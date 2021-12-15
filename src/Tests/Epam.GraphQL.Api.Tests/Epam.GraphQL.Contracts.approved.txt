@@ -1,0 +1,31 @@
+namespace Epam.GraphQL
+{
+    public static class ContractsSchemaOptionsBuilderExtensions
+    {
+        public static Epam.GraphQL.SchemaOptionsBuilder<TExecutionContext> ApplySoftDeletableFilterImplicitly<TExecutionContext>(this Epam.GraphQL.SchemaOptionsBuilder<TExecutionContext>? builder) { }
+    }
+}
+namespace Epam.GraphQL.Filters.Inputs
+{
+    public class SoftDeletableFilter : Epam.GraphQL.Loaders.Input
+    {
+        public SoftDeletableFilter() { }
+        public bool? IsDeleted { get; set; }
+    }
+}
+namespace Epam.GraphQL.Loaders
+{
+    public abstract class IdentifiableLoader<TEntity, TExecutionContext> : Epam.GraphQL.Loaders.IdentifiableLoader<TEntity, int, TExecutionContext>
+        where TEntity :  class, Epam.Contracts.Models.IHasId<int>
+    {
+        protected IdentifiableLoader() { }
+        protected override System.Linq.Expressions.Expression<System.Func<TEntity, int>> IdExpression { get; }
+    }
+    public abstract class MutableLoader<TEntity, TExecutionContext> : Epam.GraphQL.Loaders.MutableLoader<TEntity, int, TExecutionContext>
+        where TEntity :  class, Epam.Contracts.Models.IHasId<int>
+    {
+        protected MutableLoader() { }
+        protected override System.Linq.Expressions.Expression<System.Func<TEntity, int>> IdExpression { get; }
+        public override bool IsFakeId(int id) { }
+    }
+}

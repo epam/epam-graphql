@@ -1,0 +1,25 @@
+namespace Epam.GraphQL.SystemTextJson
+{
+    public static class NewtonsoftJsonExecutionResultExtensions
+    {
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, Newtonsoft.Json.JsonSerializerSettings serializerSettings) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, System.Action<Newtonsoft.Json.JsonSerializerSettings> configureSerializerSettings) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, bool indent) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, Newtonsoft.Json.JsonSerializerSettings serializerSettings, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, System.Action<Newtonsoft.Json.JsonSerializerSettings> configureSerializerSettings, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResul, bool indent, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+    }
+    public static class NewtonsoftJsonTaskExecutionResultExtensions
+    {
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, Newtonsoft.Json.JsonSerializerSettings serializerSettings) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, System.Action<Newtonsoft.Json.JsonSerializerSettings> configureSerializerSettings) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, bool indent) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, Newtonsoft.Json.JsonSerializerSettings serializerSettings, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, System.Action<Newtonsoft.Json.JsonSerializerSettings> configureSerializerSettings, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, bool indent, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+    }
+}

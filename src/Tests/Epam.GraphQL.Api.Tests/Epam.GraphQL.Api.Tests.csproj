@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Tests.props" />
+
+  <PropertyGroup Label="FineCodeCoverage">
+    <Enabled>True</Enabled>
+    <Include>[*]*</Include>
+    <ExcludeByFile>
+      **/Epam.GraphQL.TestHelpers/**
+    </ExcludeByFile>
+    <IncludeTestAssembly>False</IncludeTestAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PublicApiGenerator" Version="10.2.0" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Epam.GraphQL.EntityFrameworkCore\Epam.GraphQL.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\Epam.GraphQL.MiniProfiler\Epam.GraphQL.MiniProfiler.csproj" />
+    <ProjectReference Include="..\..\Epam.GraphQL.NewtonsoftJson\Epam.GraphQL.NewtonsoftJson.csproj" />
+    <ProjectReference Include="..\..\Epam.GraphQL.SystemTextJson\Epam.GraphQL.SystemTextJson.csproj" />
+    <ProjectReference Include="..\..\Epam.GraphQL\Epam.GraphQL.csproj" />
+  </ItemGroup>
+
+</Project>

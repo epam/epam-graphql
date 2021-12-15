@@ -1,0 +1,94 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL", "Epam.GraphQL\Epam.GraphQL.csproj", "{0521E9C9-267D-46AA-9D94-197A7B16D1AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.EntityFrameworkCore", "Epam.GraphQL.EntityFrameworkCore\Epam.GraphQL.EntityFrameworkCore.csproj", "{B647E5EA-21A7-4E82-A654-35DB4BE4307E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.MiniProfiler", "Epam.GraphQL.MiniProfiler\Epam.GraphQL.MiniProfiler.csproj", "{980F19EB-ED57-4475-84C4-37FF6B257BC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{848B3D13-A357-4415-B7E0-6D355BE51E81}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		..\README.md = ..\README.md
+		stylecop.json = stylecop.json
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.SystemTextJson", "Epam.GraphQL.SystemTextJson\Epam.GraphQL.SystemTextJson.csproj", "{176151E2-95C5-45D2-BAA4-47CAB4AB1819}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.NewtonsoftJson", "Epam.GraphQL.NewtonsoftJson\Epam.GraphQL.NewtonsoftJson.csproj", "{5F68BD61-3054-4D16-A2AF-E0A5A8413FE2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.TestHelpers", "Tests\Epam.GraphQL.TestHelpers\Epam.GraphQL.TestHelpers.csproj", "{35E1C808-0142-42CE-991E-6C7704E075A5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F90904CF-816F-463E-95A9-F81C94A1CCEC}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\.editorconfig = Tests\.editorconfig
+		Tests\Tests.props = Tests\Tests.props
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.Tests", "Tests\Epam.GraphQL.Tests\Epam.GraphQL.Tests.csproj", "{C601E6D6-9E6D-45DD-A3B4-10FD40A6CF4D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.EntityFrameworkCore.Tests", "Tests\Epam.GraphQL.EntityFrameworkCore.Tests\Epam.GraphQL.EntityFrameworkCore.Tests.csproj", "{18414FF5-0543-4311-8EAC-2BEC81977397}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Epam.GraphQL.Api.Tests", "Tests\Epam.GraphQL.Api.Tests\Epam.GraphQL.Api.Tests.csproj", "{BA8E9929-EBB0-4C00-A322-CE32B297C693}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0521E9C9-267D-46AA-9D94-197A7B16D1AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0521E9C9-267D-46AA-9D94-197A7B16D1AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0521E9C9-267D-46AA-9D94-197A7B16D1AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0521E9C9-267D-46AA-9D94-197A7B16D1AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B647E5EA-21A7-4E82-A654-35DB4BE4307E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B647E5EA-21A7-4E82-A654-35DB4BE4307E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B647E5EA-21A7-4E82-A654-35DB4BE4307E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B647E5EA-21A7-4E82-A654-35DB4BE4307E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{980F19EB-ED57-4475-84C4-37FF6B257BC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{980F19EB-ED57-4475-84C4-37FF6B257BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{980F19EB-ED57-4475-84C4-37FF6B257BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{980F19EB-ED57-4475-84C4-37FF6B257BC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{176151E2-95C5-45D2-BAA4-47CAB4AB1819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{176151E2-95C5-45D2-BAA4-47CAB4AB1819}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{176151E2-95C5-45D2-BAA4-47CAB4AB1819}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{176151E2-95C5-45D2-BAA4-47CAB4AB1819}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F68BD61-3054-4D16-A2AF-E0A5A8413FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F68BD61-3054-4D16-A2AF-E0A5A8413FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F68BD61-3054-4D16-A2AF-E0A5A8413FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F68BD61-3054-4D16-A2AF-E0A5A8413FE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35E1C808-0142-42CE-991E-6C7704E075A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35E1C808-0142-42CE-991E-6C7704E075A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35E1C808-0142-42CE-991E-6C7704E075A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35E1C808-0142-42CE-991E-6C7704E075A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C601E6D6-9E6D-45DD-A3B4-10FD40A6CF4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C601E6D6-9E6D-45DD-A3B4-10FD40A6CF4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C601E6D6-9E6D-45DD-A3B4-10FD40A6CF4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C601E6D6-9E6D-45DD-A3B4-10FD40A6CF4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18414FF5-0543-4311-8EAC-2BEC81977397}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18414FF5-0543-4311-8EAC-2BEC81977397}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18414FF5-0543-4311-8EAC-2BEC81977397}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18414FF5-0543-4311-8EAC-2BEC81977397}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA8E9929-EBB0-4C00-A322-CE32B297C693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA8E9929-EBB0-4C00-A322-CE32B297C693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA8E9929-EBB0-4C00-A322-CE32B297C693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA8E9929-EBB0-4C00-A322-CE32B297C693}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{35E1C808-0142-42CE-991E-6C7704E075A5} = {F90904CF-816F-463E-95A9-F81C94A1CCEC}
+		{C601E6D6-9E6D-45DD-A3B4-10FD40A6CF4D} = {F90904CF-816F-463E-95A9-F81C94A1CCEC}
+		{18414FF5-0543-4311-8EAC-2BEC81977397} = {F90904CF-816F-463E-95A9-F81C94A1CCEC}
+		{BA8E9929-EBB0-4C00-A322-CE32B297C693} = {F90904CF-816F-463E-95A9-F81C94A1CCEC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C6E6E5B8-0067-4689-B013-DEB99379EEAB}
+	EndGlobalSection
+EndGlobal

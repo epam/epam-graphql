@@ -1,0 +1,7 @@
+namespace Epam.GraphQL
+{
+    public static class MiniProfilerSchemaOptionsBuilderExtensions
+    {
+        public static Epam.GraphQL.SchemaOptionsBuilder<TExecutionContext> UseMiniProfiler<TExecutionContext>(this Epam.GraphQL.SchemaOptionsBuilder<TExecutionContext> builder) { }
+    }
+}

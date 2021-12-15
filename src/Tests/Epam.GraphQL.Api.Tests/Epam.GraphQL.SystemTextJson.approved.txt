@@ -1,0 +1,25 @@
+namespace Epam.GraphQL.SystemTextJson
+{
+    public static class SystemTextJsonExecutionResultExtensions
+    {
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, System.Action<System.Text.Json.JsonSerializerOptions> configureSerializerOptions) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, bool indent) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, System.Text.Json.JsonSerializerOptions serializerOptions) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, System.Action<System.Text.Json.JsonSerializerOptions> configureSerializerOptions, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, bool indent, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, System.Text.Json.JsonSerializerOptions serializerOptions, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+    }
+    public static class SystemTextJsonTaskExecutionResultExtensions
+    {
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, System.Action<System.Text.Json.JsonSerializerOptions> configureSerializerOptions) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, bool indent) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, System.Text.Json.JsonSerializerOptions serializerOptions) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, System.Action<System.Text.Json.JsonSerializerOptions> configureSerializerOptions, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, bool indent, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, System.Text.Json.JsonSerializerOptions serializerOptions, GraphQL.Execution.IErrorInfoProvider errorInfoProvider) { }
+    }
+}

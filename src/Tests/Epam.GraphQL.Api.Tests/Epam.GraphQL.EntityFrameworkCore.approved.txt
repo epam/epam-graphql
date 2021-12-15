@@ -1,0 +1,9 @@
+namespace Epam.GraphQL
+{
+    public static class EntityFrameworkCoreSchemaExecutionOptionsBuilderExtensions
+    {
+        [System.Obsolete("UseDbContext has been renamed. Use WithDbContext instead")]
+        public static Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> UseDbContext<TExecutionContext>(this Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> builder, Microsoft.EntityFrameworkCore.DbContext dbContext) { }
+        public static Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> WithDbContext<TExecutionContext>(this Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> builder, Microsoft.EntityFrameworkCore.DbContext dbContext) { }
+    }
+}
