@@ -10,7 +10,7 @@
 
 **Epam.GraphQL** is a set of .NET libraries which provides high-level way for building GraphQL APIs with a few lines of code, including (but not limited to) CRUD, batching, complex sorting and filtering, pagination.
 We have built **Epam.GraphQL** on top of [GraphQL.NET](https://github.com/graphql-dotnet/graphql-dotnet/) to simplify developing GraphQL API layer:
-  * It used by dozen EPAM internal applications, battle-tested on complex tasks
+  * It is used by a dozen internal EPAM applications, battle-tested on complex tasks
   * Highly declarative; can be seen as Low-Code platform done right
   * Serves as architecture backbone for the whole app
   * Makes APIs aligned and metadata-rich – allowing future features like admin UI generation
@@ -34,3 +34,5 @@ We have built **Epam.GraphQL** on top of [GraphQL.NET](https://github.com/graphq
 * Entity Framework Core Usage
   * [Automapping](docs/02-ef-core/01.automapping.md)
 
+## License
+[MIT](LICENSE.md)
