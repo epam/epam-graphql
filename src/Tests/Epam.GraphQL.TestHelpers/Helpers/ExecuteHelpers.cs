@@ -22,21 +22,19 @@ namespace Epam.GraphQL.Tests.Helpers
     {
         public static ExecutionResult ExecuteQuery(Type queryType, Type mutationType, string request, IDataContext dataContext = null, Action<SchemaOptionsBuilder<TestUserContext>> configure = null)
         {
-            var executeQueryMethodInfo = typeof(ExecuteHelpers).GetGenericMethod(
+            var executeQueryMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
                 nameof(ExecuteQuery),
                 new[] { queryType, mutationType },
-                new[] { typeof(string), typeof(IDataContext), typeof(Action<SchemaOptionsBuilder<TestUserContext>>) },
-                BindingFlags.Static | BindingFlags.NonPublic);
+                new[] { typeof(string), typeof(IDataContext), typeof(Action<SchemaOptionsBuilder<TestUserContext>>) });
             return executeQueryMethodInfo.InvokeAndHoistBaseException<ExecutionResult>(null, request, dataContext, configure);
         }
 
         public static ExecutionResult ExecuteQuery<TExecutionContext>(Type queryType, Type mutationType, Action<SchemaOptionsBuilder<TExecutionContext>> configure, Action<SchemaExecutionOptionsBuilder<TExecutionContext>> configureExecutionOptions)
         {
-            var executeQueryMethodInfo = typeof(ExecuteHelpers).GetGenericMethod(
+            var executeQueryMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
                 nameof(ExecuteQuery),
                 new[] { queryType, mutationType, typeof(TExecutionContext) },
-                new[] { typeof(Action<SchemaOptionsBuilder<TExecutionContext>>), typeof(Action<SchemaExecutionOptionsBuilder<TExecutionContext>>) },
-                BindingFlags.Static | BindingFlags.NonPublic);
+                new[] { typeof(Action<SchemaOptionsBuilder<TExecutionContext>>), typeof(Action<SchemaExecutionOptionsBuilder<TExecutionContext>>) });
             return executeQueryMethodInfo.InvokeAndHoistBaseException<ExecutionResult>(null, configure, configureExecutionOptions);
         }
 
