@@ -22,6 +22,8 @@ jobs:
       with:
         dotnet-version: 3.1.x
         source-url: https://api.nuget.org/v3/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Restore solution
       working-directory: src
       run: dotnet restore
