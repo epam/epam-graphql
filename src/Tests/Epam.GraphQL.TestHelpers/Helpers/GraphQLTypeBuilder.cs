@@ -245,7 +245,7 @@ namespace Epam.GraphQL.Tests.Helpers
             string typeName = null)
             where TEntity : class, IHasId<int>
         {
-            var type = CreateMutableLoaderType<TEntity, int, TExecutionContext>(
+            var type = CreateMutableLoaderType(
                 onConfigure,
                 getBaseQuery,
                 id => id < 0,
