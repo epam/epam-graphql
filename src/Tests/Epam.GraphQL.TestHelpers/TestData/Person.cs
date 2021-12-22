@@ -9,7 +9,7 @@ using Epam.Contracts.Models;
 
 namespace Epam.GraphQL.Tests.TestData
 {
-    public class Person : IHasId<int>, ISoftDeletable, IPerson
+    public class Person : IHasId<int>, IPerson
     {
         private int? _unitId;
 
