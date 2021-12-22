@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - src/**   
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dump GitHub context
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup .NET Core 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+        source-url: https://api.nuget.org/v3/index.json
+    - name: Restore solution
+      working-directory: src
+      run: dotnet restore
+    - name: Build solution [Release]
+      working-directory: src
+      run: dotnet build --no-restore -c Release -p:VersionSuffix=$GITHUB_RUN_NUMBER
+    - name: Test
+      working-directory: src
+      run: dotnet test --no-build --configuration Release
+    - name: Pack solution [Release]
+      working-directory: src
+      run: dotnet pack --no-restore -c Release -p:VersionSuffix=$GITHUB_RUN_NUMBER -o out
+    - uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: src/out/*
