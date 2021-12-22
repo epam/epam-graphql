@@ -76,6 +76,7 @@ dotnet_diagnostic.IDE0058.severity = none
 # Remove unnecessary suppression (IDE0079)
 dotnet_diagnostic.IDE0079.severity = suggestion
 
+dotnet_diagnostic.IDE0130.severity=none
 
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = none
