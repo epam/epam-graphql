@@ -93,6 +93,40 @@ namespace Epam.GraphQL.Tests.Sorting
         }
 
         [Test]
+        public void ShouldBeAbleToSortByStringFieldWithContext()
+        {
+            TestQuery(
+                @"
+                query {
+                    people(sorting: [{
+                        field: ""ctxFullName""
+                    }]) {
+                        items {
+                            fullName
+                        }
+                    }
+                }",
+                @"
+                {
+                    people: {
+                        items: [{
+                            fullName: ""Aldon Exley""
+                        }, {
+                            fullName: ""Florance Goodricke""
+                        }, {
+                            fullName: ""Hannie Everitt""
+                        }, {
+                            fullName: ""Linoel Livermore""
+                        }, {
+                            fullName: ""Sophie Gandley""
+                        }, {
+                            fullName: ""Walton Alvarez""
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
         public void ShouldBeAbleToSortByIntFieldAsc()
         {
             TestQuery(
@@ -157,6 +191,41 @@ namespace Epam.GraphQL.Tests.Sorting
                             id: 5
                         }, {
                             id: 6
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
+        public void ShouldBeAbleToSortByNullableIntFieldAscWithContext()
+        {
+            TestQuery(
+                @"
+                query {
+                    people(sorting: [{
+                        field: ""ctxManagerId"",
+                        direction: DESC
+                    }]) {
+                        items {
+                            id
+                        }
+                    }
+                }",
+                @"
+                {
+                    people: {
+                        items: [{
+                            id: 6
+                        }, {
+                            id: 4
+                        }, {
+                            id: 5
+                        }, {
+                            id: 2
+                        }, {
+                            id: 3
+                        }, {
+                            id: 1
                         }]
                     }
                 }");
@@ -564,7 +633,7 @@ namespace Epam.GraphQL.Tests.Sorting
         {
             TestQueryError(
                 typeof(FormatException),
-                "Failed to parse PersonFieldName from input 'unknown'. Input should be a string ('id', 'ctxId', 'managerId', 'fullName', 'roundedSalary', 'managerName', 'hireDate', 'terminationDate', 'managerNameSorter').",
+                "Failed to parse PersonFieldName from input 'unknown'. Input should be a string ('id', 'ctxId', 'ctxManagerId', 'ctxFullName', 'managerId', 'fullName', 'roundedSalary', 'managerName', 'hireDate', 'terminationDate', 'managerNameSorter').",
                 @"
                 query {
                     people(sorting: [{

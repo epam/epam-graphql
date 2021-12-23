@@ -93,8 +93,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         IProxyAccessor<TExecutionContext> IObjectGraphTypeConfigurator<TExecutionContext>.ProxyAccessor => ProxyAccessor;
 
-        IReadOnlyList<IField> IObjectGraphTypeConfigurator.Fields => Fields;
-
         public IField<TExecutionContext> Parent { get; }
 
         public IReadOnlyList<ISorter<TExecutionContext>> Sorters => _sorters;
@@ -124,69 +122,46 @@ namespace Epam.GraphQL.Configuration.Implementations
             return InternalAddField(field, deprecationReason);
         }
 
-        public TypedField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, string deprecationReason)
-        {
-            var field = new TypedField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
-                this,
-                name,
-                GetGraphQLTypeDescriptor<TReturnType>(null));
-
-            return InternalAddField(field, deprecationReason);
-        }
-
-        public TypedField<TEntity, TReturnType, TExecutionContext> AddField<TProjection, TReturnType>(string name, string deprecationReason)
-            where TProjection : ProjectionBase<TReturnType, TExecutionContext>, new()
-            where TReturnType : class
-        {
-            var field = new TypedField<TEntity, TProjection, TReturnType, TExecutionContext>(
-                Registry,
-                this,
-                name);
-
-            return InternalAddField(field, deprecationReason);
-        }
-
-        public StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string deprecationReason)
+        public StructExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new StructExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string deprecationReason)
+        public StructExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new StructExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string deprecationReason)
+        public NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new NullableExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string deprecationReason)
+        public NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new NullableExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TEntity, string>> expression, string deprecationReason)
+        public StringExpressionField<TEntity, TExecutionContext> AddExpressionField(string name, Expression<Func<TEntity, string>> expression, string deprecationReason)
             => InternalAddField(new StringExpressionField<TEntity, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string deprecationReason)
+        public StringExpressionField<TEntity, TExecutionContext> AddExpressionField(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string deprecationReason)
             => InternalAddField(new StringExpressionField<TEntity, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<TReturnType>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<TReturnType>>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType?>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType?>>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<TReturnType?>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<TReturnType?>>> expression, string deprecationReason)
             where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<string>, TExecutionContext> AddField(string name, Expression<Func<TEntity, IEnumerable<string>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<string>, TExecutionContext> AddEnumerableExpressionField(string name, Expression<Func<TEntity, IEnumerable<string>>> expression, string deprecationReason)
             => InternalAddField(new ExpressionField<TEntity, IEnumerable<string>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<string>, TExecutionContext> AddField(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<string>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<string>, TExecutionContext> AddEnumerableExpressionField(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<string>>> expression, string deprecationReason)
             => InternalAddField(new ExpressionField<TEntity, IEnumerable<string>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, TReturnType, TExecutionContext> AddObjectField<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string deprecationReason)
+        public ExpressionField<TEntity, TReturnType, TExecutionContext> AddObjectExpressionField<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string deprecationReason)
            where TReturnType : class => InternalAddField(new ExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddObjectField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string deprecationReason)
+        public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableObjectExpressionField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string deprecationReason)
            where TReturnType : class => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
         public ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> AddConnectionLoaderField<TChildLoader, TChildEntity>(
@@ -308,7 +283,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             return _filters;
         }
 
-        IInlineFilters IObjectGraphTypeConfigurator.CreateInlineFilters() => CreateInlineFilters();
+        IInlineFilters IObjectGraphTypeConfigurator<TExecutionContext>.CreateInlineFilters() => CreateInlineFilters();
 
         public abstract void ConfigureGraphType(IComplexGraphType graphType);
 
@@ -925,7 +900,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             if (propertyType == typeof(string))
             {
                 addFieldMethodInfo = typeof(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>).GetMethod(
-                    nameof(AddField),
+                    nameof(AddExpressionField),
                     new[] { typeof(string), expressionType, typeof(string) });
             }
             else if (propertyType.IsEnumerableOfT())
@@ -938,20 +913,20 @@ namespace Epam.GraphQL.Configuration.Implementations
                 if (underlyingType == typeof(string))
                 {
                     addFieldMethodInfo = GetType().GetMethod(
-                        nameof(AddField),
+                        nameof(AddEnumerableExpressionField),
                         new[] { typeof(string), expressionType, typeof(string) });
                 }
                 else if (underlyingType.IsValueType)
                 {
                     addFieldMethodInfo = GetType().GetGenericMethod(
-                        nameof(AddField),
+                        nameof(AddEnumerableExpressionField),
                         new[] { underlyingType.UnwrapIfNullable() },
                         new[] { typeof(string), expressionType, typeof(string) });
                 }
                 else
                 {
                     addFieldMethodInfo = GetType().GetGenericMethod(
-                        nameof(AddObjectField),
+                        nameof(AddEnumerableObjectExpressionField),
                         new[] { underlyingType },
                         new[] { typeof(string), expressionType, typeof(string) });
                 }
@@ -959,14 +934,14 @@ namespace Epam.GraphQL.Configuration.Implementations
             else if (propertyType.IsValueType)
             {
                 addFieldMethodInfo = GetType().GetGenericMethod(
-                    nameof(AddField),
+                    nameof(AddExpressionField),
                     new[] { propertyType.UnwrapIfNullable() },
                     new[] { typeof(string), expressionType, typeof(string) });
             }
             else
             {
                 addFieldMethodInfo = GetType().GetGenericMethod(
-                    nameof(AddObjectField),
+                    nameof(AddObjectExpressionField),
                     new[] { propertyType },
                     new[] { typeof(string), expressionType, typeof(string) });
             }

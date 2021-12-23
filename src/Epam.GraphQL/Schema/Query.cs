@@ -42,14 +42,6 @@ namespace Epam.GraphQL
 
             var childEntityType = baseLoaderType.GetGenericArguments().First();
 
-            if (IsConfiguringInputType)
-            {
-                var dummyBuilderType = typeof(DummyConnectionBuilder<,,>)
-                    .MakeGenericType(childLoaderType, childEntityType, typeof(TExecutionContext));
-
-                return (IConnectionBuilder)dummyBuilderType.CreateInstanceAndHoistBaseException();
-            }
-
             var getGraphQLTypeDescriptorMethod = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
                 nameof(ObjectGraphTypeConfigurator.GetGraphQLTypeDescriptor),
                 new[] { childLoaderType, childEntityType },
@@ -96,14 +88,6 @@ namespace Epam.GraphQL
                 throw new ArgumentException($"Entity type mismatch: expected {typeof(TEntity)}, but found {childLoaderType}", nameof(childLoaderType));
             }
 
-            if (IsConfiguringInputType)
-            {
-                var dummyBuilderType = typeof(DummyConnectionBuilder<,,>)
-                    .MakeGenericType(childLoaderType, childEntityType, typeof(TExecutionContext));
-
-                return (IConnectionBuilder)dummyBuilderType.CreateInstanceAndHoistBaseException();
-            }
-
             var getGraphQLTypeDescriptorMethod = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
                 nameof(ObjectGraphTypeConfigurator.GetGraphQLTypeDescriptor),
                 new[] { childLoaderType, childEntityType },
@@ -148,14 +132,6 @@ namespace Epam.GraphQL
             }
 
             var childEntityType = baseLoaderType.GetGenericArguments().First();
-
-            if (IsConfiguringInputType)
-            {
-                var dummyBuilderType = typeof(DummyConnectionBuilder<,,>)
-                    .MakeGenericType(childLoaderType, childEntityType, typeof(TExecutionContext));
-
-                return (IConnectionBuilder)dummyBuilderType.CreateInstanceAndHoistBaseException();
-            }
 
             var addGroupConnectionLoaderFieldMethodInfo = ObjectGraphTypeConfigurator.GetType().GetGenericMethod(
                 nameof(ObjectGraphTypeConfigurator.AddGroupLoaderField),

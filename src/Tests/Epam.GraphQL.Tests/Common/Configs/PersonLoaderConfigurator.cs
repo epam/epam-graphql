@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Globalization;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
 
@@ -29,6 +30,10 @@ namespace Epam.GraphQL.Tests.Common.Configs
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId);
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId);
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture));
+                loader
                     .Field(p => p.ManagerId);
                 loader
                     .Field(p => p.FullName);
@@ -53,6 +58,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
                     .Filterable();
                 loader
                     .Field(p => p.ManagerId)
@@ -88,6 +99,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Sortable();
                 loader
@@ -120,6 +137,14 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
                     .Filterable()
                     .Sortable();
                 loader
@@ -173,6 +198,10 @@ namespace Epam.GraphQL.Tests.Common.Configs
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId);
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId);
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture));
+                loader
                     .Field(p => p.ManagerId);
                 loader
                     .Field(p => p.FullName);
@@ -197,6 +226,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
                     .Filterable();
                 loader
                     .Field(p => p.ManagerId)
@@ -232,6 +267,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Sortable();
                 loader
@@ -264,6 +305,14 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
                     .Filterable()
                     .Sortable();
                 loader
@@ -317,6 +366,10 @@ namespace Epam.GraphQL.Tests.Common.Configs
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId);
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId);
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture));
+                loader
                     .Field(p => p.ManagerId);
                 loader
                     .Field(p => p.FullName);
@@ -341,6 +394,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
                     .Filterable();
                 loader
                     .Field(p => p.ManagerId)
@@ -376,6 +435,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Sortable();
                 loader
@@ -408,6 +473,14 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
                     .Filterable()
                     .Sortable();
                 loader

@@ -47,11 +47,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         {
         }
 
-        protected ArgumentsBase(ArgumentsBase<TResolveArgumentContext, TExecutionContext> args, IArgument<TResolveArgumentContext> lastArg)
-            : base(args, lastArg)
-        {
-        }
-
         public Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TResult> resolve)
         {
             return ctx =>
@@ -66,11 +61,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal abstract class ArgumentsBase<TArg1, TArg2, TResolveArgumentContext, TExecutionContext> : ArgumentsBase<TResolveArgumentContext, TExecutionContext>
     {
-        protected ArgumentsBase(RelationRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
-            : base(registry, arg)
-        {
-        }
-
         protected ArgumentsBase(ArgumentsBase<TResolveArgumentContext, TExecutionContext> args, IArgument<TResolveArgumentContext> lastArg)
             : base(args, lastArg)
         {
@@ -91,11 +81,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal abstract class ArgumentsBase<TArg1, TArg2, TArg3, TResolveArgumentContext, TExecutionContext> : ArgumentsBase<TResolveArgumentContext, TExecutionContext>
     {
-        protected ArgumentsBase(RelationRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
-            : base(registry, arg)
-        {
-        }
-
         protected ArgumentsBase(ArgumentsBase<TResolveArgumentContext, TExecutionContext> args, IArgument<TResolveArgumentContext> lastArg)
             : base(args, lastArg)
         {
@@ -117,11 +102,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal abstract class ArgumentsBase<TArg1, TArg2, TArg3, TArg4, TResolveArgumentContext, TExecutionContext> : ArgumentsBase<TResolveArgumentContext, TExecutionContext>
     {
-        protected ArgumentsBase(RelationRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
-            : base(registry, arg)
-        {
-        }
-
         protected ArgumentsBase(ArgumentsBase<TResolveArgumentContext, TExecutionContext> args, IArgument<TResolveArgumentContext> lastArg)
             : base(args, lastArg)
         {
@@ -144,11 +124,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal abstract class ArgumentsBase<TArg1, TArg2, TArg3, TArg4, TArg5, TResolveArgumentContext, TExecutionContext> : ArgumentsBase<TResolveArgumentContext, TExecutionContext>
     {
-        protected ArgumentsBase(RelationRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
-            : base(registry, arg)
-        {
-        }
-
         protected ArgumentsBase(ArgumentsBase<TResolveArgumentContext, TExecutionContext> args, IArgument<TResolveArgumentContext> lastArg)
             : base(args, lastArg)
         {

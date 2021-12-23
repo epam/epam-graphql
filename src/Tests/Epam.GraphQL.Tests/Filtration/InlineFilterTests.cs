@@ -79,6 +79,34 @@ namespace Epam.GraphQL.Tests.Filtration
         }
 
         [Test]
+        public void ShouldApplyInByNullableIntWithCtx()
+        {
+            TestQuery(
+                @"
+                query {
+                    people(filter: {
+                        ctxManagerId: {
+                            in: [6]
+                        }
+                    }) {
+                        items {
+                            id
+                        }
+                    }
+                }",
+                @"
+                {
+                    people: {
+                        items: [{
+                            id: 2
+                        },{
+                            id: 3
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
         public void ShouldApplyNinByInt()
         {
             TestQuery(
@@ -787,6 +815,32 @@ namespace Epam.GraphQL.Tests.Filtration
                     people(filter: {
                         fullName: {
                             eq: ""Hannie Everitt""
+                        }
+                    }) {
+                        items {
+                            id
+                        }
+                    }
+                }",
+                @"
+                {
+                    people: {
+                        items: [{
+                            id: 3
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
+        public void ShouldApplyEqByStringWithContext()
+        {
+            TestQuery(
+                @"
+                query {
+                    people(filter: {
+                        ctxFullName: {
+                            eq: ""Hannie Everitt5""
                         }
                     }) {
                         items {

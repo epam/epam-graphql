@@ -62,11 +62,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
     internal class GraphTypeDescriptor<TReturnType, TExecutionContext> : GraphTypeDescriptor<TExecutionContext>, IGraphTypeDescriptor<TReturnType, TExecutionContext>
     {
-        public GraphTypeDescriptor(Type type, IGraphType graphType, IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
-            : base(type, graphType, configurator)
-        {
-        }
-
         public GraphTypeDescriptor(Type type, Func<IGraphType> graphTypeFactory, IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
             : base(type, graphTypeFactory, configurator)
         {
