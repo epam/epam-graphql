@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Projection;
+using Epam.GraphQL.Builders.Mutation;
 using Epam.GraphQL.EntityFrameworkCore;
 using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Tests.Helpers;

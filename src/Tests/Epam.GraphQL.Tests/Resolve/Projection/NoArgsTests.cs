@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace Epam.GraphQL.Tests.Resolve.Projection
 {
     [TestFixture]
-    public class NoArgsTests
+    public class NoArgsTests : BaseTests
     {
         public interface IGeometry
         {
@@ -74,6 +74,49 @@ namespace Epam.GraphQL.Tests.Resolve.Projection
 
             resolver.Received(1)
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Projection>());
+        }
+
+        [Test]
+        public void ShouldResolveFromIQueryableField()
+        {
+            var geometryLoader = GraphQLTypeBuilder.CreateLoaderType<IGeometry, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field("id1", g => g.Id);
+                    loader.Field("prop", g => g.Id * 2);
+                },
+                getBaseQuery: ctx => new[] { new Geometry { Id = 1 } }.AsQueryable(),
+                applyNaturalOrderBy: q => q.OrderBy(g => g.Id),
+                applyNaturalThenBy: q => q.OrderBy(g => g.Id));
+
+            var projection = GraphQLTypeBuilder.CreateProjectionType<Projection, TestUserContext>(
+                onConfigure: prj => prj.Field("people")
+                    .FromIQueryable(
+                        ctx => FakeData.People.AsQueryable(),
+                        (prj, person) => prj.IntField == person.Id));
+
+            TestHelpers.TestQuery(
+                builder: builder =>
+                {
+                    builder.Field("test")
+                        .Resolve(ctx => new Projection { IntField = 3 }, builder => builder.ConfigureFrom(projection));
+                },
+                query: @"
+                    query {
+                        test {
+                            people {
+                                id
+                            }
+                        }
+                    }",
+                expected: @"
+                    {
+                        test: {
+                            people: [{
+                                id: 3
+                            }]
+                        }
+                    }");
         }
 
         [Test]
@@ -319,6 +362,8 @@ namespace Epam.GraphQL.Tests.Resolve.Projection
         public class Projection
         {
             public string StringField { get; set; }
+
+            public int IntField { get; set; }
         }
     }
 }

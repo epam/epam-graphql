@@ -3,14 +3,11 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-
 #nullable enable
 
 namespace Epam.GraphQL.Configuration
 {
     internal interface IRegistry
     {
-        IObjectGraphTypeConfigurator GetInputObjectGraphTypeConfigurator(Type type, Type? loaderType = null);
     }
 }

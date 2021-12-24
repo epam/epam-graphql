@@ -81,8 +81,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected virtual bool IsSupportSorting => false;
 
-        protected virtual bool IsSupportEditing => false;
-
         protected virtual bool IsSupportGrouping => false;
 
         public override object Resolve(IResolveFieldContext context)

@@ -14,7 +14,6 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Language.AST;
-using Microsoft.Extensions.Logging;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -32,11 +31,7 @@ namespace Epam.GraphQL.Extensions
 
         public static TExecutionContext GetUserContext<TExecutionContext>(this IResolveFieldContext context) => ((GraphQLContext<TExecutionContext>)context.UserContext["ctx"]).ExecutionContext;
 
-        public static RelationRegistry<TExecutionContext> GetRegistry<TExecutionContext>(this IResolveFieldContext context) => ((GraphQLContext<TExecutionContext>)context.UserContext["ctx"]).Registry;
-
         public static ISchemaExecutionListener GetListener(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Listener;
-
-        public static ILogger GetLogger(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Logger;
 
         public static IQueryExecuter GetQueryExecuter(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).QueryExecuter;
 

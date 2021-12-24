@@ -147,60 +147,46 @@ namespace Epam.GraphQL.Loaders
             where TReturnType : struct
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddExpressionField(name, expression, deprecationReason);
         }
 
         private protected StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string deprecationReason = null)
             where TReturnType : struct
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddExpressionField(name, expression, deprecationReason);
         }
 
         private protected NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string deprecationReason = null)
             where TReturnType : struct
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddExpressionField(name, expression, deprecationReason);
         }
 
         private protected NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string deprecationReason = null)
             where TReturnType : struct
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddExpressionField(name, expression, deprecationReason);
         }
 
         private protected StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TEntity, string>> expression, string deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddExpressionField(name, expression, deprecationReason);
         }
 
         private protected StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddExpressionField(name, expression, deprecationReason);
         }
 
         private protected Field<TEntity, TExecutionContext> AddField(string name, string deprecationReason)
         {
             ThrowIfIsNotConfiguring();
             return Configurator.AddField(name, deprecationReason);
-        }
-
-        private protected TypedField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, string deprecationReason)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField<TReturnType>(name, deprecationReason);
-        }
-
-        private protected TypedField<TEntity, TReturnType, TExecutionContext> AddField<TProjection, TReturnType>(string name, string deprecationReason)
-            where TProjection : ProjectionBase<TReturnType, TExecutionContext>, new()
-            where TReturnType : class
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField<TProjection, TReturnType>(name, deprecationReason);
         }
 
         private protected void AddFilter<TValueType>(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)

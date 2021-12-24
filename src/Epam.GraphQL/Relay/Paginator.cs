@@ -111,21 +111,6 @@ namespace Epam.GraphQL.Relay
             return this;
         }
 
-        public IPaginatorWithoutSkip<TSource> DropLast(int? count)
-        {
-            if (count.HasValue)
-            {
-                if (!_shouldTake)
-                {
-                    throw new NotImplementedException();
-                }
-
-                _takeCount -= count.Value;
-            }
-
-            return this;
-        }
-
 #pragma warning disable CA1502
         public PaginatorResult<TSource> Materialize()
 #pragma warning restore CA1502

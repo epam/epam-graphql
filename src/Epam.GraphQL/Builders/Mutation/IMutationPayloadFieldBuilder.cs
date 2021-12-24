@@ -7,7 +7,7 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Loaders;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationPayloadFieldBuilder<out TArgType, TExecutionContext> :
         IMutationFieldBuilder<IMutationFieldBuilderBase<TArgType, TExecutionContext>, TArgType, TExecutionContext>

@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Projection;
-using Epam.GraphQL.Builders.Projection.Implementations;
+using Epam.GraphQL.Builders.Mutation;
+using Epam.GraphQL.Builders.Mutation.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Extensions;
@@ -113,7 +113,7 @@ namespace Epam.GraphQL
         protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
-            return new ProjectionFieldBuilder<object, TExecutionContext>(field);
+            return new MutationFieldBuilder<TExecutionContext>(field);
         }
 
         protected override void AfterConfigure()

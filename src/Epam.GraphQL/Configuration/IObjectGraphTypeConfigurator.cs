@@ -11,13 +11,17 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal interface IObjectGraphTypeConfigurator
+    internal interface IObjectGraphTypeConfigurator<TExecutionContext>
     {
         string Name { get; }
 
-        IReadOnlyList<IField> Fields { get; }
-
         bool HasInlineFilters { get; }
+
+        IReadOnlyList<IField<TExecutionContext>> Fields { get; }
+
+        IReadOnlyList<ISorter<TExecutionContext>> Sorters { get; }
+
+        IProxyAccessor<TExecutionContext> ProxyAccessor { get; }
 
         void Configure();
 
@@ -28,15 +32,6 @@ namespace Epam.GraphQL.Configuration
         IInlineFilters CreateInlineFilters();
 
         Type GenerateGraphType();
-    }
-
-    internal interface IObjectGraphTypeConfigurator<TExecutionContext> : IObjectGraphTypeConfigurator
-    {
-        new IReadOnlyList<IField<TExecutionContext>> Fields { get; }
-
-        IReadOnlyList<ISorter<TExecutionContext>> Sorters { get; }
-
-        IProxyAccessor<TExecutionContext> ProxyAccessor { get; }
 
         bool FilterEquals(IObjectGraphTypeConfigurator<TExecutionContext> other);
     }

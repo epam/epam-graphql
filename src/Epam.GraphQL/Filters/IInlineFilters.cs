@@ -17,8 +17,6 @@ namespace Epam.GraphQL.Filters
 
     internal interface IInlineFilters<TEntity, TExecutionContext> : IInlineFilters, IFilter<TEntity, TExecutionContext>
     {
-        bool IsEmpty { get; }
-
         new Type FilterType { get; }
     }
 }

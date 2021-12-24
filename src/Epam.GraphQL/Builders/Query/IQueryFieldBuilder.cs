@@ -7,9 +7,11 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Builders.Projection;
+using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Loaders;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Builders.Query
 {
     public partial interface IQueryFieldBuilder<TExecutionContext> :
         IUnionableProjectionFieldBuilder<IQueryFieldBuilder<TExecutionContext>, TExecutionContext>,
