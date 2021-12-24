@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Builders.RootProjection
 {
     public interface IRootProjectionFieldBuilder<TExecutionContext>
     {

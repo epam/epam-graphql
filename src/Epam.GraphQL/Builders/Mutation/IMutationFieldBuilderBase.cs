@@ -5,9 +5,10 @@
 
 using System;
 using System.Threading.Tasks;
+using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Mutation;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationFieldBuilderBase<TExecutionContext> :
         IRootProjectionFieldBuilder<TExecutionContext>

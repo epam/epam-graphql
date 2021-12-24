@@ -8,8 +8,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
-using Epam.GraphQL.Builders.Projection;
-using Epam.GraphQL.Builders.Projection.Implementations;
+using Epam.GraphQL.Builders.Query;
+using Epam.GraphQL.Builders.Query.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
@@ -22,7 +22,7 @@ namespace Epam.GraphQL
         protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
-            return new ProjectionFieldBuilder<object, TExecutionContext>(field);
+            return new QueryFieldBuilder<TExecutionContext>(field);
         }
 
         protected internal IConnectionBuilder Connection<TChildLoader>(string name, string deprecationReason = null)

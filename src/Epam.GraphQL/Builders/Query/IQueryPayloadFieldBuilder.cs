@@ -5,9 +5,10 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Loaders;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Builders.Query
 {
     public interface IQueryPayloadFieldBuilder<out TArgType, TExecutionContext> :
         IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext>

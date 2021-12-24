@@ -8,15 +8,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
-using Epam.GraphQL.Mutation;
 
-namespace Epam.GraphQL.Builders.Projection.Implementations
+namespace Epam.GraphQL.Builders.RootProjection.Implementations
 {
-    internal class ProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext> : IRootProjectionFieldBuilder<TArgType, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext> : IRootProjectionFieldBuilder<TArgType, TExecutionContext>
         where TEntity : class
         where TFieldType : IResolvableField<TEntity, TArgType, TExecutionContext>
     {
-        internal ProjectionArgumentBuilderBase(TFieldType field)
+        protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
@@ -88,33 +87,13 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         {
             Field.ApplyResolve(resolve, build, optionsBuilder);
         }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
     }
 
-    internal class ProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>
         where TEntity : class
         where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>
     {
-        internal ProjectionArgumentBuilderBase(TFieldType field)
+        protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
@@ -186,33 +165,13 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         {
             Field.ApplyResolve(resolve, build, optionsBuilder);
         }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
     }
 
-    internal class ProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>
         where TEntity : class
         where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
-        internal ProjectionArgumentBuilderBase(TFieldType field)
+        protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
@@ -284,33 +243,13 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         {
             Field.ApplyResolve(resolve, build, optionsBuilder);
         }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
     }
 
-    internal class ProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
         where TEntity : class
         where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
-        internal ProjectionArgumentBuilderBase(TFieldType field)
+        protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
@@ -382,33 +321,13 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         {
             Field.ApplyResolve(resolve, build, optionsBuilder);
         }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
     }
 
-    internal class ProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
         where TEntity : class
         where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
-        internal ProjectionArgumentBuilderBase(TFieldType field)
+        internal RootProjectionArgumentBuilderBase(TFieldType field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
@@ -479,26 +398,6 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             where TReturnType : class
         {
             Field.ApplyResolve(resolve, build, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve)
-        {
-            Field.ApplyResolve(resolve);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve(resolve, optionsBuilder);
         }
     }
 }

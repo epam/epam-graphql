@@ -13,7 +13,7 @@ using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class BaseFieldBuilder<TEntity, TExecutionContext> : ProjectionFieldBuilder<TEntity, TExecutionContext>, IHasFromIQueryable<TEntity, TExecutionContext>
+    internal class BaseFieldBuilder<TEntity, TExecutionContext> : ProjectionFieldBuilder<TEntity, TExecutionContext>
         where TEntity : class
     {
         internal BaseFieldBuilder(Field<TEntity, TExecutionContext> fieldType)
