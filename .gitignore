@@ -2,5 +2,6 @@ bin
 obj
 .vs
 .obsidian
+.coverage
 
 *.received.txt

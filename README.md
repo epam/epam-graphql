@@ -1,6 +1,7 @@
 # Epam.GraphQL
 ![Licence](https://img.shields.io/github/license/epam/epam-graphql.svg)
 
+[![codecov](https://codecov.io/gh/epam/epam-graphql/branch/main/graph/badge.svg?token=AD2OM1HLZ4)](https://codecov.io/gh/epam/epam-graphql)
 [![Build artifacts](https://github.com/epam/epam-graphql/actions/workflows/build.yml/badge.svg)](https://github.com/epam/epam-graphql/actions/workflows/build.yml)
 [![Publish code](https://github.com/epam/epam-graphql/actions/workflows/publish.yml/badge.svg)](https://github.com/epam/epam-graphql/actions/workflows/publish.yml)
 
