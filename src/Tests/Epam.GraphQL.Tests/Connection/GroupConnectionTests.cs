@@ -1035,6 +1035,45 @@ namespace Epam.GraphQL.Tests.Connection
                 null);
         }
 
+        [Test]
+        public void TestGroupConnectionQueryWithCountOnly()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.ManagerId).Groupable();
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .GroupConnection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        people {
+                            items {
+                                count
+                            }
+                            totalCount
+                        }
+                    }",
+                @"{
+                    people: {
+                        items: [{
+                            count: 6
+                        }],
+                        totalCount: 1
+                    }
+                }");
+        }
+
         public class PersonFilter : Input
         {
             public List<int> Ids { get; set; }

@@ -65,6 +65,59 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             };
         }
 
+        public static Func<IResolveFieldContext, IOrderedQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>(IProxyAccessor<TChildEntity, TExecutionContext> proxyAccessor)
+        {
+            return (context, children) =>
+            {
+                var subFields = context.GetGroupConnectionQueriedFields();
+                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
+
+                var sourceType = proxyAccessor.GetConcreteProxyType(subFields.Concat(aggregateQueriedFields));
+
+                var first = context.GetFirst();
+                var last = context.GetLast();
+                var after = context.GetAfter();
+                var before = context.GetBefore();
+
+                var shouldComputeCount = context.HasTotalCount();
+                var shouldComputeEndOffset = context.HasEndCursor();
+                var shouldComputeEdges = context.HasEdges();
+                var shouldComputeItems = context.HasItems();
+
+                IOrderedQueryable<object> items;
+                if (aggregateQueriedFields.Contains("<>$count"))
+                {
+                    var propGetter = sourceType.GetPropertyDelegate("<>$count");
+                    Func<object, int> countGetter = entity => (int)propGetter(entity);
+                    items = (IOrderedQueryable<object>)children.SafeNull().AsQueryable().Select(entity => new GroupResult<Proxy<TChildEntity>>
+                    {
+                        Item = entity,
+                        Count = countGetter(entity),
+                    });
+                }
+                else
+                {
+                    items = (IOrderedQueryable<object>)children.SafeNull().AsQueryable().Select(entity => new GroupResult<Proxy<TChildEntity>>
+                    {
+                        Item = entity,
+                    });
+                }
+
+                return ConnectionUtils.ToConnection(
+                    items,
+                    () => context.GetPath(),
+                    context.GetQueryExecuter(),
+                    first,
+                    last,
+                    before,
+                    after,
+                    shouldComputeCount,
+                    shouldComputeEndOffset,
+                    shouldComputeEdges,
+                    shouldComputeItems);
+            };
+        }
+
         public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func, bool doesDependOnAllFields)
             where TEntity : class
         {

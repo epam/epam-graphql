@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class ProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TEntity, TExecutionContext>
     {
-        private readonly IReadOnlyList<IField<TExecutionContext>> _fields;
         private readonly HashSet<LambdaExpression> _members = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<LambdaExpression, string> _expressionNames = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<string, FieldDependencies<TExecutionContext>> _conditionMembers = new(StringComparer.Ordinal);
@@ -28,10 +27,12 @@ namespace Epam.GraphQL.Configuration.Implementations
         private Type _proxyGenericType;
         private Type _proxyType;
 
-        public ProxyAccessor(IReadOnlyList<IField<TExecutionContext>> fields)
+        public ProxyAccessor(IReadOnlyList<IField<TEntity, TExecutionContext>> fields)
         {
-            _fields = fields ?? throw new ArgumentNullException(nameof(fields));
+            Fields = fields ?? throw new ArgumentNullException(nameof(fields));
         }
+
+        public IReadOnlyList<IField<TEntity, TExecutionContext>> Fields { get; }
 
         public Type ProxyGenericType
         {
@@ -68,7 +69,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 var type = ProxyGenericType; // Force type creation
 
                 // TODO Refactor
-                var fields = _fields.Where(field => fieldNames.Contains(field.Name, StringComparer.Ordinal));
+                var fields = Fields.Where(field => fieldNames.Contains(field.Name, StringComparer.Ordinal));
 
                 var conditionalFields = fields
                     .Where(field => _conditionMembers.ContainsKey(field.Name));
@@ -100,7 +101,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             {
                 var fieldTypes = new Dictionary<string, Type>();
 
-                foreach (var calculatedField in _fields)
+                foreach (var calculatedField in Fields)
                 {
                     var name = calculatedField.Name;
 
@@ -135,7 +136,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                     }
                 }
 
-                if (_fields.Any(f => f.IsGroupable))
+                if (Fields.Any(f => f.IsGroupable))
                 {
                     fieldTypes.Add("<>$count", typeof(int));
                 }
@@ -146,25 +147,38 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public LambdaExpression GetProxyExpression(LambdaExpression originalExpression)
         {
-            var param = Expression.Parameter(typeof(Proxy<TEntity>));
-            var castedParam = Expression.MakeUnary(ExpressionType.TypeAs, param, ProxyType);
+            var param = Expression.Parameter(ProxyType);
 
             if (originalExpression.Body is UnaryExpression unaryExpr
                 && (originalExpression.Body.NodeType == ExpressionType.Convert || originalExpression.Body.NodeType == ExpressionType.ConvertChecked || originalExpression.Body.NodeType == ExpressionType.TypeAs))
             {
                 var unaryLambda = Expression.Lambda(unaryExpr.Operand, originalExpression.Parameters);
-                var propInfo = ProxyType.GetProperty(_expressionNames[unaryLambda], BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                var member = Expression.Property(castedParam, propInfo);
-                var expr = Expression.MakeUnary(unaryExpr.NodeType, member, unaryExpr.Type);
-                var result = Expression.Lambda(expr, param);
-                return result;
+                if (_expressionNames.TryGetValue(unaryLambda, out var unaryLambdaName))
+                {
+                    var propInfo = ProxyType.GetProperty(unaryLambdaName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                    var member = Expression.Property(param, propInfo);
+                    var expr = Expression.MakeUnary(unaryExpr.NodeType, member, unaryExpr.Type);
+                    var result = Expression.Lambda(expr, param);
+                    return result;
+                }
             }
-            else
+            else if (_expressionNames.TryGetValue(originalExpression, out var originalExpressionName))
             {
-                var member = Expression.Property(castedParam, ProxyType.GetProperty(_expressionNames[originalExpression], BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+                var member = Expression.Property(param, ProxyType.GetProperty(originalExpressionName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
                 var result = Expression.Lambda(member, param);
                 return result;
             }
+
+            var field = Fields.FirstOrDefault(field => field.IsExpression && ExpressionEqualityComparer.Instance.Equals(originalExpression, field.OriginalExpression));
+
+            if (field != null)
+            {
+                var member = Expression.Property(param, ProxyType.GetProperty(field.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+                var result = Expression.Lambda(member, param);
+                return result;
+            }
+
+            throw new NotSupportedException();
         }
 
         public Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression(IEnumerable<string> fieldNames)
@@ -184,7 +198,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public Expression<Func<TExecutionContext, TEntity, TType>> CreateGroupSelectorExpression<TType>(IEnumerable<string> fieldNames)
         {
-            var unorderedFields = _fields.Where(field => field.IsExpression && field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var unorderedFields = Fields.Where(field => field.IsExpression && field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var orderedFields = fieldNames.Select(f => unorderedFields.First(u => u.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
 
             var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
@@ -198,7 +212,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 orderedFields
                     .Select(f =>
                     {
-                        var expr = f.Expression.ReplaceFirstParameter(contextParam);
+                        var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
                         return Expression.Bind(
                             typeof(TType).GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase),
                             expr.Body.ReplaceParameter(expr.Parameters[0], entiyParam));
@@ -215,6 +229,44 @@ namespace Epam.GraphQL.Configuration.Implementations
                 new[] { typeof(IEnumerable<string>) });
 
             return createGroupingExpressionMethodInfo.InvokeAndHoistBaseException<LambdaExpression>(this, fieldNames);
+        }
+
+        public LambdaExpression CreateGroupKeySelectorExpression(IEnumerable<string> subFields, IEnumerable<string> aggregateQueriedFields)
+        {
+            var fields = Fields.Where(field => field.IsExpression && field.IsGroupable && subFields.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var sourceType = GetConcreteProxyType(subFields.Concat(aggregateQueriedFields));
+
+            var groupingType = typeof(IGrouping<,>).MakeGenericType(sourceType, sourceType);
+            var param = Expression.Parameter(groupingType);
+            var entityExpr = Expression.Property(param, groupingType.GetProperty("Key"));
+
+            var ctor = sourceType.GetConstructors().Single(c => c.GetParameters().Length == 0);
+            var newExpr = Expression.New(ctor);
+            var initExpr = Expression.MemberInit(
+                newExpr,
+                fields
+                    .Select(f =>
+                    {
+                        var propInfo = sourceType.GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                        return Expression.Bind(propInfo, Expression.Property(entityExpr, propInfo));
+                    })
+                    .Concat(aggregateQueriedFields
+                        .SafeNull()
+                        .Select(f =>
+                        {
+                            if (f == "<>$count")
+                            {
+                                var propInfo = sourceType.GetProperty("<>$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                                var countMethodInfo = CachedReflectionInfo.ForEnumerable.Count(sourceType);
+                                var methodCallExpr = Expression.Call(null, countMethodInfo, param);
+
+                                return Expression.Bind(propInfo, methodCallExpr);
+                            }
+
+                            throw new NotSupportedException();
+                        })));
+
+            return Expression.Lambda(initExpr, param);
         }
 
         public ILoaderHooksExecuter<Proxy<TEntity>> CreateHooksExecuter(TExecutionContext executionContext)
@@ -294,7 +346,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TType : Proxy<TEntity>
         {
             // TODO Refactor it (should we query 'queriedFields'?)
-            var queriedFields = _fields.Where(field => fieldNames.SafeNull().Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var queriedFields = Fields.Where(field => fieldNames.SafeNull().Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
 
             var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
 
@@ -310,7 +362,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             var bindings = queriedFields.Where(field => field.IsExpression).Select(f =>
             {
-                var expr = f.Expression.ReplaceFirstParameter(contextParam);
+                var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
                 return Expression.Bind(
                     properties.First(p => p.Name.Equals(f.Name, StringComparison.OrdinalIgnoreCase)),
                     expr.Body.ReplaceParameter(expr.Parameters[0], entityParam));

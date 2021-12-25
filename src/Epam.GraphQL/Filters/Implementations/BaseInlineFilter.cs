@@ -141,7 +141,7 @@ namespace Epam.GraphQL.Filters.Implementations
 
         public Expression<Func<TEntity, TReturnType>> BuildExpression(TExecutionContext context)
         {
-            var expression = (Expression<Func<TExecutionContext, TEntity, TReturnType>>)_field.Expression;
+            var expression = (Expression<Func<TExecutionContext, TEntity, TReturnType>>)_field.ContextExpression;
             var result = expression.BindFirstParameter(context);
             return result;
         }

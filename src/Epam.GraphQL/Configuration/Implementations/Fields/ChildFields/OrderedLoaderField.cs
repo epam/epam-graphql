@@ -72,10 +72,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
             Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
         {
-            return (context, children) => SortingHelpers.ApplySort<TEntity, TChildEntity, TExecutionContext>(
+            return (context, children) => SortingHelpers.ApplySort(
                 context,
                 children,
-                loader.ObjectGraphTypeConfigurator,
+                loader.ObjectGraphTypeConfigurator.Sorters,
                 searcher as IOrderedSearcher<TChildEntity, TExecutionContext>,
                 orderBy,
                 thenBy);
@@ -83,7 +83,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         protected override QueryableField<TEntity, TChildEntity, TExecutionContext> ApplySelector(Func<IResolveFieldContext, IQueryable<TChildEntity>, IQueryable<TChildEntity>> selector)
         {
-            EnumerableFieldResolver = OrderedQueryableFieldResolver.Select(selector).Reorder(ApplySort(Loader, Searcher, _orderBy, _thenBy));
+            EnumerableFieldResolver = OrderedQueryableFieldResolver.Select(selector, ApplySort(Loader, Searcher, _orderBy, _thenBy));
             return this;
         }
 

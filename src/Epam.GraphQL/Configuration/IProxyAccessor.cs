@@ -16,15 +16,23 @@ namespace Epam.GraphQL.Configuration
     {
         bool HasHooks { get; }
 
+        Type ProxyType { get; }
+
         Type GetConcreteProxyType(IEnumerable<string> fieldNames);
 
         LambdaExpression GetProxyExpression(LambdaExpression originalExpression);
 
         void Configure();
+
+        LambdaExpression CreateGroupSelectorExpression(Type entityType, IEnumerable<string> fieldNames);
+
+        LambdaExpression CreateGroupKeySelectorExpression(IEnumerable<string> subFields, IEnumerable<string> aggregateQueriedFields);
     }
 
     internal interface IProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TExecutionContext>
     {
+        IReadOnlyList<IField<TEntity, TExecutionContext>> Fields { get; }
+
         Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression(IEnumerable<string> fieldNames);
 
         ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(TExecutionContext executionContext);

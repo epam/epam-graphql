@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.MutableLoader;
 using Epam.GraphQL.Builders.MutableLoader.Implementations;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Savers;
 using Epam.GraphQL.TaskBatcher;
