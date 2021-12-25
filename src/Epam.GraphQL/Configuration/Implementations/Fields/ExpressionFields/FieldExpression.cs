@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -12,15 +12,14 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Sorters;
 using GraphQL;
 using GraphQL.Resolvers;
-using Expr = System.Linq.Expressions.Expression;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class FieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldExpression<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
-        private readonly Expression<Func<TEntity, TReturnType>> _expression;
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
+        private readonly Expression<Func<TEntity, TReturnType>> _originalExpression;
         private Func<TEntity, TReturnType> _resolver;
 
         public FieldExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TEntity, TReturnType>> expression)
@@ -30,27 +29,31 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                 throw new ArgumentNullException(nameof(name));
             }
 
-            _expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            Expression = Expr.Lambda<Func<TExecutionContext, TEntity, TReturnType>>(
-                _expression.Body,
-                Expr.Parameter(typeof(TExecutionContext)),
-                _expression.Parameters[0]);
+            _originalExpression = expression ?? throw new ArgumentNullException(nameof(expression));
+            ContextedExpression = Expression.Lambda<Func<TExecutionContext, TEntity, TReturnType>>(
+                _originalExpression.Body,
+                Expression.Parameter(typeof(TExecutionContext)),
+                _originalExpression.Parameters[0]);
 
             _field = field ?? throw new ArgumentNullException(nameof(field));
             Name = name;
         }
 
-        public bool IsReadOnly => !_expression.IsProperty() && !typeof(Input).IsAssignableFrom(typeof(TEntity));
+        public bool IsReadOnly => !_originalExpression.IsProperty() && !typeof(Input).IsAssignableFrom(typeof(TEntity));
 
         public string Name { get; }
 
-        public PropertyInfo PropertyInfo => _expression.IsProperty() ? _expression.GetPropertyInfo() : null;
+        public PropertyInfo PropertyInfo => _originalExpression.IsProperty() ? _originalExpression.GetPropertyInfo() : null;
 
-        public Expression<Func<TExecutionContext, TEntity, TReturnType>> Expression { get; }
+        public bool IsGroupable => _field.IsGroupable;
+
+        public LambdaExpression ContextedExpression { get; }
+
+        public LambdaExpression OriginalExpression => _originalExpression;
 
         public void ValidateExpression()
         {
-            ExpressionValidator.Validate(_expression);
+            ExpressionValidator.Validate(_originalExpression);
         }
 
         public TReturnType Resolve(IResolveFieldContext context, object source)
@@ -65,7 +68,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
             if (_resolver == null)
             {
-                _resolver = _expression.Compile();
+                _resolver = _originalExpression.Compile();
             }
 
             return _resolver((TEntity)source);
@@ -81,14 +84,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             return Resolve(context);
         }
 
-        LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => _expression;
+        LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => _originalExpression;
 
         public bool Equals(ISorter<TExecutionContext> other)
         {
             if (other is FieldExpression<TEntity, TReturnType, TExecutionContext> fieldExpression)
             {
                 return Name.Equals(fieldExpression.Name, StringComparison.Ordinal)
-                    && ExpressionEqualityComparer.Instance.Equals(_expression, fieldExpression._expression);
+                    && ExpressionEqualityComparer.Instance.Equals(_originalExpression, fieldExpression._originalExpression);
             }
 
             return false;

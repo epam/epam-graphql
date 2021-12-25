@@ -75,7 +75,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public override bool CanResolve => true;
 
-        public override LambdaExpression Expression => _expression.Expression;
+        public override LambdaExpression ContextExpression => _expression.ContextedExpression;
+
+        public override LambdaExpression OriginalExpression => _expression.OriginalExpression;
 
         protected virtual bool IsSupportFiltering => false;
 

@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 
 #nullable enable
@@ -31,7 +32,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public override void Execute(TExecutionContext executionContext, Proxy<TEntity> proxy)
         {
-            var expr = (Expression<Func<Proxy<TEntity>, TEntityProxy>>)_proxyAccessor.GetProxyExpression(_proxyExpression);
+            var expr = (Expression<Func<Proxy<TEntity>, TEntityProxy>>)_proxyAccessor.GetProxyExpression(_proxyExpression).CastFirstParamTo<Proxy<TEntity>>();
             var getter = expr.Compile();
             _hook(executionContext, getter(proxy));
         }

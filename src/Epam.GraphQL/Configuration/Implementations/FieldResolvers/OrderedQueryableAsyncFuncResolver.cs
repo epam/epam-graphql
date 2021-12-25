@@ -80,9 +80,11 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return ProxiedResolver(context).Then(FuncConstants<IOrderedQueryable<object>>.WeakIdentity);
         }
 
-        public IOrderedQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
+        public IOrderedQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> sorter)
         {
-            return Create(_fieldName, ctx => selector(ctx, _resolver(ctx)), _condition, _transform, _sorter, _outerProxyAccessor, InnerProxyAccessor);
+            return Create(_fieldName, ctx => selector(ctx, _resolver(ctx)), _condition, _transform, sorter, _outerProxyAccessor, InnerProxyAccessor);
         }
 
         public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector)
@@ -104,17 +106,14 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 ctx => _proxiedBatchTaskResolver.Value(ctx).Then(items => selector(ctx, (IOrderedQueryable<TReturnType>)items.SafeNull().AsQueryable().Select(proxy => proxy.GetOriginal()))));
         }
 
-        public IOrderedQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> selector)
-        {
-            return Create(_fieldName, _resolver, _condition, _transform, selector, _outerProxyAccessor, InnerProxyAccessor);
-        }
-
         public IOrderedQueryableResolver<TEntity, TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate)
         {
             return Create(_fieldName, ctx => _resolver(ctx).Where(predicate), _condition, _transform, _sorter, _outerProxyAccessor, InnerProxyAccessor);
         }
 
-        public IOrderedQueryableResolver<TEntity, TAnotherReturnType, TExecutionContext> Select<TAnotherReturnType>(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TAnotherReturnType>> selector)
+        public IOrderedQueryableResolver<TEntity, TAnotherReturnType, TExecutionContext> Select<TAnotherReturnType>(
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TAnotherReturnType>> selector,
+            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IOrderedQueryable<TAnotherReturnType>> sorter)
             where TAnotherReturnType : class
         {
             throw new NotSupportedException();
@@ -140,7 +139,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         IQueryableResolver<TEntity, TReturnType, TExecutionContext> IQueryableResolver<TEntity, TReturnType, TExecutionContext>.Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
         {
-            return Select(selector);
+            return Select(selector, _sorter);
         }
 
         IQueryableResolver<TEntity, TReturnType, TExecutionContext> IQueryableResolver<TEntity, TReturnType, TExecutionContext>.Where(Expression<Func<TReturnType, bool>> predicate)

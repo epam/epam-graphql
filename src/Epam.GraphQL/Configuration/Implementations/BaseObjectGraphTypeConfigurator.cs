@@ -85,7 +85,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public bool HasInlineFilters => _inlineFilters.Any() || _fields.Any(f => f.IsFilterable);
 
-        public IReadOnlyList<IField<TExecutionContext>> Fields => _fields;
+        public IReadOnlyList<IField<TEntity, TExecutionContext>> Fields => _fields;
 
         public ProxyAccessor<TEntity, TExecutionContext> ProxyAccessor { get; }
 
@@ -98,8 +98,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         public IReadOnlyList<ISorter<TExecutionContext>> Sorters => _sorters;
 
         protected RelationRegistry<TExecutionContext> Registry { get; }
-
-        public IField<TEntity, TExecutionContext> FindFieldByName(string name) => _fields.Find(field => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         public TField ReplaceField<TField>(Field<TEntity, TExecutionContext> oldField, TField newField)
             where TField : Field<TEntity, TExecutionContext>

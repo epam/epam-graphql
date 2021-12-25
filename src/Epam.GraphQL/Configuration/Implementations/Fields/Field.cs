@@ -54,7 +54,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public virtual bool CanResolve => false;
 
-        public virtual LambdaExpression Expression => null;
+        public virtual LambdaExpression ContextExpression => null;
+
+        public virtual LambdaExpression OriginalExpression => null;
 
         public IFieldEditSettings<TEntity, TExecutionContext> EditSettings { get; protected set; }
 

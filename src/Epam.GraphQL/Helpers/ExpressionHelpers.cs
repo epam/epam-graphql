@@ -112,6 +112,12 @@ namespace Epam.GraphQL.Helpers
             return result;
         }
 
+        public static LambdaExpression MakeIdentity(Type type)
+        {
+            var param = Expression.Parameter(type);
+            return Expression.Lambda(param, param);
+        }
+
         public static ExpressionFactorizationResult Factorize<T1, T2, TResult>(Expression<Func<T1, T2, TResult>> expression)
         {
             if (expression == null)

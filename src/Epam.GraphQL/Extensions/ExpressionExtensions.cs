@@ -470,6 +470,14 @@ namespace Epam.GraphQL.Extensions
             return expression is ConstantExpression constantExpr && constantExpr.Value is bool value && !value;
         }
 
+        public static LambdaExpression CastFirstParamTo<T>(this LambdaExpression expression)
+        {
+            var param = Expression.Parameter(typeof(T));
+            var castedParam = Expression.MakeUnary(ExpressionType.TypeAs, param, expression.Parameters[0].Type);
+
+            return Expression.Lambda(expression.Body.ReplaceParameter(expression.Parameters[0], castedParam), Enumerable.Repeat(param, 1).Concat(expression.Parameters.Skip(1)));
+        }
+
         /// <summary>
         ///     Combines the first expression with the second using the specified merge function.
         /// </summary>

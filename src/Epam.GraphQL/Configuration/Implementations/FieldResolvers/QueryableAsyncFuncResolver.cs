@@ -82,12 +82,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             var outerProxyParam = Expression.Parameter(typeof(Proxy<TEntity>));
             var innerProxyParam = Expression.Parameter(typeof(Proxy<TReturnType>));
             var outers = factorizationResult.LeftExpressions
-                .Select(_outerProxyAccessor.GetProxyExpression)
+                .Select(e => _outerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TEntity>>())
                 .Select(e => e.Body.ReplaceParameter(e.Parameters[0], outerProxyParam))
                 .ToList();
 
             var inners = factorizationResult.RightExpressions
-                .Select(_innerProxyAccessor.GetProxyExpression)
+                .Select(e => _innerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TReturnType>>())
                 .Select(e => e.Body.ReplaceParameter(e.Parameters[0], innerProxyParam))
                 .ToList();
 
@@ -464,7 +464,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         private Expression<Func<TChildEntity, TReturnType>> Transform(IResolveFieldContext context, Expression<Func<TChildEntity, TReturnType>> transform)
         {
             var fieldNames = context.GetQueriedFields();
-            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform);
+            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform).CastFirstParamTo<Proxy<TChildEntity>>();
             var lambda = _innerProxyAccessor.CreateSelectorExpression(fieldNames);
             var result = ExpressionRewriter.Rewrite(ExpressionHelpers.Compose(lambda, proxiedSelector));
 
@@ -475,7 +475,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         private Expression<Func<TChildEntity, Tuple<Proxy<TChildEntity>, TReturnType>>> Transform2(IResolveFieldContext context, Expression<Func<TChildEntity, TReturnType>> transform)
         {
             var fieldNames = context.GetQueriedFields();
-            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform);
+            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform).CastFirstParamTo<Proxy<TChildEntity>>();
             var executionContextParam = Expression.Parameter(typeof(TExecutionContext));
             var entityParam = Expression.Parameter(typeof(TChildEntity));
 

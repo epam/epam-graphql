@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Helpers
     {
         public static class ForQueryable
         {
-            private static MethodInfo? _cast;
             private static MethodInfo? _groupBy;
             private static MethodInfo? _orderBy;
             private static MethodInfo? _orderByDescending;
@@ -45,11 +44,6 @@ namespace Epam.GraphQL.Helpers
             public static MethodInfo GenericThenByWithComparer => _thenByWithComparer ??= new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, IComparer<object>, IOrderedQueryable<object>>(Queryable.ThenBy).GetMethodInfo().GetGenericMethodDefinition();
 
             public static MethodInfo GenericThenByDescendingWithComparer => _thenByDescendingWithComparer ??= new Func<IOrderedQueryable<object>, Expression<Func<object, object>>, IComparer<object>, IOrderedQueryable<object>>(Queryable.ThenByDescending).GetMethodInfo().GetGenericMethodDefinition();
-
-            public static MethodInfo Cast(Type result)
-            {
-                return (_cast ??= new Func<IQueryable, IQueryable<object>>(Queryable.Cast<object>).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(result);
-            }
 
             public static MethodInfo GroupBy(Type source, Type key)
             {

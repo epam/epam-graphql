@@ -247,7 +247,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
             var transformedReturnLambda = _returnTypeProxyAccessor.CreateSelectorExpression(fieldNames);
 
-            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform);
+            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform).CastFirstParamTo<Proxy<TChildEntity>>();
             var transformedLambda = _innerProxyAccessor.CreateSelectorExpression(fieldNames);
             var transformedResult = ExpressionRewriter.Rewrite(ExpressionHelpers.Compose(transformedLambda, proxiedSelector));
 
@@ -261,7 +261,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         {
             var fieldNames = context.GetQueriedFields();
             var transformedReturnLambda = _returnTypeProxyAccessor.CreateSelectorExpression(fieldNames);
-            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform);
+            var proxiedSelector = (Expression<Func<Proxy<TChildEntity>, TReturnType>>)_innerProxyAccessor.GetProxyExpression(transform).CastFirstParamTo<Proxy<TChildEntity>>();
             var childEntityLambda = _innerProxyAccessor.CreateSelectorExpression(fieldNames);
             var transformedResult = ExpressionRewriter.Rewrite(ExpressionHelpers.Compose(childEntityLambda, proxiedSelector));
             var resultLambda = ExpressionHelpers.SafeCompose(transformedResult, transformedReturnLambda);
