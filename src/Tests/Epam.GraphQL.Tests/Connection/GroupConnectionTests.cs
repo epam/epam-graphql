@@ -8,6 +8,7 @@ using System.Linq;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Connection
@@ -1035,6 +1036,9 @@ namespace Epam.GraphQL.Tests.Connection
                 null);
         }
 
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/8.
+        /// </summary>
         [Test]
         public void TestGroupConnectionQueryWithCountOnly()
         {
@@ -1072,6 +1076,45 @@ namespace Epam.GraphQL.Tests.Connection
                         totalCount: 1
                     }
                 }");
+        }
+
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/7.
+        /// </summary>
+        [Test]
+        public void TestGroupConnectionQueryItemsWithSorting()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id).Sortable();
+                    loader.Field(p => p.ManagerId).Groupable();
+                    loader.Field(p => p.UnitId).Groupable();
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .GroupConnection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQueryError(
+                Builder,
+                typeof(ExecutionError),
+                "Cannot sort by the following fields: `id`. Consider making them groupable.",
+                @"
+                    query {
+                        people(sorting: {field: ""id"" }) {
+                            items {
+                                item {
+                                    unitId
+                                }
+                            }
+                        }
+                    }");
         }
 
         public class PersonFilter : Input
