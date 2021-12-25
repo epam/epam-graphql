@@ -84,7 +84,7 @@ namespace Epam.GraphQL.Sorters.Implementations
 
             if (sortFields.Any(f => !(f.Item1?.IsGroupable ?? false)))
             {
-                throw new ExecutionError($"Cannot find field(s) for sorting: {string.Join(", ", sorting.Select(o => o.Field))}");
+                throw new ExecutionError($"Cannot sort by the following fields: {string.Join(", ", sorting.Select(o => $"`{o.Field}`"))}. Consider making them groupable.");
             }
 
             var subFields = context.GetGroupConnectionQueriedFields()
