@@ -35,7 +35,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   registry,
                   parent,
                   name,
-                  CreateResolver(name, parent, registry.ResolveLoader<TChildLoader, TChildEntity>(), condition, searcher, orderBy, thenBy),
+                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
+                  condition,
                   elementGraphType,
                   arguments,
                   searcher,
@@ -68,7 +69,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
         }
 
-        protected LoaderField(
+        private LoaderField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
@@ -84,6 +85,34 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   parent,
                   name,
                   resolver,
+                  elementGraphType,
+                  loader.ObjectGraphTypeConfigurator,
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
+        {
+            Loader = loader;
+        }
+
+        private LoaderField(
+            RelationRegistry<TExecutionContext> registry,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            TChildLoader loader,
+            Expression<Func<TEntity, TChildEntity, bool>>? condition,
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
+            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            : base(
+                  registry,
+                  parent,
+                  name,
+                  query: context => loader.DoGetBaseQuery(context.GetUserContext<TExecutionContext>()),
+                  transform: (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query),
+                  condition,
                   elementGraphType,
                   loader.ObjectGraphTypeConfigurator,
                   arguments,
@@ -144,6 +173,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Name,
                 QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
                 graphType,
+                graphType.Configurator,
                 Arguments,
                 searcher: null,
                 orderBy: null,
@@ -167,36 +197,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ThenBy);
 
             return queryableField;
-        }
-
-        private static IQueryableResolver<TEntity, TChildEntity, TExecutionContext> CreateResolver(
-            string fieldName,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            TChildLoader loader,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
-            ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
-        {
-            var func = GetQuery(loader.ObjectGraphTypeConfigurator, context => loader.DoGetBaseQuery(context.GetUserContext<TExecutionContext>()));
-
-            if (condition == null)
-            {
-                return new QueryableFuncResolver<TEntity, TChildEntity, TExecutionContext>(
-                    loader.ObjectGraphTypeConfigurator.ProxyAccessor,
-                    func,
-                    (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query),
-                    ApplySort(loader.ObjectGraphTypeConfigurator.Sorters, searcher, orderBy, thenBy));
-            }
-
-            return new QueryableAsyncFuncResolver<TEntity, TChildEntity, TExecutionContext>(
-                fieldName,
-                func,
-                condition,
-                (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query),
-                ApplySort(loader.ObjectGraphTypeConfigurator.Sorters, searcher, orderBy, thenBy),
-                parent.ProxyAccessor,
-                loader.ObjectGraphTypeConfigurator.ProxyAccessor);
         }
     }
 

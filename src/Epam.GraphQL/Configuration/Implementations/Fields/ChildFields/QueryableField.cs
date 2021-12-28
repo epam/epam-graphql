@@ -9,7 +9,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Search;
-using GraphQL;
 
 #nullable enable
 
@@ -28,47 +27,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
             Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  CreateResolver(
-                      parent,
-                      name,
-                      ctx => query(ctx.GetUserContext<TExecutionContext>()),
-                      condition,
-                      elementGraphType,
-                      elementGraphType.Configurator ?? throw new NotSupportedException(),
-                      searcher,
-                      orderBy,
-                      thenBy),
-                  elementGraphType,
-                  elementGraphType.Configurator,
-                  arguments: null,
-                  searcher,
-                  orderBy,
-                  thenBy)
-        {
-        }
-
-        public QueryableField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            LazyQueryArguments? arguments,
-            ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
             : base(
                   registry,
                   parent,
                   name,
-                  resolver,
+                  query: ctx => query(ctx.GetUserContext<TExecutionContext>()),
+                  transform: (ctx, items) => items,
+                  condition,
                   elementGraphType,
-                  elementGraphType.Configurator,
-                  arguments,
+                  elementGraphType.Configurator ?? throw new NotSupportedException(),
+                  arguments: null,
                   searcher,
                   orderBy,
                   thenBy)
@@ -124,6 +92,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Name,
                 QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
                 graphType,
+                graphType.Configurator,
                 Arguments,
                 searcher: null,
                 orderBy: null,
@@ -145,38 +114,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Searcher,
                 OrderBy,
                 ThenBy);
-        }
-
-        private static IQueryableResolver<TEntity, TReturnType, TExecutionContext> CreateResolver(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<IResolveFieldContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>>? condition,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
-            ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
-        {
-            var func = GetQuery(configurator, query);
-
-            if (condition != null)
-            {
-                return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(
-                    name,
-                    func,
-                    condition,
-                    (ctx, items) => items,
-                    ApplySort(configurator.Sorters, searcher, orderBy, thenBy),
-                    parent.ProxyAccessor,
-                    configurator.ProxyAccessor);
-            }
-
-            return new QueryableFuncResolver<TEntity, TReturnType, TExecutionContext>(
-                elementGraphType.Configurator?.ProxyAccessor,
-                func,
-                (ctx, items) => items,
-                ApplySort(configurator.Sorters, searcher, orderBy, thenBy));
         }
     }
 }
