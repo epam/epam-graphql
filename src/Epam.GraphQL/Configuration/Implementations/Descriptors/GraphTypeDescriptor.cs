@@ -6,6 +6,8 @@
 using System;
 using GraphQL.Types;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal static class GraphTypeDescriptor
@@ -25,31 +27,31 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
     internal class GraphTypeDescriptor<TExecutionContext> : IGraphTypeDescriptor<TExecutionContext>
     {
         private readonly Lazy<Type> _type;
-        private readonly Lazy<IObjectGraphTypeConfigurator<TExecutionContext>> _configurator;
-        private readonly Lazy<IGraphType> _graphType;
+        private readonly Lazy<IObjectGraphTypeConfigurator<TExecutionContext>?> _configurator;
+        private readonly Lazy<IGraphType?> _graphType;
 
         public GraphTypeDescriptor(Type type, IGraphType graphType, IObjectGraphTypeConfigurator<TExecutionContext> configurator)
             : this(() => type, () => graphType, () => configurator)
         {
         }
 
-        public GraphTypeDescriptor(Type type, Func<IGraphType> graphTypeFactory, IObjectGraphTypeConfigurator<TExecutionContext> configurator)
+        public GraphTypeDescriptor(Type type, Func<IGraphType?> graphTypeFactory, IObjectGraphTypeConfigurator<TExecutionContext>? configurator)
             : this(() => type, graphTypeFactory, () => configurator)
         {
         }
 
-        protected GraphTypeDescriptor(Func<Type> typeFactory, Func<IGraphType> graphTypeFactory, Func<IObjectGraphTypeConfigurator<TExecutionContext>> configuratorFactory)
+        protected GraphTypeDescriptor(Func<Type> typeFactory, Func<IGraphType?> graphTypeFactory, Func<IObjectGraphTypeConfigurator<TExecutionContext>?> configuratorFactory)
         {
             _type = new Lazy<Type>(typeFactory);
-            _configurator = new Lazy<IObjectGraphTypeConfigurator<TExecutionContext>>(configuratorFactory);
-            _graphType = new Lazy<IGraphType>(graphTypeFactory);
+            _configurator = new Lazy<IObjectGraphTypeConfigurator<TExecutionContext>?>(configuratorFactory);
+            _graphType = new Lazy<IGraphType?>(graphTypeFactory);
         }
 
-        public IGraphType GraphType => _graphType.Value;
+        public IGraphType? GraphType => _graphType.Value;
 
         public Type Type => _type.Value;
 
-        public IObjectGraphTypeConfigurator<TExecutionContext> Configurator => _configurator.Value;
+        public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => _configurator.Value;
 
         public void Validate()
         {
@@ -72,6 +74,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
         {
         }
 
-        IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> IGraphTypeDescriptor<TReturnType, TExecutionContext>.Configurator => (IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>)Configurator;
+        IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? IGraphTypeDescriptor<TReturnType, TExecutionContext>.Configurator => Configurator as IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>;
     }
 }

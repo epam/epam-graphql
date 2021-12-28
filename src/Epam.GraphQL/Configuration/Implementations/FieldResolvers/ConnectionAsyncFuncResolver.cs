@@ -10,9 +10,11 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
 using GraphQL;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> : OrderedQueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>
+    internal class ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> : QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
         public ConnectionAsyncFuncResolver(
@@ -20,23 +22,30 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> sorter,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? sorter,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
             : base(fieldName, resolver, condition, transform, sorter, outerProxyAccessor, innerProxyAccessor)
         {
         }
 
-        protected override IOrderedQueryableResolver<TEntity, TReturnType, TExecutionContext> Create(
+        protected override IQueryableResolver<TEntity, TReturnType, TExecutionContext> Create(
             string fieldName,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> sorter,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? sorter,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
         {
-            return new ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(fieldName, resolver, condition, transform, sorter, outerProxyAccessor, innerProxyAccessor);
+            return new ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(
+                fieldName,
+                resolver,
+                condition,
+                transform,
+                sorter ?? throw new ArgumentNullException(nameof(sorter)),
+                outerProxyAccessor,
+                innerProxyAccessor);
         }
 
         protected override IEnumerable<string> GetQueriedFields(IResolveFieldContext context)

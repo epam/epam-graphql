@@ -7,18 +7,20 @@ using System;
 using System.Linq;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Search;
 using Epam.GraphQL.Sorters.Implementations;
 using Epam.GraphQL.Types;
 using GraphQL;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
 #pragma warning disable CA1501
-    internal class GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : OrderedLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
+    internal class GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
 #pragma warning restore CA1501
         where TEntity : class
         where TChildEntity : class
@@ -30,44 +32,68 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            LazyQueryArguments arguments,
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments,
             Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
             Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
             : base(
                   registry,
                   parent,
                   name,
-                  null,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
-                  null,
+                  condition: null,
+                  elementGraphType,
                   arguments,
+                  searcher: null,
                   orderBy,
                   thenBy)
         {
             _graphType = GraphTypeDescriptor.Create<GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
-
-            Argument<string>(
-                "after",
-                "Only look at connected edges with cursors greater than the value of `after`.");
-
-            Argument<int?>(
-                "first",
-                "Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.");
-
-            Argument<string>(
-                "before",
-                "Only look at connected edges with cursors smaller than the value of `before`.");
-
-            Argument<int?>(
-                "last",
-                "Specifies the number of edges to return counting reversely from `before`, or the last entry if `before` is not specified.");
+            Initialize();
         }
 
-        public override IResolver<TEntity> FieldResolver => OrderedQueryableFieldResolver
-            .Select(GetGroupByQuery(Loader.ObjectGraphTypeConfigurator.ProxyAccessor), OrderBy(Loader.ObjectGraphTypeConfigurator))
-            .Select(Resolvers.ToGroupConnection(Loader.ObjectGraphTypeConfigurator.ProxyAccessor));
+        private GroupLoaderField(
+            RelationRegistry<TExecutionContext> registry,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
+            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
+            : base(
+                  registry,
+                  parent,
+                  name,
+                  resolver,
+                  elementGraphType,
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
+        {
+            _graphType = GraphTypeDescriptor.Create<GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
+            Initialize();
+        }
+
+        public override IResolver<TEntity> FieldResolver => QueryableFieldResolver
+            .AsGroupConnection(GetGroupByQuery(Loader.ObjectGraphTypeConfigurator.ProxyAccessor), ApplyGroupSort(Loader.ObjectGraphTypeConfigurator));
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
+
+        protected override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        {
+            return new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                resolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+                OrderBy!,
+                ThenBy!);
+        }
 
         private static Func<IResolveFieldContext, IQueryable<TChildEntity>, IQueryable<Proxy<TChildEntity>>> GetGroupByQuery(IProxyAccessor<TChildEntity, TExecutionContext> proxyAccessor)
         {
@@ -96,7 +122,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             };
         }
 
-        private static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, IOrderedQueryable<Proxy<TChildEntity>>> OrderBy(IObjectGraphTypeConfigurator<TChildEntity, TExecutionContext> configurator)
+        private static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, IOrderedQueryable<Proxy<TChildEntity>>> ApplyGroupSort(IObjectGraphTypeConfigurator<TChildEntity, TExecutionContext> configurator)
         {
             return (context, query) =>
             {
@@ -109,6 +135,25 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
                 return result;
             };
+        }
+
+        private void Initialize()
+        {
+            Argument<string>(
+                "after",
+                "Only look at connected edges with cursors greater than the value of `after`.");
+
+            Argument<int?>(
+                "first",
+                "Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.");
+
+            Argument<string>(
+                "before",
+                "Only look at connected edges with cursors smaller than the value of `before`.");
+
+            Argument<int?>(
+                "last",
+                "Specifies the number of edges to return counting reversely from `before`, or the last entry if `before` is not specified.");
         }
     }
 }

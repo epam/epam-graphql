@@ -8,185 +8,115 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Extensions;
-using Epam.GraphQL.Filters;
-using Epam.GraphQL.Helpers;
-using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
-using Epam.GraphQL.Types;
 using GraphQL;
-using GraphQL.Types;
+
+#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class QueryableField<TEntity, TReturnType, TExecutionContext> : EnumerableField<TEntity, TReturnType, TExecutionContext>
+    internal class QueryableField<TEntity, TReturnType, TExecutionContext> : QueryableFieldBase<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
-        private readonly Expression<Func<TEntity, TReturnType, bool>> _condition;
-        private Func<TExecutionContext, IQueryable<TReturnType>> _query;
-
         public QueryableField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>> condition,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
+            Expression<Func<TEntity, TReturnType, bool>>? condition,
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
+            ISearcher<TReturnType, TExecutionContext>? searcher,
+            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
+            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
             : this(
                   registry,
                   parent,
                   name,
-                  CreateResolver(parent, name, query, condition, elementGraphType, elementGraphType?.Configurator),
+                  CreateResolver(
+                      parent,
+                      name,
+                      ctx => query(ctx.GetUserContext<TExecutionContext>()),
+                      condition,
+                      elementGraphType,
+                      elementGraphType.Configurator ?? throw new NotSupportedException(),
+                      searcher,
+                      orderBy,
+                      thenBy),
                   elementGraphType,
-                  elementGraphType?.Configurator,
-                  arguments: null)
+                  elementGraphType.Configurator,
+                  arguments: null,
+                  searcher,
+                  orderBy,
+                  thenBy)
         {
-            _query = query;
-            _condition = condition;
         }
 
-        protected QueryableField(
+        public QueryableField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
-            LazyQueryArguments arguments)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  elementGraphType,
-                  configurator,
-                  arguments)
-        {
-            EnumerableFieldResolver = resolver;
-        }
-
-        private QueryableField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
-            LazyQueryArguments arguments)
+            LazyQueryArguments? arguments,
+            ISearcher<TReturnType, TExecutionContext>? searcher,
+            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
+            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
             : base(
                   registry,
                   parent,
                   name,
-                  elementGraphType)
+                  resolver,
+                  elementGraphType,
+                  elementGraphType.Configurator,
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
         {
-            Arguments = arguments;
-            ObjectGraphTypeConfigurator = configurator;
-
-            if (HasFilter)
-            {
-                Argument("filter", () => new QueryArgument(Registry.GenerateInputGraphType(ObjectGraphTypeConfigurator.CreateInlineFilters().FilterType))
-                {
-                    Name = "filter",
-                });
-            }
-
-            var sortableFields = ObjectGraphTypeConfigurator?.Sorters.Select(f => f.Name).ToArray();
-            if (sortableFields != null && sortableFields.Any())
-            {
-                Argument("sorting", new ListGraphType(new SortingOptionGraphType(typeof(TReturnType).Name, sortableFields)));
-            }
         }
 
-        public virtual bool HasFilter => ObjectGraphTypeConfigurator?.HasInlineFilters ?? false;
-
-        protected ISearcher<TReturnType, TExecutionContext> Searcher { get; private set; }
-
-        protected IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> ObjectGraphTypeConfigurator { get; private set; }
-
-        protected IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolver => (IQueryableResolver<TEntity, TReturnType, TExecutionContext>)EnumerableFieldResolver;
-
-        public override EnumerableField<TEntity, TReturnType, TExecutionContext> ApplyWhere(Expression<Func<TReturnType, bool>> condition)
+        public QueryableField(
+            RelationRegistry<TExecutionContext> registry,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
+            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator,
+            LazyQueryArguments? arguments,
+            ISearcher<TReturnType, TExecutionContext>? searcher,
+            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
+            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
+            : base(
+                  registry,
+                  parent,
+                  name,
+                  resolver,
+                  elementGraphType,
+                  configurator,
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
         {
-            var oldQuery = _query;
-            _query = ctx => oldQuery(ctx).Where(condition);
-            EnumerableFieldResolver = QueryableFieldResolver.Where(condition);
-            return this;
         }
 
-        public virtual QueryableField<TEntity, TReturnType, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
-            where TLoaderFilter : Filter<TReturnType, TFilter, TExecutionContext>
-            where TFilter : Input
+        public override QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
-            if (HasFilter)
-            {
-                throw new InvalidOperationException("Cannot apply filter twice.");
-            }
-
-            Registry.RegisterInputAutoObjectGraphType<TFilter>();
-            var loaderFilterType = typeof(TLoaderFilter);
-            var filter = Registry.ResolveFilter<TReturnType>(loaderFilterType);
-
-            Argument("filter", filter.FilterType);
-            return ApplySelector(GetFilteredQuery(filter));
+            var connectionField = new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                QueryableFieldResolver,
+                ElementGraphType,
+                ObjectGraphTypeConfigurator ?? throw new NotSupportedException(),
+                Arguments,
+                Searcher,
+                order.Compile(),
+                order.GetThenBy().Compile());
+            return ApplyField(connectionField);
         }
 
-        public QueryableField<TEntity, TReturnType, TExecutionContext> ApplySearch<TSearcher>()
-        {
-            var searcherBaseType = TypeHelpers.FindMatchingGenericBaseType(typeof(TSearcher), typeof(Searcher<,>));
-
-            if (searcherBaseType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for filter: {typeof(TSearcher)}");
-            }
-
-            if (Searcher != null)
-            {
-                throw new InvalidOperationException("Cannot apply search twice.");
-            }
-
-            Searcher = Registry.ResolveSearcher<TReturnType>(typeof(TSearcher));
-            Argument("search", typeof(string));
-            return ApplySelector(GetSearchQuery(Searcher));
-        }
-
-        public virtual QueryableField<TEntity, TReturnType, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
-        {
-            return ApplyField(new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(Registry, Parent, Name, _query, _condition, ObjectGraphTypeConfigurator, Arguments, order.Compile(), order.GetThenBy().Compile()));
-        }
-
-        protected static Func<IResolveFieldContext, IQueryable<TReturnType>> GetQuery(IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator, Func<TExecutionContext, IQueryable<TReturnType>> queryFactory)
-        {
-            return context =>
-            {
-                var filter = configurator != null && configurator.HasInlineFilters ? configurator.CreateInlineFilters() : null;
-                var ctx = context.GetUserContext<TExecutionContext>();
-                var listener = context.GetListener();
-
-                var query = queryFactory(ctx);
-
-                if (filter != null)
-                {
-                    query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
-                }
-
-                var sorters = configurator?.Sorters;
-
-                if (sorters != null)
-                {
-                    var sorting = context.GetSorting();
-
-                    var fields = sorting
-                        .Select(o => (sorters.Single(s => string.Equals(s.Name, o.Field, StringComparison.Ordinal)), o.Direction))
-                        .ToArray();
-
-                    if (fields.Any())
-                    {
-                        query = query.ApplyOrderBy(fields.Select(f => (f.Item1.BuildExpression(context.GetUserContext<TExecutionContext>()), f.Direction)));
-                    }
-                }
-
-                return query;
-            };
-        }
-
-        protected override EnumerableField<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
+        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
         {
             var queryableField = new QueryableField<TEntity, TReturnType1, TExecutionContext>(
                 Registry,
@@ -194,64 +124,59 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Name,
                 QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
                 graphType,
-                graphType?.Configurator,
-                Arguments);
+                Arguments,
+                searcher: null,
+                orderBy: null,
+                thenBy: null);
 
             return queryableField;
         }
 
-        protected virtual QueryableField<TEntity, TReturnType, TExecutionContext> ApplySelector(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
+        protected override QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
-            EnumerableFieldResolver = QueryableFieldResolver.Select(selector);
-            return this;
-        }
-
-        private static Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> GetFilteredQuery(IFilter<TReturnType, TExecutionContext> filter)
-        {
-            return (context, query) =>
-            {
-                var listener = context.GetListener();
-                return filter.All(listener, query, context.GetUserContext<TExecutionContext>(), context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
-            };
-        }
-
-        private static Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> GetSearchQuery(ISearcher<TReturnType, TExecutionContext> searcher)
-        {
-            return (context, query) =>
-            {
-                var result = query;
-                if (!string.IsNullOrEmpty(context.GetSearch()))
-                {
-                    result = searcher.All(result, context.GetUserContext<TExecutionContext>(), context.GetSearch());
-                }
-
-                return result;
-            };
+            return new QueryableField<TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                resolver,
+                ElementGraphType,
+                ObjectGraphTypeConfigurator,
+                Arguments,
+                Searcher,
+                OrderBy,
+                ThenBy);
         }
 
         private static IQueryableResolver<TEntity, TReturnType, TExecutionContext> CreateResolver(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>> condition,
+            Func<IResolveFieldContext, IQueryable<TReturnType>> query,
+            Expression<Func<TEntity, TReturnType, bool>>? condition,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
+            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
+            ISearcher<TReturnType, TExecutionContext>? searcher,
+            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
+            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
         {
+            var func = GetQuery(configurator, query);
+
             if (condition != null)
             {
                 return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(
                     name,
-                    context => GetQuery(configurator, query)(context),
+                    func,
                     condition,
                     (ctx, items) => items,
+                    ApplySort(configurator.Sorters, searcher, orderBy, thenBy),
                     parent.ProxyAccessor,
-                    elementGraphType.Configurator?.ProxyAccessor);
+                    configurator.ProxyAccessor);
             }
 
             return new QueryableFuncResolver<TEntity, TReturnType, TExecutionContext>(
                 elementGraphType.Configurator?.ProxyAccessor,
-                context => GetQuery(configurator, query)(context),
-                (ctx, items) => items);
+                func,
+                (ctx, items) => items,
+                ApplySort(configurator.Sorters, searcher, orderBy, thenBy));
         }
     }
 }

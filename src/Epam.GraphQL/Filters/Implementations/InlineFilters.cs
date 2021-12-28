@@ -13,6 +13,8 @@ using Epam.GraphQL.Filters.Inputs;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 
+#nullable enable
+
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal sealed class InlineFilters<TEntity, TExecutionContext> : IInlineFilters<TEntity, TExecutionContext>
@@ -20,7 +22,7 @@ namespace Epam.GraphQL.Filters.Implementations
     {
         private readonly List<IInlineFilter<TExecutionContext>> _inlineFilters = new();
         private readonly string _name;
-        private Type _filterType;
+        private Type? _filterType;
 
         public InlineFilters(IEnumerable<IInlineFilter<TExecutionContext>> filters, string name)
         {
@@ -63,7 +65,7 @@ namespace Epam.GraphQL.Filters.Implementations
             }
         }
 
-        public IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter, IEnumerable<string> filterFieldNames)
+        public IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object? filter, IEnumerable<string>? filterFieldNames)
         {
             var resultExpression = BuildExpression(context, filter);
 
@@ -89,7 +91,7 @@ namespace Epam.GraphQL.Filters.Implementations
 
         public override bool Equals(object obj) => Equals(obj as IFilter<TEntity, TExecutionContext>);
 
-        public bool Equals(IFilter<TEntity, TExecutionContext> obj)
+        public bool Equals(IFilter<TEntity, TExecutionContext>? obj)
         {
             if (obj == null)
             {
@@ -117,12 +119,12 @@ namespace Epam.GraphQL.Filters.Implementations
             return false;
         }
 
-        LambdaExpression IInlineFilters.BuildExpression(object executionContext, object filter)
+        LambdaExpression IInlineFilters<TExecutionContext>.BuildExpression(TExecutionContext executionContext, object? filter)
         {
-            return BuildExpression((TExecutionContext)executionContext, filter);
+            return BuildExpression(executionContext, filter);
         }
 
-        private Expression<Func<TEntity, bool>> BuildNotExpression(TExecutionContext context, object filter)
+        private Expression<Func<TEntity, bool>>? BuildNotExpression(TExecutionContext context, object? filter)
         {
             if (filter == null)
             {
@@ -133,7 +135,7 @@ namespace Epam.GraphQL.Filters.Implementations
             return filterExpression.Not();
         }
 
-        private Expression<Func<TEntity, bool>> BuildAndExpression(TExecutionContext context, object filter)
+        private Expression<Func<TEntity, bool>>? BuildAndExpression(TExecutionContext context, object? filter)
         {
             if (filter == null || !(filter.GetType().IsGenericType && filter.GetType().GetGenericTypeDefinition() == typeof(List<>)))
             {
@@ -147,7 +149,7 @@ namespace Epam.GraphQL.Filters.Implementations
                 .Aggregate((acc, f) => acc == null ? f : (f == null ? acc : acc.And(f)));
         }
 
-        private Expression<Func<TEntity, bool>> BuildOrExpression(TExecutionContext context, object filter)
+        private Expression<Func<TEntity, bool>>? BuildOrExpression(TExecutionContext context, object? filter)
         {
             if (filter == null || !(filter.GetType().IsGenericType && filter.GetType().GetGenericTypeDefinition() == typeof(List<>)))
             {
@@ -161,22 +163,22 @@ namespace Epam.GraphQL.Filters.Implementations
                 .Aggregate((acc, f) => acc == null ? f : (f == null ? acc : acc.Or(f)));
         }
 
-        private Expression<Func<TEntity, bool>> BuildFieldExpression(TExecutionContext context, PropertyInfo propInfo, object propValue)
+        private Expression<Func<TEntity, bool>> BuildFieldExpression(TExecutionContext context, PropertyInfo propInfo, object? propValue)
         {
             var inlineFilter = _inlineFilters.First(f => f.FieldName == propInfo.Name);
             return (Expression<Func<TEntity, bool>>)inlineFilter.BuildExpression(context, propValue);
         }
 
-        private Expression<Func<TEntity, bool>> BuildExpression(TExecutionContext context, object filter)
+        private Expression<Func<TEntity, bool>> BuildExpression(TExecutionContext context, object? filter)
         {
-            Expression<Func<TEntity, bool>> resultExpression = null;
+            Expression<Func<TEntity, bool>>? resultExpression = null;
 
             if (filter != null)
             {
                 foreach (var propInfo in filter.GetType().GetProperties())
                 {
                     var propValue = filter.GetPropertyValue(propInfo);
-                    Expression<Func<TEntity, bool>> expression = null;
+                    Expression<Func<TEntity, bool>>? expression = null;
                     if (propInfo.Name == "Not")
                     {
                         expression = BuildNotExpression(context, propValue);

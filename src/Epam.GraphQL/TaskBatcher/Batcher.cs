@@ -70,7 +70,7 @@ namespace Epam.GraphQL.TaskBatcher
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,
-            ILoaderHooksExecuter<TTransformedInnerEntity> hooksExecuter)
+            ILoaderHooksExecuter<TTransformedInnerEntity>? hooksExecuter)
         {
             if (context == null)
             {

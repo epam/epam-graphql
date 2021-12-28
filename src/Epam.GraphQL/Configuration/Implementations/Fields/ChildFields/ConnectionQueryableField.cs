@@ -5,15 +5,17 @@
 
 using System;
 using System.Linq;
-using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
+
+#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
 #pragma warning disable CA1501
-    internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> : OrderedQueryableField<TEntity, TReturnType, TExecutionContext>
+    internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> : QueryableField<TEntity, TReturnType, TExecutionContext>
 #pragma warning restore CA1501
         where TEntity : class
     {
@@ -23,25 +25,27 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>> condition,
+            IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
             IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
-            LazyQueryArguments arguments,
+            LazyQueryArguments? arguments,
+            ISearcher<TReturnType, TExecutionContext>? searcher,
             Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> orderBy,
             Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>> thenBy)
             : base(
                   registry,
                   parent,
                   name,
-                  null, // TODO elementGraphType was typeof(ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>),
+                  resolver,
+                  elementGraphType,
                   configurator,
                   arguments,
-                  CreateResolver(name, parent, query, condition, configurator, orderBy, thenBy),
+                  searcher,
                   orderBy,
                   thenBy)
         {
             _graphType = new GraphTypeDescriptor<TReturnType, TExecutionContext>(
-                type: null,
+                type: typeof(ConnectionGraphType<TReturnType, TExecutionContext>),
                 graphTypeFactory: () => new ConnectionGraphType<TReturnType, TExecutionContext>(configurator),
                 configurator);
 
@@ -64,20 +68,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        public override IResolver<TEntity> FieldResolver => OrderedQueryableFieldResolver.AsConnection();
+        public override IResolver<TEntity> FieldResolver => QueryableFieldResolver.AsConnection();
 
-        private static IOrderedQueryableResolver<TEntity, TReturnType, TExecutionContext> CreateResolver(
-            string fieldName,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>> condition,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>> thenBy)
+        protected override QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
-            return condition == null
-                ? new ConnectionFuncResolver<TEntity, TReturnType, TExecutionContext>(configurator.ProxyAccessor, GetQuery(configurator, query), (ctx, query) => query, ApplySort(configurator, null, orderBy, thenBy))
-                : new ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(fieldName, GetQuery(configurator, query), condition, (ctx, query) => query, ApplySort(configurator, null, orderBy, thenBy), parent.ProxyAccessor, configurator.ProxyAccessor);
+            return new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                resolver,
+                ElementGraphType,
+                ObjectGraphTypeConfigurator!,
+                Arguments,
+                Searcher,
+                OrderBy!,
+                ThenBy!);
         }
     }
 }

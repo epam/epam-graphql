@@ -13,15 +13,17 @@ using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Types;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration
 {
     internal interface IField
     {
-        PropertyInfo PropertyInfo { get; }
+        PropertyInfo? PropertyInfo { get; }
 
         string Name { get; }
 
-        Type FieldType { get; }
+        Type? FieldType { get; }
 
         bool IsExpression { get; }
 
@@ -31,9 +33,9 @@ namespace Epam.GraphQL.Configuration
 
         bool CanResolve { get; }
 
-        LambdaExpression ContextExpression { get; }
+        LambdaExpression? ContextExpression { get; }
 
-        LambdaExpression OriginalExpression { get; }
+        LambdaExpression? OriginalExpression { get; }
 
         FieldType AsFieldType();
 
@@ -41,12 +43,12 @@ namespace Epam.GraphQL.Configuration
 
         string GetGraphQLTypePrefix();
 
-        object Resolve(IResolveFieldContext context);
+        object? Resolve(IResolveFieldContext context);
     }
 
     internal interface IField<TExecutionContext> : IField
     {
-        IFieldEditSettings<TExecutionContext> EditSettings { get; }
+        IFieldEditSettings<TExecutionContext>? EditSettings { get; }
 
         IGraphTypeDescriptor<TExecutionContext> GraphType { get; }
 
@@ -55,7 +57,7 @@ namespace Epam.GraphQL.Configuration
 
     internal interface IField<TEntity, TExecutionContext> : IField<TExecutionContext>
     {
-        new IFieldEditSettings<TEntity, TExecutionContext> EditSettings { get; }
+        new IFieldEditSettings<TEntity, TExecutionContext>? EditSettings { get; }
 
         IDataLoader<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)> CanEdit(IResolveFieldContext context);
     }

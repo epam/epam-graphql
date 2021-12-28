@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -13,14 +13,16 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class EnumerableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> : AsyncFuncResolver<TEntity, IEnumerable<TReturnType>>, IEnumerableResolver<TEntity, TReturnType, TExecutionContext>
+    internal class EnumerableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> : AsyncFuncResolver<TEntity, IEnumerable<TReturnType>?>, IEnumerableResolver<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
         public EnumerableAsyncFuncResolver(
-            Func<IResolveFieldContext, IDataLoader<TEntity, IEnumerable<TReturnType>>> resolver,
-            Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IEnumerable<TReturnType>>> proxiedResolver)
+            Func<IResolveFieldContext, IDataLoader<TEntity, IEnumerable<TReturnType>?>> resolver,
+            Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IEnumerable<TReturnType>?>> proxiedResolver)
             : base(resolver, proxiedResolver)
         {
         }
@@ -35,7 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                     (src, arg) => arg?.AsQueryable().Select(item => compiledSelector(src.GetOriginal(), item)).AsEnumerable()));
         }
 
-        public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext> selectTypeProxyAccessor)
+        public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)
         {
             var entityParam = Expression.Parameter(typeof(TEntity));
             var lambda = Expression.Lambda<Func<TEntity, TReturnType, TSelectType>>(selector.Body, entityParam, selector.Parameters[0]);

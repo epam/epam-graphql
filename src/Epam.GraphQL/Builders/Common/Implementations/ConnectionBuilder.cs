@@ -16,9 +16,9 @@ namespace Epam.GraphQL.Builders.Common.Implementations
     internal class ConnectionBuilder<TEntity, TChildEntity, TExecutionContext> : IConnectionBuilder
         where TEntity : class
     {
-        private QueryableField<TEntity, TChildEntity, TExecutionContext> _field;
+        private QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> _field;
 
-        public ConnectionBuilder(QueryableField<TEntity, TChildEntity, TExecutionContext> field)
+        public ConnectionBuilder(QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> field)
         {
             _field = field ?? throw new ArgumentNullException(nameof(field));
         }
