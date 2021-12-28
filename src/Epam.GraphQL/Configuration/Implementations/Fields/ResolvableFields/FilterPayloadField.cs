@@ -12,7 +12,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterPayloadField<TExecutionContext> : IArgument<PayloadFieldsContext<TExecutionContext>>
     {
-        private readonly Lazy<IInlineFilters> _inlineFilters;
+        private readonly Lazy<IInlineFilters<TExecutionContext>> _inlineFilters;
         private readonly Type _projectionType;
         private readonly Type _entityType;
 
@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             _projectionType = projectionType;
             _entityType = entityType;
 
-            _inlineFilters = new Lazy<IInlineFilters>(() =>
+            _inlineFilters = new Lazy<IInlineFilters<TExecutionContext>>(() =>
             {
                 var configurator = registry.GetObjectGraphTypeConfigurator(_entityType, _projectionType);
                 var inlineFilters = configurator.CreateInlineFilters();
@@ -37,7 +37,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public TOut GetValue<TOut>(PayloadFieldsContext<TExecutionContext> context)
         {
             var filter = context.GetPropertyValue(Name);
-            var predicate = (object)_inlineFilters.Value.BuildExpression(context.ExecutionContext, filter);
+            var executionContext = context.ExecutionContext;
+            var predicate = (object)_inlineFilters.Value.BuildExpression(executionContext, filter);
             return (TOut)predicate;
         }
     }

@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Sorters.Implementations
                     return applyNaturalOrderBy(queryable);
                 }
 
-                return (IOrderedQueryable<TChildEntity>)queryable;
+                return queryable.OrderBy(x => 1);
             }
 
             if (!string.IsNullOrEmpty(search) && searcher != null)
@@ -96,7 +96,7 @@ namespace Epam.GraphQL.Sorters.Implementations
 
             var query = queryable.ApplyOrderBy(sort) ?? queryable;
 
-            return (IOrderedQueryable<Proxy<TChildEntity>>)query.Cast<Proxy<TChildEntity>>();
+            return (IOrderedQueryable<Proxy<TChildEntity>>)query;
         }
     }
 }

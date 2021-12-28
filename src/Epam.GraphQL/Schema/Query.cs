@@ -10,7 +10,6 @@ using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Builders.Query;
 using Epam.GraphQL.Builders.Query.Implementations;
-using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -42,22 +41,14 @@ namespace Epam.GraphQL
 
             var childEntityType = baseLoaderType.GetGenericArguments().First();
 
-            var getGraphQLTypeDescriptorMethod = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.GetGraphQLTypeDescriptor),
-                new[] { childLoaderType, childEntityType },
-                Type.EmptyTypes);
-
-            var descriptor = getGraphQLTypeDescriptorMethod.InvokeAndHoistBaseException<IGraphTypeDescriptor<TExecutionContext>>(ObjectGraphTypeConfigurator);
-
             var addConnectionLoaderFieldMethodInfo = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
                 nameof(ObjectGraphTypeConfigurator.AddConnectionLoaderField),
                 new[] { childLoaderType, childEntityType },
-                new[] { typeof(string), typeof(IGraphTypeDescriptor<,>).MakeGenericType(childEntityType, typeof(TExecutionContext)), typeof(string) });
+                new[] { typeof(string), typeof(string) });
 
             var field = addConnectionLoaderFieldMethodInfo.InvokeAndHoistBaseException(
                 ObjectGraphTypeConfigurator,
                 name,
-                descriptor,
                 deprecationReason);
 
             var projectionBuilder = typeof(ConnectionBuilder<,,>)
@@ -88,14 +79,6 @@ namespace Epam.GraphQL
                 throw new ArgumentException($"Entity type mismatch: expected {typeof(TEntity)}, but found {childLoaderType}", nameof(childLoaderType));
             }
 
-            var getGraphQLTypeDescriptorMethod = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.GetGraphQLTypeDescriptor),
-                new[] { childLoaderType, childEntityType },
-                Type.EmptyTypes);
-
-            var descriptor = getGraphQLTypeDescriptorMethod.InvokeAndHoistBaseException<IGraphTypeDescriptor<TExecutionContext>>(ObjectGraphTypeConfigurator);
-
-            var graphTypeDescriptorType = typeof(IGraphTypeDescriptor<,>).MakeGenericType(childEntityType, typeof(TExecutionContext));
             var queryableType = typeof(IQueryable<>).MakeGenericType(childEntityType);
             var orderedQueryableType = typeof(IOrderedQueryable<>).MakeGenericType(childEntityType);
             var orderFuncType = typeof(Func<,>).MakeGenericType(queryableType, orderedQueryableType);
@@ -104,12 +87,11 @@ namespace Epam.GraphQL
             var addConnectionLoaderFieldMethodInfo = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
                 nameof(ObjectGraphTypeConfigurator.AddConnectionLoaderField),
                 new[] { childLoaderType, childEntityType },
-                new[] { typeof(string), graphTypeDescriptorType, orderType, typeof(string) });
+                new[] { typeof(string), orderType, typeof(string) });
 
             var field = addConnectionLoaderFieldMethodInfo.InvokeAndHoistBaseException(
                 ObjectGraphTypeConfigurator,
                 name,
-                descriptor,
                 order,
                 deprecationReason);
 

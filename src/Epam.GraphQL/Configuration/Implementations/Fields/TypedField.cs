@@ -11,6 +11,8 @@ using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class TypedField<TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>
@@ -69,7 +71,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public override UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
             where TLastElementType : class
         {
-            if (!FieldType.IsAssignableFrom(typeof(TLastElementType)) && !FieldType.IsAssignableFrom(typeof(IEnumerable<TLastElementType>)))
+            if (FieldType == null || (!FieldType.IsAssignableFrom(typeof(TLastElementType)) && !FieldType.IsAssignableFrom(typeof(IEnumerable<TLastElementType>))))
             {
                 // TODO Throw exception with meaningful message
                 throw new NotSupportedException();
@@ -87,9 +89,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
         }
 
-        public new IFieldEditSettings<TEntity, TReturnType, TExecutionContext> EditSettings
+        public new IFieldEditSettings<TEntity, TReturnType, TExecutionContext>? EditSettings
         {
-            get => (IFieldEditSettings<TEntity, TReturnType, TExecutionContext>)base.EditSettings;
+            get => (IFieldEditSettings<TEntity, TReturnType, TExecutionContext>?)base.EditSettings;
             set => base.EditSettings = value;
         }
     }

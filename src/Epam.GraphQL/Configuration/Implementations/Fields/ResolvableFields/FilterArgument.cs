@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterArgument<TExecutionContext> : IArgument<IResolveFieldContext>
     {
-        private readonly Lazy<IInlineFilters> _inlineFilters;
+        private readonly Lazy<IInlineFilters<TExecutionContext>> _inlineFilters;
         private readonly Type _projectionType;
         private readonly Type _entityType;
 
@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             _projectionType = projectionType;
             _entityType = entityType;
 
-            _inlineFilters = new Lazy<IInlineFilters>(() =>
+            _inlineFilters = new Lazy<IInlineFilters<TExecutionContext>>(() =>
             {
                 var configurator = registry.GetObjectGraphTypeConfigurator(_entityType, _projectionType);
                 var inlineFilters = configurator.CreateInlineFilters();

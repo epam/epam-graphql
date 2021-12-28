@@ -32,9 +32,9 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         IHasEnumerableMethodsAndSelect<TReturnType, TExecutionContext>
         where TSourceType : class
     {
-        private readonly QueryableField<TSourceType, TReturnType, TExecutionContext> _fieldType;
+        private readonly QueryableFieldBase<TSourceType, TReturnType, TExecutionContext> _fieldType;
 
-        public FromIQueryableBuilder(QueryableField<TSourceType, TReturnType, TExecutionContext> fieldType)
+        public FromIQueryableBuilder(QueryableFieldBase<TSourceType, TReturnType, TExecutionContext> fieldType)
             : base(fieldType)
         {
             _fieldType = fieldType ?? throw new ArgumentNullException(nameof(fieldType));

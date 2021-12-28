@@ -9,27 +9,33 @@ using System.Linq;
 using Epam.GraphQL.Extensions;
 using GraphQL;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class ConnectionFuncResolver<TEntity, TReturnType, TExecutionContext> : OrderedQueryableFuncResolver<TEntity, TReturnType, TExecutionContext>
+    internal class ConnectionFuncResolver<TEntity, TReturnType, TExecutionContext> : QueryableFuncResolver<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
         public ConnectionFuncResolver(
-            IProxyAccessor<TReturnType, TExecutionContext> proxyAccessor,
+            IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> sorter)
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? sorter)
             : base(proxyAccessor, resolver, transform, sorter)
         {
         }
 
-        protected override IOrderedQueryableResolver<TEntity, TAnotherReturnType, TExecutionContext> Create<TAnotherReturnType>(
-            IProxyAccessor<TAnotherReturnType, TExecutionContext> proxyAccessor,
+        protected override QueryableFuncResolver<TEntity, TAnotherReturnType, TExecutionContext> Create<TAnotherReturnType>(
+            IProxyAccessor<TAnotherReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IOrderedQueryable<TAnotherReturnType>> sorter)
+            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IOrderedQueryable<TAnotherReturnType>>? sorter)
         {
-            return new ConnectionFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(proxyAccessor, resolver, transform, sorter);
+            return new ConnectionFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(
+                proxyAccessor,
+                resolver,
+                transform,
+                sorter ?? throw new ArgumentNullException(nameof(sorter)));
         }
 
         protected override IEnumerable<string> GetQueriedFields(IResolveFieldContext context)

@@ -15,6 +15,8 @@ using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Language.AST;
 
+#nullable enable
+
 namespace Epam.GraphQL.Extensions
 {
     internal static class ResolveFieldContextExtensions
@@ -43,7 +45,7 @@ namespace Epam.GraphQL.Extensions
 
         public static IProfiler GetProfiler(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Profiler;
 
-        public static IDataContext GetDataContext(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).DataContext;
+        public static IDataContext? GetDataContext(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).DataContext;
 
         public static bool HasTotalCount(this IResolveFieldContext context) => context.SubFields.ContainsKey("totalCount");
 
@@ -63,9 +65,9 @@ namespace Epam.GraphQL.Extensions
 
         public static string GetPath(this IResolveFieldContext context) => string.Join(".", context.Path.SafeNull());
 
-        public static IEnumerable<string> GetFilterFieldNames(this IResolveFieldContext context) => GetArgument(context, "filter", new Dictionary<string, object>()).Keys;
+        public static IEnumerable<string>? GetFilterFieldNames(this IResolveFieldContext context) => GetArgument(context, "filter", new Dictionary<string, object>())?.Keys;
 
-        public static string GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
+        public static string? GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
 
         public static int? GetFirst(this IResolveFieldContext context) => GetArgument<int?>(context, "first");
 
@@ -93,7 +95,7 @@ namespace Epam.GraphQL.Extensions
             return null;
         }
 
-        public static IEnumerable<SortingOption> GetSorting(this IResolveFieldContext context) => GetArgument(context, "sorting", Enumerable.Empty<SortingOption>());
+        public static IEnumerable<SortingOption>? GetSorting(this IResolveFieldContext context) => GetArgument(context, "sorting", Enumerable.Empty<SortingOption>());
 
         public static IEnumerable<string> GetQueriedFields(this IResolveFieldContext context)
         {
@@ -144,7 +146,7 @@ namespace Epam.GraphQL.Extensions
                 .Concat(edges.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))).Distinct();
         }
 
-        public static object GetFilterValue(this IResolveFieldContext context, Type filterType)
+        public static object? GetFilterValue(this IResolveFieldContext context, Type filterType)
         {
             return GetArgument(context, filterType, "filter", new Dictionary<string, object>());
         }
@@ -155,7 +157,7 @@ namespace Epam.GraphQL.Extensions
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,
-            ILoaderHooksExecuter<TTransformedInnerEntity> hooksExecuter)
+            ILoaderHooksExecuter<TTransformedInnerEntity>? hooksExecuter)
         {
             var batcher = context.GetBatcher();
 
@@ -171,7 +173,7 @@ namespace Epam.GraphQL.Extensions
             return result;
         }
 
-        private static Field GetSubField(IResolveFieldContext context, Field parent, string subFieldName)
+        private static Field? GetSubField(IResolveFieldContext context, Field parent, string subFieldName)
         {
             if (parent == null)
             {
@@ -192,12 +194,12 @@ namespace Epam.GraphQL.Extensions
                 .FirstOrDefault();
         }
 
-        private static TType GetArgument<TType>(IResolveFieldContext context, string name, TType defaultValue = default)
+        private static TType? GetArgument<TType>(IResolveFieldContext context, string name, TType? defaultValue = default)
         {
-            return (TType)GetArgument(context, typeof(TType), name, defaultValue);
+            return (TType?)GetArgument(context, typeof(TType), name, defaultValue);
         }
 
-        private static object GetArgument(IResolveFieldContext context, Type argumentType, string name, object defaultValue)
+        private static object? GetArgument(IResolveFieldContext context, Type argumentType, string name, object? defaultValue)
         {
             if (!HasArgument(context, name) || context.Arguments[name] == null)
             {

@@ -13,6 +13,8 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class ProxiedQueryableAsyncFuncResolver<TEntity, TChildEntity, TReturnType, TExecutionContext> : IQueryableResolver<TEntity, TReturnType, TExecutionContext>
@@ -44,8 +46,8 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             _outerProxyAccessor = outerProxyAccessor ?? throw new ArgumentNullException(nameof(outerProxyAccessor));
             _innerProxyAccessor = innerProxyAccessor ?? throw new ArgumentNullException(nameof(innerProxyAccessor));
             _returnTypeProxyAccessor = returnTypeProxyAccessor ?? throw new ArgumentNullException(nameof(returnTypeProxyAccessor));
-            _batchTaskResolver = GetBatchTaskResolver(resolver, condition, transform);
-            _proxiedBatchTaskResolver = GetProxiedBatchTaskResolver(resolver, condition, transform);
+            _batchTaskResolver = GetBatchTaskResolver<TEntity>(resolver, condition, transform, FuncConstants<LambdaExpression>.Identity);
+            _proxiedBatchTaskResolver = GetBatchTaskResolver<Proxy<TEntity>>(resolver, condition, transform, leftExpression => _outerProxyAccessor.GetProxyExpression(leftExpression));
 
             _innerProxyAccessor.AddMember(_transform);
         }
@@ -64,24 +66,19 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 : batchLoader.Value.LoadAsync((TEntity)context.Source);
         }
 
-        public IDataLoader<TEntity, object> GetBatchLoader(IResolveFieldContext context)
+        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
         {
             return Resolver(context).Then(FuncConstants<IEnumerable<Proxy<TReturnType>>>.WeakIdentity);
         }
 
-        public IDataLoader<Proxy<TEntity>, object> GetProxiedBatchLoader(IResolveFieldContext context)
+        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
         {
             return ProxiedResolver(context).Then(FuncConstants<IEnumerable<Proxy<TReturnType>>>.WeakIdentity);
         }
 
-        public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector)
+        public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)
         {
-            throw new NotSupportedException();
-        }
-
-        public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext> selectTypeProxyAccessor)
-        {
-            _innerProxyAccessor?.RemoveMember(_transform);
+            _innerProxyAccessor.RemoveMember(_transform);
 
             if (selectTypeProxyAccessor == null)
             {
@@ -104,14 +101,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 selectTypeProxyAccessor);
         }
 
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
-        {
-            throw new NotSupportedException();
-        }
-
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate)
         {
-            _innerProxyAccessor?.RemoveMember(_transform);
+            _innerProxyAccessor.RemoveMember(_transform);
 
             return new ProxiedQueryableAsyncFuncResolver<TEntity, TChildEntity, TReturnType, TExecutionContext>(
                 _fieldName,
@@ -123,7 +115,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 _returnTypeProxyAccessor);
         }
 
-        IEnumerableResolver<TEntity, TSelectType, TExecutionContext> IEnumerableResolver<TEntity, TReturnType, TExecutionContext>.Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext> selectTypeProxyAccessor)
+        IEnumerableResolver<TEntity, TSelectType, TExecutionContext> IEnumerableResolver<TEntity, TReturnType, TExecutionContext>.Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)
         {
             return Select(selector, selectTypeProxyAccessor);
         }
@@ -151,17 +143,43 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                     .Then(items => items.FirstOrDefault()));
         }
 
-        private Func<IResolveFieldContext, IDataLoader<TEntity, IGrouping<TEntity, Proxy<TReturnType>>>> GetBatchTaskResolver(
+        public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector)
+        {
+            throw new NotSupportedException();
+        }
+
+        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
+        {
+            throw new NotSupportedException();
+        }
+
+        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> sorter)
+        {
+            // TODO Come up with how to reorder
+            return this;
+        }
+
+        public IResolver<TEntity> AsGroupConnection(
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
+            Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IOrderedQueryable<Proxy<TReturnType>>> sorter)
+        {
+            throw new NotSupportedException();
+        }
+
+        public IResolver<TEntity> AsConnection()
+        {
+            throw new NotSupportedException();
+        }
+
+        private Func<IResolveFieldContext, IDataLoader<TOuterEntity, IGrouping<TOuterEntity, Proxy<TReturnType>>>> GetBatchTaskResolver<TOuterEntity>(
             Func<IResolveFieldContext, IQueryable<TChildEntity>> resolver,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
-            Expression<Func<TChildEntity, TReturnType>> transform)
+            Expression<Func<TChildEntity, TReturnType>> transform,
+            Func<LambdaExpression, LambdaExpression> leftExpressionConverter)
         {
-            if (!ExpressionHelpers.TryFactorizeCondition(condition, out var factorizationResult))
-            {
-                throw new ArgumentException($"Cannot translate condition {condition}.", nameof(condition));
-            }
+            var factorizationResult = ExpressionHelpers.FactorizeCondition(condition);
 
-            var outerExpression = factorizationResult.LeftExpression;
+            var outerExpression = leftExpressionConverter(factorizationResult.LeftExpression);
             var innerExpression = factorizationResult.RightExpression;
             var rightCondition = factorizationResult.RightCondition;
 
@@ -170,13 +188,13 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 return context =>
                 {
                     var result = context
-                        .Get<TEntity, TChildEntity, Tuple<Proxy<TChildEntity>, Proxy<TReturnType>>>(
+                        .Get<TOuterEntity, TChildEntity, Tuple<Proxy<TChildEntity>, Proxy<TReturnType>>>(
                             ctx => resolver(ctx).SafeWhere(rightCondition),
                             ctx => Transform2(ctx, transform),
                             outerExpression,
                             innerExpression,
                             new LoaderHooksExecuter<TChildEntity, Proxy<TReturnType>, TExecutionContext>(context.GetUserContext<TExecutionContext>(), _innerProxyAccessor))
-                        .Then(group => group == null ? null : Grouping.Create(group.Key, group.Select(g => g.Item2)));
+                        .Then(group => Grouping.Create(group.Key, group.Select(g => g.Item2)));
 
                     return result;
                 };
@@ -185,55 +203,10 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return context =>
             {
                 var result = context
-                    .Get<TEntity, TChildEntity, Proxy<TReturnType>>(
+                    .Get<TOuterEntity, TChildEntity, Proxy<TReturnType>>(
                         ctx => resolver(ctx).SafeWhere(rightCondition),
                         ctx => Transform(ctx, transform),
                         outerExpression,
-                        innerExpression,
-                        _returnTypeProxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>()));
-
-                return result;
-            };
-        }
-
-        private Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IGrouping<Proxy<TEntity>, Proxy<TReturnType>>>> GetProxiedBatchTaskResolver(
-            Func<IResolveFieldContext, IQueryable<TChildEntity>> resolver,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            Expression<Func<TChildEntity, TReturnType>> transform)
-        {
-            if (!ExpressionHelpers.TryFactorizeCondition(condition, out var factorizationResult))
-            {
-                throw new ArgumentException($"Cannot translate condition {condition}.", nameof(condition));
-            }
-
-            var outerExpression = new Lazy<LambdaExpression>(() => _outerProxyAccessor.GetProxyExpression(factorizationResult.LeftExpression));
-            var innerExpression = factorizationResult.RightExpression;
-            var rightCondition = factorizationResult.RightCondition;
-
-            if (_innerProxyAccessor.HasHooks)
-            {
-                return context =>
-                {
-                    var result = context
-                        .Get<Proxy<TEntity>, TChildEntity, Tuple<Proxy<TChildEntity>, Proxy<TReturnType>>>(
-                            ctx => resolver(ctx).SafeWhere(rightCondition),
-                            ctx => Transform2(ctx, transform),
-                            outerExpression.Value,
-                            innerExpression,
-                            new LoaderHooksExecuter<TChildEntity, Proxy<TReturnType>, TExecutionContext>(context.GetUserContext<TExecutionContext>(), _innerProxyAccessor))
-                        .Then(group => group == null ? null : Grouping.Create(group.Key, group.Select(g => g.Item2)));
-
-                    return result;
-                };
-            }
-
-            return context =>
-            {
-                var result = context
-                    .Get<Proxy<TEntity>, TChildEntity, Proxy<TReturnType>>(
-                        ctx => resolver(ctx).SafeWhere(rightCondition),
-                        ctx => Transform(ctx, transform),
-                        outerExpression.Value,
                         innerExpression,
                         _returnTypeProxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>()));
 

@@ -21,6 +21,8 @@ using GraphQL.DataLoader;
 using GraphQL.Resolvers;
 using GraphQL.Types;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
@@ -34,17 +36,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
-        public LazyQueryArguments Arguments { get; set; }
+        public LazyQueryArguments? Arguments { get; set; }
 
-        public virtual IGraphTypeDescriptor<TExecutionContext> GraphType { get; }
+        public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => throw new NotImplementedException();
 
         public string Name { get; set; }
 
-        public string DeprecationReason { get; set; }
+        public string? DeprecationReason { get; set; }
 
-        public virtual PropertyInfo PropertyInfo => null;
+        public virtual PropertyInfo? PropertyInfo => null;
 
-        public Type FieldType { get; protected set; }
+        public Type? FieldType { get; protected set; }
 
         public virtual bool IsExpression => false;
 
@@ -54,13 +56,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public virtual bool CanResolve => false;
 
-        public virtual LambdaExpression ContextExpression => null;
+        public virtual LambdaExpression? ContextExpression => null;
 
-        public virtual LambdaExpression OriginalExpression => null;
+        public virtual LambdaExpression? OriginalExpression => null;
 
-        public IFieldEditSettings<TEntity, TExecutionContext> EditSettings { get; protected set; }
+        public IFieldEditSettings<TEntity, TExecutionContext>? EditSettings { get; protected set; }
 
-        IFieldEditSettings<TExecutionContext> IField<TExecutionContext>.EditSettings => EditSettings;
+        IFieldEditSettings<TExecutionContext>? IField<TExecutionContext>.EditSettings => EditSettings;
 
         internal RelationRegistry<TExecutionContext> Registry { get; }
 
@@ -94,9 +96,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             return fieldType;
         }
 
-        public void Argument<TArgumentType>(string name, string description = null) => Argument(name, typeof(TArgumentType), description);
+        public void Argument<TArgumentType>(string name, string? description = null) => Argument(name, typeof(TArgumentType), description);
 
-        public void Argument(string name, Type type, string description = null)
+        public void Argument(string name, Type type, string? description = null)
         {
             Argument(name, () => new QueryArgument(Registry.GenerateInputGraphType(type))
             {
@@ -105,7 +107,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             });
         }
 
-        public void Argument(string name, IGraphType graphType, string description = null)
+        public void Argument(string name, IGraphType graphType, string? description = null)
         {
             Argument(name, () => new QueryArgument(graphType)
             {
@@ -132,18 +134,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
         }
 
-        public virtual object Resolve(IResolveFieldContext context) => throw new NotSupportedException();
+        public virtual object? Resolve(IResolveFieldContext context) => throw new NotSupportedException();
 
         public IDataLoader<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)> CanEdit(IResolveFieldContext context)
         {
-            if (EditSettings.IsReadOnly)
+            if (EditSettings != null)
             {
-                return BatchLoader.FromResult<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)>(change => (false, "The field is read only."));
-            }
+                if (EditSettings.IsReadOnly)
+                {
+                    return BatchLoader.FromResult<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)>(change => (false, "The field is read only."));
+                }
 
-            if (EditSettings.CanEdit != null)
-            {
-                return EditSettings.CanEdit(context);
+                if (EditSettings.CanEdit != null)
+                {
+                    return EditSettings.CanEdit(context);
+                }
             }
 
             return BatchLoader.FromResult<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)>(change => (false, "The field is not editable. Consider to use `Editable()` or `EditableIf(...)` methods."));
@@ -252,7 +257,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         // TODO make it property
-        protected virtual IFieldResolver GetResolver()
+        protected virtual IFieldResolver? GetResolver()
         {
             return null;
         }

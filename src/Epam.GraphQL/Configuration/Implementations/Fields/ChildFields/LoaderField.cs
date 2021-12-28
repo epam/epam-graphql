@@ -10,32 +10,38 @@ using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
-using GraphQL;
+using Epam.GraphQL.Search;
+
+#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : QueryableField<TEntity, TChildEntity, TExecutionContext>
+    internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : QueryableFieldBase<TEntity, TChildEntity, TExecutionContext>
         where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
-        private readonly Expression<Func<TEntity, TChildEntity, bool>> _condition;
-
         public LoaderField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
+            Expression<Func<TEntity, TChildEntity, bool>>? condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments arguments = null)
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
+            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
             : this(
                   registry,
                   parent,
                   name,
-                  condition,
                   registry.ResolveLoader<TChildLoader, TChildEntity>(),
+                  condition,
                   elementGraphType,
-                  arguments)
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
         {
         }
 
@@ -43,11 +49,37 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            TChildLoader loader,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
-            LazyQueryArguments arguments)
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
+            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            : this(
+                  registry,
+                  parent,
+                  name,
+                  resolver,
+                  elementGraphType,
+                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
+        {
+        }
+
+        private LoaderField(
+            RelationRegistry<TExecutionContext> registry,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            TChildLoader loader,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
+            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
             : base(
                   registry,
                   parent,
@@ -55,47 +87,75 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   resolver,
                   elementGraphType,
                   loader.ObjectGraphTypeConfigurator,
-                  arguments)
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
         {
-            _condition = condition;
-            Loader = loader ?? throw new ArgumentNullException(nameof(loader));
+            Loader = loader;
         }
 
         private LoaderField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
             TChildLoader loader,
+            Expression<Func<TEntity, TChildEntity, bool>>? condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments arguments)
-            : this(
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
+            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            : base(
                   registry,
                   parent,
                   name,
+                  query: context => loader.DoGetBaseQuery(context.GetUserContext<TExecutionContext>()),
+                  transform: (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query),
                   condition,
-                  loader,
                   elementGraphType,
-                  CreateResolver(name, parent, loader, condition),
-                  arguments)
+                  loader.ObjectGraphTypeConfigurator,
+                  arguments,
+                  searcher,
+                  orderBy,
+                  thenBy)
         {
+            Loader = loader;
         }
 
         protected TChildLoader Loader { get; }
 
         public ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ApplyConnection()
         {
-            var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
-            return ApplyField(new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, Parent, Name, _condition, Arguments, loader.ApplyNaturalOrderBy, loader.ApplyNaturalThenBy));
+            var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                QueryableFieldResolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+                Loader.ApplyNaturalOrderBy,
+                Loader.ApplyNaturalThenBy);
+            return ApplyField(connectionField);
         }
 
-        public override QueryableField<TEntity, TChildEntity, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order)
+        public override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order)
         {
-            var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
-            return ApplyField(new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, Parent, Name, _condition, Arguments, order.Compile(), order.GetThenBy().Compile()));
+            var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                QueryableFieldResolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+                order.Compile(),
+                order.GetThenBy().Compile());
+            return ApplyField(connectionField);
         }
 
-        public override QueryableField<TEntity, TChildEntity, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
+        public override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
         {
             if (HasFilter)
             {
@@ -105,38 +165,38 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return base.ApplyFilter<TLoaderFilter, TFilter>();
         }
 
-        protected static Func<IResolveFieldContext, IQueryable<TChildEntity>> GetQuery(TChildLoader loader)
+        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TChildEntity, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
         {
-            return context =>
-            {
-                var filter = loader.ObjectGraphTypeConfigurator.HasInlineFilters ? loader.ObjectGraphTypeConfigurator.CreateInlineFilters() : null;
+            var queryableField = new QueryableField<TEntity, TReturnType1, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
+                graphType,
+                graphType.Configurator,
+                Arguments,
+                searcher: null,
+                orderBy: null,
+                thenBy: null);
 
-                var ctx = context.GetUserContext<TExecutionContext>();
-                var listener = context.GetListener();
-                var query = loader.DoGetBaseQuery(ctx);
-
-                if (filter != null)
-                {
-                    query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
-                }
-
-                return query;
-            };
+            return queryableField;
         }
 
-        private static IQueryableResolver<TEntity, TChildEntity, TExecutionContext> CreateResolver(string fieldName, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, TChildLoader loader, Expression<Func<TEntity, TChildEntity, bool>> condition)
+        protected override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
-            var func = GetQuery(loader);
+            var queryableField = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                resolver,
+                ElementGraphType,
+                Loader,
+                Arguments,
+                Searcher,
+                OrderBy,
+                ThenBy);
 
-            // TODO avoid creation in descendands
-            if (condition == null)
-            {
-                return new QueryableFuncResolver<TEntity, TChildEntity, TExecutionContext>(loader.ObjectGraphTypeConfigurator.ProxyAccessor, func, (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query));
-            }
-            else
-            {
-                return new QueryableAsyncFuncResolver<TEntity, TChildEntity, TExecutionContext>(fieldName, func, condition, (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query), parent.ProxyAccessor, loader.ObjectGraphTypeConfigurator.ProxyAccessor);
-            }
+            return queryableField;
         }
     }
 
@@ -157,7 +217,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Expression<Func<TChildEntity, TEntity>> navigationProperty,
             Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType)
-            : base(registry, parent, name, condition, elementGraphType)
+            : base(registry, parent, name, condition, elementGraphType, arguments: null, searcher: null, orderBy: null, thenBy: null)
         {
             registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
         }

@@ -164,25 +164,25 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> AddConnectionLoaderField<TChildLoader, TChildEntity>(
             string name,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphResultType,
             string deprecationReason)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, graphResultType);
+            var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
+            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, graphResultType, arguments: null, searcher: null, orderBy: null, thenBy: null);
             var connectionField = field.ApplyConnection();
             return InternalAddField(connectionField, deprecationReason);
         }
 
-        public QueryableField<TEntity, TChildEntity, TExecutionContext> AddConnectionLoaderField<TChildLoader, TChildEntity>(
+        public QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> AddConnectionLoaderField<TChildLoader, TChildEntity>(
             string name,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphResultType,
             Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order,
             string deprecationReason)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, graphResultType);
+            var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
+            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, graphResultType, arguments: null, searcher: null, orderBy: null, thenBy: null);
             var connectionField = field.ApplyConnection(order);
             return InternalAddField(connectionField, deprecationReason);
         }
@@ -192,7 +192,8 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TChildEntity : class
         {
             var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
-            var field = new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, loader.ApplyNaturalOrderBy, loader.ApplyNaturalThenBy);
+            var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
+            var field = new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, graphResultType, null, loader.ApplyNaturalOrderBy, loader.ApplyNaturalThenBy);
             return InternalAddField(field, deprecationReason);
         }
 
@@ -281,7 +282,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             return _filters;
         }
 
-        IInlineFilters IObjectGraphTypeConfigurator<TExecutionContext>.CreateInlineFilters() => CreateInlineFilters();
+        IInlineFilters<TExecutionContext> IObjectGraphTypeConfigurator<TExecutionContext>.CreateInlineFilters() => CreateInlineFilters();
 
         public abstract void ConfigureGraphType(IComplexGraphType graphType);
 
@@ -592,11 +593,11 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TSelectType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new QueryableField<TEntity, TSelectType, TExecutionContext>(Registry, this, field.Name, query, condition, graphType);
+            var result = new QueryableField<TEntity, TSelectType, TExecutionContext>(Registry, this, field.Name, query, condition, graphType, searcher: null, orderBy: null, thenBy: null);
             return ReplaceField(field, result);
         }
 
-        public EnumerableField<TEntity, TChildEntity, TExecutionContext> FromLoader<TLoader, TChildLoader, TChildEntity>(
+        public EnumerableFieldBase<TEntity, TChildEntity, TExecutionContext> FromLoader<TLoader, TChildLoader, TChildEntity>(
             Field<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             RelationType relationType,
@@ -628,7 +629,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, field.Name, condition, graphResultType);
+            var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, field.Name, condition, graphResultType, arguments: null, searcher: null, orderBy: null, thenBy: null);
             return ReplaceField(field, result);
         }
 

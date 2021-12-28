@@ -9,6 +9,8 @@ using Epam.GraphQL.Filters;
 using Epam.GraphQL.Sorters;
 using GraphQL.Types;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration
 {
     internal interface IObjectGraphTypeConfigurator<TExecutionContext>
@@ -27,7 +29,7 @@ namespace Epam.GraphQL.Configuration
 
         void ConfigureGroupGraphType(IObjectGraphType graphType);
 
-        IInlineFilters CreateInlineFilters();
+        IInlineFilters<TExecutionContext> CreateInlineFilters();
 
         Type GenerateGraphType();
 

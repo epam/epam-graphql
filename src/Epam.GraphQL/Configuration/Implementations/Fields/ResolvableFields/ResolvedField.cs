@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, TReturnType> resolver,
-            LazyQueryArguments arguments,
+            LazyQueryArguments? arguments,
             bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
@@ -79,7 +79,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, Task<TReturnType>> resolver,
-            LazyQueryArguments arguments,
+            LazyQueryArguments? arguments,
             bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
@@ -133,7 +133,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, IEnumerable<TReturnType>> resolver,
-            LazyQueryArguments arguments,
+            LazyQueryArguments? arguments,
             bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
@@ -187,7 +187,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolver,
-            LazyQueryArguments arguments,
+            LazyQueryArguments? arguments,
             bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
@@ -250,7 +250,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             IFieldResolver resolver,
-            LazyQueryArguments arguments,
+            LazyQueryArguments? arguments,
             bool doesDependOnAllFields)
             : base(registry, parent, name)
         {

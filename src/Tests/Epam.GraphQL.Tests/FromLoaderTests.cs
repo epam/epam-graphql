@@ -1258,6 +1258,72 @@ namespace Epam.GraphQL.Tests
                 null);
         }
 
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/1.
+        /// </summary>
+        [Test]
+        public void TestFromLoaderFilterableSortableNoConnection()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id).Filterable().Sortable();
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field("people")
+                        .FromLoader<Person>(personLoaderType, (u, p) => u.Id == p.UnitId);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => FakeData.Units.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(unitLoader, "units");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query t {
+                        units {
+                            items {
+                                id
+                                people(filter: {id: {in: [1, 3, 4, 5]} }, sorting: {field: ""id"", direction: DESC}) {
+                                    id
+                                }
+                            }
+                        }
+                    }",
+                @"{
+                    units: {
+                        items: [{
+                            id: 1,
+                            people: [{
+                                id: 3
+                            },{
+                                id: 1
+                            }]
+                        },{
+                            id: 2,
+                            people: [{
+                                id: 5
+                            },{
+                                id: 4
+                            }]
+                        }]
+                    }
+                }");
+        }
+
         [Test]
         public void TestFromLoaderWithFilterIntToIntRelation()
         {

@@ -1115,7 +1115,7 @@ namespace Epam.GraphQL.Filters
     {
         protected Filter() { }
         protected abstract System.Linq.IQueryable<TEntity> ApplyFilter(TExecutionContext context, System.Linq.IQueryable<TEntity> query, TFilter filter);
-        public bool Equals(Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext> other) { }
+        public bool Equals(Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>? other) { }
         public override bool Equals(object obj) { }
         public override int GetHashCode() { }
     }
@@ -1123,7 +1123,7 @@ namespace Epam.GraphQL.Filters
     public interface IFilter<TEntity, TExecutionContext> : System.IEquatable<Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>>
     {
         System.Type FilterType { get; }
-        System.Linq.IQueryable<TEntity> All(Epam.GraphQL.Infrastructure.ISchemaExecutionListener listener, System.Linq.IQueryable<TEntity> query, TExecutionContext context, object filter, System.Collections.Generic.IEnumerable<string> filterFieldNames);
+        System.Linq.IQueryable<TEntity> All(Epam.GraphQL.Infrastructure.ISchemaExecutionListener listener, System.Linq.IQueryable<TEntity> query, TExecutionContext context, object? filter, System.Collections.Generic.IEnumerable<string>? filterFieldNames);
     }
 }
 namespace Epam.GraphQL.Filters.Inputs
