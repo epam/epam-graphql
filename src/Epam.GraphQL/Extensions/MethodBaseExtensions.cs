@@ -5,6 +5,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 
 #nullable enable
@@ -43,6 +44,11 @@ namespace Epam.GraphQL.Extensions
                 ExceptionDispatchInfo.Capture(e.GetBaseException()).Throw();
                 throw;
             }
+        }
+
+        public static bool IsExtensionMethod(this MethodBase methodBase)
+        {
+            return methodBase.IsDefined(typeof(ExtensionAttribute), inherit: false);
         }
     }
 }

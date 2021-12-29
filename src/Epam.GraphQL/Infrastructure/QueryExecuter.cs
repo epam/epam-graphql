@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Adapters;
+using Epam.GraphQL.Helpers;
 using GraphQL;
 using Microsoft.Extensions.Logging;
 
@@ -39,7 +40,7 @@ namespace Epam.GraphQL.Infrastructure
 
                 if (_logger.IsEnabled(Constants.Logging.BeforeQuery.Level))
                 {
-                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{LinqOperation}:\r\n{QueryExpression}", "AsEnumerable", query.Expression.ToString());
+                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{LinqOperation}:\r\n{QueryExpression}", "AsEnumerable", ExpressionPrinter.Print(query.Expression));
                 }
 
                 return query.AsEnumerable();
@@ -58,7 +59,7 @@ namespace Epam.GraphQL.Infrastructure
 
                 if (_logger.IsEnabled(Constants.Logging.BeforeQuery.Level))
                 {
-                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{LinqOperation}:\r\n{QueryExpression}", "ToList", query.Expression.ToString());
+                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{LinqOperation}:\r\n{QueryExpression}", "ToList", ExpressionPrinter.Print(query.Expression));
                 }
 
                 return query.ToList();
@@ -77,7 +78,7 @@ namespace Epam.GraphQL.Infrastructure
 
                 if (_logger.IsEnabled(Constants.Logging.BeforeQuery.Level))
                 {
-                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{StepName}\r\n{LinqOperation}:\r\n{QueryExpression}", stepNameFactory(), "Async Query", query.Expression.ToString());
+                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{StepName}\r\n{LinqOperation}:\r\n{QueryExpression}", stepNameFactory(), "Async Query", ExpressionPrinter.Print(query.Expression));
                 }
 
                 return QueryableToAsyncEnumerable(query);
@@ -96,7 +97,7 @@ namespace Epam.GraphQL.Infrastructure
 
                 if (_logger.IsEnabled(Constants.Logging.BeforeQuery.Level))
                 {
-                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{StepName}\r\n{LinqOperation}:\r\n{QueryExpression}", stepNameFactory(), transformName, query.Expression.ToString());
+                    _logger.Log(Constants.Logging.BeforeQuery.Level, Constants.Logging.BeforeQuery.EventId, "{StepName}\r\n{LinqOperation}:\r\n{QueryExpression}", stepNameFactory(), transformName, ExpressionPrinter.Print(query.Expression));
                 }
 
                 var result = transform(query);

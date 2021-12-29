@@ -108,7 +108,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
             Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IOrderedQueryable<Proxy<TReturnType>>> sorter)
         {
-            var connectionResolver = Resolvers.ToGroupConnection(_proxyAccessor);
+            var connectionResolver = Resolvers.ToGroupConnection<TReturnType, TExecutionContext>();
 
             var resolver = Create(null, ctx => selector(ctx, _transform(ctx, _resolver(ctx))), (ctx, query) => query, sorter);
 
