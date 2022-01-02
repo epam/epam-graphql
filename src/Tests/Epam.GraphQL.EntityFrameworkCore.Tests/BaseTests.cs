@@ -6,6 +6,7 @@
 using System;
 using System.Data.Common;
 using System.Linq;
+using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using Microsoft.Data.Sqlite;
@@ -42,7 +43,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                 builder => builder
                     .ClearProviders()
                     .AddConsole()
-                    .AddFilter((category, logLevel) => category == DbLoggerCategory.Database.Command.Name && logLevel == LogLevel.Information));
+                    .AddFilter((category, logLevel) => (category == DbLoggerCategory.Database.Command.Name && logLevel == LogLevel.Information) || category == Constants.Logging.Category));
 
             var options = new DbContextOptionsBuilder<TestDbContext>()
                 .UseSqlite(_connection)

@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Relay;
@@ -65,14 +67,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             };
         }
 
-        public static Func<IResolveFieldContext, IOrderedQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>(IProxyAccessor<TChildEntity, TExecutionContext> proxyAccessor)
+        public static Func<IResolveFieldContext, IOrderedQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>()
         {
             return (context, children) =>
             {
                 var subFields = context.GetGroupConnectionQueriedFields();
                 var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
 
-                var sourceType = proxyAccessor.GetConcreteProxyType(subFields.Concat(aggregateQueriedFields));
+                var sourceType = children.ElementType;
 
                 var first = context.GetFirst();
                 var last = context.GetLast();
@@ -87,13 +89,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 IOrderedQueryable<object> items;
                 if (aggregateQueriedFields.Contains("<>$count"))
                 {
-                    var propGetter = sourceType.GetPropertyDelegate("<>$count");
-                    Func<object, int> countGetter = entity => (int)propGetter(entity);
-                    items = (IOrderedQueryable<object>)children.SafeNull().AsQueryable().Select(entity => new GroupResult<Proxy<TChildEntity>>
-                    {
-                        Item = entity,
-                        Count = countGetter(entity),
-                    });
+                    var param = Expression.Parameter(sourceType);
+                    var member = Expression.Property(param, sourceType.GetProperty("<>$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+                    var result = Expression.Lambda(member, param);
+
+                    var lambda = ExpressionHelpers.MakeMemberInit<GroupResult<Proxy<TChildEntity>>>(sourceType)
+                        .Property(result => result.Item, ExpressionHelpers.MakeIdentity(sourceType))
+                        .Property(result => result.Count, result)
+                        .Lambda();
+
+                    items = (IOrderedQueryable<object>)children.SafeNull().AsQueryable().ApplySelect(lambda);
                 }
                 else
                 {

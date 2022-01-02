@@ -211,6 +211,11 @@ namespace Epam.GraphQL.Helpers
             return false;
         }
 
+        public static MemberInitBuilder<TResult> MakeMemberInit<TResult>(Type paramType)
+        {
+            return new MemberInitBuilder<TResult>(paramType);
+        }
+
         private static IReadOnlyList<Expression> GetAndAlsoExpressions(Expression expression)
         {
             var expressions = new List<Expression>();
@@ -225,6 +230,32 @@ namespace Epam.GraphQL.Helpers
             expressions.Reverse();
 
             return expressions;
+        }
+
+        public class MemberInitBuilder<TResult>
+        {
+            private readonly List<MemberAssignment> _assignments = new();
+            private readonly ParameterExpression _param;
+
+            public MemberInitBuilder(Type paramType)
+            {
+                _param = Expression.Parameter(paramType);
+            }
+
+            public MemberInitBuilder<TResult> Property<TProperty>(Expression<Func<TResult, TProperty>> property, LambdaExpression initializer)
+            {
+                _assignments.Add(Expression.Bind(property.GetPropertyInfo(), initializer.Body.ReplaceParameter(initializer.Parameters[0], _param)));
+                return this;
+            }
+
+            public LambdaExpression Lambda()
+            {
+                var ctor = typeof(TResult).GetConstructors().Single(c => c.GetParameters().Length == 0);
+                var newExpr = Expression.New(ctor);
+                var initExpr = Expression.MemberInit(newExpr, _assignments);
+
+                return Expression.Lambda(initExpr, _param);
+            }
         }
 
         public class ParameterRebinder : ExpressionVisitor

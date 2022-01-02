@@ -94,14 +94,14 @@ namespace Epam.GraphQL.Extensions
 
         public static IQueryable ApplyGroupBy(this IQueryable query, LambdaExpression expression)
         {
-            var sourceType = expression.Parameters[0].Type;
+            var sourceType = query.ElementType;
             var resultType = expression.GetResultType();
             return CachedReflectionInfo.ForQueryable.GroupBy(sourceType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, expression);
         }
 
         public static IQueryable ApplySelect(this IQueryable query, LambdaExpression expression)
         {
-            var sourceType = expression.Parameters[0].Type;
+            var sourceType = query.ElementType;
             var resultType = expression.GetResultType();
             return CachedReflectionInfo.ForQueryable.Select(sourceType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, expression);
         }
