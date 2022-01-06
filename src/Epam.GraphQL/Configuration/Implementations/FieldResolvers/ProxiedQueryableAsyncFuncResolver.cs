@@ -153,7 +153,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             throw new NotSupportedException();
         }
 
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> sorter)
+        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> sorter)
         {
             // TODO Come up with how to reorder
             return this;
@@ -161,7 +161,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsGroupConnection(
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
-            Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IOrderedQueryable<Proxy<TReturnType>>> sorter)
+            Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IQueryable<Proxy<TReturnType>>> sorter)
         {
             throw new NotSupportedException();
         }

@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 {
     internal static class Resolvers
     {
-        public static Connection<Proxy<TReturnType>> Resolve<TReturnType>(IResolveFieldContext context, IOrderedQueryable<Proxy<TReturnType>> children)
+        public static Connection<Proxy<TReturnType>> Resolve<TReturnType>(IResolveFieldContext context, IQueryable<Proxy<TReturnType>> children)
         {
             var first = context.GetFirst();
             var last = context.GetLast();
@@ -46,7 +46,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return connection;
         }
 
-        public static Func<IResolveFieldContext, IOrderedQueryable<Proxy<TReturnType>>, Connection<Proxy<TReturnType>>> ToConnection<TChildEntity, TReturnType, TExecutionContext>(IProxyAccessor<TReturnType, TExecutionContext> proxyAccessor)
+        public static Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, Connection<Proxy<TReturnType>>> ToConnection<TChildEntity, TReturnType, TExecutionContext>(IProxyAccessor<TReturnType, TExecutionContext> proxyAccessor)
         {
             return (context, children) =>
             {
@@ -67,7 +67,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             };
         }
 
-        public static Func<IResolveFieldContext, IOrderedQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>()
+        public static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>()
         {
             return (context, children) =>
             {
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 var shouldComputeEdges = context.HasEdges();
                 var shouldComputeItems = context.HasItems();
 
-                IOrderedQueryable<object> items;
+                IQueryable<object> items;
                 if (aggregateQueriedFields.Contains("<>$count"))
                 {
                     var param = Expression.Parameter(sourceType);
@@ -98,11 +98,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                         .Property(result => result.Count, result)
                         .Lambda();
 
-                    items = (IOrderedQueryable<object>)children.SafeNull().AsQueryable().ApplySelect(lambda);
+                    // TODO Get rid of cast
+                    items = (IQueryable<object>)children.SafeNull().AsQueryable().ApplySelect(lambda);
                 }
                 else
                 {
-                    items = (IOrderedQueryable<object>)children.SafeNull().AsQueryable().Select(entity => new GroupResult<Proxy<TChildEntity>>
+                    items = children.SafeNull().AsQueryable().Select(entity => new GroupResult<Proxy<TChildEntity>>
                     {
                         Item = entity,
                     });

@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Sorters.Implementations
 {
     internal static class SortingHelpers
     {
-        public static IOrderedQueryable<TChildEntity> ApplySort<TChildEntity, TExecutionContext>(
+        public static IQueryable<TChildEntity> ApplySort<TChildEntity, TExecutionContext>(
             IResolveFieldContext context,
             IQueryable<TChildEntity> queryable,
             IReadOnlyList<ISorter<TExecutionContext>> sorters,
@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Sorters.Implementations
                     return applyNaturalOrderBy(queryable);
                 }
 
-                return queryable.OrderBy(x => 1);
+                return queryable;
             }
 
             if (!string.IsNullOrEmpty(search) && searcher != null)
@@ -68,7 +68,7 @@ namespace Epam.GraphQL.Sorters.Implementations
             return query;
         }
 
-        public static IOrderedQueryable<Proxy<TChildEntity>> ApplyGroupSort<TChildEntity, TExecutionContext>(
+        public static IQueryable<Proxy<TChildEntity>> ApplyGroupSort<TChildEntity, TExecutionContext>(
             IResolveFieldContext context,
             IQueryable<Proxy<TChildEntity>> queryable,
             IReadOnlyList<ISorter<TExecutionContext>> sorters,
@@ -96,7 +96,7 @@ namespace Epam.GraphQL.Sorters.Implementations
 
             var query = queryable.ApplyOrderBy(sort) ?? queryable;
 
-            return (IOrderedQueryable<Proxy<TChildEntity>>)query;
+            return query;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
             : base(fieldName, resolver, condition, transform, sorter, outerProxyAccessor, innerProxyAccessor)
@@ -34,7 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
         {

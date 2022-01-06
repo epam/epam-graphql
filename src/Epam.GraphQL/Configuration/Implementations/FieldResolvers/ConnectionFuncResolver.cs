@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? sorter)
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter)
             : base(proxyAccessor, resolver, transform, sorter)
         {
         }
@@ -29,7 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TAnotherReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IOrderedQueryable<TAnotherReturnType>>? sorter)
+            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>>? sorter)
         {
             return new ConnectionFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(
                 proxyAccessor,

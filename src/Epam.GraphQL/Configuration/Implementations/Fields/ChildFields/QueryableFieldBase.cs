@@ -242,7 +242,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             };
         }
 
-        private static Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> ApplySort(
+        private static Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> ApplySort(
             IReadOnlyList<ISorter<TExecutionContext>>? sorters,
             ISearcher<TReturnType, TExecutionContext>? searcher,
             Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
