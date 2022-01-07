@@ -13,13 +13,12 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
 
-#nullable enable
-
 namespace Epam.GraphQL.Tests.Utils
 {
     [TestFixture]
-    public partial class ExpressionExtensionsTests
+    public partial class QueryableExtensionsTests
     {
+        private static readonly IQueryable<Person> _baseQuery = Enumerable.Empty<Person>().AsQueryable();
         private static readonly Expression<Func<Person, int>> _idExpression = x => x.Id;
         private static readonly Expression<Func<Person, string>> _fullNameExpression = x => x.FullName;
         private static readonly Expression<Func<Person, int>> _getHashCodeExpression = x => x.GetHashCode();
@@ -27,8 +26,9 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderBy()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
-                .OrderBy(x => x.Id));
+            var result = _baseQuery
+                .OrderBy(x => x.Id)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -41,8 +41,9 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByWithComparer()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
-                .OrderBy(x => x.Id, Comparer<int>.Default));
+            var result = _baseQuery
+                .OrderBy(x => x.Id, Comparer<int>.Default)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -55,8 +56,9 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByMethodCall()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
-                .OrderBy(x => x.GetHashCode()));
+            var result = _baseQuery
+                .OrderBy(x => x.GetHashCode())
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -69,8 +71,9 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByDesc()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
-                .OrderByDescending(x => x.Id));
+            var result = _baseQuery
+                .OrderByDescending(x => x.Id)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -83,8 +86,9 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByDescWithComparer()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
-                .OrderByDescending(x => x.Id, Comparer<int>.Default));
+            var result = _baseQuery
+                .OrderByDescending(x => x.Id, Comparer<int>.Default)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -97,9 +101,10 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByAndOrderBy()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
+            var result = _baseQuery
                 .OrderBy(x => x.Id)
-                .OrderBy(x => x.FullName));
+                .OrderBy(x => x.FullName)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -112,9 +117,10 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByDescAndOrderByDesc()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
+            var result = _baseQuery
                 .OrderByDescending(x => x.Id)
-                .OrderByDescending(x => x.FullName));
+                .OrderByDescending(x => x.FullName)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -127,9 +133,10 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByAndThenBy()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
+            var result = _baseQuery
                 .OrderBy(x => x.Id)
-                .ThenBy(x => x.FullName));
+                .ThenBy(x => x.FullName)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -143,9 +150,10 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByAndThenByWithComparer()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
+            var result = _baseQuery
                 .OrderBy(x => x.Id)
-                .ThenBy(x => x.FullName, StringComparer.Ordinal));
+                .ThenBy(x => x.FullName, StringComparer.Ordinal)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -159,9 +167,10 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByAndThenByDesc()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
+            var result = _baseQuery
                 .OrderBy(x => x.Id)
-                .ThenByDescending(x => x.FullName));
+                .ThenByDescending(x => x.FullName)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -175,9 +184,10 @@ namespace Epam.GraphQL.Tests.Utils
         [Test]
         public void GetSortersOrderByAndThenByDescWithComparer()
         {
-            var result = ExpressionExtensions.GetSorters<Person>(query => query
+            var result = _baseQuery
                 .OrderBy(x => x.Id)
-                .ThenByDescending(x => x.FullName, StringComparer.Ordinal));
+                .ThenByDescending(x => x.FullName, StringComparer.Ordinal)
+                .GetSorters();
 
             var expected = new List<(LambdaExpression, SortDirection)>()
             {
@@ -194,9 +204,10 @@ namespace Epam.GraphQL.Tests.Utils
             Assert.Throws(
                 Is.TypeOf<ArgumentException>()
                     .And.Message.EqualTo("Expression should not contain method calls except OrderBy, OrderByDescending, ThenBy and ThenByDescending. Call of Where method was found."),
-                () => ExpressionExtensions.GetSorters<Person>(query => query
+                () => _baseQuery
                     .Where(x => x.Id > 0)
-                    .OrderBy(x => x.Id)));
+                    .OrderBy(x => x.Id)
+                    .GetSorters());
         }
     }
 }

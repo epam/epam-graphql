@@ -3,10 +3,11 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
 
@@ -30,8 +31,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
             LazyQueryArguments? arguments,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>> thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -41,8 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   configurator,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
             _graphType = new GraphTypeDescriptor<TReturnType, TExecutionContext>(
                 type: typeof(ConnectionGraphType<TReturnType, TExecutionContext>),
@@ -81,8 +80,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ObjectGraphTypeConfigurator!,
                 Arguments,
                 Searcher,
-                OrderBy!,
-                ThenBy!);
+                NaturalSorters!);
         }
     }
 }

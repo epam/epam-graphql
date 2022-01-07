@@ -411,7 +411,7 @@ namespace Epam.GraphQL.Extensions
 
         public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters<T>(this Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderExpression)
         {
-            return SortVisitor<T>.GetSorters(orderExpression);
+            return SortVisitor<T>.GetSorters(orderExpression.Body);
         }
 
         public static Expression<Func<IOrderedQueryable<T>, IOrderedQueryable<T>>> GetThenBy<T>(this Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderExpression)
@@ -512,44 +512,16 @@ namespace Epam.GraphQL.Extensions
             return GetParameterOfType<T>(memberExpression.Expression);
         }
 
-        private class ParameterVisitor : ExpressionVisitor
-        {
-            private readonly ParameterExpression[] _parameters;
-            private bool _containsAnyParam;
-
-            private ParameterVisitor(ParameterExpression[] parameters)
-            {
-                _parameters = parameters;
-            }
-
-            public static bool ContainsAnyParameter(Expression expr, ParameterExpression[] parameters)
-            {
-                var visitor = new ParameterVisitor(parameters);
-                visitor.Visit(expr);
-                return visitor._containsAnyParam;
-            }
-
-            protected override Expression VisitParameter(ParameterExpression node)
-            {
-                if (_parameters.Contains(node))
-                {
-                    _containsAnyParam = true;
-                }
-
-                return base.VisitParameter(node);
-            }
-        }
-
-        private class SortVisitor<T> : ExpressionVisitor
+        internal class SortVisitor<T> : ExpressionVisitor
         {
             private readonly List<(LambdaExpression SortExpression, SortDirection SortDirection)> _sorters = new();
             private bool _stop;
 
-            public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters(Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderExpression)
+            public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters(Expression orderExpression)
             {
                 var visitor = new SortVisitor<T>();
 
-                visitor.Visit(orderExpression.Body);
+                visitor.Visit(orderExpression);
 
                 visitor._sorters.Reverse();
                 return visitor._sorters;
@@ -597,6 +569,34 @@ namespace Epam.GraphQL.Extensions
 
                 _stop = stop;
                 return base.VisitMethodCall(node);
+            }
+        }
+
+        private class ParameterVisitor : ExpressionVisitor
+        {
+            private readonly ParameterExpression[] _parameters;
+            private bool _containsAnyParam;
+
+            private ParameterVisitor(ParameterExpression[] parameters)
+            {
+                _parameters = parameters;
+            }
+
+            public static bool ContainsAnyParameter(Expression expr, ParameterExpression[] parameters)
+            {
+                var visitor = new ParameterVisitor(parameters);
+                visitor.Visit(expr);
+                return visitor._containsAnyParam;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                if (_parameters.Contains(node))
+                {
+                    _containsAnyParam = true;
+                }
+
+                return base.VisitParameter(node);
             }
         }
     }

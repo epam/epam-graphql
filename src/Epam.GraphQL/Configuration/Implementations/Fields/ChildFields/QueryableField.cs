@@ -4,11 +4,14 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
+using Epam.GraphQL.Sorters.Implementations;
 
 #nullable enable
 
@@ -25,8 +28,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Expression<Func<TEntity, TReturnType, bool>>? condition,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -38,8 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   elementGraphType.Configurator ?? throw new NotSupportedException(),
                   arguments: null,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
         }
 
@@ -52,8 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator,
             LazyQueryArguments? arguments,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -63,8 +63,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   configurator,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
         }
 
@@ -79,8 +78,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ObjectGraphTypeConfigurator ?? throw new NotSupportedException(),
                 Arguments,
                 Searcher,
-                order.Compile(),
-                order.GetThenBy().Compile());
+                order.GetSorters());
             return ApplyField(connectionField);
         }
 
@@ -95,8 +93,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 graphType.Configurator,
                 Arguments,
                 searcher: null,
-                orderBy: null,
-                thenBy: null);
+                naturalSorters: SortingHelpers.Empty);
 
             return queryableField;
         }
@@ -112,8 +109,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ObjectGraphTypeConfigurator,
                 Arguments,
                 Searcher,
-                OrderBy,
-                ThenBy);
+                NaturalSorters);
         }
     }
 }

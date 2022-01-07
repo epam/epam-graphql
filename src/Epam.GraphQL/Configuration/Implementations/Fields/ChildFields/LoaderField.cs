@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
@@ -11,6 +12,7 @@ using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
+using Epam.GraphQL.Sorters.Implementations;
 
 #nullable enable
 
@@ -29,8 +31,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
                   registry,
                   parent,
@@ -40,8 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   elementGraphType,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
         }
 
@@ -53,8 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
                   registry,
                   parent,
@@ -64,8 +63,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   registry.ResolveLoader<TChildLoader, TChildEntity>(),
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
         }
 
@@ -78,8 +76,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TChildLoader loader,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -89,8 +86,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   loader.ObjectGraphTypeConfigurator,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
             Loader = loader;
         }
@@ -104,8 +100,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -117,8 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   loader.ObjectGraphTypeConfigurator,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
             Loader = loader;
         }
@@ -135,8 +129,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ElementGraphType,
                 Arguments,
                 Searcher,
-                Loader.ApplyNaturalOrderBy,
-                Loader.ApplyNaturalThenBy);
+                Loader.ApplyNaturalOrderBy(Enumerable.Empty<TChildEntity>().AsQueryable()).GetSorters());
             return ApplyField(connectionField);
         }
 
@@ -150,8 +143,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ElementGraphType,
                 Arguments,
                 Searcher,
-                order.Compile(),
-                order.GetThenBy().Compile());
+                order.GetSorters());
             return ApplyField(connectionField);
         }
 
@@ -176,8 +168,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 graphType.Configurator,
                 Arguments,
                 searcher: null,
-                orderBy: null,
-                thenBy: null);
+                naturalSorters: SortingHelpers.Empty);
 
             return queryableField;
         }
@@ -193,8 +184,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Loader,
                 Arguments,
                 Searcher,
-                OrderBy,
-                ThenBy);
+                NaturalSorters);
 
             return queryableField;
         }
@@ -217,7 +207,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Expression<Func<TChildEntity, TEntity>> navigationProperty,
             Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType)
-            : base(registry, parent, name, condition, elementGraphType, arguments: null, searcher: null, orderBy: null, thenBy: null)
+            : base(registry, parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
         {
             registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
         }
