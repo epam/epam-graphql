@@ -26,10 +26,11 @@ namespace Epam.GraphQL.Extensions
             Expression<Func<TEntity, TTransformedEntity>> transform,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
-            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter)
+            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>? sorters)
         {
             var filtered = query.Where(ExpressionHelpers.MakeContainsExpression(propValues, propSelector));
-            return GroupBy(filtered, propSelector, transform, stepNameFactory, queryExecuter, hooksExecuter);
+            return GroupBy(filtered, propSelector, transform, stepNameFactory, queryExecuter, hooksExecuter, sorters);
         }
 
         public static IAsyncEnumerable<IGrouping<TProperty, TTransformedEntity>> GroupByValues<TEntity, TTransformedEntity, TProperty>(
@@ -39,12 +40,13 @@ namespace Epam.GraphQL.Extensions
             Expression<Func<TEntity, TTransformedEntity>> transform,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
-            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter)
+            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>? sorters)
             where TProperty : struct
         {
             var keySelector = ExpressionHelpers.MakeValueAccessExpression(propSelector);
             var filtered = query.Where(ExpressionHelpers.MakeContainsExpression(propValues, propSelector));
-            return GroupBy(filtered, keySelector, transform, stepNameFactory, queryExecuter, hooksExecuter);
+            return GroupBy(filtered, keySelector, transform, stepNameFactory, queryExecuter, hooksExecuter, sorters);
         }
 
         public static IQueryable<T> SafeWhere<T>(this IQueryable<T> query, Expression<Func<T, bool>>? condition) =>
@@ -138,10 +140,18 @@ namespace Epam.GraphQL.Extensions
             Expression<Func<TEntity, TTransformedEntity>> transform,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
-            ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter)
+            ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>? sorters)
         {
-            var orderedQuery = query.OrderBy(propSelector).Select(CreateExpression(propSelector, transform));
-            var orderedItems = queryExecuter.ToAsyncEnumerable(stepNameFactory, orderedQuery);
+            var orderedQuery = query.OrderBy(propSelector);
+
+            if (sorters != null)
+            {
+                orderedQuery = orderedQuery.ApplyThenBy(sorters);
+            }
+
+            var resultQuery = orderedQuery.Select(CreateExpression(propSelector, transform));
+            var orderedItems = queryExecuter.ToAsyncEnumerable(stepNameFactory, resultQuery);
 
             var comparer = EqualityComparer<TProperty>.Default;
             Grouping<TProperty, TTransformedEntity>? grouping = null;

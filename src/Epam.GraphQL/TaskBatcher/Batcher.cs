@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
 
@@ -67,6 +68,7 @@ namespace Epam.GraphQL.TaskBatcher
         public IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>> Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
             IResolveFieldContext context,
             Func<IResolveFieldContext, IQueryable<TInnerEntity>> queryFactory,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>>? sorters,
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,
@@ -85,7 +87,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var query = queryFactory(context);
                 var queryExecuter = context.GetQueryExecuter();
                 var factory = BatchHelpers.GetQueryJoinFactory<TOuterEntity, TInnerEntity, TTransformedInnerEntity, IResolveFieldContext>(context.GetPath, transform, outerExpression, innerExpression);
-                return factory(context, Profiler, queryExecuter, hooksExecuter, query);
+                return factory(context, Profiler, queryExecuter, hooksExecuter, query, sorters?.Invoke(context));
             }
         }
 

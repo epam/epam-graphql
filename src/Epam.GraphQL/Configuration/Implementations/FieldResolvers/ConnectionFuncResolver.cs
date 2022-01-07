@@ -6,7 +6,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Loaders;
 using GraphQL;
 
 #nullable enable
@@ -20,8 +22,8 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter)
-            : base(proxyAccessor, resolver, transform, sorter)
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
+            : base(proxyAccessor, resolver, transform, sorters)
         {
         }
 
@@ -29,13 +31,13 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TAnotherReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>>? sorter)
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             return new ConnectionFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(
                 proxyAccessor,
                 resolver,
                 transform,
-                sorter ?? throw new ArgumentNullException(nameof(sorter)));
+                sorters);
         }
 
         protected override IEnumerable<string> GetQueriedFields(IResolveFieldContext context)

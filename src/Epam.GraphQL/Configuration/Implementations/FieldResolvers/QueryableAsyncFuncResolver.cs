@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Relay;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
@@ -31,14 +32,14 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         private readonly Lazy<Func<IResolveFieldContext, IDataLoader<TEntity, IGrouping<TEntity, Proxy<TReturnType>>>>> _batchTaskResolver;
         private readonly Lazy<Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IGrouping<Proxy<TEntity>, Proxy<TReturnType>>>>> _proxiedBatchTaskResolver;
         private readonly Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> _transform;
-        private readonly Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? _sorter;
+        private readonly Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> _sorters;
 
         public QueryableAsyncFuncResolver(
             string fieldName,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
         {
@@ -48,12 +49,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
             _outerProxyAccessor = outerProxyAccessor ?? throw new ArgumentNullException(nameof(outerProxyAccessor));
             _innerProxyAccessor = innerProxyAccessor ?? throw new ArgumentNullException(nameof(innerProxyAccessor));
-            _sorter = sorter;
+            _sorters = sorters;
 
             _batchTaskResolver = new Lazy<Func<IResolveFieldContext, IDataLoader<TEntity, IGrouping<TEntity, Proxy<TReturnType>>>>>(
-                () => GetBatchTaskResolver<TEntity>(_resolver, _condition, _transform, _sorter, FuncConstants<LambdaExpression>.Identity));
+                () => GetBatchTaskResolver<TEntity>(_resolver, _condition, _transform, _sorters, FuncConstants<LambdaExpression>.Identity));
             _proxiedBatchTaskResolver = new Lazy<Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IGrouping<Proxy<TEntity>, Proxy<TReturnType>>>>>(
-                () => GetBatchTaskResolver<Proxy<TEntity>>(_resolver, _condition, _transform, _sorter, leftExpression => _outerProxyAccessor.GetProxyExpression(leftExpression)));
+                () => GetBatchTaskResolver<Proxy<TEntity>>(_resolver, _condition, _transform, _sorters, leftExpression => _outerProxyAccessor.GetProxyExpression(leftExpression)));
 
             var factorizationResults = ExpressionHelpers.Factorize(condition);
             outerProxyAccessor.AddMembers(fieldName, innerProxyAccessor, factorizationResults);
@@ -84,9 +85,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         }
 
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter)
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
-            return Create(_fieldName, _resolver, _condition, _transform, sorter, _outerProxyAccessor, _innerProxyAccessor);
+            return Create(_fieldName, _resolver, _condition, _transform, sorters, _outerProxyAccessor, _innerProxyAccessor);
         }
 
         public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector)
@@ -148,7 +149,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate)
         {
-            return Create(_fieldName, ctx => _resolver(ctx).Where(predicate), _condition, _transform, _sorter, _outerProxyAccessor, _innerProxyAccessor);
+            return Create(_fieldName, ctx => _resolver(ctx).Where(predicate), _condition, _transform, _sorters, _outerProxyAccessor, _innerProxyAccessor);
         }
 
         IEnumerableResolver<TEntity, TReturnType, TExecutionContext> IEnumerableResolver<TEntity, TReturnType, TExecutionContext>.Where(Expression<Func<TReturnType, bool>> predicate)
@@ -158,23 +159,18 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
         {
-            return Create(_fieldName, ctx => selector(ctx, _resolver(ctx)), _condition, _transform, _sorter, _outerProxyAccessor, _innerProxyAccessor);
+            return Create(_fieldName, ctx => selector(ctx, _resolver(ctx)), _condition, _transform, _sorters, _outerProxyAccessor, _innerProxyAccessor);
         }
 
         public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(
             Expression<Func<TReturnType, TSelectType>> selector,
             IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)
         {
-            Func<IResolveFieldContext, IQueryable<TReturnType>> queryFactory =
-                _sorter == null
-                    ? ctx => _transform(ctx, _resolver(ctx))
-                    : ctx => _sorter(ctx, _transform(ctx, _resolver(ctx)));
-
             if (selectTypeProxyAccessor == null)
             {
                 return new QueryableAsyncFuncResolver<TEntity, TReturnType, TSelectType, TExecutionContext>(
                     _fieldName,
-                    queryFactory,
+                    QueryFactory,
                     _condition,
                     selector,
                     _outerProxyAccessor,
@@ -183,12 +179,25 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
             return new ProxiedQueryableAsyncFuncResolver<TEntity, TReturnType, TSelectType, TExecutionContext>(
                 _fieldName,
-                queryFactory,
+                QueryFactory,
                 _condition,
                 selector,
                 _outerProxyAccessor,
                 _innerProxyAccessor,
                 selectTypeProxyAccessor);
+
+            IQueryable<TReturnType> QueryFactory(IResolveFieldContext ctx)
+            {
+                var sorters = _sorters(ctx);
+                var result = _transform(ctx, _resolver(ctx));
+
+                if (sorters.Any())
+                {
+                    return result.ApplyOrderBy(sorters);
+                }
+
+                return result;
+            }
         }
 
         public IResolver<TEntity> SingleOrDefault()
@@ -211,7 +220,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsConnection()
         {
-            var resolver = new ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(_fieldName, _resolver, _condition, _transform, _sorter, _outerProxyAccessor, _innerProxyAccessor);
+            var resolver = new ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(_fieldName, _resolver, _condition, _transform, _sorters, _outerProxyAccessor, _innerProxyAccessor);
             return new AsyncFuncResolver<TEntity, Connection<Proxy<TReturnType>>>(
                 ctx => resolver._batchTaskResolver.Value(ctx).Then(items => Resolvers.Resolve(ctx, (IOrderedQueryable<Proxy<TReturnType>>)items.SafeNull().AsQueryable())),
                 ctx => resolver._proxiedBatchTaskResolver.Value(ctx).Then(items => Resolvers.Resolve(ctx, (IOrderedQueryable<Proxy<TReturnType>>)items.SafeNull().AsQueryable())));
@@ -219,7 +228,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsGroupConnection(
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
-            Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IQueryable<Proxy<TReturnType>>> sorter)
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             throw new NotSupportedException();
         }
@@ -229,11 +238,11 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
         {
-            return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(fieldName, resolver, condition, transform, sorter, outerProxyAccessor, innerProxyAccessor);
+            return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(fieldName, resolver, condition, transform, sorters, outerProxyAccessor, innerProxyAccessor);
         }
 
         protected virtual IEnumerable<string> GetQueriedFields(IResolveFieldContext context)
@@ -245,7 +254,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> queryTransform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
             Func<LambdaExpression, LambdaExpression> leftExpressionConverter)
         {
             var factorizationResult = ExpressionHelpers.FactorizeCondition(condition);
@@ -254,16 +263,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             var innerExpression = factorizationResult.RightExpression;
             var rightCondition = factorizationResult.RightCondition;
 
-            Func<IResolveFieldContext, IQueryable<TReturnType>> queryFactory =
-                sorter == null
-                    ? ctx => queryTransform(ctx, resolver(ctx)).SafeWhere(rightCondition)
-                    : ctx => sorter(ctx, queryTransform(ctx, resolver(ctx)).SafeWhere(rightCondition));
-
             return context =>
             {
                 var result = context
                     .Get<TOuterEntity, TReturnType, Proxy<TReturnType>>(
-                        queryFactory,
+                        ctx => queryTransform(ctx, resolver(ctx)).SafeWhere(rightCondition),
+                        sorters: sorters,
                         Transform,
                         outerExpression.Value,
                         innerExpression,
@@ -415,7 +420,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             throw new NotSupportedException();
         }
 
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> sorter)
+        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             // TODO Come up with how to reorder
             return this;
@@ -423,7 +428,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsGroupConnection(
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
-            Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IQueryable<Proxy<TReturnType>>> sorter)
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             throw new NotSupportedException();
         }
@@ -452,6 +457,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                     var result = context
                         .Get<TOuterEntity, TChildEntity, Tuple<Proxy<TChildEntity>, TReturnType>>(
                             ctx => resolver(ctx).SafeWhere(rightCondition),
+                            sorters: null,
                             ctx => Transform2(ctx, transform),
                             outerExpression.Value,
                             innerExpression,
@@ -467,6 +473,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 var result = context
                     .Get<TOuterEntity, TChildEntity, TReturnType>(
                         ctx => resolver(ctx).SafeWhere(rightCondition),
+                        sorters: null,
                         ctx => Transform(ctx, transform),
                         outerExpression.Value,
                         innerExpression,

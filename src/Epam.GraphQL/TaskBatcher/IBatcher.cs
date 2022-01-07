@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
 
@@ -31,6 +32,7 @@ namespace Epam.GraphQL.TaskBatcher
         IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>> Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
             IResolveFieldContext context,
             Func<IResolveFieldContext, IQueryable<TInnerEntity>> queryFactory,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>>? sort,
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,

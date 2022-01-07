@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Loaders;
 using GraphQL;
 
 #nullable enable
@@ -22,10 +23,10 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
-            : base(fieldName, resolver, condition, transform, sorter, outerProxyAccessor, innerProxyAccessor)
+            : base(fieldName, resolver, condition, transform, sorters, outerProxyAccessor, innerProxyAccessor)
         {
         }
 
@@ -34,7 +35,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>>? sorter,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
         {
@@ -43,7 +44,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 resolver,
                 condition,
                 transform,
-                sorter ?? throw new ArgumentNullException(nameof(sorter)),
+                sorters,
                 outerProxyAccessor,
                 innerProxyAccessor);
         }

@@ -154,6 +154,7 @@ namespace Epam.GraphQL.Extensions
         public static IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>> Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
             this IResolveFieldContext context,
             Func<IResolveFieldContext, IQueryable<TInnerEntity>> queryFactory,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>>? sorters,
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,
@@ -165,6 +166,7 @@ namespace Epam.GraphQL.Extensions
                 .Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
                     context,
                     queryFactory,
+                    sorters,
                     transform,
                     outerExpression,
                     innerExpression,
