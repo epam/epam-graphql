@@ -217,7 +217,7 @@ namespace Epam.GraphQL.Tests.Suites
                     DataSet.All,
                     null,
                     @"{
-                    id
+                        id
                     }",
                     @"[{
                         id: 1

@@ -13,6 +13,8 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Extensions
 {
     internal static class QueryableExtensions
@@ -45,7 +47,7 @@ namespace Epam.GraphQL.Extensions
             return GroupBy(filtered, keySelector, transform, stepNameFactory, queryExecuter, hooksExecuter);
         }
 
-        public static IQueryable<T> SafeWhere<T>(this IQueryable<T> query, Expression<Func<T, bool>> condition) =>
+        public static IQueryable<T> SafeWhere<T>(this IQueryable<T> query, Expression<Func<T, bool>>? condition) =>
             condition == null ? query : query.Where(condition);
 
         public static IOrderedQueryable<TChildEntity> ApplyOrderBy<TChildEntity>(this IQueryable<TChildEntity> query, LambdaExpression expression, SortDirection sortDirection)
@@ -60,7 +62,7 @@ namespace Epam.GraphQL.Extensions
 
         public static IOrderedQueryable<T> ApplyOrderBy<T>(this IQueryable<T> query, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> sorters)
         {
-            IOrderedQueryable<T> orderedQuery = null;
+            IOrderedQueryable<T>? orderedQuery = null;
             foreach (var sorter in sorters)
             {
                 orderedQuery = orderedQuery == null
@@ -68,7 +70,17 @@ namespace Epam.GraphQL.Extensions
                     : orderedQuery.ApplyThenBy(sorter.SortExpression, sorter.SortDirection);
             }
 
+            if (orderedQuery == null)
+            {
+                throw new ArgumentException("The list of sorters must contain one element at least.", nameof(sorters));
+            }
+
             return orderedQuery;
+        }
+
+        public static IOrderedQueryable<T> ApplyThenBy<T>(this IOrderedQueryable<T> query, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> sorters)
+        {
+            return sorters.Aggregate(query, (acc, sorter) => acc.ApplyThenBy(sorter.SortExpression, sorter.SortDirection));
         }
 
         public static IOrderedQueryable<TChildEntity> ApplyThenBy<TChildEntity>(this IOrderedQueryable<TChildEntity> query, LambdaExpression expression, SortDirection sortDirection)
@@ -79,17 +91,6 @@ namespace Epam.GraphQL.Extensions
             return sortDirection == SortDirection.Asc
                 ? CachedReflectionInfo.ForQueryable.ThenBy(sourceType, resultType).InvokeAndHoistBaseException<IOrderedQueryable<TChildEntity>>(null, query, expression)
                 : CachedReflectionInfo.ForQueryable.ThenByDescending(sourceType, resultType).InvokeAndHoistBaseException<IOrderedQueryable<TChildEntity>>(null, query, expression);
-        }
-
-        public static IOrderedQueryable<T> ApplyThenBy<T>(this IOrderedQueryable<T> query, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> sorters)
-        {
-            var orderedQuery = query;
-            foreach (var sorter in sorters)
-            {
-                orderedQuery = orderedQuery.ApplyThenBy(sorter.SortExpression, sorter.SortDirection);
-            }
-
-            return orderedQuery;
         }
 
         public static IQueryable ApplyGroupBy(this IQueryable query, LambdaExpression expression)
@@ -104,6 +105,11 @@ namespace Epam.GraphQL.Extensions
             var sourceType = query.ElementType;
             var resultType = expression.GetResultType();
             return CachedReflectionInfo.ForQueryable.Select(sourceType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, expression);
+        }
+
+        public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters<T>(this IQueryable<T> query)
+        {
+            return ExpressionExtensions.SortVisitor<T>.GetSorters(query.Expression);
         }
 
         private static Expression<Func<TValue, KeyValue<TKey, TNewValue>>> CreateExpression<TKey, TValue, TNewValue>(
@@ -132,13 +138,13 @@ namespace Epam.GraphQL.Extensions
             Expression<Func<TEntity, TTransformedEntity>> transform,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
-            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter)
+            ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter)
         {
             var orderedQuery = query.OrderBy(propSelector).Select(CreateExpression(propSelector, transform));
             var orderedItems = queryExecuter.ToAsyncEnumerable(stepNameFactory, orderedQuery);
 
             var comparer = EqualityComparer<TProperty>.Default;
-            Grouping<TProperty, TTransformedEntity> grouping = null;
+            Grouping<TProperty, TTransformedEntity>? grouping = null;
 
             await foreach (var item in orderedItems)
             {
@@ -170,12 +176,14 @@ namespace Epam.GraphQL.Extensions
             }
         }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         internal class KeyValue<TKey, TValue>
         {
             public TKey Key { get; set; }
 
             public TValue Value { get; set; }
         }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         private class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
         {

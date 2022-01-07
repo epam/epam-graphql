@@ -15,7 +15,7 @@ namespace Epam.GraphQL.Relay
     internal static class ConnectionUtils
     {
         public static Connection<TSource> ToConnection<TSource>(
-            IOrderedQueryable<TSource> query,
+            IQueryable<TSource> query,
             Func<string> stepNameFactory,
             IQueryExecuter executer,
             int? first,

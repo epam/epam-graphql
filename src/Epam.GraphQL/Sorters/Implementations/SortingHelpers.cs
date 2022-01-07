@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
@@ -13,62 +14,51 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using GraphQL;
 
+#nullable enable
+
 namespace Epam.GraphQL.Sorters.Implementations
 {
     internal static class SortingHelpers
     {
-        public static IOrderedQueryable<TChildEntity> ApplySort<TChildEntity, TExecutionContext>(
+        public static IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> Empty => Enumerable.Empty<(LambdaExpression SortExpression, SortDirection SortDirection)>();
+
+        public static IQueryable<TChildEntity> ApplySort<TChildEntity, TExecutionContext>(
             IResolveFieldContext context,
             IQueryable<TChildEntity> queryable,
-            IReadOnlyList<ISorter<TExecutionContext>> sorters,
-            IOrderedSearcher<TChildEntity, TExecutionContext> searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> applyNaturalOrderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> applyNaturalThenBy)
+            IReadOnlyList<ISorter<TExecutionContext>>? sorters,
+            IOrderedSearcher<TChildEntity, TExecutionContext>? searcher,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
         {
             var sorting = context.GetSorting();
             var search = context.GetSearch();
 
-            var fields = sorting
-                .Select(o => (sorters.Single(s => string.Equals(s.Name, o.Field, StringComparison.Ordinal)), o.Direction));
+            var userSorters = sorting
+                .Select(o => (sorters.Single(s => string.Equals(s.Name, o.Field, StringComparison.Ordinal)).BuildExpression(context.GetUserContext<TExecutionContext>()), o.Direction))
+                .ToArray();
 
-            var query = queryable.ApplyOrderBy(fields.Select(f => (f.Item1.BuildExpression(context.GetUserContext<TExecutionContext>()), f.Direction)));
+            var lastSorters = naturalSorters.Where(sorter => userSorters.All(field => !ExpressionEqualityComparer.Instance.Equals(field.Item1, sorter.SortExpression)));
 
-            if (query == null)
+            if (userSorters.Length > 0)
             {
+                var query = queryable.ApplyOrderBy(userSorters);
+
                 if (!string.IsNullOrEmpty(search) && searcher != null)
                 {
-                    query = searcher.ApplySearchOrderBy(queryable, search);
-
-                    if (applyNaturalThenBy != null)
-                    {
-                        return applyNaturalThenBy(query);
-                    }
-
-                    return query;
+                    return searcher.ApplySearchThenBy(query, search).ApplyThenBy(naturalSorters);
                 }
 
-                if (applyNaturalOrderBy != null)
-                {
-                    return applyNaturalOrderBy(queryable);
-                }
-
-                return queryable.OrderBy(x => 1);
+                return lastSorters.Any() ? query.ApplyThenBy(lastSorters) : query;
             }
 
             if (!string.IsNullOrEmpty(search) && searcher != null)
             {
-                query = searcher.ApplySearchThenBy(query, search);
+                return searcher.ApplySearchOrderBy(queryable, search).ApplyThenBy(naturalSorters);
             }
 
-            if (applyNaturalThenBy != null)
-            {
-                return applyNaturalThenBy(query);
-            }
-
-            return query;
+            return lastSorters.Any() ? queryable.ApplyOrderBy(lastSorters) : queryable;
         }
 
-        public static IOrderedQueryable<Proxy<TChildEntity>> ApplyGroupSort<TChildEntity, TExecutionContext>(
+        public static IQueryable<Proxy<TChildEntity>> ApplyGroupSort<TChildEntity, TExecutionContext>(
             IResolveFieldContext context,
             IQueryable<Proxy<TChildEntity>> queryable,
             IReadOnlyList<ISorter<TExecutionContext>> sorters,
@@ -92,11 +82,11 @@ namespace Epam.GraphQL.Sorters.Implementations
                 .Select(name => proxyAccessor.Fields.FirstOrDefault(field => string.Equals(field.Name, name, StringComparison.Ordinal)));
 
             var sort = sortFields.Select(f => (proxyAccessor.GetProxyExpression(f.Item1.OriginalExpression), f.Direction))
-                .Concat(subFields.Select(f => (proxyAccessor.GetProxyExpression(f.OriginalExpression), SortDirection.Asc)));
+                .Concat(subFields.Select(f => (proxyAccessor.GetProxyExpression(f.OriginalExpression ?? throw new NotSupportedException()), SortDirection.Asc)));
 
-            var query = queryable.ApplyOrderBy(sort) ?? queryable;
+            var query = sort.Any() ? queryable.ApplyOrderBy(sort) : queryable;
 
-            return (IOrderedQueryable<Proxy<TChildEntity>>)query;
+            return query;
         }
     }
 }

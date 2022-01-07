@@ -3,8 +3,8 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Loaders;
@@ -32,8 +32,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -42,8 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   elementGraphType,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
 
@@ -78,8 +76,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ElementGraphType,
                 Arguments,
                 Searcher,
-                OrderBy!,
-                ThenBy!);
+                NaturalSorters!);
         }
     }
 }

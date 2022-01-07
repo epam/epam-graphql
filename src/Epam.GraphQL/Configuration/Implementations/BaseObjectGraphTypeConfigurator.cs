@@ -169,7 +169,16 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TChildEntity : class
         {
             var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, graphResultType, arguments: null, searcher: null, orderBy: null, thenBy: null);
+            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                this,
+                name,
+                condition: null,
+                graphResultType,
+                arguments: null,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
             var connectionField = field.ApplyConnection();
             return InternalAddField(connectionField, deprecationReason);
         }
@@ -182,7 +191,16 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TChildEntity : class
         {
             var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, null, graphResultType, arguments: null, searcher: null, orderBy: null, thenBy: null);
+            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                this,
+                name,
+                condition: null,
+                graphResultType,
+                arguments: null,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
             var connectionField = field.ApplyConnection(order);
             return InternalAddField(connectionField, deprecationReason);
         }
@@ -193,7 +211,13 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
             var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, name, graphResultType, null, loader.ApplyNaturalOrderBy, loader.ApplyNaturalThenBy);
+            var field = new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                this,
+                name,
+                graphResultType,
+                arguments: null,
+                naturalSorters: loader.ApplyNaturalOrderBy(Enumerable.Empty<TChildEntity>().AsQueryable()).GetSorters());
             return InternalAddField(field, deprecationReason);
         }
 
@@ -593,7 +617,16 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TSelectType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new QueryableField<TEntity, TSelectType, TExecutionContext>(Registry, this, field.Name, query, condition, graphType, searcher: null, orderBy: null, thenBy: null);
+            var result = new QueryableField<TEntity, TSelectType, TExecutionContext>(
+                Registry,
+                this,
+                field.Name,
+                query,
+                condition,
+                graphType,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
             return ReplaceField(field, result);
         }
 
@@ -629,7 +662,16 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, this, field.Name, condition, graphResultType, arguments: null, searcher: null, orderBy: null, thenBy: null);
+            var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                this,
+                field.Name,
+                condition,
+                graphResultType,
+                arguments: null,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
             return ReplaceField(field, result);
         }
 

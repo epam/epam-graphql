@@ -37,8 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
             LazyQueryArguments? arguments,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
                   registry,
                   parent,
@@ -49,16 +48,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                       transform,
                       condition,
                       searcher,
-                      orderBy,
-                      thenBy,
+                      naturalSorters,
                       outerProxyAccessor: parent.ProxyAccessor,
                       configurator),
                   elementGraphType,
                   configurator,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
         }
 
@@ -71,8 +68,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator,
             LazyQueryArguments? arguments,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -82,8 +78,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             Arguments = arguments;
             ObjectGraphTypeConfigurator = configurator;
-            OrderBy = orderBy;
-            ThenBy = thenBy;
+            NaturalSorters = naturalSorters;
 
             if (HasFilter)
             {
@@ -108,7 +103,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public virtual bool HasFilter => ObjectGraphTypeConfigurator?.HasInlineFilters ?? false;
 
-        protected Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? OrderBy { get; }
+        protected IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> NaturalSorters { get; }
 
         protected Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? ThenBy { get; }
 
@@ -116,7 +111,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         protected IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? ObjectGraphTypeConfigurator { get; private set; }
 
-        protected virtual IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolver => QueryableFieldResolverBase.Reorder(ApplySort(ObjectGraphTypeConfigurator?.Sorters, Searcher, OrderBy, ThenBy));
+        protected virtual IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolver => QueryableFieldResolverBase.Reorder(ApplySort(ObjectGraphTypeConfigurator?.Sorters, Searcher, NaturalSorters));
 
         protected IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolverBase => (IQueryableResolver<TEntity, TReturnType, TExecutionContext>)EnumerableFieldResolver;
 
@@ -172,8 +167,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
             Expression<Func<TEntity, TReturnType, bool>>? condition,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
         {
@@ -185,7 +179,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                     configurator.ProxyAccessor,
                     GetQuery(configurator, query),
                     transform,
-                    ApplySort(sorters, searcher, orderBy, thenBy));
+                    ApplySort(sorters, searcher, naturalSorters));
             }
 
             return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(
@@ -193,7 +187,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 GetQuery(configurator, query),
                 condition,
                 transform,
-                ApplySort(sorters, searcher, orderBy, thenBy),
+                ApplySort(sorters, searcher, naturalSorters),
                 outerProxyAccessor,
                 configurator.ProxyAccessor);
 
@@ -242,19 +236,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             };
         }
 
-        private static Func<IResolveFieldContext, IQueryable<TReturnType>, IOrderedQueryable<TReturnType>> ApplySort(
+        private static Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> ApplySort(
             IReadOnlyList<ISorter<TExecutionContext>>? sorters,
             ISearcher<TReturnType, TExecutionContext>? searcher,
-            Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? orderBy,
-            Func<IOrderedQueryable<TReturnType>, IOrderedQueryable<TReturnType>>? thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
         {
             return (context, children) => SortingHelpers.ApplySort(
                 context,
                 children,
                 sorters,
                 searcher as IOrderedSearcher<TReturnType, TExecutionContext>,
-                orderBy,
-                thenBy);
+                naturalSorters);
         }
     }
 }

@@ -4,7 +4,9 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Extensions;
@@ -34,8 +36,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             string name,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -44,8 +45,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   elementGraphType,
                   arguments,
                   searcher: null,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
             Initialize();
@@ -59,8 +59,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
                   registry,
                   parent,
@@ -69,8 +68,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   elementGraphType,
                   arguments,
                   searcher,
-                  orderBy,
-                  thenBy)
+                  naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
             Initialize();
@@ -91,8 +89,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ElementGraphType,
                 Arguments,
                 Searcher,
-                OrderBy!,
-                ThenBy!);
+                NaturalSorters!);
         }
 
         private static Func<IResolveFieldContext, IQueryable<TChildEntity>, IQueryable<Proxy<TChildEntity>>> GetGroupByQuery(IProxyAccessor<TChildEntity, TExecutionContext> proxyAccessor)
@@ -122,7 +119,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             };
         }
 
-        private static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, IOrderedQueryable<Proxy<TChildEntity>>> ApplyGroupSort(IObjectGraphTypeConfigurator<TChildEntity, TExecutionContext> configurator)
+        private static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, IQueryable<Proxy<TChildEntity>>> ApplyGroupSort(IObjectGraphTypeConfigurator<TChildEntity, TExecutionContext> configurator)
         {
             return (context, query) =>
             {
