@@ -22,50 +22,36 @@ namespace Epam.GraphQL.Sorters.Implementations
     {
         public static IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> Empty => Enumerable.Empty<(LambdaExpression SortExpression, SortDirection SortDirection)>();
 
-        public static IQueryable<TChildEntity> ApplySort<TChildEntity, TExecutionContext>(
+        public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> ApplySort<TChildEntity, TExecutionContext>(
             IResolveFieldContext context,
-            IQueryable<TChildEntity> queryable,
             IReadOnlyList<ISorter<TExecutionContext>>? sorters,
             IOrderedSearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
         {
             var sorting = context.GetSorting();
             var search = context.GetSearch();
+            var result = new List<(LambdaExpression SortExpression, SortDirection SortDirection)>();
 
-            var userSorters = sorting
-                .Select(o => (sorters.Single(s => string.Equals(s.Name, o.Field, StringComparison.Ordinal)).BuildExpression(context.GetUserContext<TExecutionContext>()), o.Direction))
-                .ToArray();
-
-            var lastSorters = naturalSorters.Where(sorter => userSorters.All(field => !ExpressionEqualityComparer.Instance.Equals(field.Item1, sorter.SortExpression)));
-
-            if (userSorters.Length > 0)
-            {
-                var query = queryable.ApplyOrderBy(userSorters);
-
-                if (!string.IsNullOrEmpty(search) && searcher != null)
-                {
-                    return searcher.ApplySearchThenBy(query, search).ApplyThenBy(naturalSorters);
-                }
-
-                return lastSorters.Any() ? query.ApplyThenBy(lastSorters) : query;
-            }
+            result.AddRange(sorting
+                .Select(o => (sorters.Single(s => string.Equals(s.Name, o.Field, StringComparison.Ordinal)).BuildExpression(context.GetUserContext<TExecutionContext>()), o.Direction)));
 
             if (!string.IsNullOrEmpty(search) && searcher != null)
             {
-                return searcher.ApplySearchOrderBy(queryable, search).ApplyThenBy(naturalSorters);
+                result.AddRange(searcher.ApplySearchOrderBy(Enumerable.Empty<TChildEntity>().AsQueryable(), search).GetSorters());
             }
 
-            return lastSorters.Any() ? queryable.ApplyOrderBy(lastSorters) : queryable;
+            var lastSorters = naturalSorters.Where(sorter => result.All(field => !ExpressionEqualityComparer.Instance.Equals(field.SortExpression, sorter.SortExpression)));
+            result.AddRange(lastSorters);
+
+            return result;
         }
 
-        public static IQueryable<Proxy<TChildEntity>> ApplyGroupSort<TChildEntity, TExecutionContext>(
+        public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> ApplyGroupSort<TChildEntity, TExecutionContext>(
             IResolveFieldContext context,
-            IQueryable<Proxy<TChildEntity>> queryable,
             IReadOnlyList<ISorter<TExecutionContext>> sorters,
             IProxyAccessor<TChildEntity, TExecutionContext> proxyAccessor)
         {
             var sourceType = proxyAccessor.ProxyType;
-
             var sorting = context.GetSorting();
             var search = context.GetSearch();
 
@@ -81,12 +67,10 @@ namespace Epam.GraphQL.Sorters.Implementations
                 .Where(name => !sorting.Any(s => string.Equals(s.Field, name, StringComparison.Ordinal)))
                 .Select(name => proxyAccessor.Fields.FirstOrDefault(field => string.Equals(field.Name, name, StringComparison.Ordinal)));
 
-            var sort = sortFields.Select(f => (proxyAccessor.GetProxyExpression(f.Item1.OriginalExpression), f.Direction))
+            var result = sortFields.Select(f => (proxyAccessor.GetProxyExpression(f.Item1.OriginalExpression), f.Direction))
                 .Concat(subFields.Select(f => (proxyAccessor.GetProxyExpression(f.OriginalExpression ?? throw new NotSupportedException()), SortDirection.Asc)));
 
-            var query = sort.Any() ? queryable.ApplyOrderBy(sort) : queryable;
-
-            return query;
+            return result.ToList();
         }
     }
 }

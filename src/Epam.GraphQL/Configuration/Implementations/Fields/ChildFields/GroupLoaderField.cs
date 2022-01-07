@@ -119,14 +119,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             };
         }
 
-        private static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, IQueryable<Proxy<TChildEntity>>> ApplyGroupSort(IObjectGraphTypeConfigurator<TChildEntity, TExecutionContext> configurator)
+        private static Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> ApplyGroupSort(IObjectGraphTypeConfigurator<TChildEntity, TExecutionContext> configurator)
         {
-            return (context, query) =>
+            return (context) =>
             {
                 // Apply sort
                 var result = SortingHelpers.ApplyGroupSort(
                     context,
-                    query,
                     configurator.Sorters,
                     configurator.ProxyAccessor);
 

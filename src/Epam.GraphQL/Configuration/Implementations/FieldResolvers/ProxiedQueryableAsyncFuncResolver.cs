@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -153,7 +154,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             throw new NotSupportedException();
         }
 
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> sorter)
+        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             // TODO Come up with how to reorder
             return this;
@@ -161,7 +162,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsGroupConnection(
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
-            Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, IQueryable<Proxy<TReturnType>>> sorter)
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             throw new NotSupportedException();
         }
@@ -190,6 +191,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                     var result = context
                         .Get<TOuterEntity, TChildEntity, Tuple<Proxy<TChildEntity>, Proxy<TReturnType>>>(
                             ctx => resolver(ctx).SafeWhere(rightCondition),
+                            sorters: null,
                             ctx => Transform2(ctx, transform),
                             outerExpression,
                             innerExpression,
@@ -205,6 +207,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 var result = context
                     .Get<TOuterEntity, TChildEntity, Proxy<TReturnType>>(
                         ctx => resolver(ctx).SafeWhere(rightCondition),
+                        sorters: null,
                         ctx => Transform(ctx, transform),
                         outerExpression,
                         innerExpression,
