@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplyResolve<TEntity, TExecutionContext>

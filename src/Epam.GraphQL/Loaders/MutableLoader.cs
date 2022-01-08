@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.MutableLoader;
 using Epam.GraphQL.Builders.MutableLoader.Implementations;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Savers;
 using Epam.GraphQL.TaskBatcher;
@@ -362,6 +363,7 @@ namespace Epam.GraphQL.Loaders
                             prevEntity.CopyProperties(
                                 nextEntity.Payload,
                                 fieldTask.Select(fv => fv.Item1)
+                                    .OfType<IExpressionField<TEntity, TExecutionContext>>()
                                     .Where(field => field.PropertyInfo != null && field.EditSettings.OnWrite == null && field.EditSettings.OnWriteAsync == null)
                                     .Select(field => field.PropertyInfo));
                         }
@@ -400,6 +402,7 @@ namespace Epam.GraphQL.Loaders
                                 item.Payload,
                                 item.Properties.Keys
                                     .Select(fieldName => InputObjectGraphTypeConfigurator.FindFieldByName(fieldName))
+                                    .OfType<IExpressionField<TEntity, TExecutionContext>>()
                                     .Where(field => field.PropertyInfo != null && field.EditSettings.OnWrite == null && field.EditSettings.OnWriteAsync == null)
                                     .Select(field => field.PropertyInfo));
                             itemsToCheck.Add(payload);
@@ -475,7 +478,9 @@ namespace Epam.GraphQL.Loaders
 
                     foreach (var item in itemsToCreate)
                     {
-                        foreach (var field in InputObjectGraphTypeConfigurator.Fields.Where(f => f.EditSettings.GetDefaultValue != null))
+                        foreach (var field in InputObjectGraphTypeConfigurator.Fields
+                            .Where(f => f.EditSettings.GetDefaultValue != null)
+                            .OfType<IExpressionField<TEntity, TExecutionContext>>())
                         {
                             var defaultValue = field.EditSettings.GetDefaultValue(context, item.Payload);
                             item.Payload.SetPropertyValue(field.PropertyInfo, defaultValue);
@@ -496,12 +501,14 @@ namespace Epam.GraphQL.Loaders
                         {
                             var fieldTypes = item.Properties.Keys
                                 .Select(propName => InputObjectGraphTypeConfigurator.FindFieldByName(propName))
+                                .OfType<IExpressionField<TEntity, TExecutionContext>>()
                                 .Where(field => field.PropertyInfo != null)
                                 .Select(field => field.PropertyInfo.PropertyType)
                                 .Where(propertyType => propertyType.IsValueType && !TypeExtensions.IsNullable(propertyType))
                                 .ToList();
 
                             var fields = InputObjectGraphTypeConfigurator.Fields
+                                .OfType<IExpressionField<TEntity, TExecutionContext>>()
                                 .Where(field => field.PropertyInfo != null && field.PropertyInfo.PropertyType.IsValueType && !TypeExtensions.IsNullable(field.PropertyInfo.PropertyType)
                                     && fieldTypes.All(fieldType => fieldType != field.PropertyInfo.PropertyType))
                                 .Where(field => field.EditSettings.GetDefaultValue == null);

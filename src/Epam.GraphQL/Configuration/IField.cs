@@ -4,10 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Linq.Expressions;
-using System.Reflection;
 using Epam.GraphQL.Configuration.Implementations;
-using Epam.GraphQL.Filters;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -19,23 +16,11 @@ namespace Epam.GraphQL.Configuration
 {
     internal interface IField
     {
-        PropertyInfo? PropertyInfo { get; }
-
         string Name { get; }
 
         Type? FieldType { get; }
 
-        bool IsExpression { get; }
-
-        bool IsFilterable { get; }
-
-        bool IsGroupable { get; }
-
         bool CanResolve { get; }
-
-        LambdaExpression? ContextExpression { get; }
-
-        LambdaExpression? OriginalExpression { get; }
 
         FieldType AsFieldType();
 
@@ -51,8 +36,6 @@ namespace Epam.GraphQL.Configuration
         IFieldEditSettings<TExecutionContext>? EditSettings { get; }
 
         IGraphTypeDescriptor<TExecutionContext> GraphType { get; }
-
-        IInlineFilter<TExecutionContext> CreateInlineFilter();
     }
 
     internal interface IField<TEntity, TExecutionContext> : IField<TExecutionContext>

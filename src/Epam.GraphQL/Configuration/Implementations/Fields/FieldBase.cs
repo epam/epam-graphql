@@ -11,7 +11,6 @@ using System.Reflection;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
-using Epam.GraphQL.Filters;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
@@ -46,17 +45,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public Type? FieldType { get; protected set; }
 
-        public virtual bool IsExpression => false;
-
-        public virtual bool IsFilterable { get => false; protected set => throw new NotSupportedException(); }
-
-        public virtual bool IsGroupable { get => false; protected set => throw new NotSupportedException(); }
-
         public virtual bool CanResolve => false;
-
-        public virtual LambdaExpression? ContextExpression => null;
-
-        public virtual LambdaExpression? OriginalExpression => null;
 
         public IFieldEditSettings<TEntity, TExecutionContext>? EditSettings { get; protected set; }
 
@@ -69,7 +58,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay => $"{GetType().GetGenericTypeDefinition().Name}({FieldType?.Name} {typeof(TEntity).Name}.{Name})";
 
-        public FieldType AsFieldType()
+        public virtual FieldType AsFieldType()
         {
             var resolver = GetResolver();
 
@@ -84,12 +73,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 ResolvedType = GraphType.GraphType,
                 DeprecationReason = DeprecationReason,
             };
-
-            if (PropertyInfo != null)
-            {
-                // Hack against GraphQL.NET: ComplexGraphType<object>.ORIGINAL_EXPRESSION_PROPERTY_NAME is internal.
-                fieldType.Metadata.Add("ORIGINAL_EXPRESSION_PROPERTY_NAME", PropertyInfo.Name);
-            }
 
             return fieldType;
         }
@@ -203,11 +186,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
 
             return false;
-        }
-
-        public virtual IInlineFilter<TExecutionContext> CreateInlineFilter()
-        {
-            throw new NotSupportedException();
         }
 
         public virtual ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(string argName)

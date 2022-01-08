@@ -13,10 +13,15 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using GraphQL;
 using GraphQL.Resolvers;
+using GraphQL.Types;
+
+#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
-    internal class ExpressionField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>
+    internal class ExpressionField<TEntity, TReturnType, TExecutionContext> :
+        TypedField<TEntity, TReturnType, TExecutionContext>,
+        IExpressionField<TEntity, TExecutionContext>
         where TEntity : class
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
@@ -52,7 +57,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             {
                 IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
 
-                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !EditSettings.IsMandatoryForUpdate)
+                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !(EditSettings?.IsMandatoryForUpdate ?? false))
                 {
                     graphType = graphType.UnwrapIfNonNullable();
                 }
@@ -61,19 +66,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
         }
 
-        public override bool IsExpression => true;
+        public bool IsFilterable { get; set; }
 
-        public override bool IsFilterable { get; protected set; }
+        public bool IsGroupable { get; protected set; }
 
-        public override bool IsGroupable { get; protected set; }
-
-        public override PropertyInfo PropertyInfo => _expression?.PropertyInfo;
+        public override PropertyInfo? PropertyInfo => _expression?.PropertyInfo;
 
         public override bool CanResolve => true;
 
-        public override LambdaExpression ContextExpression => _expression.ContextedExpression;
+        public LambdaExpression ContextExpression => _expression.ContextedExpression;
 
-        public override LambdaExpression OriginalExpression => _expression.OriginalExpression;
+        public LambdaExpression OriginalExpression => _expression.OriginalExpression;
 
         protected virtual bool IsSupportFiltering => false;
 
@@ -81,7 +84,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected virtual bool IsSupportGrouping => false;
 
-        public override object Resolve(IResolveFieldContext context)
+        public override object? Resolve(IResolveFieldContext context)
         {
             return _expression.Resolve(context, context.Source);
         }
@@ -124,6 +127,31 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
 
             IsGroupable = true;
+        }
+
+        public override FieldType AsFieldType()
+        {
+            var result = base.AsFieldType();
+
+            // Hack against GraphQL.NET: ComplexGraphType<object>.ORIGINAL_EXPRESSION_PROPERTY_NAME is internal.
+            result.Metadata.Add("ORIGINAL_EXPRESSION_PROPERTY_NAME", PropertyInfo?.Name);
+
+            return result;
+        }
+
+        public IInlineFilter<TExecutionContext> CreateInlineFilter()
+        {
+            if (IsFilterable)
+            {
+                return OnCreateInlineFilter();
+            }
+
+            throw new NotSupportedException();
+        }
+
+        public virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter()
+        {
+            throw new NotSupportedException();
         }
 
         public override int GetHashCode()
@@ -179,11 +207,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected override bool IsSupportFiltering => true;
 
-        protected TFilterValueType[] DefaultValues { get; private set; }
+        protected TFilterValueType[]? DefaultValues { get; private set; }
 
         protected NullOption? NullValue { get; private set; }
 
-        public void Filterable(TFilterValueType[] defaultValues = null)
+        public void Filterable(TFilterValueType[]? defaultValues = null)
         {
             if (defaultValues != null && defaultValues.Any(value => value == null))
             {
@@ -208,21 +236,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
             NullValue = nullValue;
             IsFilterable = true;
-        }
-
-        public override IInlineFilter<TExecutionContext> CreateInlineFilter()
-        {
-            if (IsFilterable)
-            {
-                return OnCreateInlineFilter();
-            }
-
-            throw new NotSupportedException();
-        }
-
-        public virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter()
-        {
-            throw new NotSupportedException();
         }
     }
 }

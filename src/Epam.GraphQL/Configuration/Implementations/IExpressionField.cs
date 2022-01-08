@@ -3,21 +3,26 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq.Expressions;
-
 #nullable enable
 
-namespace Epam.GraphQL.Sorters
-{
-    internal interface ISorter<TExecutionContext> : IEquatable<ISorter<TExecutionContext>>
-    {
-        string Name { get; }
+using System.Linq.Expressions;
+using System.Reflection;
+using Epam.GraphQL.Filters;
 
-        bool IsGroupable { get; }
+namespace Epam.GraphQL.Configuration.Implementations
+{
+    internal interface IExpressionField<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>
+    {
+        PropertyInfo? PropertyInfo { get; }
+
+        LambdaExpression ContextExpression { get; }
 
         LambdaExpression OriginalExpression { get; }
 
-        LambdaExpression BuildExpression(TExecutionContext context);
+        bool IsFilterable { get; set; }
+
+        bool IsGroupable { get; }
+
+        IInlineFilter<TExecutionContext> CreateInlineFilter();
     }
 }
