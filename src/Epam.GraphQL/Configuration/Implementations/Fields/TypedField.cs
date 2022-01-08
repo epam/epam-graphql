@@ -5,67 +5,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers;
 
 #nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
-    internal class TypedField<TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>
+    internal class TypedField<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
         where TEntity : class
     {
         public TypedField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, Type fieldType)
             : base(registry, parent, name)
         {
             FieldType = fieldType;
-        }
-
-        public override ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), build, doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), build, doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), build, doesDependOnAllFields, optionsBuilder);
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), build, doesDependOnAllFields, optionsBuilder);
         }
 
         public override UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)

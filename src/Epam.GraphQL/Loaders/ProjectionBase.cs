@@ -132,7 +132,7 @@ namespace Epam.GraphQL.Loaders
         protected internal IProjectionFieldBuilder<TEntity, TExecutionContext> Field(string name, string deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
-            return new ProjectionFieldBuilder<TEntity, TExecutionContext>(field);
+            return new ProjectionFieldBuilder<Field<TEntity, TExecutionContext>, TEntity, TExecutionContext>(field);
         }
 
         private protected void ThrowIfIsNotConfiguring()

@@ -12,6 +12,7 @@ using Epam.GraphQL.Builders.Mutation;
 using Epam.GraphQL.Builders.Mutation.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -113,7 +114,7 @@ namespace Epam.GraphQL
         protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
-            return new MutationFieldBuilder<TExecutionContext>(field);
+            return new MutationFieldBuilder<Field<object, TExecutionContext>, TExecutionContext>(field);
         }
 
         protected override void AfterConfigure()

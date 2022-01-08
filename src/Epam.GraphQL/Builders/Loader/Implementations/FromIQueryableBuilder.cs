@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
     internal static class FromIQueryableBuilder
     {
         public static IFromIQueryableBuilder<TSelectType, TExecutionContext> Create<TSourceType, TSelectType, TExecutionContext>(
-            Field<TSourceType, TExecutionContext> parentField,
+            FieldBase<TSourceType, TExecutionContext> parentField,
             Func<TExecutionContext, IQueryable<TSelectType>> query,
             Expression<Func<TSourceType, TSelectType, bool>> condition,
             Action<IInlineObjectBuilder<TSelectType, TExecutionContext>> build)

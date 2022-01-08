@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 using Epam.GraphQL.Extensions;
@@ -16,12 +17,13 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class InlineObjectFieldBuilder<TEntity, TExecutionContext> : BaseFieldBuilder<TEntity, TExecutionContext>, IInlineObjectFieldBuilder<TEntity, TExecutionContext>
+    internal class InlineObjectFieldBuilder<TField, TEntity, TExecutionContext> : BaseFieldBuilder<TField, TEntity, TExecutionContext>, IInlineObjectFieldBuilder<TEntity, TExecutionContext>
         where TEntity : class
+        where TField : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
 
-        internal InlineObjectFieldBuilder(RelationRegistry<TExecutionContext> registry, Field<TEntity, TExecutionContext> fieldType)
+        internal InlineObjectFieldBuilder(RelationRegistry<TExecutionContext> registry, TField fieldType)
             : base(fieldType)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));

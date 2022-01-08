@@ -11,6 +11,7 @@ using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -127,7 +128,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string deprecationReason = null)
         {
             var fieldType = _objectGraphTypeConfigurator.AddField(name, deprecationReason);
-            return new InlineObjectFieldBuilder<TSourceType, TExecutionContext>(_registry, fieldType);
+            return new InlineObjectFieldBuilder<Field<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>(_registry, fieldType);
         }
 
         public void ConfigureFrom<TProjection>()

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
@@ -15,15 +16,16 @@ using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
-    internal class MutationFieldBuilder<TExecutionContext> :
+    internal class MutationFieldBuilder<TField, TExecutionContext> :
         IMutationFieldBuilder<TExecutionContext>
+        where TField : FieldBase<object, TExecutionContext>, IFieldSupportsApplyResolve<object, TExecutionContext>
     {
-        public MutationFieldBuilder(Field<object, TExecutionContext> field)
+        public MutationFieldBuilder(TField field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
 
-        protected Field<object, TExecutionContext> Field { get; set; }
+        private TField Field { get; }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve)
         {
@@ -183,28 +185,26 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             return methodInfo.InvokeAndHoistBaseException<IMutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        private MutationFieldBuilder<TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private MutationFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
             where TType : class
         {
-            Field = Field.ApplyUnion(build, false);
-            return this;
+            return new MutationFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build, false));
         }
 
-        private MutationFieldBuilder<TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private MutationFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            Field = Field.ApplyUnion(build, true);
-            return this;
+            return new MutationFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build, true));
         }
 
-        private MutationFieldBuilder<TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private MutationFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private MutationFieldBuilder<TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private MutationFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {

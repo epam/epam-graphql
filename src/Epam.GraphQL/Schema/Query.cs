@@ -10,6 +10,7 @@ using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Builders.Query;
 using Epam.GraphQL.Builders.Query.Implementations;
+using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -21,7 +22,7 @@ namespace Epam.GraphQL
         protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
-            return new QueryFieldBuilder<TExecutionContext>(field);
+            return new QueryFieldBuilder<Field<object, TExecutionContext>, TExecutionContext>(field);
         }
 
         protected internal IConnectionBuilder Connection<TChildLoader>(string name, string deprecationReason = null)

@@ -10,20 +10,22 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Loader.Implementations;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {
-    internal class ProjectionFieldBuilder<TEntity, TExecutionContext> :
+    internal class ProjectionFieldBuilder<TField, TEntity, TExecutionContext> :
         IProjectionFieldBuilder<TEntity, TExecutionContext>
         where TEntity : class
+        where TField : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>
     {
-        public ProjectionFieldBuilder(Field<TEntity, TExecutionContext> field)
+        public ProjectionFieldBuilder(TField field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
 
-        protected Field<TEntity, TExecutionContext> Field { get; set; }
+        protected TField Field { get; }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)
         {
@@ -192,28 +194,26 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         public IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(Func<TExecutionContext, IQueryable<TReturnType>> query, Expression<Func<TEntity, TReturnType, bool>> condition, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class => FromIQueryableBuilder.Create(Field, query, condition, build);
 
-        private ProjectionFieldBuilder<TEntity, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private ProjectionFieldBuilder<UnionField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
             where TType : class
         {
-            Field = Field.ApplyUnion(build, false);
-            return this;
+            return new ProjectionFieldBuilder<UnionField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.ApplyUnion(build, false));
         }
 
-        private ProjectionFieldBuilder<TEntity, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private ProjectionFieldBuilder<UnionField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            Field = Field.ApplyUnion(build, true);
-            return this;
+            return new ProjectionFieldBuilder<UnionField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.ApplyUnion(build, true));
         }
 
-        private ProjectionFieldBuilder<TEntity, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private ProjectionFieldBuilder<UnionField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private ProjectionFieldBuilder<TEntity, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private ProjectionFieldBuilder<UnionField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {

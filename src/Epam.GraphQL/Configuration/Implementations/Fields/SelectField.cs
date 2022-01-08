@@ -4,12 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using GraphQL;
 using GraphQL.Resolvers;
 
@@ -59,50 +55,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public override object Resolve(IResolveFieldContext context)
         {
             return _resolver.Resolve(context);
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
         }
 
         protected override IFieldResolver GetResolver()

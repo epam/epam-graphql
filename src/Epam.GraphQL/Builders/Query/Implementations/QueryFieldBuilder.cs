@@ -10,21 +10,23 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Loader.Implementations;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Query.Implementations
 {
-    internal class QueryFieldBuilder<TExecutionContext> :
+    internal class QueryFieldBuilder<TField, TExecutionContext> :
         IQueryFieldBuilder<TExecutionContext>
+        where TField : FieldBase<object, TExecutionContext>, IFieldSupportsApplyResolve<object, TExecutionContext>
     {
-        public QueryFieldBuilder(Field<object, TExecutionContext> field)
+        public QueryFieldBuilder(TField field)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
         }
 
-        protected Field<object, TExecutionContext> Field { get; set; }
+        private TField Field { get; }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve)
         {
@@ -170,28 +172,26 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new FromIQueryableBuilder<object, TReturnType, TExecutionContext>(Field.Parent.FromIQueryableClass(Field, query, null, configure));
         }
 
-        private QueryFieldBuilder<TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
             where TType : class
         {
-            Field = Field.ApplyUnion(build, false);
-            return this;
+            return new QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build, false));
         }
 
-        private QueryFieldBuilder<TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            Field = Field.ApplyUnion(build, true);
-            return this;
+            return new QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build, true));
         }
 
-        private QueryFieldBuilder<TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryFieldBuilder<TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {

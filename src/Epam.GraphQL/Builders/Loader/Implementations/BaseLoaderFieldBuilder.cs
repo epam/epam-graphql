@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -15,11 +15,12 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class BaseLoaderFieldBuilder<TEntity, TLoader, TExecutionContext> : BaseFieldBuilder<TEntity, TExecutionContext>
+    internal class BaseLoaderFieldBuilder<TField, TEntity, TLoader, TExecutionContext> : BaseFieldBuilder<TField, TEntity, TExecutionContext>
         where TLoader : Projection<TEntity, TExecutionContext>, new()
         where TEntity : class
+        where TField : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>
     {
-        internal BaseLoaderFieldBuilder(RelationRegistry<TExecutionContext> registry, Field<TEntity, TExecutionContext> fieldType)
+        internal BaseLoaderFieldBuilder(RelationRegistry<TExecutionContext> registry, TField fieldType)
             : base(fieldType)
         {
             Registry = registry ?? throw new ArgumentNullException(nameof(registry));
