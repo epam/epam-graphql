@@ -77,8 +77,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             return fieldType;
         }
 
-        public void Argument<TArgumentType>(string name, string? description = null) => Argument(name, typeof(TArgumentType), description);
-
         public void Argument(string name, Type type, string? description = null)
         {
             Argument(name, () => new QueryArgument(Registry.GenerateInputGraphType(type))

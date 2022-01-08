@@ -719,19 +719,19 @@ namespace Epam.GraphQL.Configuration.Implementations
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(FieldBase<TEntity, TExecutionContext> field, IResolver<TEntity> resolver)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType, field.Arguments));
+            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType));
         }
 
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(FieldBase<TEntity, TExecutionContext> field, IResolver<TEntity> resolver, IGraphTypeDescriptor<TExecutionContext> graphType)
         {
-            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType, field.Arguments));
+            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType));
         }
 
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(FieldBase<TEntity, TExecutionContext> field, IResolver<TEntity> resolver, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType, field.Arguments));
+            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType));
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TAnotherReturnType>(

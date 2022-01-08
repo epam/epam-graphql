@@ -23,14 +23,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IResolver<TEntity> resolver,
-            IGraphTypeDescriptor<TExecutionContext> graphType,
-            LazyQueryArguments arguments)
+            IGraphTypeDescriptor<TExecutionContext> graphType)
             : base(registry, parent, name)
         {
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();
             _graphType = graphType;
-            Arguments = arguments;
         }
 
         public override bool CanResolve => true;

@@ -115,6 +115,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         protected IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolverBase => (IQueryableResolver<TEntity, TReturnType, TExecutionContext>)EnumerableFieldResolver;
 
+        public void Argument<TArgumentType>(string name, string? description = null) => Argument(name, typeof(TArgumentType), description);
+
         public virtual QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
             where TLoaderFilter : Filter<TReturnType, TFilter, TExecutionContext>
             where TFilter : Input
