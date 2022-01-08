@@ -6,7 +6,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
@@ -43,8 +42,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public string Name { get; set; }
 
         public string? DeprecationReason { get; set; }
-
-        public virtual PropertyInfo? PropertyInfo => null;
 
         public Type? FieldType { get; protected set; }
 

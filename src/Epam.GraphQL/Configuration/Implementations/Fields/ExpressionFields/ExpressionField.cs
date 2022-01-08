@@ -70,7 +70,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public bool IsGroupable { get; protected set; }
 
-        public override PropertyInfo? PropertyInfo => _expression?.PropertyInfo;
+        public PropertyInfo? PropertyInfo => _expression?.PropertyInfo;
 
         public override bool CanResolve => true;
 
