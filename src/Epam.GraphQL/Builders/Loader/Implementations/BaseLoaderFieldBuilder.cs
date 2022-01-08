@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
+using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
@@ -15,7 +16,7 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class BaseLoaderFieldBuilder<TField, TEntity, TLoader, TExecutionContext> : BaseFieldBuilder<TField, TEntity, TExecutionContext>
+    internal class BaseLoaderFieldBuilder<TField, TEntity, TLoader, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>
         where TLoader : Projection<TEntity, TExecutionContext>, new()
         where TEntity : class
         where TField : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>
