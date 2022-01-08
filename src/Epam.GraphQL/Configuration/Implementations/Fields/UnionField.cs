@@ -35,7 +35,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     }
 
     internal class UnionField<TEntity, TExecutionContext> :
-        TypedField<TEntity, TExecutionContext>,
+        FieldBase<TEntity, TExecutionContext>,
         IFieldSupportsApplyResolve<TEntity, TExecutionContext>,
         IFieldSupportsApplyUnion<TEntity, TExecutionContext>
         where TEntity : class

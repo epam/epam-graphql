@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
 {
     internal static class ResolvableTypedFieldHelpers
     {
-        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, TReturnType> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, TReturnType> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
             if (!typeof(TReturnType).IsAssignableFrom(field.FieldType))
@@ -29,7 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<TReturnType>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<TReturnType>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
             if (!typeof(TReturnType).IsAssignableFrom(field.FieldType))
@@ -42,7 +42,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
@@ -57,7 +57,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
@@ -72,7 +72,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, IEnumerable<TReturnType>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, IEnumerable<TReturnType>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
             if (typeof(IEnumerable<TReturnType>).IsAssignableFrom(field.FieldType))
@@ -92,7 +92,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             throw new NotSupportedException();
         }
 
-        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
             if (typeof(IEnumerable<TReturnType>).IsAssignableFrom(field.FieldType))
@@ -112,7 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             throw new NotSupportedException();
         }
 
-        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
@@ -121,7 +121,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(TypedField<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
