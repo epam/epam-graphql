@@ -13,7 +13,10 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
-    internal class Field<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>
+    internal class Field<TEntity, TExecutionContext> :
+        FieldBase<TEntity, TExecutionContext>,
+        IFieldSupportsApplyResolve<TEntity, TExecutionContext>,
+        IFieldSupportsApplyUnion<TEntity, TExecutionContext>
         where TEntity : class
     {
         public Field(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
@@ -48,5 +51,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public virtual ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
             where TReturnType : class
             => Parent.ApplyResolve(this, resolve, build, doesDependOnAllFields, optionsBuilder);
+
+        public virtual UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+            where TLastElementType : class
+            => Parent.ApplyUnion(this, build, isList);
     }
 }

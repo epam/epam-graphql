@@ -32,7 +32,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
     }
 
-    internal class UnionField<TEntity, TExecutionContext> : TypedField<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>
+    internal class UnionField<TEntity, TExecutionContext> :
+        TypedField<TEntity, TExecutionContext>,
+        IFieldSupportsApplyResolve<TEntity, TExecutionContext>,
+        IFieldSupportsApplyUnion<TEntity, TExecutionContext>
         where TEntity : class
     {
         public UnionField(
@@ -140,7 +143,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             return ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve, doesDependOnAllFields), build, doesDependOnAllFields, optionsBuilder);
         }
 
-        public override UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>> build, bool isList)
+        public UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>> build, bool isList)
             where TLastElementType2 : class
         {
             var unionField = new UnionField<TEntity, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType2), UnionField.CreateTypeResolver<TEntity, TLastElementType2, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList);

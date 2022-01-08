@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationFieldBuilder<TField, TExecutionContext> :
         IMutationFieldBuilder<TExecutionContext>
-        where TField : FieldBase<object, TExecutionContext>, IFieldSupportsApplyResolve<object, TExecutionContext>
+        where TField : FieldBase<object, TExecutionContext>, IFieldSupportsApplyResolve<object, TExecutionContext>, IFieldSupportsApplyUnion<object, TExecutionContext>
     {
         public MutationFieldBuilder(TField field)
         {

@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
@@ -147,10 +146,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 throw new InvalidOperationException($"Field `{Name}` must have resolver.");
             }
         }
-
-        public virtual UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class
-            => Parent.ApplyUnion(this, build, isList);
 
         public TField ApplyField<TField>(TField field)
             where TField : FieldBase<TEntity, TExecutionContext>

@@ -4,8 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
-using Epam.GraphQL.Builders.Loader;
 
 #nullable enable
 
@@ -18,18 +16,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             : base(registry, parent, name)
         {
             FieldType = fieldType;
-        }
-
-        public override UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class
-        {
-            if (FieldType == null || (!FieldType.IsAssignableFrom(typeof(TLastElementType)) && !FieldType.IsAssignableFrom(typeof(IEnumerable<TLastElementType>))))
-            {
-                // TODO Throw exception with meaningful message
-                throw new NotSupportedException();
-            }
-
-            return base.ApplyUnion(build, isList);
         }
     }
 
