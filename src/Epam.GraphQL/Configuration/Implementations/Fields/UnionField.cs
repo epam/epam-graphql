@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
@@ -12,6 +13,7 @@ using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers;
 using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
@@ -149,5 +151,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             var unionField = new UnionField<TEntity, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType2), UnionField.CreateTypeResolver<TEntity, TLastElementType2, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList);
             return ApplyField(unionField);
         }
+
+        public ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(string argName)
+            => Parent.ApplyArgument<TArgType>(this, argName);
+
+        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>
+            where TEntity1 : class
+            => Parent.ApplyFilterArgument<TProjection, TEntity1>(this, argName);
+
+        public ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyPayloadField<TArgType>(string argName)
+            => Parent.ApplyPayloadField<TArgType>(this, argName);
+
+        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterPayloadField<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>
+            where TEntity1 : class
+            => Parent.ApplyFilterPayloadField<TProjection, TEntity1>(this, argName);
     }
 }

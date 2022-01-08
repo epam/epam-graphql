@@ -6,9 +6,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
@@ -182,22 +180,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
             return false;
         }
-
-        public virtual ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(string argName)
-            => Parent.ApplyArgument<TArgType>(this, argName);
-
-        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-            => Parent.ApplyFilterArgument<TProjection, TEntity1>(this, argName);
-
-        public virtual ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyPayloadField<TArgType>(string argName)
-            => Parent.ApplyPayloadField<TArgType>(this, argName);
-
-        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterPayloadField<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-            => Parent.ApplyFilterPayloadField<TProjection, TEntity1>(this, argName);
 
         // TODO make it property
         protected virtual IFieldResolver? GetResolver()
