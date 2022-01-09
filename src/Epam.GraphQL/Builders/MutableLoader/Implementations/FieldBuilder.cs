@@ -18,6 +18,8 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext> : FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
@@ -106,19 +108,27 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> EditableIf(Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate, Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, string> reason = null)
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> EditableIf(
+            Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate,
+            Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason)
         {
             Field.EditSettings.EditableIf(predicate, reason);
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(Func<IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc, Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate, Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string> reason = null)
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(
+            Func<IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
+            Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
+            Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
             Field.EditSettings.EditableIf(_registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(Func<TExecutionContext, IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc, Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate, Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string> reason = null)
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(
+            Func<TExecutionContext, IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
+            Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
+            Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
             Field.EditSettings.EditableIf(batchFunc, predicate, reason);
             return this;

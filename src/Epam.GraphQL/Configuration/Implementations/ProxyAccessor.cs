@@ -298,7 +298,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         public void AddMembers<TChildEntity>(string childFieldName, IProxyAccessor<TChildEntity, TExecutionContext> childProxyAccessor, ExpressionFactorizationResult factorizationResult)
         {
             AddMembers(childFieldName, factorizationResult.LeftExpressions.SelectMany(ExpressionHelpers.GetMembers));
-            (childProxyAccessor as ProxyAccessor<TChildEntity, TExecutionContext>).AddMembers(factorizationResult.RightExpressions.SelectMany(ExpressionHelpers.GetMembers));
+            childProxyAccessor.AddMembers(factorizationResult.RightExpressions.SelectMany(ExpressionHelpers.GetMembers));
         }
 
         public void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member)
@@ -331,6 +331,11 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
 
             fieldDependencies.DependOnAllMembers = true;
+        }
+
+        public void AddMembers(IEnumerable<LambdaExpression> members)
+        {
+            _members.UnionWith(members);
         }
 
         public void AddLoadHook<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
@@ -400,11 +405,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             var result = Expression.Lambda<Func<TExecutionContext, TEntity, Proxy<TEntity>>>(initExpr, contextParam, entityParam);
             return result;
-        }
-
-        private void AddMembers(IEnumerable<LambdaExpression> members)
-        {
-            _members.UnionWith(members);
         }
 
         private void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members)

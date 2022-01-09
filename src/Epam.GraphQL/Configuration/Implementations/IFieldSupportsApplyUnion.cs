@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Configuration.Implementations
     internal interface IFieldSupportsApplyUnion<TEntity, TExecutionContext>
         where TEntity : class
     {
-        UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+        UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class;
     }
 }

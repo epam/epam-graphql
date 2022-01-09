@@ -17,6 +17,8 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class InlineObjectBuilder<TSourceType, TExecutionContext> : IInlineObjectBuilder<TSourceType, TExecutionContext>, IInlineGraphTypeResolver<TSourceType, TExecutionContext>
@@ -24,9 +26,9 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
         private readonly BaseObjectGraphTypeConfigurator<TSourceType, TExecutionContext> _objectGraphTypeConfigurator;
-        private Type _childProjectionType;
+        private Type? _childProjectionType;
 
-        public InlineObjectBuilder(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TSourceType, TExecutionContext>> build, bool isInputType)
+        public InlineObjectBuilder(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TSourceType, TExecutionContext>>? build, bool isInputType)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _objectGraphTypeConfigurator = isInputType
@@ -38,94 +40,94 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public string Name { get => _objectGraphTypeConfigurator.Name; set => _objectGraphTypeConfigurator.Name = value; }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason = null)
             where TReturnType : struct
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(null, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TReturnType, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason = null)
             where TReturnType : struct
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(name, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TReturnType, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null)
             where TReturnType : struct
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(name, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TReturnType, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType?>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType : struct
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(null, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType?, TReturnType, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType?>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType : struct
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(name, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType?, TReturnType, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType?>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType : struct
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(name, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType?, TReturnType, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, string> Field(Expression<Func<TSourceType, string>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, string> Field(Expression<Func<TSourceType, string>> expression, string? deprecationReason = null)
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(null, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, string, string, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, string> Field(string name, Expression<Func<TSourceType, string>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, string> Field(string name, Expression<Func<TSourceType, string>> expression, string? deprecationReason = null)
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(name, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, string, string, TExecutionContext>(field);
         }
 
-        public IHasFilterableAndSortable<TSourceType, string> Field(string name, Expression<Func<TExecutionContext, TSourceType, string>> expression, string deprecationReason = null)
+        public IHasFilterableAndSortable<TSourceType, string> Field(string name, Expression<Func<TExecutionContext, TSourceType, string>> expression, string? deprecationReason = null)
         {
             var field = _objectGraphTypeConfigurator.AddExpressionField(name, expression, deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, string, string, TExecutionContext>(field);
         }
 
-        public void Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string deprecationReason = null)
+        public void Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
             where TReturnType : struct => _objectGraphTypeConfigurator.AddEnumerableExpressionField(null, expression, deprecationReason);
 
-        public void Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string deprecationReason = null)
+        public void Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
             where TReturnType : struct => _objectGraphTypeConfigurator.AddEnumerableExpressionField(name, expression, deprecationReason);
 
-        public void Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string deprecationReason = null)
+        public void Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
             where TReturnType : struct => _objectGraphTypeConfigurator.AddEnumerableExpressionField(name, expression, deprecationReason);
 
-        public void Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType?>>> expression, string deprecationReason = null)
+        public void Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
             where TReturnType : struct => _objectGraphTypeConfigurator.AddEnumerableExpressionField(null, expression, deprecationReason);
 
-        public void Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType?>>> expression, string deprecationReason = null)
+        public void Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
             where TReturnType : struct => _objectGraphTypeConfigurator.AddEnumerableExpressionField(name, expression, deprecationReason);
 
-        public void Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType?>>> expression, string deprecationReason = null)
+        public void Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
             where TReturnType : struct => _objectGraphTypeConfigurator.AddEnumerableExpressionField(name, expression, deprecationReason);
 
-        public void Field(Expression<Func<TSourceType, IEnumerable<string>>> expression, string deprecationReason = null)
+        public void Field(Expression<Func<TSourceType, IEnumerable<string>>> expression, string? deprecationReason = null)
             => _objectGraphTypeConfigurator.AddEnumerableExpressionField(null, expression, deprecationReason);
 
-        public void Field(string name, Expression<Func<TSourceType, IEnumerable<string>>> expression, string deprecationReason = null)
+        public void Field(string name, Expression<Func<TSourceType, IEnumerable<string>>> expression, string? deprecationReason = null)
             => _objectGraphTypeConfigurator.AddEnumerableExpressionField(name, expression, deprecationReason);
 
-        public void Field(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<string>>> expression, string deprecationReason = null)
+        public void Field(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<string>>> expression, string? deprecationReason = null)
             => _objectGraphTypeConfigurator.AddEnumerableExpressionField(name, expression, deprecationReason);
 
-        public IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string deprecationReason = null)
+        public IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             var fieldType = _objectGraphTypeConfigurator.AddField(name, deprecationReason);
             return new InlineObjectFieldBuilder<Field<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>(_registry, fieldType);
@@ -142,7 +144,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             _childProjectionType = projectionType ?? throw new ArgumentNullException(nameof(projectionType));
         }
 
-        public (IGraphType GraphType, Type Type) Resolve()
+        public (IGraphType? GraphType, Type? Type) Resolve()
         {
             if (_childProjectionType != null && _objectGraphTypeConfigurator.Fields.Any())
             {

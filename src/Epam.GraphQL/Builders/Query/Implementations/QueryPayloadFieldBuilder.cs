@@ -13,6 +13,8 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Query.Implementations
 {
     internal class QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> :
@@ -48,40 +50,46 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return methodInfo.InvokeAndHoistBaseException<IQueryPayloadFieldBuilder<TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AndImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AndImpl<TEnumerable, TElementType>(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AsUnionOfImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             Field = Field.ApplyUnion(build, false);
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -89,13 +97,15 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AndImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> AndImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -150,40 +160,46 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return methodInfo.InvokeAndHoistBaseException<IQueryPayloadFieldBuilder<TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AndImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AndImpl<TEnumerable, TElementType>(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             Field = Field.ApplyUnion(build, false);
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -191,13 +207,15 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AndImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TExecutionContext> AndImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -252,40 +270,46 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return methodInfo.InvokeAndHoistBaseException<IQueryPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AndImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AndImpl<TEnumerable, TElementType>(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             Field = Field.ApplyUnion(build, false);
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -293,13 +317,15 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -354,40 +380,46 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return methodInfo.InvokeAndHoistBaseException<IQueryPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AndImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AndImpl<TEnumerable, TElementType>(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             Field = Field.ApplyUnion(build, false);
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -395,13 +427,15 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -433,40 +467,46 @@ namespace Epam.GraphQL.Builders.Query.Implementations
         {
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AndImpl(build);
         }
 
-        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AndImpl<TEnumerable, TElementType>(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             Field = Field.ApplyUnion(build, false);
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -474,13 +514,15 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return this;
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryPayloadFieldBuilder<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {

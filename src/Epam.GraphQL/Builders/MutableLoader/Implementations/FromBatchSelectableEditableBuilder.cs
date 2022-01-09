@@ -10,6 +10,8 @@ using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FromBatchSelectableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext> : FromBatchEditableBuilder<TSourceType, TReturnType, TExecutionContext>,
@@ -55,7 +57,9 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return new FromBatchEditableBuilder<TSourceType, string, TExecutionContext>(Registry, Field.ApplySelect(selector).EditSettings);
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
             return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, Field.ApplySelect(selector, build).EditSettings);

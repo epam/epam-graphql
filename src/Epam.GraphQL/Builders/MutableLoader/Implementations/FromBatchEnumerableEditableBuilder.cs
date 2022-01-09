@@ -12,6 +12,8 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FromBatchEnumerableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext> : FromBatchSelectableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext>,
@@ -24,56 +26,76 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         {
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(Func<TExecutionContext, IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<TExecutionContext, IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(Func<IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(Expression<Func<TSourceType, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TSourceType, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(Expression<Func<TSourceType, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TSourceType, TKeyType>> keySelector,
+            Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(Func<TExecutionContext, IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<TExecutionContext, IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(Func<IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>>? batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(Expression<Func<TSourceType, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TSourceType, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(Expression<Func<TSourceType, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TSourceType, TKeyType>> keySelector,
+            Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method

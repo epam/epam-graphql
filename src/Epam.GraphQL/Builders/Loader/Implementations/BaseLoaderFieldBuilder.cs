@@ -14,6 +14,8 @@ using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class BaseLoaderFieldBuilder<TField, TEntity, TLoader, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>
@@ -32,8 +34,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             RelationType relationType = RelationType.Association,
-            Expression<Func<TChildEntity, TEntity>> navigationProperty = null,
-            Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty = null)
+            Expression<Func<TChildEntity, TEntity>>? navigationProperty = null,
+            Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
@@ -44,8 +46,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Type childLoaderType,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             RelationType relationType = RelationType.Association,
-            Expression<Func<TChildEntity, TEntity>> navigationProperty = null,
-            Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty = null)
+            Expression<Func<TChildEntity, TEntity>>? navigationProperty = null,
+            Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
             where TChildEntity : class
         {
             var fromLoaderParameterTypes = new[]

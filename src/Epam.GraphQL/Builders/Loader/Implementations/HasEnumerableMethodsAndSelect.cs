@@ -7,6 +7,8 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class HasEnumerableMethodsAndSelect<TSourceType, TReturnType, TExecutionContext> :
@@ -20,12 +22,12 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             _fieldType = fieldType ?? throw new ArgumentNullException(nameof(fieldType));
         }
 
-        public void SingleOrDefault(Expression<Func<TReturnType, bool>> predicate)
+        public void SingleOrDefault(Expression<Func<TReturnType, bool>>? predicate)
         {
             _fieldType.ApplySingleOrDefault(predicate);
         }
 
-        public void FirstOrDefault(Expression<Func<TReturnType, bool>> predicate)
+        public void FirstOrDefault(Expression<Func<TReturnType, bool>>? predicate)
         {
             _fieldType.ApplyFirstOrDefault(predicate);
         }
@@ -47,7 +49,9 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new HasEnumerableMethodsAndSelect<TSourceType, string, TExecutionContext>(_fieldType.ApplySelect(selector));
         }
 
-        public IHasEnumerableMethodsAndSelect<TReturnType1, TExecutionContext> Select<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build = default)
+        public IHasEnumerableMethodsAndSelect<TReturnType1, TExecutionContext> Select<TReturnType1>(
+            Expression<Func<TReturnType, TReturnType1>> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
             return new HasEnumerableMethodsAndSelect<TSourceType, TReturnType1, TExecutionContext>(_fieldType.ApplySelect(selector, build));

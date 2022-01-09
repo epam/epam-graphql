@@ -77,7 +77,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(enumerableField);
         }
 
-        public EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build)
+        public EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build);

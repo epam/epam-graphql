@@ -9,6 +9,8 @@ using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class SelectAndReferenceToBuilder<TField, TSourceType, TReturnType, TExecutionContext> : SelectBuilder<TField, TSourceType, TReturnType, TExecutionContext>,

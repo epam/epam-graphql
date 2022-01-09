@@ -15,6 +15,8 @@ using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Query.Implementations
 {
     internal class QueryFieldBuilder<TField, TExecutionContext> :
@@ -52,7 +54,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve)
         {
-            Resolve(resolve, (Action<ResolveOptionsBuilder>)null);
+            Resolve(resolve, (Action<ResolveOptionsBuilder>?)null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
@@ -63,7 +65,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve)
         {
-            Resolve(resolve, (Action<ResolveOptionsBuilder>)null);
+            Resolve(resolve, (Action<ResolveOptionsBuilder>?)null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
@@ -72,48 +74,54 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             Resolve(resolve, build, null);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
             Field.ApplyResolve((ctx, entity) => resolve(ctx), optionsBuilder);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
+        public void Resolve<TReturnType>(
+            Func<TExecutionContext, IEnumerable<TReturnType>> resolve,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build,
+            Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
             Field.ApplyResolve((ctx, entity) => resolve(ctx), build, optionsBuilder);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
             Field.ApplyResolve((ctx, entity) => resolve(ctx), optionsBuilder);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
+        public void Resolve<TReturnType>(
+            Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build,
+            Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
             Field.ApplyResolve((ctx, entity) => resolve(ctx), build, optionsBuilder);
         }
 
-        public IQueryFieldBuilder<TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        public IQueryFieldBuilder<TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
 
-        public IQueryFieldBuilder<TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        public IQueryFieldBuilder<TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AndImpl(build);
         }
 
-        public IQueryFieldBuilder<TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        public IQueryFieldBuilder<TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
@@ -166,32 +174,34 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return methodInfo.InvokeAndHoistBaseException<IQueryPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        public IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(Func<TExecutionContext, IQueryable<TReturnType>> query, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> configure)
+        public IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
             where TReturnType : class
         {
             return new FromIQueryableBuilder<object, TReturnType, TExecutionContext>(Field.Parent.FromIQueryableClass(Field, query, null, configure));
         }
 
-        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return new QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build, false));
         }
 
-        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
             return new QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build, true));
         }
 
-        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
         }
 
-        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
+        private QueryFieldBuilder<UnionField<object, TExecutionContext>, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {

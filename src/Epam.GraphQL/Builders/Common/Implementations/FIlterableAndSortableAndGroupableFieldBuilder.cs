@@ -6,6 +6,8 @@
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
     internal class FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext> : SortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>,

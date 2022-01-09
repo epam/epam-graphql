@@ -7,6 +7,8 @@ using System;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class SelectBuilder<TField, TSourceType, TReturnType, TExecutionContext> :
@@ -38,7 +40,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Field.ApplySelect(selector);
         }
 
-        public void Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build)
+        public void Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
             Field.ApplySelect(selector, build);

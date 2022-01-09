@@ -7,11 +7,16 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasFromIQueryable<TEntity, TExecutionContext>
     {
-        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(Func<TExecutionContext, IQueryable<TReturnType>> query, Expression<Func<TEntity, TReturnType, bool>> condition, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build = null)
+        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query,
+            Expression<Func<TEntity, TReturnType, bool>> condition,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
             where TReturnType : class;
     }
 }

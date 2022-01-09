@@ -11,6 +11,8 @@ using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class FromBatchBuilder<TField, TSourceType, TReturnType, TExecutionContext> : SelectAndReferenceToBuilder<TField, TSourceType, TReturnType, TExecutionContext>,
@@ -31,28 +33,38 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         protected new TField Field { get; set; }
 
-        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(Func<TExecutionContext, IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<TExecutionContext, IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(batchFunc, build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
 
-        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(Func<IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(batchFunc, build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
 
-        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(Expression<Func<TSourceType, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TSourceType, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(keySelector, batchFunc, build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
 
-        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(Expression<Func<TSourceType, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc, Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>> build = null)
+        public IHasSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TSourceType, TKeyType>> keySelector,
+            Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(keySelector, batchFunc, build);

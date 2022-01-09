@@ -10,6 +10,8 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, TResult, TExecutionContext> : IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>
@@ -37,12 +39,12 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, T, TExecutionContext>(Registry, Field.ApplySelect(selector));
         }
 
-        public virtual void SingleOrDefault(Expression<Func<TResult, bool>> predicate)
+        public virtual void SingleOrDefault(Expression<Func<TResult, bool>>? predicate)
         {
             Field.ApplySingleOrDefault(predicate);
         }
 
-        public virtual void FirstOrDefault(Expression<Func<TResult, bool>> predicate)
+        public virtual void FirstOrDefault(Expression<Func<TResult, bool>>? predicate)
         {
             Field.ApplyFirstOrDefault(predicate);
         }

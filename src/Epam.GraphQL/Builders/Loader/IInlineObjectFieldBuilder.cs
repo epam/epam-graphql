@@ -8,6 +8,8 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : IHasFromIQueryable<TEntity, TExecutionContext>, IHasFromBatch<TEntity, TExecutionContext>

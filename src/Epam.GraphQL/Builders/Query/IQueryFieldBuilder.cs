@@ -11,6 +11,8 @@ using Epam.GraphQL.Builders.Projection;
 using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Query
 {
     public partial interface IQueryFieldBuilder<TExecutionContext> :
@@ -35,7 +37,9 @@ namespace Epam.GraphQL.Builders.Query
         IQueryArgumentBuilder<Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TEntity>(Type projectionType, string name)
             where TEntity : class;
 
-        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(Func<TExecutionContext, IQueryable<TReturnType>> query, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> configure = null)
+        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure = null)
             where TReturnType : class;
     }
 

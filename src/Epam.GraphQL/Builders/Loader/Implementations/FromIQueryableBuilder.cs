@@ -11,6 +11,8 @@ using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal static class FromIQueryableBuilder
@@ -19,7 +21,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             FieldBase<TSourceType, TExecutionContext> parentField,
             Func<TExecutionContext, IQueryable<TSelectType>> query,
             Expression<Func<TSourceType, TSelectType, bool>> condition,
-            Action<IInlineObjectBuilder<TSelectType, TExecutionContext>> build)
+            Action<IInlineObjectBuilder<TSelectType, TExecutionContext>>? build)
             where TSourceType : class
             where TSelectType : class
         {

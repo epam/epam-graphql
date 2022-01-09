@@ -11,6 +11,8 @@ using Epam.GraphQL.Filters;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
     internal class ConnectionBuilder<TEntity, TChildEntity, TExecutionContext> : IConnectionBuilder
