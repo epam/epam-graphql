@@ -220,12 +220,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
                     return null;
                 }
 
-                return new ForeignKeyMetadata
-                {
-                    ToType = graphType,
-                    ToField = ItemToArray(fieldType),
-                    FromField = ItemToArray(childFieldType),
-                };
+                return new ForeignKeyMetadata(
+                    toType: graphType,
+                    toField: ItemToArray(fieldType),
+                    fromField: ItemToArray(childFieldType));
             }
 
             return null;

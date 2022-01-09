@@ -15,23 +15,25 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL
 {
     public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>
     {
-        protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
+        protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
             return new QueryFieldBuilder<Field<object, TExecutionContext>, TExecutionContext>(field);
         }
 
-        protected internal IConnectionBuilder Connection<TChildLoader>(string name, string deprecationReason = null)
+        protected internal IConnectionBuilder Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
             return Connection(typeof(TChildLoader), name, deprecationReason);
         }
 
-        protected internal IConnectionBuilder Connection(Type childLoaderType, string name, string deprecationReason = null)
+        protected internal IConnectionBuilder Connection(Type childLoaderType, string name, string? deprecationReason = null)
         {
             var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(childLoaderType, typeof(Loader<,>));
 
@@ -58,13 +60,13 @@ namespace Epam.GraphQL
             return (IConnectionBuilder)projectionBuilder.CreateInstanceAndHoistBaseException(field);
         }
 
-        protected internal IConnectionBuilder Connection<TChildLoader, TEntity>(string name, Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order, string deprecationReason = null)
+        protected internal IConnectionBuilder Connection<TChildLoader, TEntity>(string name, Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order, string? deprecationReason = null)
             where TChildLoader : class
         {
             return Connection(typeof(TChildLoader), name, order, deprecationReason);
         }
 
-        protected internal IConnectionBuilder Connection<TEntity>(Type childLoaderType, string name, Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order, string deprecationReason = null)
+        protected internal IConnectionBuilder Connection<TEntity>(Type childLoaderType, string name, Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order, string? deprecationReason = null)
         {
             var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(childLoaderType, typeof(Loader<,>));
 
@@ -102,10 +104,10 @@ namespace Epam.GraphQL
             return (IConnectionBuilder)projectionBuilder.CreateInstanceAndHoistBaseException(field);
         }
 
-        protected internal IConnectionBuilder GroupConnection<TChildLoader>(string name, string deprecationReason = null)
+        protected internal IConnectionBuilder GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class => GroupConnection(typeof(TChildLoader), name, deprecationReason);
 
-        protected internal IConnectionBuilder GroupConnection(Type childLoaderType, string name, string deprecationReason = null)
+        protected internal IConnectionBuilder GroupConnection(Type childLoaderType, string name, string? deprecationReason = null)
         {
             var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(childLoaderType, typeof(Loader<,>));
 

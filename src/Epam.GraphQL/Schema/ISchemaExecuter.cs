@@ -6,6 +6,8 @@
 using System.Threading.Tasks;
 using GraphQL;
 
+#nullable enable
+
 namespace Epam.GraphQL
 {
     /// <summary>

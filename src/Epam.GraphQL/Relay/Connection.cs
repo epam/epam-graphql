@@ -6,16 +6,18 @@
 using System.Collections.Generic;
 using GraphQL.Types.Relay.DataObjects;
 
+#nullable enable
+
 namespace Epam.GraphQL.Relay
 {
     public class Connection<T>
     {
         public int TotalCount { get; set; }
 
-        public PageInfo PageInfo { get; set; }
+        public PageInfo? PageInfo { get; set; }
 
-        public IEnumerable<Edge<T>> Edges { get; set; }
+        public IEnumerable<Edge<T>>? Edges { get; set; }
 
-        public IEnumerable<T> Items { get; set; }
+        public IEnumerable<T>? Items { get; set; }
     }
 }

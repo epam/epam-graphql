@@ -96,7 +96,7 @@ namespace Epam.GraphQL.Helpers
             return ValueAccessExpressionCacher<TEntity, TProperty>.MakeValueAccessExpression(selector);
         }
 
-        public static Expression<Func<object, object>> MakeWeakLambdaExpression(LambdaExpression selector)
+        public static Expression<Func<object?, object?>> MakeWeakLambdaExpression(LambdaExpression selector)
         {
             if (selector.Parameters.Count != 1)
             {
@@ -107,7 +107,7 @@ namespace Epam.GraphQL.Helpers
             var convertParamExpression = Expression.Convert(paramExpression, selector.Parameters[0].Type);
             var keySelectorExpression = ParameterRebinder.ReplaceParameter(selector.Body, selector.Parameters[0], convertParamExpression);
             var convertResultExpression = Expression.Convert(keySelectorExpression, typeof(object));
-            var result = Expression.Lambda<Func<object, object>>(convertResultExpression, paramExpression);
+            var result = Expression.Lambda<Func<object?, object?>>(convertResultExpression, paramExpression);
 
             return result;
         }

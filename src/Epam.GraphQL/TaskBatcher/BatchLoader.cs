@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using GraphQL.DataLoader;
+
+#nullable enable
 
 namespace Epam.GraphQL.TaskBatcher
 {
@@ -132,7 +134,7 @@ namespace Epam.GraphQL.TaskBatcher
         }
     }
 
-    internal class BatchLoader<TId, TItem> : DataLoaderBase<TId, TItem>, IDataLoader<TId, TItem>, IBatchLoaderContinuation<TId, TItem>
+    internal class BatchLoader<TId, TItem> : DataLoaderBase<TId, TItem?>, IDataLoader<TId, TItem?>, IBatchLoaderContinuation<TId, TItem?>
     {
         private readonly Func<IEnumerable<TId>, IDictionary<TId, TItem>> _loader;
         private readonly Func<string> _stepNameFactory;
@@ -156,17 +158,17 @@ namespace Epam.GraphQL.TaskBatcher
             _profiler = profiler;
         }
 
-        public IDataLoader<TId, T> Combine<T>(Func<TId, TItem, T> continuation)
+        public IDataLoader<TId, T> Combine<T>(Func<TId, TItem?, T> continuation)
         {
-            return new BatchLoaderContinuation<TItem, TId, T>(this, continuation);
+            return new BatchLoaderContinuation<TItem?, TId, T>(this, continuation);
         }
 
-        public IDataLoader<TId, T> Combine<T>(Func<TItem, T> continuation)
+        public IDataLoader<TId, T> Combine<T>(Func<TItem?, T> continuation)
         {
-            return new BatchLoaderContinuation<TItem, TId, T>(this, continuation);
+            return new BatchLoaderContinuation<TItem?, TId, T>(this, continuation);
         }
 
-        protected override Task FetchAsync(IEnumerable<DataLoaderPair<TId, TItem>> list, CancellationToken cancellationToken)
+        protected override Task FetchAsync(IEnumerable<DataLoaderPair<TId, TItem?>> list, CancellationToken cancellationToken)
         {
             using (_profiler?.Step(_stepNameFactory()))
             {
@@ -174,7 +176,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var dictionary = _loader(keys);
                 foreach (var item in list)
                 {
-                    if (!dictionary.TryGetValue(item.Key, out var value))
+                    if (!dictionary.TryGetValue(item.Key, out TItem? value))
                     {
                         value = default;
                     }
@@ -187,14 +189,14 @@ namespace Epam.GraphQL.TaskBatcher
         }
     }
 
-    internal class AsyncBatchLoader<TId, TItem> : DataLoaderBase<TId, TItem>, IDataLoader<TId, TItem>, IBatchLoaderContinuation<TId, TItem>
+    internal class AsyncBatchLoader<TId, TItem> : DataLoaderBase<TId, TItem?>, IDataLoader<TId, TItem?>, IBatchLoaderContinuation<TId, TItem?>
     {
         private readonly Func<IEnumerable<TId>, ValueTask<IDictionary<TId, TItem>>> _loader;
         private readonly Func<string> _stepNameFactory;
         private readonly IProfiler _profiler;
-        private readonly Func<TId, TItem> _defaultFactory;
+        private readonly Func<TId, TItem?> _defaultFactory;
 
-        public AsyncBatchLoader(Func<IEnumerable<TId>, IAsyncEnumerable<KeyValuePair<TId, TItem>>> batchLoad, Func<TId, TItem> defaultFactory, Func<string> stepNameFactory, IProfiler profiler)
+        public AsyncBatchLoader(Func<IEnumerable<TId>, IAsyncEnumerable<KeyValuePair<TId, TItem>>> batchLoad, Func<TId, TItem?> defaultFactory, Func<string> stepNameFactory, IProfiler profiler)
             : base()
         {
             if (batchLoad == null)
@@ -213,19 +215,19 @@ namespace Epam.GraphQL.TaskBatcher
             _profiler = profiler;
         }
 
-        public TItem Default(TId id) => _defaultFactory(id);
+        public TItem? Default(TId id) => _defaultFactory(id);
 
-        public IDataLoader<TId, T> Combine<T>(Func<TId, TItem, T> continuation)
+        public IDataLoader<TId, T> Combine<T>(Func<TId, TItem?, T> continuation)
         {
-            return new BatchLoaderContinuation<TItem, TId, T>(this, continuation);
+            return new BatchLoaderContinuation<TItem?, TId, T>(this, continuation);
         }
 
-        public IDataLoader<TId, T> Combine<T>(Func<TItem, T> continuation)
+        public IDataLoader<TId, T> Combine<T>(Func<TItem?, T> continuation)
         {
-            return new BatchLoaderContinuation<TItem, TId, T>(this, continuation);
+            return new BatchLoaderContinuation<TItem?, TId, T>(this, continuation);
         }
 
-        protected override async Task FetchAsync(IEnumerable<DataLoaderPair<TId, TItem>> list, CancellationToken cancellationToken)
+        protected override async Task FetchAsync(IEnumerable<DataLoaderPair<TId, TItem?>> list, CancellationToken cancellationToken)
         {
             using (_profiler?.Step(_stepNameFactory()))
             {
@@ -233,7 +235,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var dictionary = await _loader(keys).ConfigureAwait(false);
                 foreach (var item in list)
                 {
-                    if (!dictionary.TryGetValue(item.Key, out var value))
+                    if (!dictionary.TryGetValue(item.Key, out TItem? value))
                     {
                         value = _defaultFactory(item.Key);
                     }
@@ -244,7 +246,7 @@ namespace Epam.GraphQL.TaskBatcher
         }
     }
 
-    internal class TaskBatchLoader<TId, TItem> : DataLoaderBase<TId, TItem>, IDataLoader<TId, TItem>, IBatchLoaderContinuation<TId, TItem>
+    internal class TaskBatchLoader<TId, TItem> : DataLoaderBase<TId, TItem?>, IDataLoader<TId, TItem?>, IBatchLoaderContinuation<TId, TItem?>
     {
         private readonly Func<IEnumerable<TId>, Task<IDictionary<TId, TItem>>> _loader;
         private readonly Func<string> _stepNameFactory;
@@ -258,17 +260,17 @@ namespace Epam.GraphQL.TaskBatcher
             _profiler = profiler;
         }
 
-        public IDataLoader<TId, T> Combine<T>(Func<TId, TItem, T> continuation)
+        public IDataLoader<TId, T> Combine<T>(Func<TId, TItem?, T> continuation)
         {
-            return new BatchLoaderContinuation<TItem, TId, T>(this, continuation);
+            return new BatchLoaderContinuation<TItem?, TId, T>(this, continuation);
         }
 
-        public IDataLoader<TId, T> Combine<T>(Func<TItem, T> continuation)
+        public IDataLoader<TId, T> Combine<T>(Func<TItem?, T> continuation)
         {
-            return new BatchLoaderContinuation<TItem, TId, T>(this, continuation);
+            return new BatchLoaderContinuation<TItem?, TId, T>(this, continuation);
         }
 
-        protected override async Task FetchAsync(IEnumerable<DataLoaderPair<TId, TItem>> list, CancellationToken cancellationToken)
+        protected override async Task FetchAsync(IEnumerable<DataLoaderPair<TId, TItem?>> list, CancellationToken cancellationToken)
         {
             using (_profiler?.Step(_stepNameFactory()))
             {
@@ -276,7 +278,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var dictionary = await _loader(keys).ConfigureAwait(false);
                 foreach (var item in list)
                 {
-                    if (!dictionary.TryGetValue(item.Key, out var value))
+                    if (!dictionary.TryGetValue(item.Key, out TItem? value))
                     {
                         value = default;
                     }

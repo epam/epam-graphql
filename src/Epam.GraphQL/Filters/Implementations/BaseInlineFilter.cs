@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -12,6 +12,8 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters.Inputs;
+
+#nullable enable
 
 namespace Epam.GraphQL.Filters.Implementations
 {
@@ -29,7 +31,7 @@ namespace Epam.GraphQL.Filters.Implementations
             _nullValue = nullValue;
         }
 
-        public Type FieldType => _field.FieldType;
+        public Type FieldType => _field.FieldType ?? throw new NotSupportedException();
 
         public string FieldName => _field.Name;
 
@@ -37,14 +39,14 @@ namespace Epam.GraphQL.Filters.Implementations
             ? typeof(ComparisonsFilter<TItemType, TListItemType>)
             : typeof(InFilter<TItemType, TListItemType>);
 
-        LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object filter)
+        LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {
-            return BuildExpression(context, (EqFilter<TItemType>)filter);
+            return BuildExpression(context, (EqFilter<TItemType>?)filter);
         }
 
-        public Expression<Func<TEntity, bool>> BuildExpression(TExecutionContext context, EqFilter<TItemType> filter)
+        public Expression<Func<TEntity, bool>> BuildExpression(TExecutionContext context, EqFilter<TItemType>? filter)
         {
-            Expression<Func<TEntity, bool>> result = null;
+            Expression<Func<TEntity, bool>>? result = null;
 
             if (filter == null)
             {
@@ -125,9 +127,9 @@ namespace Epam.GraphQL.Filters.Implementations
             return HashCode.Combine(_field);
         }
 
-        public override bool Equals(object obj) => Equals(obj as BaseInlineFilter<TEntity, TReturnType, TItemType, TListItemType, TExecutionContext>);
+        public override bool Equals(object? obj) => Equals(obj as BaseInlineFilter<TEntity, TReturnType, TItemType, TListItemType, TExecutionContext>);
 
-        public bool Equals(BaseInlineFilter<TEntity, TReturnType, TItemType, TListItemType, TExecutionContext> other)
+        public bool Equals(BaseInlineFilter<TEntity, TReturnType, TItemType, TListItemType, TExecutionContext>? other)
         {
             if (other == null)
             {

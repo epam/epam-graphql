@@ -33,14 +33,14 @@ namespace Epam.GraphQL.TaskBatcher
 
         internal IProfiler Profiler { get; }
 
-        public IDataLoader<TId, TItem> Get<TId, TItem, TExecutionContext>(
+        public IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> loader)
         {
-            return (IDataLoader<TId, TItem>)_batchTaskCache!.GetOrAdd((loader, context), Factory!);
+            return (IDataLoader<TId, TItem?>)_batchTaskCache!.GetOrAdd((loader, context), Factory!);
 
-            IDataLoader<TId, TItem> Factory((Delegate Loader, object Context) key)
+            IDataLoader<TId, TItem?> Factory((Delegate Loader, object Context) key)
             {
                 var loader = (Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>>)key.Loader;
                 var context = (TExecutionContext)key.Context;
@@ -49,14 +49,14 @@ namespace Epam.GraphQL.TaskBatcher
             }
         }
 
-        public IDataLoader<TId, TItem> Get<TId, TItem, TExecutionContext>(
+        public IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>> loader)
         {
-            return (IDataLoader<TId, TItem>)_batchTaskCache!.GetOrAdd((loader, context), Factory!);
+            return (IDataLoader<TId, TItem?>)_batchTaskCache!.GetOrAdd((loader, context), Factory!);
 
-            IDataLoader<TId, TItem> Factory((Delegate Loader, object Context) key)
+            IDataLoader<TId, TItem?> Factory((Delegate Loader, object Context) key)
             {
                 var loader = (Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>>)key.Loader;
                 var context = (TExecutionContext)key.Context;

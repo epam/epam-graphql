@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -7,6 +7,8 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
 using GraphQL;
+
+#nullable enable
 
 namespace Epam.GraphQL.Filters.Implementations
 {
@@ -38,12 +40,12 @@ namespace Epam.GraphQL.Filters.Implementations
 
         public Type FilterType => typeof(TValueType);
 
-        LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object filter)
+        LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {
-            return BuildExpression(context, (TValueType)filter);
+            return BuildExpression(context, (TValueType?)filter);
         }
 
-        public LambdaExpression BuildExpression(TExecutionContext context, TValueType filter)
+        public LambdaExpression BuildExpression(TExecutionContext context, TValueType? filter)
         {
             if (filter != null)
             {
@@ -57,7 +59,7 @@ namespace Epam.GraphQL.Filters.Implementations
 
         public bool Equals(IInlineFilter<TExecutionContext> obj) => Equals(obj as CustomInlineFilter<TEntity, TValueType, TExecutionContext>);
 
-        public bool Equals(CustomInlineFilter<TEntity, TValueType, TExecutionContext> other)
+        public bool Equals(CustomInlineFilter<TEntity, TValueType, TExecutionContext>? other)
         {
             if (other == null)
             {

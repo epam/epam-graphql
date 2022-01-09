@@ -23,6 +23,8 @@ using GraphQL;
 using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 
+#nullable enable
+
 namespace Epam.GraphQL
 {
     public abstract class Mutation<TExecutionContext> : RootProjection<TExecutionContext>
@@ -38,7 +40,7 @@ namespace Epam.GraphQL
         private readonly PropertyInfo _mutationResultDataPropInfo;
         private readonly Lazy<SubmitInputTypeRegistry<TExecutionContext>> _submitInputTypeRegistry;
 
-        private Type _submitOutputType;
+        private Type _submitOutputType = null!; // Initialized in AfterConfigure method
 
         protected Mutation()
         {
@@ -111,7 +113,7 @@ namespace Epam.GraphQL
             SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
         }
 
-        protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
+        protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
             return new MutationFieldBuilder<Field<object, TExecutionContext>, TExecutionContext>(field);

@@ -982,7 +982,7 @@ namespace Epam.GraphQL
         protected Mutation() { }
         protected override void AfterConfigure() { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(TExecutionContext context, System.Collections.Generic.IEnumerable<object> entities) { }
-        protected Epam.GraphQL.Builders.Mutation.IMutationFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Mutation.IMutationFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null) { }
         protected void SubmitField(System.Type loaderType, string fieldName) { }
         protected void SubmitField<TLoader, TEntity>(string fieldName)
             where TLoader : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext>
@@ -995,15 +995,15 @@ namespace Epam.GraphQL
     public abstract class Query<TExecutionContext> : Epam.GraphQL.Loaders.RootProjection<TExecutionContext>
     {
         protected Query() { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection(System.Type childLoaderType, string name, string deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TChildLoader>(string name, string deprecationReason = null)
+        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection(System.Type childLoaderType, string name, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader :  class { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TEntity>(System.Type childLoaderType, string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order, string deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TChildLoader, TEntity>(string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order, string deprecationReason = null)
+        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TEntity>(System.Type childLoaderType, string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TChildLoader, TEntity>(string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order, string? deprecationReason = null)
             where TChildLoader :  class { }
-        protected Epam.GraphQL.Builders.Query.IQueryFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder GroupConnection(System.Type childLoaderType, string name, string deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder GroupConnection<TChildLoader>(string name, string deprecationReason = null)
+        protected Epam.GraphQL.Builders.Query.IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Common.IConnectionBuilder GroupConnection(System.Type childLoaderType, string name, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Common.IConnectionBuilder GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader :  class { }
     }
     public class ResolveOptions : Epam.GraphQL.Helpers.Options<Epam.GraphQL.ResolveOptions>
@@ -1062,18 +1062,18 @@ namespace Epam.GraphQL
     {
         public SchemaExecutionOptions() { }
         public System.Threading.CancellationToken CancellationToken { get; set; }
-        public GraphQL.Validation.Complexity.ComplexityConfiguration ComplexityConfiguration { get; set; }
-        public Epam.GraphQL.IDataContext DataContext { get; set; }
-        public GraphQL.Language.AST.Document Document { get; set; }
+        public GraphQL.Validation.Complexity.ComplexityConfiguration? ComplexityConfiguration { get; set; }
+        public Epam.GraphQL.IDataContext? DataContext { get; set; }
+        public GraphQL.Language.AST.Document? Document { get; set; }
         public bool EnableMetrics { get; set; }
         public TExecutionContext ExecutionContext { get; set; }
-        public string OperationName { get; set; }
-        public string Query { get; set; }
+        public string? OperationName { get; set; }
+        public string? Query { get; set; }
         public bool ThrowOnUnhandledException { get; set; }
         [System.Obsolete("UserContext has been renamed to ExecutionContext. Use ExecutionContext instead")]
         public TExecutionContext UserContext { get; set; }
-        public System.Collections.Generic.IEnumerable<GraphQL.Validation.IValidationRule> ValidationRules { get; set; }
-        public System.Collections.Generic.Dictionary<string, object> Variables { get; set; }
+        public System.Collections.Generic.IEnumerable<GraphQL.Validation.IValidationRule>? ValidationRules { get; set; }
+        public System.Collections.Generic.Dictionary<string, object>? Variables { get; set; }
     }
     public class SchemaOptions : Epam.GraphQL.Helpers.Options<Epam.GraphQL.SchemaOptions>
     {
@@ -1334,8 +1334,8 @@ namespace Epam.GraphQL.Mutation
 {
     public interface IMutationResult
     {
-        object Data { get; set; }
-        System.Collections.Generic.IEnumerable<object> Payload { get; set; }
+        object? Data { get; set; }
+        System.Collections.Generic.IEnumerable<object>? Payload { get; set; }
     }
     public static class MutationResult
     {
@@ -1345,7 +1345,7 @@ namespace Epam.GraphQL.Mutation
     {
         public MutationResult() { }
         public TData Data { get; set; }
-        public System.Collections.Generic.IEnumerable<object> Payload { get; set; }
+        public System.Collections.Generic.IEnumerable<object>? Payload { get; set; }
     }
 }
 namespace Epam.GraphQL.Relay
@@ -1353,9 +1353,9 @@ namespace Epam.GraphQL.Relay
     public class Connection<T>
     {
         public Connection() { }
-        public System.Collections.Generic.IEnumerable<GraphQL.Types.Relay.DataObjects.Edge<T>> Edges { get; set; }
-        public System.Collections.Generic.IEnumerable<T> Items { get; set; }
-        public GraphQL.Types.Relay.DataObjects.PageInfo PageInfo { get; set; }
+        public System.Collections.Generic.IEnumerable<GraphQL.Types.Relay.DataObjects.Edge<T>>? Edges { get; set; }
+        public System.Collections.Generic.IEnumerable<T>? Items { get; set; }
+        public GraphQL.Types.Relay.DataObjects.PageInfo? PageInfo { get; set; }
         public int TotalCount { get; set; }
     }
 }
@@ -1400,7 +1400,7 @@ namespace Epam.GraphQL.Search
     public interface ISearcher { }
     public interface ISearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
     {
-        System.Linq.IQueryable<TEntity> All(System.Linq.IQueryable<TEntity> query, TExecutionContext context, string search);
+        System.Linq.IQueryable<TEntity> All(System.Linq.IQueryable<TEntity> query, TExecutionContext context, string? search);
     }
     public abstract class OrderedSearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.Searcher<TEntity, TExecutionContext>, Epam.GraphQL.Search.IOrderedSearcher<TEntity, TExecutionContext>, Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
     {
@@ -1411,8 +1411,8 @@ namespace Epam.GraphQL.Search
     public abstract class Searcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
     {
         protected Searcher() { }
-        public abstract System.Linq.IQueryable<TEntity> All(System.Linq.IQueryable<TEntity> query, TExecutionContext context, string search);
-        public bool Equals(Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext> other) { }
+        public abstract System.Linq.IQueryable<TEntity> All(System.Linq.IQueryable<TEntity> query, TExecutionContext context, string? search);
+        public bool Equals(Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>? other) { }
         public override bool Equals(object obj) { }
         public override int GetHashCode() { }
     }

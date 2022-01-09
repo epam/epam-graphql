@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -12,12 +12,14 @@ using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 
+#nullable enable
+
 namespace Epam.GraphQL.Filters.Implementations
 {
-    internal class StringInlineFilter<TEntity, TExecutionContext> : BaseInlineFilter<TEntity, string, string, string, TExecutionContext>
+    internal class StringInlineFilter<TEntity, TExecutionContext> : BaseInlineFilter<TEntity, string?, string, string, TExecutionContext>
         where TEntity : class
     {
-        public StringInlineFilter(ExpressionField<TEntity, string, TExecutionContext> field, string[] defaultValues, NullOption? nullValue)
+        public StringInlineFilter(ExpressionField<TEntity, string?, TExecutionContext> field, string[] defaultValues, NullOption? nullValue)
             : base(field, defaultValues, nullValue)
         {
         }
@@ -29,7 +31,7 @@ namespace Epam.GraphQL.Filters.Implementations
 
         protected override Expression<Func<TEntity, bool>> BuildIsNullExpression(TExecutionContext context, bool isNull)
         {
-            var result = BuildExpression(context).MakeComparisonExpression(ComparisonType.Eq, null);
+            var result = BuildExpression(context).MakeComparisonExpression(ComparisonType.Eq, default);
             if (!isNull)
             {
                 result = result.Not();

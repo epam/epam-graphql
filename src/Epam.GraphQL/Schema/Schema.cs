@@ -5,6 +5,8 @@
 
 using System;
 
+#nullable enable
+
 namespace Epam.GraphQL
 {
     /// <inheritdoc/>

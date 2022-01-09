@@ -19,6 +19,8 @@ using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 using DocumentExecuter = Epam.GraphQL.TaskBatcher.DocumentExecuter;
 
+#nullable enable
+
 namespace Epam.GraphQL
 {
     /// <summary>
@@ -122,7 +124,7 @@ namespace Epam.GraphQL
 
             GraphQLSchema.Initialize();
 
-            var typeGraphType = GraphQLSchema.FindType(nameof(__Type)) as __Type;
+            var typeGraphType = (__Type)GraphQLSchema.FindType(nameof(__Type));
             var field = new FieldType()
             {
                 Name = "metadata",
