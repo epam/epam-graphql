@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
     internal class ProjectionFieldBuilder<TField, TEntity, TExecutionContext> :
         IProjectionFieldBuilder<TEntity, TExecutionContext>
         where TEntity : class
-        where TField : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>, IFieldSupportsApplyUnion<TEntity, TExecutionContext>
+        where TField : FieldBase<TEntity, TExecutionContext>, IResolvableField<TEntity, TExecutionContext>, IFieldSupportsApplyUnion<TEntity, TExecutionContext>
     {
         public ProjectionFieldBuilder(TField field)
         {

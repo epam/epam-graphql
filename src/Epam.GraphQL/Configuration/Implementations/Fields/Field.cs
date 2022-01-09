@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class Field<TEntity, TExecutionContext> :
         FieldBase<TEntity, TExecutionContext>,
-        IFieldSupportsApplyResolve<TEntity, TExecutionContext>,
+        IResolvableField<TEntity, TExecutionContext>,
         IFieldSupportsApplyUnion<TEntity, TExecutionContext>
         where TEntity : class
     {

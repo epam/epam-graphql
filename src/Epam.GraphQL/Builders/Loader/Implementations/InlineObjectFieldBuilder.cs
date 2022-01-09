@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class InlineObjectFieldBuilder<TField, TEntity, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>, IInlineObjectFieldBuilder<TEntity, TExecutionContext>
         where TEntity : class
-        where TField : FieldBase<TEntity, TExecutionContext>, IFieldSupportsApplyResolve<TEntity, TExecutionContext>, IFieldSupportsApplyUnion<TEntity, TExecutionContext>
+        where TField : FieldBase<TEntity, TExecutionContext>, IResolvableField<TEntity, TExecutionContext>, IFieldSupportsApplyUnion<TEntity, TExecutionContext>
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
 

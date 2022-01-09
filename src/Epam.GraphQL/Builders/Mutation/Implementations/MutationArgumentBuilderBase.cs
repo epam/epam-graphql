@@ -6,7 +6,7 @@
 using System;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.RootProjection.Implementations;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations

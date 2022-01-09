@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
 {
     internal class QueryFieldBuilder<TField, TExecutionContext> :
         IQueryFieldBuilder<TExecutionContext>
-        where TField : FieldBase<object, TExecutionContext>, IFieldSupportsApplyResolve<object, TExecutionContext>, IFieldSupportsApplyUnion<object, TExecutionContext>
+        where TField : FieldBase<object, TExecutionContext>, IResolvableField<object, TExecutionContext>, IFieldSupportsApplyUnion<object, TExecutionContext>
     {
         public QueryFieldBuilder(TField field)
         {
