@@ -29,24 +29,24 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)
         {
-            Field.ApplyResolve(resolve, true, null);
+            Field.ApplyResolve(resolve, null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class
         {
-            Field.ApplyResolve(resolve, build, true, null);
+            Field.ApplyResolve(resolve, build, null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class
         {
-            Field.ApplyResolve(resolve, build, true, null);
+            Field.ApplyResolve(resolve, build, null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve)
         {
-            Field.ApplyResolve(resolve, true, null);
+            Field.ApplyResolve(resolve, null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve)
@@ -73,46 +73,46 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, true, optionsBuilder);
+            Field.ApplyResolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
             where TReturnType : class
         {
-            Field.ApplyResolve(resolve, build, true, optionsBuilder);
+            Field.ApplyResolve(resolve, build, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, true, optionsBuilder);
+            Field.ApplyResolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
             where TReturnType : class
         {
-            Field.ApplyResolve(resolve, build, true, optionsBuilder);
+            Field.ApplyResolve(resolve, build, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, TReturnType> resolve)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), true, null);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), null);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), build, true, null);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), build, null);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), build, true, null);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), build, null);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, Task<TReturnType>> resolve)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), true, null);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), null);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, IEnumerable<TReturnType>> resolve)
@@ -139,24 +139,24 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
 
         public void Resolve<TReturnType>(Func<TEntity, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), true, optionsBuilder);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
             where TReturnType : class
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), build, true, optionsBuilder);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), build, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), true, optionsBuilder);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
             where TReturnType : class
         {
-            Field.ApplyResolve((ctx, entity) => resolve(entity), build, true, optionsBuilder);
+            Field.ApplyResolve((ctx, entity) => resolve(entity), build, optionsBuilder);
         }
 
         public IProjectionFieldBuilder<TEntity, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)

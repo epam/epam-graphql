@@ -28,7 +28,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, TReturnType> resolver,
             LazyQueryArguments? arguments,
-            bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
@@ -57,8 +56,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                             name,
                             graphType,
                             fieldResolver,
-                            arguments,
-                            doesDependOnAllFields);
+                            arguments);
                     }
                 }
             }
@@ -69,8 +67,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 name,
                 graphType,
                 new FuncFieldResolver<object, TReturnType>(resolver),
-                arguments,
-                doesDependOnAllFields);
+                arguments);
         }
 
         public static ResolvedField<TEntity, TReturnType, TExecutionContext> Create<TEntity, TReturnType, TExecutionContext>(
@@ -80,7 +77,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, Task<TReturnType>> resolver,
             LazyQueryArguments? arguments,
-            bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
@@ -111,8 +107,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                             name,
                             graphType,
                             fieldResolver,
-                            arguments,
-                            doesDependOnAllFields);
+                            arguments);
                     }
                 }
             }
@@ -123,8 +118,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 name,
                 graphType,
                 new AsyncFieldResolver<object, TReturnType>(resolver),
-                arguments,
-                doesDependOnAllFields);
+                arguments);
         }
 
         public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> Create<TEntity, TReturnType, TExecutionContext>(
@@ -134,7 +128,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, IEnumerable<TReturnType>> resolver,
             LazyQueryArguments? arguments,
-            bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
@@ -164,8 +157,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                             name,
                             graphType,
                             fieldResolver,
-                            arguments,
-                            doesDependOnAllFields);
+                            arguments);
                     }
                 }
             }
@@ -177,7 +169,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 graphType,
                 resolver,
                 arguments,
-                doesDependOnAllFields,
                 optionsBuilder);
         }
 
@@ -188,7 +179,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolver,
             LazyQueryArguments? arguments,
-            bool doesDependOnAllFields,
             Action<ResolveOptionsBuilder>? optionsBuilder)
             where TEntity : class
         {
@@ -220,8 +210,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                             name,
                             graphType,
                             fieldResolver,
-                            arguments,
-                            doesDependOnAllFields);
+                            arguments);
                     }
                 }
             }
@@ -233,7 +222,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 graphType,
                 resolver,
                 arguments,
-                doesDependOnAllFields,
                 optionsBuilder);
         }
     }
@@ -250,18 +238,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             IFieldResolver resolver,
-            LazyQueryArguments? arguments,
-            bool doesDependOnAllFields)
+            LazyQueryArguments? arguments)
             : base(registry, parent, name)
         {
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             _graphType = graphType;
             Arguments = arguments;
 
-            if (doesDependOnAllFields)
-            {
-                parent.ProxyAccessor.AddAllMembers(Name);
-            }
+            parent.ProxyAccessor.AddAllMembers(Name);
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;

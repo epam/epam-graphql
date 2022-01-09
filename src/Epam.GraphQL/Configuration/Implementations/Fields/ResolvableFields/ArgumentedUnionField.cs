@@ -51,46 +51,46 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public new IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
@@ -166,46 +166,46 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public new IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
@@ -281,46 +281,46 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
@@ -396,46 +396,46 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
@@ -511,46 +511,46 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
         public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)

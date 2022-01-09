@@ -124,15 +124,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             };
         }
 
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func, bool doesDependOnAllFields)
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func)
             where TEntity : class
         {
-            if (doesDependOnAllFields)
-            {
-                return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
-            }
-
-            return ctx => func(ctx.GetUserContext<TExecutionContext>(), null);
+            return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
         }
 
         public static IEnumerable<T> ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, IEnumerable<T> items)
