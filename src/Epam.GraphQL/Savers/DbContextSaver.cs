@@ -18,6 +18,8 @@ using GraphQL;
 using GraphQL.Language.AST;
 using Microsoft.Extensions.DependencyInjection;
 
+#nullable enable
+
 namespace Epam.GraphQL.Savers
 {
     internal static class DbContextSaver
@@ -34,10 +36,11 @@ namespace Epam.GraphQL.Savers
                 var results = await SaveChangesAndReload(registry, entities, mutation, context, options).ConfigureAwait(false);
 
                 var afterSaveEntities = await mutation.DoAfterSave(
-                    executionContext,
+                    context,
                     results
                         .SelectMany(result => result.ProcessedItems)
-                        .Select(item => item.Payload)).ConfigureAwait(false);
+                        .Where(item => item.Payload != null)
+                        .Select(item => item.Payload!)).ConfigureAwait(false);
 
                 var afterSaveResults = afterSaveEntities.Any()
                     ? await SaveChangesAndReload(
@@ -68,12 +71,12 @@ namespace Epam.GraphQL.Savers
             using (profiler.Step(nameof(PerformManualMutationAndGetResult)))
             {
                 var results = await SaveChangesAndReload(registry, mutationResult.Payload, mutation, context, options).ConfigureAwait(false);
-
                 var afterSaveEntities = await mutation.DoAfterSave(
-                    executionContext,
+                    context,
                     results
                         .SelectMany(result => result.ProcessedItems)
-                        .Select(item => item.Payload)).ConfigureAwait(false);
+                        .Where(item => item.Payload != null)
+                        .Select(item => item.Payload!)).ConfigureAwait(false);
 
                 var afterSaveResults = await SaveChangesAndReload(registry, afterSaveEntities, mutation, context, options).ConfigureAwait(false);
 
@@ -98,14 +101,15 @@ namespace Epam.GraphQL.Savers
             return (Task<object>)methodInfo.InvokeAndHoistBaseException(null, registry, mutationResult, mutation, context, options);
         }
 
-        public static async Task<IEnumerable<ISaveResult<TExecutionContext>>> SaveChangesAndReload<TExecutionContext>(RelationRegistry<TExecutionContext> registry, IEnumerable<object> entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<IEnumerable<ISaveResult<TExecutionContext>>> SaveChangesAndReload<TExecutionContext>(RelationRegistry<TExecutionContext> registry, IEnumerable<object>? entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
         {
-            var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
+            var dataContext = context.GetDataContext();
+            var batcher = context.GetBatcher();
+            var profiler = context.GetProfiler();
+
             var doNotSaveChanges = options.FindExtension<EFCoreResolveOptionsExtension>()?.DoNotSaveChanges ?? false;
             var doNotAddEntityToDbContext = options.FindExtension<EFCoreResolveOptionsExtension>()?.DoNotAddNewEntitiesToDbContext ?? false;
             var submitInputTypeRegistry = registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>();
-
-            var profiler = executionContext.Profiler;
 
             using (profiler.Step(nameof(SaveChangesAndReload)))
             {
@@ -127,12 +131,12 @@ namespace Epam.GraphQL.Savers
                         var newEntities = saveResult.ProcessedItems.Where(r => r.IsNew).Select(r => r.Payload);
                         if (newEntities.Any() && !doNotAddEntityToDbContext)
                         {
-                            var addRangeMethodInfo = typeof(IDataContext).GetMethod(nameof(executionContext.DataContext.AddRange)).MakeGenericMethod(entityType);
+                            var addRangeMethodInfo = typeof(IDataContext).GetMethod(nameof(dataContext.AddRange)).MakeGenericMethod(entityType);
                             var castMethodInfo = CachedReflectionInfo.ForEnumerable.Cast(entityType);
 
                             var castedEntities = castMethodInfo.InvokeAndHoistBaseException(null, newEntities);
 
-                            addRangeMethodInfo.InvokeAndHoistBaseException(executionContext.DataContext, castedEntities);
+                            addRangeMethodInfo.InvokeAndHoistBaseException(dataContext, castedEntities);
                         }
 
                         results.Add(saveResult);
@@ -140,7 +144,7 @@ namespace Epam.GraphQL.Savers
 
                     if (!doNotSaveChanges)
                     {
-                        await executionContext.DataContext.SaveChangesAsync().ConfigureAwait(false);
+                        await dataContext.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
 
@@ -148,8 +152,6 @@ namespace Epam.GraphQL.Savers
                 {
                     using (profiler.Step("Reload"))
                     {
-                        var batcher = executionContext.Batcher;
-
                         batcher.Reset();
                         foreach (var result in results)
                         {
@@ -157,7 +159,7 @@ namespace Epam.GraphQL.Savers
                             // so, update ids of them
                             foreach (var item in result.ProcessedItems)
                             {
-                                item.Id = result.Loader.GetId(item.Payload);
+                                item.UpdateId();
                             }
                         }
 
@@ -229,13 +231,12 @@ namespace Epam.GraphQL.Savers
         private readonly Dictionary<string, IMutableLoader<TExecutionContext>> _loaders = new();
         private readonly IDictionary<string, IEnumerable<IInputItem>> _inputItems;
         private readonly Mutation<TExecutionContext> _mutation;
-        private readonly IResolveFieldContext _context;
         private readonly RelationRegistry<TExecutionContext> _registry;
         private readonly SubmitInputTypeRegistry<TExecutionContext> _submitInputTypeRegistry;
 
         public DbContextSaver(RelationRegistry<TExecutionContext> registry, Mutation<TExecutionContext> mutation, IResolveFieldContext context, IDictionary<string, IEnumerable<IInputItem>> inputItems)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            Context = context ?? throw new ArgumentNullException(nameof(context));
             _inputItems = inputItems ?? throw new ArgumentNullException(nameof(inputItems));
             _mutation = mutation ?? throw new ArgumentNullException(nameof(mutation));
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
@@ -250,18 +251,18 @@ namespace Epam.GraphQL.Savers
             }
         }
 
-        private GraphQLContext<TExecutionContext> Context => (GraphQLContext<TExecutionContext>)_context.UserContext["ctx"];
+        private IResolveFieldContext Context { get; }
 
         public async Task<Dictionary<string, IList<ISaveResultItem>>> SaveEntitiesAsync()
         {
-            var profiler = Context.Profiler;
+            var profiler = Context.GetProfiler();
 
             using (profiler.Step(nameof(SaveEntitiesAsync)))
             {
                 var results = _loaders
                     .Select(kv => kv.Value.CreateSaveResultFromValues(_mutation.GetType(), kv.Key, _inputItems[kv.Key]));
 
-                var db = Context.DataContext;
+                var db = Context.GetDataContext();
                 await db.ExecuteInTransactionAsync(async () =>
                 {
                     results = await SavePendingItems(results).ConfigureAwait(false);
@@ -284,24 +285,25 @@ namespace Epam.GraphQL.Savers
                         Context,
                         results
                             .SelectMany(result => result.ProcessedItems)
-                            .Select(item => item.Payload)).ConfigureAwait(false);
+                            .Where(item => item.Payload != null)
+                            .Select(item => item.Payload!)).ConfigureAwait(false);
 
                     var afterSaveResults = await DbContextSaver.SaveChangesAndReload(
                         _registry,
                         afterSaveEntities,
                         _mutation,
-                        _context,
+                        Context,
                         DbContextSaver.DefaultOptions).ConfigureAwait(false);
 
                     using (profiler.Step("Reload"))
                     {
-                        var batcher = Context.Batcher;
+                        var batcher = Context.GetBatcher();
 
                         batcher.Reset();
 
                         foreach (var result in results)
                         {
-                            await result.Loader.ReloadAsync(_context, result, DbContextSaver.GetFieldsForReload(result, _context)).ConfigureAwait(false);
+                            await result.Loader.ReloadAsync(Context, result, DbContextSaver.GetFieldsForReload(result, Context)).ConfigureAwait(false);
                         }
 
                         results = results
@@ -324,7 +326,7 @@ namespace Epam.GraphQL.Savers
 
         private async Task<IEnumerable<ISaveResult<TExecutionContext>>> SavePendingItems(IEnumerable<ISaveResult<TExecutionContext>> saveResults)
         {
-            var profiler = Context.Profiler;
+            var profiler = Context.GetProfiler();
 
             using (profiler.Step(nameof(SavePendingItems)))
             {
@@ -337,7 +339,7 @@ namespace Epam.GraphQL.Savers
                     foreach (var result in results)
                     {
                         var loader = result.Loader;
-                        tasks.Add(await loader.MutateAsync(_context, result).ConfigureAwait(false));
+                        tasks.Add(await loader.MutateAsync(Context, result).ConfigureAwait(false));
                     }
 
                     results = tasks.SelectMany(r => r);
@@ -346,7 +348,7 @@ namespace Epam.GraphQL.Savers
 
                     UpdateRelations(results);
 
-                    await Context.DataContext.SaveChangesAsync().ConfigureAwait(false);
+                    await Context.GetDataContext().SaveChangesAsync().ConfigureAwait(false);
 
                     if (tryCount-- < 0)
                     {

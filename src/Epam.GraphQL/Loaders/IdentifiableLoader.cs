@@ -10,24 +10,21 @@ using Epam.GraphQL.Extensions;
 
 namespace Epam.GraphQL.Loaders
 {
-    public abstract class IdentifiableLoader<TEntity, TId, TExecutionContext> : Loader<TEntity, TExecutionContext>, IIdentifiableLoader
+    public abstract class IdentifiableLoader<TEntity, TId, TExecutionContext> : Loader<TEntity, TExecutionContext>, IIdentifiableLoader<TEntity, TId>
         where TEntity : class
     {
-        Func<object, object> IIdentifiableLoader.IdGetter => obj => IdGetter((TEntity)obj);
+        private Func<TEntity, TId> _idGetter;
 
         protected internal abstract Expression<Func<TEntity, TId>> IdExpression { get; }
-
-        private protected Func<TEntity, TId> IdGetter { get; private set; }
 
         public override IOrderedQueryable<TEntity> ApplyNaturalOrderBy(IQueryable<TEntity> query)
         {
             return query.OrderBy(IdExpression);
         }
 
-        public override IOrderedQueryable<TEntity> ApplyNaturalThenBy(IOrderedQueryable<TEntity> query)
-        {
-            return query.ThenBy(IdExpression);
-        }
+        object IIdentifiableLoader.GetId(object entity) => GetId((TEntity)entity);
+
+        TId IIdentifiableLoader<TEntity, TId>.GetId(TEntity entity) => GetId(entity);
 
         internal override void AfterConstruction()
         {
@@ -37,9 +34,11 @@ namespace Epam.GraphQL.Loaders
                 throw new ArgumentException($"{GetType()}: {IdExpression} is not a property");
             }
 
-            IdGetter = IdExpression.Compile();
+            _idGetter = IdExpression.Compile();
 
             Registry.Register(IdExpression);
         }
+
+        private protected TId GetId(TEntity entity) => _idGetter(entity);
     }
 }

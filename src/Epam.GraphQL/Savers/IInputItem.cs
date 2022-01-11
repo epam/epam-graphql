@@ -6,12 +6,14 @@
 using System.Collections.Generic;
 using Epam.GraphQL.Infrastructure;
 
+#nullable enable
+
 namespace Epam.GraphQL.Savers
 {
     [InternalApi]
     public interface IInputItem
     {
-        object Payload { get; }
+        object? Payload { get; }
 
         IDictionary<string, object> Properties { get; }
     }

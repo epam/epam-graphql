@@ -1123,7 +1123,7 @@ namespace Epam.GraphQL.Filters
     public interface IFilter<TEntity, TExecutionContext> : System.IEquatable<Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>>
     {
         System.Type FilterType { get; }
-        System.Linq.IQueryable<TEntity> All(Epam.GraphQL.Infrastructure.ISchemaExecutionListener listener, System.Linq.IQueryable<TEntity> query, TExecutionContext context, object? filter, System.Collections.Generic.IEnumerable<string>? filterFieldNames);
+        System.Linq.IQueryable<TEntity> All(Epam.GraphQL.Infrastructure.ISchemaExecutionListener listener, System.Linq.IQueryable<TEntity> query, TExecutionContext context, object filter);
     }
 }
 namespace Epam.GraphQL.Filters.Inputs
@@ -1185,22 +1185,28 @@ namespace Epam.GraphQL.Loaders
     public interface IFieldChange<TExecutionContext>
     {
         TExecutionContext Context { get; }
-        object Entity { get; }
+        object? Entity { get; }
     }
     public interface IFieldChange<out TEntity, TExecutionContext> : Epam.GraphQL.Loaders.IFieldChange<TExecutionContext>
     {
         TEntity Entity { get; }
-        object NextValue { get; }
-        object PreviousValue { get; }
+        object? NextValue { get; }
+        object? PreviousValue { get; }
     }
     public interface IFieldChange<out TEntity, out T, TExecutionContext> : Epam.GraphQL.Loaders.IFieldChange<TExecutionContext>, Epam.GraphQL.Loaders.IFieldChange<TEntity, TExecutionContext>
     {
         T NextValue { get; }
         T PreviousValue { get; }
     }
+    [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IIdentifiableLoader
     {
-        System.Func<object, object> IdGetter { get; }
+        object? GetId(object entity);
+    }
+    [Epam.GraphQL.Infrastructure.InternalApi]
+    public interface IIdentifiableLoader<TEntity, TId> : Epam.GraphQL.Loaders.IIdentifiableLoader
+    {
+        TId GetId(TEntity entity);
     }
     public interface ILoader<TEntity, TExecutionContext>
     {
@@ -1209,23 +1215,21 @@ namespace Epam.GraphQL.Loaders
         System.Linq.IOrderedQueryable<TEntity> ApplyNaturalThenBy(System.Linq.IOrderedQueryable<TEntity> query);
     }
     [Epam.GraphQL.Infrastructure.InternalApi]
-    public interface IMutableLoader<TExecutionContext>
+    public interface IMutableLoader<TExecutionContext> : Epam.GraphQL.Loaders.IIdentifiableLoader
     {
         System.Type EntityType { get; }
         Epam.GraphQL.Savers.ISaveResult<TExecutionContext> CreateSaveResultFromValues(System.Type mutationType, string fieldName, System.Collections.Generic.IEnumerable<Epam.GraphQL.Savers.IInputItem> values);
         Epam.GraphQL.Savers.ISaveResult<TExecutionContext> CreateSaveResultFromValues(System.Type mutationType, string fieldName, System.Collections.Generic.IEnumerable<object> values);
-        object GetId(object entity);
-        bool IsFakeId(object id);
+        bool IsFakeId(object? id);
         System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Epam.GraphQL.Savers.ISaveResult<TExecutionContext>>> MutateAsync(GraphQL.IResolveFieldContext context, Epam.GraphQL.Savers.ISaveResult<TExecutionContext> previousSaveResult);
         System.Threading.Tasks.Task ReloadAsync(GraphQL.IResolveFieldContext context, Epam.GraphQL.Savers.ISaveResult<TExecutionContext> saveResult, System.Collections.Generic.IEnumerable<string> fieldNames);
     }
-    public abstract class IdentifiableLoader<TEntity, TId, TExecutionContext> : Epam.GraphQL.Loaders.Loader<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.IIdentifiableLoader
+    public abstract class IdentifiableLoader<TEntity, TId, TExecutionContext> : Epam.GraphQL.Loaders.Loader<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.IIdentifiableLoader, Epam.GraphQL.Loaders.IIdentifiableLoader<TEntity, TId>
         where TEntity :  class
     {
         protected IdentifiableLoader() { }
         protected abstract System.Linq.Expressions.Expression<System.Func<TEntity, TId>> IdExpression { get; }
         public override System.Linq.IOrderedQueryable<TEntity> ApplyNaturalOrderBy(System.Linq.IQueryable<TEntity> query) { }
-        public override System.Linq.IOrderedQueryable<TEntity> ApplyNaturalThenBy(System.Linq.IOrderedQueryable<TEntity> query) { }
     }
     public class Input
     {
@@ -1241,11 +1245,11 @@ namespace Epam.GraphQL.Loaders
         public virtual System.Linq.IOrderedQueryable<TEntity> ApplyNaturalOrderBy(System.Linq.IQueryable<TEntity> query) { }
         public virtual System.Linq.IOrderedQueryable<TEntity> ApplyNaturalThenBy(System.Linq.IOrderedQueryable<TEntity> query) { }
         protected virtual System.Linq.IQueryable<TEntity> ApplySecurityFilter(TExecutionContext context, System.Linq.IQueryable<TEntity> query) { }
-        protected Epam.GraphQL.Builders.Loader.ILoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Loader.ILoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null) { }
         protected abstract System.Linq.IQueryable<TEntity> GetBaseQuery(TExecutionContext context);
         protected void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TEntity, T>> proxyExpression, System.Action<TExecutionContext, T> hook) { }
     }
-    public abstract class MutableLoader<TEntity, TId, TExecutionContext> : Epam.GraphQL.Loaders.IdentifiableLoader<TEntity, TId, TExecutionContext>, Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext>
+    public abstract class MutableLoader<TEntity, TId, TExecutionContext> : Epam.GraphQL.Loaders.IdentifiableLoader<TEntity, TId, TExecutionContext>, Epam.GraphQL.Loaders.IIdentifiableLoader, Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext>
         where TEntity :  class
     {
         protected MutableLoader() { }
@@ -1364,17 +1368,18 @@ namespace Epam.GraphQL.Savers
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IInputItem
     {
-        object Payload { get; }
+        object? Payload { get; }
         System.Collections.Generic.IDictionary<string, object> Properties { get; }
     }
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface ISaveResultItem
     {
-        object Id { get; set; }
+        object? Id { get; }
         bool IsNew { get; }
-        object Payload { get; }
+        object? Payload { get; }
         System.Collections.Generic.IDictionary<string, object> Properties { get; }
         Epam.GraphQL.Savers.ISaveResultItem Merge(Epam.GraphQL.Savers.ISaveResultItem item);
+        void UpdateId();
     }
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface ISaveResult<TExecutionContext>

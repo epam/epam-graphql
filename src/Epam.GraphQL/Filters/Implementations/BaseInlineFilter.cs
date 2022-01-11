@@ -21,10 +21,10 @@ namespace Epam.GraphQL.Filters.Implementations
         where TEntity : class
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
-        private readonly TListItemType[] _defaultValues;
+        private readonly TListItemType[]? _defaultValues;
         private readonly NullOption? _nullValue;
 
-        protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TListItemType[] defaultValues, NullOption? nullValue)
+        protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TListItemType[]? defaultValues, NullOption? nullValue)
         {
             _field = field ?? throw new ArgumentNullException(nameof(field));
             _defaultValues = defaultValues;

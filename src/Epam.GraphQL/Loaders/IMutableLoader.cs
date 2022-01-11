@@ -10,10 +10,12 @@ using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Savers;
 using GraphQL;
 
+#nullable enable
+
 namespace Epam.GraphQL.Loaders
 {
     [InternalApi]
-    public interface IMutableLoader<TExecutionContext>
+    public interface IMutableLoader<TExecutionContext> : IIdentifiableLoader
     {
         Type EntityType { get; }
 
@@ -25,8 +27,6 @@ namespace Epam.GraphQL.Loaders
 
         Task ReloadAsync(IResolveFieldContext context, ISaveResult<TExecutionContext> saveResult, IEnumerable<string> fieldNames);
 
-        bool IsFakeId(object id);
-
-        object GetId(object entity);
+        bool IsFakeId(object? id);
     }
 }

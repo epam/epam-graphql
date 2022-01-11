@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Extensions;
 
+#nullable enable
+
 namespace Epam.GraphQL.Savers
 {
     internal static class InputItem
@@ -30,6 +32,6 @@ namespace Epam.GraphQL.Savers
 
         public IDictionary<string, object> Properties { get; }
 
-        object IInputItem.Payload => Payload;
+        object? IInputItem.Payload => Payload;
     }
 }

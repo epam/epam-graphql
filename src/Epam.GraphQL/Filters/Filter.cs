@@ -4,7 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Infrastructure;
@@ -19,8 +18,8 @@ namespace Epam.GraphQL.Filters
     {
         Type IFilter<TEntity, TExecutionContext>.FilterType => typeof(TFilter);
 
-        IQueryable<TEntity> IFilter<TEntity, TExecutionContext>.All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object? filter, IEnumerable<string>? filterFieldNames) =>
-            All(listener, query, context, (TFilter?)filter);
+        IQueryable<TEntity> IFilter<TEntity, TExecutionContext>.All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter) =>
+            All(listener, query, context, (TFilter)filter);
 
         public override int GetHashCode() => GetType().GetHashCode();
 
@@ -31,19 +30,11 @@ namespace Epam.GraphQL.Filters
 
         protected abstract IQueryable<TEntity> ApplyFilter(TExecutionContext context, IQueryable<TEntity> query, TFilter filter);
 
-        private IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, TFilter? filter)
+        private IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, TFilter filter)
         {
-            if (listener == null)
-            {
-                throw new ArgumentNullException(nameof(listener));
-            }
-
-            if (filter != null)
-            {
-                var predicate = listener.GetAdditionalFilter<TExecutionContext, TEntity, TFilter>(context, filter);
-                query = query.SafeWhere(predicate);
-                query = ApplyFilter(context, query, filter);
-            }
+            var predicate = listener.GetAdditionalFilter<TExecutionContext, TEntity, TFilter>(context, filter);
+            query = query.SafeWhere(predicate);
+            query = ApplyFilter(context, query, filter);
 
             return query;
         }

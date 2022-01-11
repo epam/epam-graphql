@@ -56,13 +56,13 @@ namespace Epam.GraphQL
 
         private SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
 
-        internal async Task<IEnumerable<object>> DoAfterSave(GraphQLContext<TExecutionContext> context, IEnumerable<object> entities)
+        internal async Task<IEnumerable<object>> DoAfterSave(IResolveFieldContext context, IEnumerable<object> entities)
         {
-            var profiler = context.Profiler;
+            var profiler = context.GetProfiler();
 
             using (profiler.Step(nameof(DoAfterSave)))
             {
-                return await AfterSaveAsync(context.ExecutionContext, entities).ConfigureAwait(false);
+                return await AfterSaveAsync(context.GetUserContext<TExecutionContext>(), entities).ConfigureAwait(false);
             }
         }
 

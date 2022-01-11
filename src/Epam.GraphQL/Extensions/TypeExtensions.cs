@@ -142,18 +142,8 @@ namespace Epam.GraphQL.Extensions
             return type.Name;
         }
 
-        public static Type MakeInstantiatedProxyGenericType(this Type? proxyGenericType, IEnumerable<string>? propertyNames, bool withOriginal)
+        public static Type MakeInstantiatedProxyGenericType(this Type proxyGenericType, IEnumerable<string> propertyNames, bool withOriginal)
         {
-            if (proxyGenericType == null)
-            {
-                throw new ArgumentNullException(nameof(proxyGenericType));
-            }
-
-            if (propertyNames == null)
-            {
-                throw new ArgumentNullException(nameof(propertyNames));
-            }
-
             if (propertyNames.Any(name => string.IsNullOrEmpty(name)))
             {
                 throw new ArgumentException("Property names must not contain null or empty strings.", nameof(propertyNames));
@@ -284,23 +274,13 @@ namespace Epam.GraphQL.Extensions
                    type == typeof(IEnumerable);
         }
 
-        public static bool IsNullable(this Type? type)
+        public static bool IsNullable(this Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
-        public static Type UnwrapIfNullable(this Type? type)
+        public static Type UnwrapIfNullable(this Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
             return type.IsNullable() ? type.GetGenericArguments()[0] : type;
         }
 
@@ -326,13 +306,8 @@ namespace Epam.GraphQL.Extensions
 
         public static T GetDefault<T>() => default!;
 
-        public static bool IsAnonymousType(this Type? type)
+        public static bool IsAnonymousType(this Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
             return Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute), false)
                 && type.IsGenericType && type.Name.Contains("AnonymousType", StringComparison.InvariantCulture)
                 && (type.Name.StartsWith("<>", StringComparison.Ordinal) || type.Name.StartsWith("VB$", StringComparison.Ordinal))

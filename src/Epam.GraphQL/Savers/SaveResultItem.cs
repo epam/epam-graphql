@@ -3,46 +3,57 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Epam.GraphQL.Loaders;
+
+#nullable enable
 
 namespace Epam.GraphQL.Savers
 {
     internal class SaveResultItem<TEntity, TId> : ISaveResultItem
     {
-        public TId Id { get; set; }
+        private readonly IIdentifiableLoader<TEntity, TId> _identifiableLoader;
+
+        public SaveResultItem(
+            IIdentifiableLoader<TEntity, TId> identifiableLoader,
+            TEntity payload,
+            bool isNew,
+            IDictionary<string, object> properties)
+        {
+            _identifiableLoader = identifiableLoader;
+            Payload = payload;
+            IsNew = isNew;
+            Properties = properties;
+            Id = _identifiableLoader.GetId(Payload);
+        }
+
+        public TId Id { get; private set; }
 
         public TEntity Payload { get; set; }
 
-        public bool IsNew { get; set; }
+        public bool IsNew { get; }
 
-        public IDictionary<string, object> Properties { get; set; }
+        public IDictionary<string, object> Properties { get; }
 
-        object ISaveResultItem.Id
-        {
-            get => Id;
-            set => Id = (TId)value;
-        }
+        object? ISaveResultItem.Id => Id;
 
-        object ISaveResultItem.Payload => Payload;
+        object? ISaveResultItem.Payload => Payload;
 
         public SaveResultItem<TEntity, TId> Merge(SaveResultItem<TEntity, TId> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            return new SaveResultItem<TEntity, TId>()
-            {
-                Id = Id,
-                Payload = item.Payload,
-                IsNew = IsNew,
-                Properties = Properties.Concat(item.Properties)
+            return new SaveResultItem<TEntity, TId>(
+                identifiableLoader: _identifiableLoader,
+                payload: item.Payload,
+                isNew: IsNew,
+                properties: Properties.Concat(item.Properties)
                     .GroupBy(p => p.Key)
-                    .ToDictionary(g => g.Key, g => g.Last().Value),
-            };
+                    .ToDictionary(g => g.Key, g => g.Last().Value));
+        }
+
+        public void UpdateId()
+        {
+            Id = _identifiableLoader.GetId(Payload);
         }
 
         ISaveResultItem ISaveResultItem.Merge(ISaveResultItem item) => Merge((SaveResultItem<TEntity, TId>)item);

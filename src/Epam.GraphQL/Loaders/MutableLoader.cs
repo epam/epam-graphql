@@ -44,8 +44,6 @@ namespace Epam.GraphQL.Loaders
 
         Task IMutableLoader<TExecutionContext>.ReloadAsync(IResolveFieldContext context, ISaveResult<TExecutionContext> saveResult, IEnumerable<string> fieldNames) => ReloadAsync(context, (SaveResult<TEntity, TId, TExecutionContext>)saveResult, fieldNames);
 
-        object IMutableLoader<TExecutionContext>.GetId(object entity) => IdGetter((TEntity)entity);
-
         protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TEntity, TReturnType>> expression, string deprecationReason = null)
             where TReturnType : struct
         {
@@ -147,43 +145,35 @@ namespace Epam.GraphQL.Loaders
         {
         }
 
-        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<InputItem<TEntity>> entities) => new()
-        {
-            PendingItems = entities
+        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<InputItem<TEntity>> entities) => new(
+            pendingItems: entities
                 .Select(entity =>
-                    new SaveResultItem<TEntity, TId>
-                    {
-                        Id = IdGetter(entity.Payload),
-                        Payload = entity.Payload,
-                        IsNew = IsFakeId(IdGetter(entity.Payload)),
-                        Properties = entity.Properties,
-                    })
+                    new SaveResultItem<TEntity, TId>(
+                        identifiableLoader: this,
+                        payload: entity.Payload,
+                        isNew: IsFakeId(GetId(entity.Payload)),
+                        properties: entity.Properties))
                 .ToList(),
-            ProcessedItems = new List<SaveResultItem<TEntity, TId>>(),
-            PostponedItems = new List<SaveResultItem<TEntity, TId>>(),
-            Loader = this,
-            FieldName = fieldName,
-            MutationType = mutationType,
-        };
+            processedItems: new List<SaveResultItem<TEntity, TId>>(),
+            postponedItems: new List<SaveResultItem<TEntity, TId>>(),
+            loader: this,
+            fieldName: fieldName,
+            mutationType: mutationType);
 
-        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<TEntity> entities) => new()
-        {
-            ProcessedItems = entities
+        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<TEntity> entities) => new(
+            processedItems: entities
                 .Select(entity =>
-                    new SaveResultItem<TEntity, TId>
-                    {
-                        Id = IdGetter(entity),
-                        Payload = entity,
-                        IsNew = IdGetter(entity).Equals(typeof(TId).GetDefault()),
-                        Properties = new Dictionary<string, object>(),
-                    })
+                    new SaveResultItem<TEntity, TId>(
+                        identifiableLoader: this,
+                        payload: entity,
+                        isNew: GetId(entity).Equals(typeof(TId).GetDefault()),
+                        properties: new Dictionary<string, object>()))
                 .ToList(),
-            PendingItems = new List<SaveResultItem<TEntity, TId>>(),
-            PostponedItems = new List<SaveResultItem<TEntity, TId>>(),
-            Loader = this,
-            FieldName = fieldName,
-            MutationType = mutationType,
-        };
+            pendingItems: new List<SaveResultItem<TEntity, TId>>(),
+            postponedItems: new List<SaveResultItem<TEntity, TId>>(),
+            loader: this,
+            fieldName: fieldName,
+            mutationType: mutationType);
 
         private async Task<IEnumerable<ISaveResult<TExecutionContext>>> MutateAsync(IResolveFieldContext context, SaveResult<TEntity, TId, TExecutionContext> previousSaveResult)
         {
@@ -227,14 +217,13 @@ namespace Epam.GraphQL.Loaders
 
                     var result = new List<ISaveResult<TExecutionContext>>
                     {
-                        new SaveResult<TEntity, TId, TExecutionContext>
-                        {
-                            PendingItems = postponedItems.ToList(),
-                            ProcessedItems = processedItems,
-                            PostponedItems = postponedForSaveItems.ToList(),
-                            Loader = this,
-                            FieldName = previousSaveResult.FieldName,
-                        },
+                        new SaveResult<TEntity, TId, TExecutionContext>(
+                            pendingItems: postponedItems.ToList(),
+                            processedItems: processedItems,
+                            postponedItems: postponedForSaveItems.ToList(),
+                            loader: this,
+                            fieldName: previousSaveResult.FieldName,
+                            mutationType: previousSaveResult.MutationType),
                     };
 
                     return result;
@@ -269,7 +258,7 @@ namespace Epam.GraphQL.Loaders
                                     () => "Checks:All",
                                     this,
                                     IdExpression)(profiler, queryExecuter, null, context.GetUserContext<TExecutionContext>()) // TBD hooksExecuter is null here
-                                .LoadAsync(IdGetter(item.Payload)));
+                                .LoadAsync(GetId(item.Payload)));
 
                         itemsFound = new List<IGrouping<TId, TEntity>>();
                         foreach (var itemFoundTask in itemsFoundTasks)
@@ -284,8 +273,8 @@ namespace Epam.GraphQL.Loaders
                         var itemsNotFound = itemsToUpdate.Where(item => !itemsFound.Any(i => i.Key.Equals(item.Id)));
                         var itemsHavingMoreThanOneItem = itemsToUpdate.Where(item => itemsFound.Any(i => i.Key.Equals(item.Id) && i.Count() > 1));
 
-                        errors.AddRange(itemsNotFound.Select(item => $"Cannot update entity: Entity was not found (type: {typeof(TEntity).HumanizedName()}, id: {IdGetter(item.Payload)})."));
-                        errors.AddRange(itemsHavingMoreThanOneItem.Select(item => $"Cannot update entity: More than one entity was found (type: {typeof(TEntity).HumanizedName()}: id = {IdGetter(item.Payload)})."));
+                        errors.AddRange(itemsNotFound.Select(item => $"Cannot update entity: Entity was not found (type: {typeof(TEntity).HumanizedName()}, id: {GetId(item.Payload)})."));
+                        errors.AddRange(itemsHavingMoreThanOneItem.Select(item => $"Cannot update entity: More than one entity was found (type: {typeof(TEntity).HumanizedName()}: id = {GetId(item.Payload)})."));
 
                         if (errors.Any())
                         {
@@ -299,7 +288,7 @@ namespace Epam.GraphQL.Loaders
                         var resolvedEntities = itemsToUpdate.Select(nextItemToUpdate =>
                         {
                             // TODO Optimization of proxy creation
-                            var prevEntity = items.Single(i => IdGetter(i).Equals(nextItemToUpdate.Id));
+                            var prevEntity = items.Single(i => GetId(i).Equals(nextItemToUpdate.Id));
                             var prevEntityProxy = prevEntity; // TODO transform by calling InputObjectGraphTypeConfigurator.ProxyAccessor.CreateSelectorExpression(context.UserContext, nextItemToUpdate.Properties.Keys).Compile()
                             var fieldsAndNextValues = nextItemToUpdate.Properties
                                 .Select(kv => (InputObjectGraphTypeConfigurator.FindFieldByName(kv.Key), kv.Value))
@@ -381,7 +370,7 @@ namespace Epam.GraphQL.Loaders
                             var (canEdit, disableReason) = resolvedCanEdiTasks[i];
                             if (!canEdit)
                             {
-                                errors.Add($"Cannot update entity: Cannot change field `{fieldName}` of entity (type: {typeof(TEntity).HumanizedName()}, id: {IdGetter(entity)}): {disableReason}");
+                                errors.Add($"Cannot update entity: Cannot change field `{fieldName}` of entity (type: {typeof(TEntity).HumanizedName()}, id: {GetId(entity)}): {disableReason}");
                             }
                         }
 
@@ -396,7 +385,7 @@ namespace Epam.GraphQL.Loaders
                         var itemsToCheck = new List<TEntity>();
                         foreach (var item in itemsToUpdate)
                         {
-                            var payload = items.Single(i => IdGetter(i).Equals(item.Id));
+                            var payload = items.Single(i => GetId(i).Equals(item.Id));
 
                             payload.CopyProperties(
                                 item.Payload,
@@ -428,7 +417,7 @@ namespace Epam.GraphQL.Loaders
                     {
                         foreach (var item in itemsToUpdate)
                         {
-                            var itemToUpdate = items.Single(i => IdGetter(i).Equals(item.Id));
+                            var itemToUpdate = items.Single(i => GetId(i).Equals(item.Id));
 
                             try
                             {
@@ -514,7 +503,7 @@ namespace Epam.GraphQL.Loaders
                                 .Where(field => field.EditSettings.GetDefaultValue == null);
 
                             return fields
-                                .Select(field => $"Cannot create entity: Field `{field.Name}` cannot be null (type: {typeof(TEntity).HumanizedName()}, id: {IdGetter(item.Payload)}).");
+                                .Select(field => $"Cannot create entity: Field `{field.Name}` cannot be null (type: {typeof(TEntity).HumanizedName()}, id: {GetId(item.Payload)}).");
                         });
 
                         if (errors.Any())
@@ -591,7 +580,7 @@ namespace Epam.GraphQL.Loaders
                 entities.ForEach(item => dataContext.DetachEntity(item.Payload));
 
                 var payloads = entities.Select(e => e.Payload);
-                var ids = payloads.Select(IdGetter);
+                var ids = payloads.Select(GetId);
 
                 // That portion of reload goes against batcher
                 var reloadedEntities = await batch.LoadAsync(ids).GetResultAsync().ConfigureAwait(false);
@@ -601,7 +590,7 @@ namespace Epam.GraphQL.Loaders
                 foreach (var entity in entities)
                 {
                     var result = reloadedEntities
-                        .Where(reloaded => reloaded.Key.Equals(IdGetter(entity.Payload)))
+                        .Where(reloaded => reloaded.Key.Equals(GetId(entity.Payload)))
                         .ToList();
 
                     if (!result.Any())
@@ -610,7 +599,7 @@ namespace Epam.GraphQL.Loaders
                     }
                     else if (result.Count > 1)
                     {
-                        errors.Add($"Cannot reload entity: More than one entity was found (type: {typeof(TEntity).HumanizedName()}: id = {IdGetter(entity.Payload)})");
+                        errors.Add($"Cannot reload entity: More than one entity was found (type: {typeof(TEntity).HumanizedName()}: id = {GetId(entity.Payload)})");
                     }
                     else
                     {
@@ -621,7 +610,7 @@ namespace Epam.GraphQL.Loaders
                         }
                         else if (group.Count > 1)
                         {
-                            errors.Add($"Cannot reload entity: More than one entity was found (type: {typeof(TEntity).HumanizedName()}: id = {IdGetter(entity.Payload)})");
+                            errors.Add($"Cannot reload entity: More than one entity was found (type: {typeof(TEntity).HumanizedName()}: id = {GetId(entity.Payload)})");
                         }
                         else
                         {

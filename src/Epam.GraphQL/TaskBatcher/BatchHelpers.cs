@@ -31,18 +31,18 @@ namespace Epam.GraphQL.TaskBatcher
         private static readonly ConcurrentDictionary<(Func<string> StepNameFactory, LambdaExpression KeySelector, Delegate? DefaultFactory, Delegate Transform), Delegate> _groupByValuesCache = new(
             new ValueTupleEqualityComparer<Func<string>, LambdaExpression, Delegate?, Delegate>(secondItemComparer: ExpressionEqualityComparer.Instance));
 
-        public static Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>> GetLoaderQueryFactory<TLoader, TEntity, TProperty, TExecutionContext>(
+        public static Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>> GetLoaderQueryFactory<TLoader, TEntity, TProperty, TExecutionContext>(
             Func<string> stepNameFactory,
             TLoader loader,
             Expression<Func<TEntity, TProperty>> propSelector)
             where TLoader : Loader<TEntity, TExecutionContext>
             where TEntity : class
         {
-            return (Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>>)_loaderQueriesCache.GetOrAdd(loader, key =>
+            return (Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>>)_loaderQueriesCache.GetOrAdd(loader, key =>
             {
                 var loader = (TLoader)key;
                 var factory = Get<TEntity, TEntity, TProperty, TExecutionContext>(stepNameFactory, propSelector, id => new EmptyGrouping<TProperty, TEntity>(id), ctx => FuncConstants<TEntity>.IdentityExpression);
-                Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>> result = (profiler, queryExecuter, hooksExecuter, context) => factory(context, profiler, queryExecuter, hooksExecuter, loader.All(context), null);
+                Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>> result = (profiler, queryExecuter, hooksExecuter, context) => factory(context, profiler, queryExecuter, hooksExecuter, loader.All(context), null);
                 return result;
             });
         }

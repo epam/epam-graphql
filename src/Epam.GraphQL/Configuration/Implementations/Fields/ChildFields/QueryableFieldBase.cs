@@ -207,7 +207,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                     {
                         var listener = context.GetListener();
                         var ctx = context.GetUserContext<TExecutionContext>();
-                        query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
+                        query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType));
                     }
 
                     return query;
@@ -220,7 +220,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return (context, query) =>
             {
                 var listener = context.GetListener();
-                return filter.All(listener, query, context.GetUserContext<TExecutionContext>(), context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
+                return filter.All(listener, query, context.GetUserContext<TExecutionContext>(), context.GetFilterValue(filter.FilterType));
             };
         }
 

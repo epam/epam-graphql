@@ -26,7 +26,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
 
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
+        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
             : base(
                   registry,
                   parent,
@@ -176,7 +176,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected override IFieldResolver GetResolver() => _expression;
 
-        private static string GenerateName(string name, Expression<Func<TEntity, TReturnType>> expression)
+        private static string GenerateName(string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
             if (expression == null)
             {
@@ -195,7 +195,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     internal class ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> : ExpressionField<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
+        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
             : base(registry, parent, expression, name)
         {
         }

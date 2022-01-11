@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 
+#nullable enable
+
 namespace Epam.GraphQL.Savers
 {
     [InternalApi]

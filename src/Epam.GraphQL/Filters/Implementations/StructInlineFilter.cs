@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Filters.Implementations
         where TEntity : class
         where TReturnType : struct
     {
-        public StructInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TReturnType[] defaultValues, NullOption? nullValue)
+        public StructInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TReturnType[]? defaultValues, NullOption? nullValue)
             : base(field, defaultValues, nullValue)
         {
         }

@@ -45,7 +45,7 @@ namespace Epam.GraphQL.Extensions
                 throw new ArgumentNullException(nameof(typeName));
             }
 
-            return _typeCache.GetOrAdd((parent, typeName!, properties), key =>
+            return _typeCache.GetOrAdd((parent, typeName, properties), key =>
             {
                 Interlocked.Increment(ref _typeCacheCount);
 

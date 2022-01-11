@@ -78,13 +78,12 @@ namespace Epam.GraphQL.Configuration.Implementations
             return context => BatchCall(context).Then(arg =>
             {
                 var (change, result) = arg;
-                var batchFieldChange = new BatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>
-                {
-                    Entity = change.Entity,
-                    PreviousValue = ((IFieldChange<TEntity, TReturnType, TExecutionContext>)change).PreviousValue,
-                    NextValue = ((IFieldChange<TEntity, TReturnType, TExecutionContext>)change).NextValue,
-                    BatchEntity = result,
-                };
+                var batchFieldChange = new BatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>(
+                    context.GetUserContext<TExecutionContext>(),
+                    change.Entity,
+                    ((IFieldChange<TEntity, TReturnType, TExecutionContext>)change).PreviousValue,
+                    ((IFieldChange<TEntity, TReturnType, TExecutionContext>)change).NextValue,
+                    result);
 
                 return func(batchFieldChange);
             });

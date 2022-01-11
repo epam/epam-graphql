@@ -263,7 +263,7 @@ namespace Epam.GraphQL.Configuration
             }
 
             var loader = ResolveLoader<TChildEntityLoader, TChildEntity>();
-            childRelations.Register<TPropertyType, TChildPropertyType>(propName, isFakePropValue, loader.IdGetter);
+            childRelations.Register<TPropertyType, TChildPropertyType>(propName, isFakePropValue, loader.GetId);
         }
 
         public bool HasFakePropertyValuesPostponedForSave<TChildEntity>(TChildEntity entity, IDictionary<string, object> propertyValues)
