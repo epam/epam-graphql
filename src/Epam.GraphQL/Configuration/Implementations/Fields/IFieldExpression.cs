@@ -9,17 +9,19 @@ using Epam.GraphQL.Sorters;
 using GraphQL;
 using GraphQL.Resolvers;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
-    internal interface IFieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldResolver<TReturnType>, ISorter<TExecutionContext>
+    internal interface IFieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldResolver<TReturnType?>, ISorter<TExecutionContext>
     {
         bool IsReadOnly { get; }
 
-        PropertyInfo PropertyInfo { get; }
+        PropertyInfo? PropertyInfo { get; }
 
         LambdaExpression ContextedExpression { get; }
 
-        TReturnType Resolve(IResolveFieldContext context, object source);
+        TReturnType? Resolve(IResolveFieldContext context, object source);
 
         void ValidateExpression();
     }

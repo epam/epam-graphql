@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType, TExecutionContext>
         where TSourceType : class
     {
-        internal FromBatchEditableBuilder(RelationRegistry<TExecutionContext> registry, IFieldEditSettings<TSourceType, TReturnType, TExecutionContext> settings)
+        internal FromBatchEditableBuilder(RelationRegistry<TExecutionContext> registry, IFieldEditSettings<TSourceType, TReturnType, TExecutionContext>? settings)
         {
             Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));

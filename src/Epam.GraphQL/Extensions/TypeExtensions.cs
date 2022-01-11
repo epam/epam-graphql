@@ -284,7 +284,7 @@ namespace Epam.GraphQL.Extensions
             return type.IsNullable() ? type.GetGenericArguments()[0] : type;
         }
 
-        public static object CreateInstanceAndHoistBaseException(this Type type, params object[] args)
+        public static object CreateInstanceAndHoistBaseException(this Type type, params object?[] args)
         {
             try
             {

@@ -82,10 +82,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
             if (HasFilter)
             {
-                Argument("filter", () => new QueryArgument(Registry.GenerateInputGraphType(ObjectGraphTypeConfigurator?.CreateInlineFilters().FilterType))
-                {
-                    Name = "filter",
-                });
+                Argument("filter", CreateFilterArgument);
             }
 
             var sortableFields = ObjectGraphTypeConfigurator?.Sorters.Select(f => f.Name).ToArray();
@@ -98,6 +95,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             if (searcher != null)
             {
                 Argument("search", typeof(string));
+            }
+
+            QueryArgument CreateFilterArgument()
+            {
+                if (ObjectGraphTypeConfigurator == null)
+                {
+                    throw new NotSupportedException();
+                }
+
+                return new QueryArgument(Registry.GenerateInputGraphType(ObjectGraphTypeConfigurator.CreateInlineFilters().FilterType))
+                {
+                    Name = "filter",
+                };
             }
         }
 

@@ -42,7 +42,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
@@ -57,7 +57,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
@@ -112,7 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             throw new NotSupportedException();
         }
 
-        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {
@@ -121,7 +121,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Hel
             return field.ApplyField(resolvedField);
         }
 
-        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public static ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TEntity, TReturnType, TExecutionContext>(FieldBase<TEntity, TExecutionContext> field, Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
             where TEntity : class
         {

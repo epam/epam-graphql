@@ -8,12 +8,14 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Filters.Implementations;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class StringExpressionField<TEntity, TExecutionContext> : ExpressionField<TEntity, string, string, TExecutionContext>
         where TEntity : class
     {
-        public StringExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, string>> expression, string name)
+        public StringExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, string>> expression, string? name)
             : base(registry, parent, expression, name)
         {
         }

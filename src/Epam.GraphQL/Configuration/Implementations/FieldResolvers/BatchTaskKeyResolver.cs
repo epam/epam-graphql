@@ -13,9 +13,11 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class BatchTaskKeyResolver<TEntity, TKey, TReturnType, TExecutionContext> : AsyncFuncResolver<TEntity, TReturnType>
+    internal class BatchTaskKeyResolver<TEntity, TKey, TReturnType, TExecutionContext> : BatchResolverBase<TEntity, TReturnType>
         where TEntity : class
     {
         public BatchTaskKeyResolver(
@@ -28,7 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             proxyAccessor.AddMember(fieldName, keySelector);
         }
 
-        private static Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType>> CreateResolver(
+        private static Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType?>> CreateResolver(
             Expression<Func<TEntity, TKey>> keySelector,
             Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, TReturnType>>> batchFunc)
         {
@@ -40,14 +42,14 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
                 var result = compiledKeySelector.Then(
                     FuncConstants<TKey>.IsNull,
-                    BatchLoader.FromResult(FuncConstants<TKey, TReturnType>.DefaultResultFunc),
+                    BatchLoader.FromResult(FuncConstants<TKey, TReturnType?>.DefaultResultFunc),
                     batcher.Get(context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc));
 
                 return result;
             };
         }
 
-        private static Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType>> CreateProxiedResolver(
+        private static Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType?>> CreateProxiedResolver(
             Expression<Func<TEntity, TKey>> keySelector,
             Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, TReturnType>>> batchFunc,
             IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
@@ -69,7 +71,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
                 var result = compiledProxyKeySelector.Value.Then(
                     FuncConstants<TKey>.IsNull,
-                    BatchLoader.FromResult(FuncConstants<TKey, TReturnType>.DefaultResultFunc),
+                    BatchLoader.FromResult(FuncConstants<TKey, TReturnType?>.DefaultResultFunc),
                     batcher.Get(context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc));
 
                 return result;

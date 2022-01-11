@@ -1377,7 +1377,7 @@ namespace Epam.GraphQL.Savers
         object? Id { get; }
         bool IsNew { get; }
         object? Payload { get; }
-        System.Collections.Generic.IDictionary<string, object> Properties { get; }
+        System.Collections.Generic.IDictionary<string, object?> Properties { get; }
         Epam.GraphQL.Savers.ISaveResultItem Merge(Epam.GraphQL.Savers.ISaveResultItem item);
         void UpdateId();
     }

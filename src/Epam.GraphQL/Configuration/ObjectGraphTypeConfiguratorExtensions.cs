@@ -6,6 +6,8 @@
 using System;
 using System.Linq;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration
 {
     internal static class ObjectGraphTypeConfiguratorExtensions

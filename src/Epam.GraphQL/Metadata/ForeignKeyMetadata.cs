@@ -12,7 +12,7 @@ namespace Epam.GraphQL.Metadata
 {
     internal class ForeignKeyMetadata
     {
-        public ForeignKeyMetadata(IComplexGraphType toType, IEnumerable<IFieldType> toField, IEnumerable<IFieldType> fromField)
+        public ForeignKeyMetadata(IComplexGraphType toType, IEnumerable<IFieldType>? toField, IEnumerable<IFieldType>? fromField)
         {
             ToType = toType;
             ToField = toField;
@@ -21,8 +21,8 @@ namespace Epam.GraphQL.Metadata
 
         public IComplexGraphType ToType { get; }
 
-        public IEnumerable<IFieldType> ToField { get; }
+        public IEnumerable<IFieldType>? ToField { get; }
 
-        public IEnumerable<IFieldType> FromField { get; }
+        public IEnumerable<IFieldType>? FromField { get; }
     }
 }

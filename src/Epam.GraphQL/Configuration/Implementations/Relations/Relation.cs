@@ -19,29 +19,31 @@ using GraphQL.DataLoader;
 using GraphQL.Types;
 using TypeExtensions = Epam.GraphQL.Extensions.TypeExtensions;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Relations
 {
     internal class Relation<TEntity, TEntityLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext> : IRelation
         where TEntityLoader : Loader<TEntity, TExecutionContext>, new()
         where TEntity : class
     {
-        private readonly Func<Type, PropertyInfo> _getPrimaryKeyPropertyInfo;
+        private readonly Func<Type, PropertyInfo?> _getPrimaryKeyPropertyInfo;
         private readonly Expression<Func<TEntity, TProperty>> _property;
-        private readonly Expression<Func<TEntity, TChildEntity>> _navigationProperty;
+        private readonly Expression<Func<TEntity, TChildEntity>>? _navigationProperty;
         private readonly Expression<Func<TChildEntity, TChildProperty>> _childProperty;
-        private readonly Expression<Func<TChildEntity, TEntity>> _childNavigationProperty;
+        private readonly Expression<Func<TChildEntity, TEntity>>? _childNavigationProperty;
         private readonly RelationType _relationType;
-        private readonly TEntityLoader _securityCheckLoader;
+        private readonly TEntityLoader? _securityCheckLoader;
         private readonly TEntityLoader _parentLoader;
         private readonly RelationRegistry<TExecutionContext> _registry;
 
         public Relation(
             RelationRegistry<TExecutionContext> registry,
             Expression<Func<TEntity, TProperty>> property,
-            Expression<Func<TEntity, TChildEntity>> navigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? navigationProperty,
             Expression<Func<TChildEntity, TChildProperty>> childProperty,
-            Expression<Func<TChildEntity, TEntity>> childNavigationProperty,
-            Func<Type, PropertyInfo> getPrimaryKeyPropertyInfo,
+            Expression<Func<TChildEntity, TEntity>>? childNavigationProperty,
+            Func<Type, PropertyInfo?> getPrimaryKeyPropertyInfo,
             RelationType relationType)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
@@ -79,7 +81,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
 
         protected string ChildPropertyName { get; set; }
 
-        protected string ChildNavigationPropertyName { get; set; }
+        protected string? ChildNavigationPropertyName { get; set; }
 
         private bool IsPropertyId => IsPrimaryKey(_property);
 
@@ -89,17 +91,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
 
         private Action<TChildEntity, TChildProperty> ChildPropertySetter => _childProperty.GetSetter();
 
-        private Func<TChildEntity, TEntity> ChildNavigationPropertyGetter => _childNavigationProperty?.GetGetter();
+        private Func<TChildEntity, TEntity>? ChildNavigationPropertyGetter => _childNavigationProperty?.GetGetter();
 
-        private Action<TChildEntity, TEntity> ChildNavigationPropertySetter => _childNavigationProperty?.GetSetter();
+        private Action<TChildEntity, TEntity>? ChildNavigationPropertySetter => _childNavigationProperty?.GetSetter();
 
-        private Action<TEntity, TChildEntity> NavigationPropertySetter => _navigationProperty?.GetSetter();
+        private Action<TEntity, TChildEntity>? NavigationPropertySetter => _navigationProperty?.GetSetter();
 
         public override int GetHashCode() => HashCode.Combine(EntityType, ChildEntityType, PropertyType, ChildPropertyType, PropertyName, ChildPropertyName, ChildNavigationPropertyName);
 
         public override bool Equals(object obj) => Equals(obj as Relation<TEntity, TEntityLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext>);
 
-        public bool Equals(Relation<TEntity, TEntityLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext> obj) => obj != null
+        public bool Equals(Relation<TEntity, TEntityLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext>? obj) => obj != null
             && obj.EntityType == EntityType && obj.ChildEntityType == ChildEntityType
             && obj.PropertyType == PropertyType && obj.PropertyName == PropertyName
             && obj.ChildPropertyType == ChildPropertyType && obj.ChildPropertyName == ChildPropertyName
@@ -110,7 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return $"Relation: type = {typeof(TEntity).HumanizedName()} childType = {typeof(TChildEntity).HumanizedName()} prop = {PropertyName}, childProp {ChildPropertyName}, childNavigationProp {ChildNavigationPropertyName}";
         }
 
-        public bool HasFakePropertyValue(object childEntity, IDictionary<string, object> childPropertyValues)
+        public bool HasFakePropertyValue(object? childEntity, IDictionary<string, object> childPropertyValues)
         {
             if (childEntity is TChildEntity e)
             {
@@ -120,7 +122,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return false;
         }
 
-        public void UpdateFakeProperties(object entity, object childEntity, IDictionary<string, object> childPropertyValues, object fakePropertyValue)
+        public void UpdateFakeProperties(object? entity, object? childEntity, IDictionary<string, object?> childPropertyValues, object? fakePropertyValue)
         {
             if (entity is TEntity p && childEntity is TChildEntity c && fakePropertyValue is TProperty prop)
             {
@@ -138,7 +140,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             throw new InvalidOperationException();
         }
 
-        public IDataLoaderResult<bool> CanViewParentAsync(object context, object entity)
+        public IDataLoaderResult<bool> CanViewParentAsync(object context, object? entity)
         {
             if (entity is TChildEntity e && context is GraphQLContext<TExecutionContext> c)
             {
@@ -161,7 +163,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
                         var parent = ChildNavigationPropertyGetter(entity);
                         if (parent != null)
                         {
-                            return _securityCheckLoader.CanViewAsync(context, parent);
+                            return _securityCheckLoader!.CanViewAsync(context, parent);
                         }
                     }
                 }
@@ -182,8 +184,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
                         var castedParentLoader = _securityCheckLoader as IdentifiableLoader<TEntity, TProperty, TExecutionContext>;
                         var factory = BatchHelpers.GetLoaderQueryFactory<TEntityLoader, TEntity, TProperty, TExecutionContext>(
                             () => $"CanViewParentAsync:{typeof(TChildEntity).HumanizedName()}",
-                            _securityCheckLoader,
-                            castedParentLoader.IdExpression);
+                            _securityCheckLoader!,
+                            castedParentLoader!.IdExpression);
 
                         return factory(profiler, context.QueryExecuter, null, context.ExecutionContext) // TBD hooksExecuter == null here
                             .Then(r => r.SafeNull().Any())
@@ -194,8 +196,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
                         var castedParentLoader = _securityCheckLoader as IdentifiableLoader<TEntity, TProperty, TExecutionContext>;
                         var factory = BatchHelpers.GetLoaderQueryFactory<TEntityLoader, TEntity, TProperty, TExecutionContext>(
                             () => $"CanViewParentAsync:{typeof(TChildEntity).HumanizedName()}",
-                            _securityCheckLoader,
-                            castedParentLoader.IdExpression);
+                            _securityCheckLoader!,
+                            castedParentLoader!.IdExpression);
                         return factory(profiler, context.QueryExecuter, null, context.ExecutionContext) // TBD hooksExecuter == null here
                             .Then(r => r.SafeNull().Any())
                             .LoadAsync((TProperty)Convert.ChangeType(prop, typeof(TProperty), CultureInfo.InvariantCulture));
@@ -206,7 +208,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return new DataLoaderResult<bool>(true);
         }
 
-        public ForeignKeyMetadata GetForeignKeyMetadata(IComplexGraphType childGraphType)
+        public ForeignKeyMetadata? GetForeignKeyMetadata(IComplexGraphType childGraphType)
         {
             if (IsPropertyId)
             {
@@ -229,7 +231,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return null;
         }
 
-        private static T[] ItemToArray<T>(T value)
+        private static T[]? ItemToArray<T>(T value)
         {
             if (value != null)
             {
@@ -278,7 +280,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
 
         private void UpdateFakeProperties(TEntity entity, TChildEntity childEntity, TProperty fakePropertyValue)
         {
-            if (HasFakePropertyValue(childEntity) && ChildPropertyGetter(childEntity).Equals(fakePropertyValue))
+            if (HasFakePropertyValue(childEntity) && fakePropertyValue != null && fakePropertyValue.Equals(ChildPropertyGetter(childEntity)))
             {
                 if (_childNavigationProperty == null && _navigationProperty == null)
                 {
@@ -290,7 +292,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
                     throw new NotSupportedException($"Cannot update relation between {typeof(TEntity)} and {typeof(TChildEntity)}: navigation property doesn't have setter.");
                 }
 
-                ChildPropertySetter(childEntity, default);
+                ChildPropertySetter(childEntity, default!);
                 ChildNavigationPropertySetter?.Invoke(childEntity, entity);
                 if (ChildNavigationPropertyGetter == null)
                 {

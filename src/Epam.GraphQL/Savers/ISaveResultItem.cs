@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Savers
 
         bool IsNew { get; }
 
-        IDictionary<string, object> Properties { get; }
+        IDictionary<string, object?> Properties { get; }
 
         ISaveResultItem Merge(ISaveResultItem item);
 

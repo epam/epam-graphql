@@ -13,7 +13,7 @@ using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class AsyncFuncResolver<TEntity, TReturnType> : IResolver<TEntity>, IBatchResolver<TEntity, TReturnType?>
+    internal class AsyncFuncResolver<TEntity, TReturnType> : IResolver<TEntity>
         where TEntity : class
     {
         public AsyncFuncResolver(
@@ -43,16 +43,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return context.Source is Proxy<TEntity> proxy
                 ? ProxiedResolver(context).LoadAsync(proxy)
                 : Resolver(context).LoadAsync((TEntity)context.Source);
-        }
-
-        public IBatchResolver<TEntity, TSelectType?> Select<TSelectType>(Func<TEntity, TReturnType, TSelectType> selector)
-        {
-            return new AsyncFuncResolver<TEntity, TSelectType>(ctx => Resolver(ctx).Then(selector), ctx => ProxiedResolver(ctx).Then((e, r) => selector(e.GetOriginal(), r)));
-        }
-
-        public IBatchResolver<TEntity, TSelectType?> Select<TSelectType>(Func<TReturnType, TSelectType> selector)
-        {
-            return new AsyncFuncResolver<TEntity, TSelectType>(ctx => Resolver(ctx).Then(selector), ctx => ProxiedResolver(ctx).Then(selector));
         }
     }
 }

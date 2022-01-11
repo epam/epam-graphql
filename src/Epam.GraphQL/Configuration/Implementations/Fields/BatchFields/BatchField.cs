@@ -13,6 +13,8 @@ using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using GraphQL;
 using GraphQL.Resolvers;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
     internal class BatchField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
@@ -72,7 +74,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             {
                 var graphType = _graphType;
 
-                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !EditSettings.IsMandatoryForUpdate)
+                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && EditSettings != null && !EditSettings.IsMandatoryForUpdate)
                 {
                     graphType = graphType.UnwrapIfNonNullable();
                 }
@@ -95,19 +97,24 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             return Parent.ApplySelect<TReturnType1>(this, FieldResolver.Select(selector));
         }
 
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build)
+        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
             // TODO Implement ApplySelect method
             throw new NotImplementedException();
         }
 
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector)
+        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
+            Func<TReturnType, TReturnType1> selector)
         {
             return ApplySelect(selector);
         }
 
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build)
+        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
             return ApplySelect(selector, build);
         }

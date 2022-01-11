@@ -16,15 +16,15 @@ using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Filters.Implementations
 {
-    internal class StringInlineFilter<TEntity, TExecutionContext> : BaseInlineFilter<TEntity, string?, string, string, TExecutionContext>
+    internal class StringInlineFilter<TEntity, TExecutionContext> : BaseInlineFilter<TEntity, string?, string?, string?, TExecutionContext>
         where TEntity : class
     {
-        public StringInlineFilter(ExpressionField<TEntity, string?, TExecutionContext> field, string[] defaultValues, NullOption? nullValue)
+        public StringInlineFilter(ExpressionField<TEntity, string, TExecutionContext> field, string[]? defaultValues, NullOption? nullValue)
             : base(field, defaultValues, nullValue)
         {
         }
 
-        protected override Expression<Func<TEntity, bool>> BuildContainsAsExpression(TExecutionContext context, IEnumerable<string> list)
+        protected override Expression<Func<TEntity, bool>> BuildContainsAsExpression(TExecutionContext context, IEnumerable<string?> list)
         {
             return ExpressionHelpers.MakeContainsExpression(list, BuildExpression(context));
         }
@@ -40,7 +40,7 @@ namespace Epam.GraphQL.Filters.Implementations
             return result;
         }
 
-        protected override Expression<Func<TEntity, bool>> BuildComparisonExpression(TExecutionContext context, ComparisonType comparisonType, string value)
+        protected override Expression<Func<TEntity, bool>> BuildComparisonExpression(TExecutionContext context, ComparisonType comparisonType, string? value)
         {
             if (comparisonType is not ComparisonType.Eq and not ComparisonType.Neq)
             {

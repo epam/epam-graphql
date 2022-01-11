@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Metadata
 {
     internal class TypeMetadata
     {
-        public TypeMetadata(IEnumerable<IFieldType> primaryKey, IEnumerable<ForeignKeyMetadata> foreignKeys)
+        public TypeMetadata(IEnumerable<IFieldType>? primaryKey, IEnumerable<ForeignKeyMetadata>? foreignKeys)
         {
             PrimaryKey = primaryKey.SafeNull().ToArray();
             ForeignKeys = foreignKeys.SafeNull().ToArray();

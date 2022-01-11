@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Savers
             IIdentifiableLoader<TEntity, TId> identifiableLoader,
             TEntity payload,
             bool isNew,
-            IDictionary<string, object> properties)
+            IDictionary<string, object?> properties)
         {
             _identifiableLoader = identifiableLoader;
             Payload = payload;
@@ -34,7 +34,7 @@ namespace Epam.GraphQL.Savers
 
         public bool IsNew { get; }
 
-        public IDictionary<string, object> Properties { get; }
+        public IDictionary<string, object?> Properties { get; }
 
         object? ISaveResultItem.Id => Id;
 

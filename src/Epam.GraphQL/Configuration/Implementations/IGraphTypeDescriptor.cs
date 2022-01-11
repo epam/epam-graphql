@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Configuration.Implementations
     {
         IGraphType? GraphType { get; }
 
-        Type Type { get; }
+        Type? Type { get; }
 
         IObjectGraphTypeConfigurator<TExecutionContext>? Configurator { get; }
 

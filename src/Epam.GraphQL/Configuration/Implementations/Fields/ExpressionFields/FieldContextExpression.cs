@@ -12,6 +12,8 @@ using Epam.GraphQL.Sorters;
 using GraphQL;
 using GraphQL.Resolvers;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class FieldContextExpression<TEntity, TReturnType, TExecutionContext> : IFieldExpression<TEntity, TReturnType, TExecutionContext>
@@ -19,7 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
         private readonly Expression<Func<TExecutionContext, TEntity, TReturnType>> _expression;
-        private Func<TExecutionContext, TEntity, TReturnType> _resolver;
+        private Func<TExecutionContext, TEntity, TReturnType>? _resolver;
 
         public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
         {
@@ -41,7 +43,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public bool IsReadOnly => true;
 
-        public PropertyInfo PropertyInfo => null;
+        public PropertyInfo? PropertyInfo => null;
 
         public string Name { get; }
 
@@ -50,14 +52,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             ExpressionValidator.Validate(_expression);
         }
 
-        public TReturnType Resolve(IResolveFieldContext context, object source)
+        public TReturnType? Resolve(IResolveFieldContext context, object source)
         {
             // TODO Check for input field (!_field.IsInputField && ...)
             if (source is Proxy<TEntity> proxy)
             {
                 var name = _field.Name;
                 var func = proxy.GetType().GetPropertyDelegate(name);
-                return (TReturnType)func(proxy);
+                return (TReturnType?)func(proxy);
             }
 
             if (_resolver == null)
@@ -68,12 +70,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             return _resolver(context.GetUserContext<TExecutionContext>(), (TEntity)source);
         }
 
-        public TReturnType Resolve(IResolveFieldContext context)
+        public TReturnType? Resolve(IResolveFieldContext context)
         {
             return Resolve(context, context.Source);
         }
 
-        object IFieldResolver.Resolve(IResolveFieldContext context)
+        object? IFieldResolver.Resolve(IResolveFieldContext context)
         {
             return Resolve(context);
         }

@@ -14,6 +14,8 @@ using Epam.GraphQL.Relay;
 using GraphQL;
 using DataObjects = GraphQL.Types.Relay.DataObjects;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 {
     internal static class Resolvers
@@ -46,13 +48,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return connection;
         }
 
-        public static Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, Connection<Proxy<TReturnType>>> ToConnection<TChildEntity, TReturnType, TExecutionContext>(IProxyAccessor<TReturnType, TExecutionContext> proxyAccessor)
+        public static Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, Connection<Proxy<TReturnType>>> ToConnection<TChildEntity, TReturnType, TExecutionContext>(IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor)
         {
             return (context, children) =>
             {
                 var connection = Resolve(context, children);
 
-                var executer = proxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>());
+                var executer = proxyAccessor?.CreateHooksExecuter(context.GetUserContext<TExecutionContext>());
 
                 if (connection.Items != null)
                 {
@@ -130,7 +132,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
         }
 
-        public static IEnumerable<T> ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, IEnumerable<T> items)
+        public static IEnumerable<T> ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, IEnumerable<T> items)
         {
             if (executer == null)
             {
@@ -149,7 +151,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             }
         }
 
-        public static T ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, T item)
+        public static T ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, T item)
         {
             if (executer != null)
             {
@@ -159,7 +161,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return item;
         }
 
-        private static IEnumerable<DataObjects.Edge<T>> ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, IEnumerable<DataObjects.Edge<T>> items)
+        private static IEnumerable<DataObjects.Edge<T>> ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, IEnumerable<DataObjects.Edge<T>> items)
         {
             if (executer == null)
             {

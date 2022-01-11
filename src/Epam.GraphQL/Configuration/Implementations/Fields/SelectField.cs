@@ -9,6 +9,8 @@ using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using GraphQL;
 using GraphQL.Resolvers;
 
+#nullable enable
+
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class SelectField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
@@ -39,7 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             {
                 var graphType = _graphType;
 
-                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !EditSettings.IsMandatoryForUpdate)
+                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && EditSettings != null && !EditSettings.IsMandatoryForUpdate)
                 {
                     graphType = graphType.UnwrapIfNonNullable();
                 }
@@ -48,7 +50,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
         }
 
-        IFieldEditSettings<TEntity, TReturnType, TExecutionContext> IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>.EditSettings => EditSettings;
+        IFieldEditSettings<TEntity, TReturnType, TExecutionContext>? IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>.EditSettings => EditSettings;
 
         public override object Resolve(IResolveFieldContext context)
         {
