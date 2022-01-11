@@ -8,6 +8,8 @@ using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 using GraphQL.Types.Relay;
 
+#nullable enable
+
 namespace Epam.GraphQL.Types
 {
     internal class ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>

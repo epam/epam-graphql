@@ -129,7 +129,7 @@ namespace Epam.GraphQL
             {
                 Name = "metadata",
                 Type = typeof(TypeMetadataGraphType),
-                ResolvedType = new TypeMetadataGraphType(GraphQLSchema.FindType(nameof(__Field)) as __Field, typeGraphType),
+                ResolvedType = new TypeMetadataGraphType((__Field)GraphQLSchema.FindType(nameof(__Field)), typeGraphType),
                 Resolver = new FuncFieldResolver<IGraphType, TypeMetadata>(ResolveTypeMetadata),
             };
 

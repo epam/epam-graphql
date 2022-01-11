@@ -7,6 +7,8 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
+#nullable enable
+
 namespace Epam.GraphQL.Types
 {
     internal class EdgeGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
