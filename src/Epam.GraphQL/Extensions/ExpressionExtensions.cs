@@ -12,8 +12,6 @@ using Epam.GraphQL.Enums;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class ExpressionExtensions

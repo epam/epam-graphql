@@ -5,8 +5,6 @@
 
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public class ResolveOptionsBuilder : OptionsBuilder<ResolveOptions>

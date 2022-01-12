@@ -13,8 +13,6 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Query.Implementations
 {
     internal class QueryArgumentBuilder<TEntity, TArgType, TExecutionContext> :

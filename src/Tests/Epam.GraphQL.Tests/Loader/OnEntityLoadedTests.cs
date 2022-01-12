@@ -9,8 +9,6 @@ using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
 
-#nullable enable
-
 namespace Epam.GraphQL.Tests.Loader
 {
     [TestFixture]

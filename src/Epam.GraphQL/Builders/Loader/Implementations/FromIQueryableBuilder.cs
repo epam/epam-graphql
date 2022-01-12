@@ -11,8 +11,6 @@ using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal static class FromIQueryableBuilder

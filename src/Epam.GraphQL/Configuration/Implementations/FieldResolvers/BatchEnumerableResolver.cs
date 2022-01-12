@@ -6,8 +6,6 @@
 using System;
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class BatchEnumerableResolver<TEntity, TReturnType, TExecutionContext> : BatchResolver<TEntity, IEnumerable<TReturnType>, TExecutionContext>

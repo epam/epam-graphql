@@ -13,8 +13,6 @@ using Epam.GraphQL.Sorters;
 using GraphQL;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class FieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldExpression<TEntity, TReturnType, TExecutionContext>

@@ -5,8 +5,6 @@
 
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL.Infrastructure
 {
     internal static class Constants

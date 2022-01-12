@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> : IHasSelect<TReturnType, TExecutionContext>

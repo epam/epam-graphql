@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class AsyncEnumerableExtensions

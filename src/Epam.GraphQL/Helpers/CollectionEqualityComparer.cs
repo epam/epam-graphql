@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Extensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     /// <summary>

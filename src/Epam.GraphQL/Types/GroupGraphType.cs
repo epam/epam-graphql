@@ -9,8 +9,6 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class GroupGraphType<TProjection, TEntity, TExecutionContext> : ObjectGraphType<Proxy<TEntity>>, IHasGetEntityType

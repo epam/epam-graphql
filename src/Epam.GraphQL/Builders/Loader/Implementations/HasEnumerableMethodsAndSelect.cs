@@ -7,8 +7,6 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class HasEnumerableMethodsAndSelect<TSourceType, TReturnType, TExecutionContext> :

@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.TaskBatcher
 {
     internal class BatchLoader

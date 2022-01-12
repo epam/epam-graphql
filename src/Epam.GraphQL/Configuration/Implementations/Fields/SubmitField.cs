@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using GraphQL;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class SubmitField<TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>

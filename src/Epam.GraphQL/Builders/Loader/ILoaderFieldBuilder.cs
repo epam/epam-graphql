@@ -6,8 +6,6 @@
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Projection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface ILoaderFieldBuilder<TEntity, TExecutionContext> :

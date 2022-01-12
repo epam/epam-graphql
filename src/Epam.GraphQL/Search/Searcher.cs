@@ -5,8 +5,6 @@
 
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Search
 {
     public abstract class Searcher<TEntity, TExecutionContext> : ISearcher<TEntity, TExecutionContext>

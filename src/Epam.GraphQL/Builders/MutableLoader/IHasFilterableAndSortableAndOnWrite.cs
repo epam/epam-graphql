@@ -7,8 +7,6 @@ using System;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> : IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>

@@ -14,8 +14,6 @@ using System.Text;
 using System.Threading;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class DictionaryExtensions

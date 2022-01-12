@@ -8,8 +8,6 @@ using System.Linq;
 using GraphQL.Language.AST;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class FieldNameGraphType : StringGraphType

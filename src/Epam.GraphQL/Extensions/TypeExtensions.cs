@@ -15,8 +15,6 @@ using System.Runtime.ExceptionServices;
 using System.Security;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class TypeExtensions

@@ -7,8 +7,6 @@ using System;
 using Epam.GraphQL.Configuration;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal interface IInlineGraphTypeResolver<TExecutionContext>

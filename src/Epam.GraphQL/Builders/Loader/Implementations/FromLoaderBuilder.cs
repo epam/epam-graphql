@@ -12,8 +12,6 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class FromLoaderBuilder<TLoader, TEntity, TChildLoader, TChildEntity, TExecutionContext> : FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>,

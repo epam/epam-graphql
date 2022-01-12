@@ -7,8 +7,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasFromIQueryable<TEntity, TExecutionContext>

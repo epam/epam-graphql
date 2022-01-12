@@ -6,8 +6,6 @@
 using System;
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Search
 {
 #pragma warning disable CA1040 // Avoid empty interfaces

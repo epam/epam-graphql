@@ -8,8 +8,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal class EntityGraphTypeDescriptor<TProjection, TReturnType, TExecutionContext> : IGraphTypeDescriptor<TReturnType, TExecutionContext>

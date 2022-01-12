@@ -8,8 +8,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterArgument<TExecutionContext> : IArgument<IResolveFieldContext>

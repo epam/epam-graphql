@@ -6,8 +6,6 @@
 using Epam.GraphQL.Configuration;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class MutationResultGraphType<TMutation, TExecutionContext, TDataType> : ObjectGraphType<object>

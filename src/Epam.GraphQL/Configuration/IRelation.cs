@@ -8,8 +8,6 @@ using Epam.GraphQL.Metadata;
 using GraphQL.DataLoader;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal interface IRelation

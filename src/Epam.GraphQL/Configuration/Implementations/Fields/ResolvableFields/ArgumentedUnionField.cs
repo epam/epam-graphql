@@ -13,8 +13,6 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers
 using Epam.GraphQL.Loaders;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedUnionField<TEntity, TArgType, TExecutionContext> :

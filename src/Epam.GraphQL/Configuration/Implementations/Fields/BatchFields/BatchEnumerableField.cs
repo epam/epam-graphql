@@ -13,8 +13,6 @@ using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using GraphQL;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
     internal class BatchEnumerableField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, IEnumerable<TReturnType>, TExecutionContext>,

@@ -17,8 +17,6 @@ using GraphQL.Validation;
 using GraphQL.Validation.Complexity;
 using Microsoft.Extensions.Logging.Abstractions;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public class SchemaExecutionOptions<TExecutionContext>

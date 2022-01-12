@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Mutation;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationFieldBuilderBase<TExecutionContext> :

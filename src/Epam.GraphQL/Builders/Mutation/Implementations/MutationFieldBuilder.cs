@@ -14,8 +14,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Mutation;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationFieldBuilder<TField, TExecutionContext> :

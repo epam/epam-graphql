@@ -7,8 +7,6 @@ using System;
 using System.Linq;
 using Epam.GraphQL.Infrastructure;
 
-#nullable enable
-
 namespace Epam.GraphQL.Relay
 {
     internal static class Paginator

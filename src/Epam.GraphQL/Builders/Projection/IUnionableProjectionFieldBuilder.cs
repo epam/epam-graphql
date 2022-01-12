@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Builders.Loader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Projection
 {
     public interface IUnionableProjectionFieldBuilder<out TThisType, TExecutionContext>

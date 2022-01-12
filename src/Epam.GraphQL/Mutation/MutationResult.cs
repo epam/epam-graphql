@@ -5,8 +5,6 @@
 
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Epam.GraphQL.Mutation
 {
     public static class MutationResult

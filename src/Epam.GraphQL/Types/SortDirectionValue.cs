@@ -6,8 +6,6 @@
 using Epam.GraphQL.Loaders;
 using GraphQL.Language.AST;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class SortDirectionValue : ValueNode<SortDirection>

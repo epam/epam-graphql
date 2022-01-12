@@ -6,8 +6,6 @@
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class SortingOptionGraphType : InputObjectGraphType<SortingOption>

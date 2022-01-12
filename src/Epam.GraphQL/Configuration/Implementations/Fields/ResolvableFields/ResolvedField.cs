@@ -15,8 +15,6 @@ using Epam.GraphQL.Types;
 using GraphQL;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal static class ResolvedField

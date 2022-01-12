@@ -3,12 +3,10 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public interface IBatchFieldChange<out TEntity, out T, out TBatchReturnType, TExecutionContext> : IFieldChange<TEntity, T, TExecutionContext>
     {
-        TBatchReturnType BatchEntity { get; }
+        TBatchReturnType? BatchEntity { get; }
     }
 }

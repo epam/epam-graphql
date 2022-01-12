@@ -15,8 +15,6 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal static class UnionField

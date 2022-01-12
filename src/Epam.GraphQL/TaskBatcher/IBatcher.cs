@@ -13,8 +13,6 @@ using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.TaskBatcher
 {
     internal interface IBatcher

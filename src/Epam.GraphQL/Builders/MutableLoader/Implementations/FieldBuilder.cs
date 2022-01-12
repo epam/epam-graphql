@@ -18,8 +18,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext> : FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
@@ -104,7 +102,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 
         public IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> MandatoryForUpdate()
         {
-            Field.EditSettings.MandatoryForUpdate();
+            Field.EditSettings?.MandatoryForUpdate();
             return this;
         }
 
@@ -112,7 +110,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate,
             Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings.EditableIf(predicate, reason);
+            Field.EditSettings?.EditableIf(predicate, reason);
             return this;
         }
 
@@ -121,7 +119,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings.EditableIf(_registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
+            Field.EditSettings?.EditableIf(_registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
             return this;
         }
 
@@ -130,13 +128,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings.EditableIf(batchFunc, predicate, reason);
+            Field.EditSettings?.EditableIf(batchFunc, predicate, reason);
             return this;
         }
 
         public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> Editable()
         {
-            Field.EditSettings.Editable();
+            Field.EditSettings?.Editable();
             return this;
         }
 
@@ -147,19 +145,19 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 
         public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> Default(Func<TExecutionContext, TEntity, TReturnType> selector)
         {
-            Field.EditSettings.Default(selector);
+            Field.EditSettings?.Default(selector);
             return this;
         }
 
         public IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save)
         {
-            Field.EditSettings.SetOnWrite(save);
+            Field.EditSettings?.SetOnWrite(save);
             return this;
         }
 
         public IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save)
         {
-            Field.EditSettings.SetOnWrite(save);
+            Field.EditSettings?.SetOnWrite(save);
             return this;
         }
     }

@@ -3,8 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
 #pragma warning disable CS0618 // Type or member is obsolete

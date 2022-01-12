@@ -14,8 +14,6 @@ using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public abstract class Loader<TEntity, TExecutionContext> : Projection<TEntity, TExecutionContext>, ILoader<TEntity, TExecutionContext>

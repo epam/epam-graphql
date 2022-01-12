@@ -3,8 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     internal class BatchFieldChange<TEntity, T, TBatchReturnType, TExecutionContext> : FieldChange<TEntity, T, TExecutionContext>,
@@ -15,12 +13,12 @@ namespace Epam.GraphQL.Loaders
             TEntity entity,
             T? previousValue,
             T? nextValue,
-            TBatchReturnType batchEntity)
+            TBatchReturnType? batchEntity)
             : base(context, entity, previousValue, nextValue)
         {
             BatchEntity = batchEntity;
         }
 
-        public TBatchReturnType BatchEntity { get; set; }
+        public TBatchReturnType? BatchEntity { get; set; }
     }
 }

@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class BatchEnumerableTaskResolver<TEntity, TReturnType, TExecutionContext> : BatchTaskResolver<TEntity, IEnumerable<TReturnType>, TExecutionContext>

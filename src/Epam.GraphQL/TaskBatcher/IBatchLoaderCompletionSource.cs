@@ -6,8 +6,6 @@
 using System;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Epam.GraphQL.TaskBatcher
 {
     internal interface IBatchLoaderCompletionSource<TItem>

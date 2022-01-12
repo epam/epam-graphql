@@ -10,8 +10,6 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Mutation
 {
     internal class SubmitInputTypeRegistry<TExecutionContext>

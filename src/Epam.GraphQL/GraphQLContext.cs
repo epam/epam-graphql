@@ -12,8 +12,6 @@ using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.TaskBatcher;
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     internal class GraphQLContext

@@ -8,8 +8,6 @@ using System.Linq;
 using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Metadata
 {
     internal class TypeMetadata

@@ -13,8 +13,6 @@ using Epam.GraphQL.Filters.Inputs;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal sealed class InlineFilters<TEntity, TExecutionContext> : IInlineFilters<TEntity, TExecutionContext>

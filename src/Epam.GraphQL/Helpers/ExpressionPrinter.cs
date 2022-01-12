@@ -11,8 +11,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Epam.GraphQL.Extensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class ExpressionPrinter : ExpressionVisitor

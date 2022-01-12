@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using GraphQL;
 using GraphQL.Utilities;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public static class SchemaExecuterExtensions

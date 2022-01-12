@@ -11,8 +11,6 @@ using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationPayloadFieldBuilder<TEntity, TArgType, TExecutionContext> :

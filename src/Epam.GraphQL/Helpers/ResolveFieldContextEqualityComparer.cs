@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class ResolveFieldContextEqualityComparer : IEqualityComparer<IResolveFieldContext?>

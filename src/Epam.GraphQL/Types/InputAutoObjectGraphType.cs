@@ -6,8 +6,6 @@
 using Epam.GraphQL.Configuration;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class InputAutoObjectGraphType<TSourceType, TExecutionContext> : InputObjectGraphType<TSourceType>

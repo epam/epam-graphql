@@ -6,8 +6,6 @@
 using GraphQL.Execution;
 using GraphQL.Language.AST;
 
-#nullable enable
-
 namespace Epam.GraphQL.TaskBatcher
 {
     internal class DocumentExecuter : global::GraphQL.DocumentExecuter

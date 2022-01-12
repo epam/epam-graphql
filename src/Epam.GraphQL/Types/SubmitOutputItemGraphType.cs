@@ -8,8 +8,6 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Savers;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class SubmitOutputItemGraphType<TProjection, TEntity, TId, TExecutionContext> : ObjectGraphType<SaveResultItem<TEntity, TId>>

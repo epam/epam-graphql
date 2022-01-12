@@ -5,8 +5,6 @@
 
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Search
 {
     public interface IOrderedSearcher<TEntity, TExecutionContext> : ISearcher<TEntity, TExecutionContext>

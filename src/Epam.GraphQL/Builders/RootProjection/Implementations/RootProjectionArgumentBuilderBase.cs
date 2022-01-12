@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.RootProjection.Implementations
 {
     internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext> : IRootProjectionFieldBuilder<TArgType, TExecutionContext>

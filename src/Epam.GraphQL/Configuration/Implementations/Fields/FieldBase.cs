@@ -14,8 +14,6 @@ using GraphQL.DataLoader;
 using GraphQL.Resolvers;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]

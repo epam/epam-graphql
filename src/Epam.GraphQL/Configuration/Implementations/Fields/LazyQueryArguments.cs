@@ -9,8 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class LazyQueryArguments : IEnumerable<LazyQueryArgument>

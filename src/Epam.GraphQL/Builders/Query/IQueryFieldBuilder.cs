@@ -11,8 +11,6 @@ using Epam.GraphQL.Builders.Projection;
 using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Query
 {
     public partial interface IQueryFieldBuilder<TExecutionContext> :

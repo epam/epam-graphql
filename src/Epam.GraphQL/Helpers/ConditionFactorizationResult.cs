@@ -6,8 +6,6 @@
 using System;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class ConditionFactorizationResult<TRight>

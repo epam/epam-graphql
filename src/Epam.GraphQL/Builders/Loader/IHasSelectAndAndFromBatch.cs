@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext> :

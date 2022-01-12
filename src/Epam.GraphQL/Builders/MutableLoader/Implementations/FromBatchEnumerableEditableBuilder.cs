@@ -12,8 +12,6 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FromBatchEnumerableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext> : FromBatchSelectableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext>,

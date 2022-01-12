@@ -7,8 +7,6 @@ using System;
 using Epam.GraphQL.Configuration;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class EnumerationGraphType<TEnumType, TExecutionContext> : EnumerationGraphType<TEnumType>

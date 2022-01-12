@@ -15,8 +15,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>

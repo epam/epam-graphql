@@ -10,8 +10,6 @@ using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class FieldEditSettings<TEntity, TReturnType, TExecutionContext> : IFieldEditSettings<TEntity, TReturnType, TExecutionContext>

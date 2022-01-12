@@ -7,8 +7,6 @@ using System;
 using System.Reflection;
 using Epam.GraphQL.Extensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     internal static class FieldChange

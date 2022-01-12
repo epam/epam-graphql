@@ -12,8 +12,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Relations
 {
     internal abstract class Relations

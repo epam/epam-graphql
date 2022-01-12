@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Query
 {
     public interface IQueryArgumentBuilder<out TArgType, TExecutionContext> :

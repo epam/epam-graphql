@@ -15,8 +15,6 @@ using GraphQL;
 using GraphQL.Resolvers;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class ExpressionField<TEntity, TReturnType, TExecutionContext> :

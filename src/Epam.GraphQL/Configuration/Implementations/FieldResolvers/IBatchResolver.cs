@@ -5,8 +5,6 @@
 
 using System;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IBatchResolver<TEntity, TReturnType> : IResolver<TEntity>

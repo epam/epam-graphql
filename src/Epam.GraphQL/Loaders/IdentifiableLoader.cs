@@ -8,8 +8,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public abstract class IdentifiableLoader<TEntity, TId, TExecutionContext> : Loader<TEntity, TExecutionContext>, IIdentifiableLoader<TEntity, TId>

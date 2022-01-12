@@ -6,8 +6,6 @@
 using System;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Sorters
 {
     internal interface ISorter<TExecutionContext> : IEquatable<ISorter<TExecutionContext>>

@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     public class Options<TOptions>

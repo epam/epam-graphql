@@ -9,8 +9,6 @@ using Epam.GraphQL.Sorters;
 using GraphQL;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal interface IFieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldResolver<TReturnType?>, ISorter<TExecutionContext>

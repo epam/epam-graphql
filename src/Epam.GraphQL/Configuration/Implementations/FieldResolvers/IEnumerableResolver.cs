@@ -6,8 +6,6 @@
 using System;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IEnumerableResolver<TEntity, TReturnType, TExecutionContext> : IResolver<TEntity>

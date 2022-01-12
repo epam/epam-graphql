@@ -14,8 +14,6 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Sorters.Implementations;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
     internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : QueryableFieldBase<TEntity, TChildEntity, TExecutionContext>

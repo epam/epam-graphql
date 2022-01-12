@@ -6,8 +6,6 @@
 using System;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IHasEditableAndOnWrite<TEntity, TReturnType, TExecutionContext> : IHasEditable<TEntity, TReturnType, TExecutionContext>

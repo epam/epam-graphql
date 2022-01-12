@@ -7,8 +7,6 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class GroupEdgeGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>

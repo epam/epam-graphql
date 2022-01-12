@@ -11,8 +11,6 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IQueryableResolver<TEntity, TReturnType, TExecutionContext> : IEnumerableResolver<TEntity, TReturnType, TExecutionContext>

@@ -12,8 +12,6 @@ using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class StructInlineFilter<TEntity, TReturnType, TExecutionContext> : BaseInlineFilter<TEntity, TReturnType, TReturnType?, TReturnType, TExecutionContext>

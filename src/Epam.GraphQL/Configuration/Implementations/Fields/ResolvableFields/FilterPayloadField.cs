@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Filters;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterPayloadField<TExecutionContext> : IArgument<PayloadFieldsContext<TExecutionContext>>

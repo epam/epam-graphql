@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class EnumerableExtensions

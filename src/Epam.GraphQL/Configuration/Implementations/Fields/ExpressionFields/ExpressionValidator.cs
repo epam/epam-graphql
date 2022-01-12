@@ -9,8 +9,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Extensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal static class ExpressionValidator

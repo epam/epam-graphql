@@ -7,8 +7,6 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class ILGeneratorExtensions

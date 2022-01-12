@@ -19,8 +19,6 @@ using GraphQL.DataLoader;
 using GraphQL.Types;
 using TypeExtensions = Epam.GraphQL.Extensions.TypeExtensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Relations
 {
     internal class Relation<TEntity, TEntityLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext> : IRelation

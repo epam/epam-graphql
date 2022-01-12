@@ -16,8 +16,6 @@ using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Language.AST;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class ResolveFieldContextExtensions

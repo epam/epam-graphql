@@ -10,8 +10,6 @@ using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers
 {
     internal static class ResolvableTypedFieldHelpers

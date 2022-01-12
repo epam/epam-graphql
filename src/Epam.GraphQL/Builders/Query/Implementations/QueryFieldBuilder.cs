@@ -15,8 +15,6 @@ using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Query.Implementations
 {
     internal class QueryFieldBuilder<TField, TExecutionContext> :

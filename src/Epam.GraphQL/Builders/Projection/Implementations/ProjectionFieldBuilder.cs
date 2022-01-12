@@ -13,8 +13,6 @@ using Epam.GraphQL.Builders.Loader.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {
     internal class ProjectionFieldBuilder<TField, TEntity, TExecutionContext> :

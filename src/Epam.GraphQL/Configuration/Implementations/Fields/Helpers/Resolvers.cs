@@ -14,8 +14,6 @@ using Epam.GraphQL.Relay;
 using GraphQL;
 using DataObjects = GraphQL.Types.Relay.DataObjects;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 {
     internal static class Resolvers

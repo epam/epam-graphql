@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Builders.Loader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IHasEditableAndOnWriteAndMandatoryForUpdateAndSelect<TEntity, TReturnType, TExecutionContext> : IHasEditable<TEntity, TReturnType, TExecutionContext>

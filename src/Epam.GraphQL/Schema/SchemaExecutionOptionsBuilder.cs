@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQL.Validation;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public class SchemaExecutionOptionsBuilder<TExecutionContext>

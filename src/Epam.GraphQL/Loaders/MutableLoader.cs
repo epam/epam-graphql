@@ -19,8 +19,6 @@ using GraphQL;
 using GraphQL.DataLoader;
 using TypeExtensions = Epam.GraphQL.Extensions.TypeExtensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public abstract class MutableLoader<TEntity, TId, TExecutionContext> : IdentifiableLoader<TEntity, TId, TExecutionContext>, IMutableLoader<TExecutionContext>

@@ -10,8 +10,6 @@ using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FromBatchSelectableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext> : FromBatchEditableBuilder<TSourceType, TReturnType, TExecutionContext>,

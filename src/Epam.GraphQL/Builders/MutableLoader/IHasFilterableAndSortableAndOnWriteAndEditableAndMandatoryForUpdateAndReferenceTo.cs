@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> :

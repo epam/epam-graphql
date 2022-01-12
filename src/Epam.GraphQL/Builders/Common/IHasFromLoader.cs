@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Common
 {
     public interface IHasFromLoader<TEntity, TExecutionContext>

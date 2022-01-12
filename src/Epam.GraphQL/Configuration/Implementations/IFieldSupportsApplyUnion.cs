@@ -7,8 +7,6 @@ using System;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplyUnion<TEntity, TExecutionContext>

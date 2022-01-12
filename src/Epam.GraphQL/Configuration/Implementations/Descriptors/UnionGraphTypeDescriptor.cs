@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal class UnionGraphTypeDescriptor<TExecutionContext> : IGraphTypeDescriptor<TExecutionContext>

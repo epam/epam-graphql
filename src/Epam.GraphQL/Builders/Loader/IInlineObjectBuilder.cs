@@ -9,8 +9,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IInlineObjectBuilder<TSourceType, TExecutionContext>

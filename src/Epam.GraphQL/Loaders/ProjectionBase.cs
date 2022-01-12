@@ -13,8 +13,6 @@ using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public abstract class ProjectionBase<TExecutionContext> : IEquatable<ProjectionBase<TExecutionContext>>

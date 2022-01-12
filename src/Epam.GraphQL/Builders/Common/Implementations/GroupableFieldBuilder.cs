@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
     internal class GroupableFieldBuilder<TEntity, TReturnType, TExecutionContext> : IHasGroupable

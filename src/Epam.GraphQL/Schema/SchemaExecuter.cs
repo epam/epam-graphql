@@ -19,8 +19,6 @@ using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 using DocumentExecuter = Epam.GraphQL.TaskBatcher.DocumentExecuter;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     /// <summary>

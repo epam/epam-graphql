@@ -18,8 +18,6 @@ using GraphQL;
 using GraphQL.Language.AST;
 using Microsoft.Extensions.DependencyInjection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Savers
 {
     internal static class DbContextSaver

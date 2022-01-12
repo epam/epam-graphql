@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL;
 
-#nullable enable
-
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>

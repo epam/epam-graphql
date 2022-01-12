@@ -8,8 +8,6 @@ using GraphQL.Execution;
 using GraphQL.Language.AST;
 using GraphQL.Validation;
 
-#nullable enable
-
 namespace Epam.GraphQL.Infrastructure
 {
     internal class DocumentExecutionListener<TExecutionContext> : IDocumentExecutionListener

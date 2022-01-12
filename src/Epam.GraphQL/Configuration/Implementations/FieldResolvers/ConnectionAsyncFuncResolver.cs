@@ -11,8 +11,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> : QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>

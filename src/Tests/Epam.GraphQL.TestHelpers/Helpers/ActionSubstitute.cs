@@ -7,8 +7,6 @@ using System;
 using System.Linq.Expressions;
 using NSubstitute;
 
-#nullable enable
-
 namespace Epam.GraphQL.Tests.Helpers
 {
     public static class ActionSubstitute

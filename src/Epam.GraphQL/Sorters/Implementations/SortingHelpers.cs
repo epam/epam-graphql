@@ -15,8 +15,6 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Sorters.Implementations
 {
     internal static class SortingHelpers

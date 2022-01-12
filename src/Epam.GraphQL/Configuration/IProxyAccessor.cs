@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal interface IProxyAccessor<TExecutionContext>

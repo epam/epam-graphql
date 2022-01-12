@@ -7,8 +7,6 @@ using Epam.GraphQL.Metadata;
 using GraphQL.Introspection;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class TypeMetadataGraphType : ObjectGraphType<TypeMetadata>

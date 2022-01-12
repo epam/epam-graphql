@@ -6,8 +6,6 @@
 using System.Collections.Generic;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Metadata
 {
     internal class ForeignKeyMetadata

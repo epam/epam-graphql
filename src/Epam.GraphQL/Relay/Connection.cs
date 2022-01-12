@@ -6,8 +6,6 @@
 using System.Collections.Generic;
 using GraphQL.Types.Relay.DataObjects;
 
-#nullable enable
-
 namespace Epam.GraphQL.Relay
 {
     public class Connection<T>

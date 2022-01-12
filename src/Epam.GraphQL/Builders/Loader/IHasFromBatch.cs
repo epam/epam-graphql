@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasFromBatch<TEntity, TExecutionContext>

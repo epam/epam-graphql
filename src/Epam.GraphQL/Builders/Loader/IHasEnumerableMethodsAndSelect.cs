@@ -7,8 +7,6 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasEnumerableMethodsAndSelect<TSourceType, TExecutionContext> : IHasEnumerableMethods<TSourceType>

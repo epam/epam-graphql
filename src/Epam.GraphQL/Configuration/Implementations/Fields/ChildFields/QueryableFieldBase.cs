@@ -19,8 +19,6 @@ using Epam.GraphQL.Types;
 using GraphQL;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
     internal abstract class QueryableFieldBase<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>

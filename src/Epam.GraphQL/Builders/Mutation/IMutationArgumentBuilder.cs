@@ -7,8 +7,6 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationArgumentBuilder<out TArgType, TExecutionContext> :

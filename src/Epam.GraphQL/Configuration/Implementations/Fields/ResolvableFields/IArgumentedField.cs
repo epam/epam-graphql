@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal interface IArgumentedField<TEntity, TArgType, TExecutionContext> : IResolvableField<TEntity, TArgType, TExecutionContext>

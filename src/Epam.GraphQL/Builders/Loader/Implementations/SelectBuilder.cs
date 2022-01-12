@@ -7,8 +7,6 @@ using System;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class SelectBuilder<TField, TSourceType, TReturnType, TExecutionContext> :

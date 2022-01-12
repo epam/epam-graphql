@@ -13,8 +13,6 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class QueryableExtensions

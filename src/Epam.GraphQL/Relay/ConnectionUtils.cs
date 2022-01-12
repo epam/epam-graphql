@@ -10,8 +10,6 @@ using System.Linq;
 using Epam.GraphQL.Infrastructure;
 using GraphQL.Types.Relay.DataObjects;
 
-#nullable enable
-
 namespace Epam.GraphQL.Relay
 {
     internal static class ConnectionUtils

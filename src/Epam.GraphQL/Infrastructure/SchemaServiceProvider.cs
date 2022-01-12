@@ -12,8 +12,6 @@ using Epam.GraphQL.Mutation;
 using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Infrastructure
 {
     internal class SchemaServiceProvider<TExecutionContext> : IServiceProvider

@@ -23,8 +23,6 @@ using GraphQL;
 using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public abstract class Mutation<TExecutionContext> : RootProjection<TExecutionContext>

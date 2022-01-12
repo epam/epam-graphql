@@ -5,8 +5,6 @@
 
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Epam.GraphQL.Relay
 {
     internal class PaginatorResult<TSource>

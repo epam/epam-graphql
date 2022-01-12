@@ -11,8 +11,6 @@ using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class FromBatchBuilder<TField, TSourceType, TReturnType, TExecutionContext> : SelectAndReferenceToBuilder<TField, TSourceType, TReturnType, TExecutionContext>,

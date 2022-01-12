@@ -9,8 +9,6 @@ using Epam.GraphQL.Filters;
 using Epam.GraphQL.Sorters;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal interface IObjectGraphTypeConfigurator<TExecutionContext>

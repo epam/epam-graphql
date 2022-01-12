@@ -10,8 +10,6 @@ using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal interface IField

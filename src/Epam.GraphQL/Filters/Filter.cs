@@ -9,8 +9,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters
 {
     public abstract class Filter<TEntity, TFilter, TExecutionContext> : IFilter<TEntity, TExecutionContext>

@@ -5,8 +5,6 @@
 
 using System;
 
-#nullable enable
-
 namespace Epam.GraphQL.EntityFrameworkCore
 {
     internal class EFCoreResolveOptionsExtension

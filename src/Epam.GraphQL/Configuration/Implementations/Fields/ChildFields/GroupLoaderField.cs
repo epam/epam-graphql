@@ -17,8 +17,6 @@ using Epam.GraphQL.Sorters.Implementations;
 using Epam.GraphQL.Types;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
 #pragma warning disable CA1501

@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Savers
 {
     internal class SaveResult<TEntity, TId, TExecutionContext> : ISaveResult<TExecutionContext>

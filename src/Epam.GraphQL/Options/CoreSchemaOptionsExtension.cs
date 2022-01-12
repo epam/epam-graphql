@@ -9,8 +9,6 @@ using Epam.GraphQL.Infrastructure;
 using GraphQL.Validation;
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL.Options
 {
     internal class CoreSchemaOptionsExtension<TExecutionContext>

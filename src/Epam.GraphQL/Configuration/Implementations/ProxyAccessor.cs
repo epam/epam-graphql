@@ -13,8 +13,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class ProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TEntity, TExecutionContext>

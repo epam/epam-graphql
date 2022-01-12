@@ -6,8 +6,6 @@
 using System;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal static class GraphTypeDescriptor

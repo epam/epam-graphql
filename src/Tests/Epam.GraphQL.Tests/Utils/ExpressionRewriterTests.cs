@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
 using NUnit.Framework;
 
-#nullable enable
-
 namespace Epam.GraphQL.Tests.Utils
 {
     [TestFixture]

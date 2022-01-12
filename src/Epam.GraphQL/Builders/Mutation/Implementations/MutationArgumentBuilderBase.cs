@@ -9,8 +9,6 @@ using Epam.GraphQL.Builders.RootProjection.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Mutation;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext> : RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext>

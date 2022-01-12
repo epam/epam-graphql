@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>

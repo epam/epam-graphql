@@ -11,8 +11,6 @@ using GraphQL.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     public class SchemaOptionsBuilder<TExecutionContext> : OptionsBuilder<SchemaOptions>

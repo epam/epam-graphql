@@ -6,8 +6,6 @@
 using System.Collections.Generic;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IBatchCompoundResolver<TEntity, TExecutionContext> : IBatchResolver<TEntity, IEnumerable<object>>, IFieldResolver

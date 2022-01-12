@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Savers
 {
     internal class SaveResultItem<TEntity, TId> : ISaveResultItem

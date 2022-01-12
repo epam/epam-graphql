@@ -27,8 +27,6 @@ using Epam.GraphQL.Types;
 using GraphQL.Types;
 using Microsoft.Extensions.DependencyInjection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal class RelationRegistry<TExecutionContext> : IServiceProvider, IRegistry

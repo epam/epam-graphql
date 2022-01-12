@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class CustomInlineFilter<TEntity, TValueType, TExecutionContext> : IInlineFilter<TExecutionContext>

@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Sorters.Implementations
 {
     internal class CustomSorter<TEntity, TValueType, TExecutionContext> : ISorter<TExecutionContext>

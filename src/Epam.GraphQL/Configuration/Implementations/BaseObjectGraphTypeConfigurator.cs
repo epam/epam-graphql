@@ -28,8 +28,6 @@ using GraphQL;
 using GraphQL.Types;
 using TypeExtensions = Epam.GraphQL.Extensions.TypeExtensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
 #pragma warning disable CA1506

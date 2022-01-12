@@ -5,8 +5,6 @@
 
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public interface ILoader<TEntity, TExecutionContext>

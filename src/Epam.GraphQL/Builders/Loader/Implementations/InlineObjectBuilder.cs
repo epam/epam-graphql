@@ -17,8 +17,6 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class InlineObjectBuilder<TSourceType, TExecutionContext> : IInlineObjectBuilder<TSourceType, TExecutionContext>, IInlineGraphTypeResolver<TSourceType, TExecutionContext>

@@ -9,8 +9,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext> : IHasEditableAndOnWriteAndMandatoryForUpdateAndSelect<TEntity, TReturnType, TExecutionContext>

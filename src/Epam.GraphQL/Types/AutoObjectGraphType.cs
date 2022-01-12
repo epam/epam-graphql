@@ -7,8 +7,6 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Helpers;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Types
 {
     internal class AutoObjectGraphType<TSourceType, TExecutionContext> : ObjectGraphType<object>

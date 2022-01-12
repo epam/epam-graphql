@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> :

@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
 
-#nullable enable
-
 namespace Epam.GraphQL.Loaders
 {
     public abstract class Projection<TEntity, TExecutionContext> : ProjectionBase<TEntity, TExecutionContext>

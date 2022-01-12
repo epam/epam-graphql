@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedUnionFieldBase<TArguments, TEntity, TExecutionContext> :

@@ -6,8 +6,6 @@
 using System;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.TaskBatcher
 {
     internal class BatchLoaderContinuation<TItem, TParameter, TResult> :

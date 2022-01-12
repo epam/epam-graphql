@@ -9,8 +9,6 @@ using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal interface IFieldEditSettings<TExecutionContext>

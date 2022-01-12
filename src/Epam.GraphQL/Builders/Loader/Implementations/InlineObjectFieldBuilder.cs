@@ -16,8 +16,6 @@ using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class InlineObjectFieldBuilder<TField, TEntity, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>, IInlineObjectFieldBuilder<TEntity, TExecutionContext>

@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Builders.Loader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>
