@@ -26,65 +26,65 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build);
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build);
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor();
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor();
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build).MakeListDescriptor();
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
             // TODO throw if TReturnType is IEnumerable
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build).MakeListDescriptor();
             var resolvedField = ResolvedField.Create(Registry, Parent, Name, graphType, Resolvers.ConvertFieldResolver(resolve), Arguments, optionsBuilder);
-            return Parent.ReplaceField(this, resolvedField);
+            Parent.ReplaceField(this, resolvedField);
         }
 
         public UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)

@@ -22,22 +22,22 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 
@@ -52,22 +52,22 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 
@@ -82,22 +82,22 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 
@@ -112,22 +112,22 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 
@@ -142,22 +142,22 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve)
         {
-            Field.ApplyResolve(resolve);
+            Field.Resolve(resolve);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 }
