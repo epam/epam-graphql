@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Configuration
 {
     internal interface IRelation
     {
-        bool HasFakePropertyValue(object? childEntity, IDictionary<string, object> childPropertyValues);
+        bool HasFakePropertyValue(object? childEntity, IDictionary<string, object?> childPropertyValues);
 
         void UpdateFakeProperties(object? entity, object? childEntity, IDictionary<string, object?> childPropertyValues, object? fakePropertyValue);
 

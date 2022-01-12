@@ -112,7 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return $"Relation: type = {typeof(TEntity).HumanizedName()} childType = {typeof(TChildEntity).HumanizedName()} prop = {PropertyName}, childProp {ChildPropertyName}, childNavigationProp {ChildNavigationPropertyName}";
         }
 
-        public bool HasFakePropertyValue(object? childEntity, IDictionary<string, object> childPropertyValues)
+        public bool HasFakePropertyValue(object? childEntity, IDictionary<string, object?> childPropertyValues)
         {
             if (childEntity is TChildEntity e)
             {

@@ -18,14 +18,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     {
         private readonly Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> _resolve;
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
+        private readonly Type _fieldType;
 
         public SubmitField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
             : base(registry, parent, name)
         {
             _graphType = returnGraphType ?? throw new ArgumentNullException(nameof(returnGraphType));
             _resolve = resolve ?? throw new ArgumentNullException(nameof(resolve));
+            _fieldType = fieldType;
 
-            FieldType = fieldType;
             Arguments = new LazyQueryArguments
             {
                 new LazyQueryArgument(argName, argGraphType),
@@ -35,6 +36,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
+
+        public override Type FieldType => _fieldType;
 
         protected override IFieldResolver GetResolver()
         {

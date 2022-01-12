@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             throw new NotImplementedException();
         }
 
-        public bool HasFakePropertyValue(object? childEntity, IDictionary<string, object> childPropertyValues)
+        public bool HasFakePropertyValue(object? childEntity, IDictionary<string, object?> childPropertyValues)
         {
             if (childPropertyValues.TryGetValue(_propName, out var val))
             {

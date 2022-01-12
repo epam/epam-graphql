@@ -45,7 +45,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public bool IsMandatoryForUpdate { get; set; }
 
-        Action<IResolveFieldContext, object, object>? IFieldEditSettings<TExecutionContext>.OnWrite
+        Action<IResolveFieldContext, object, object?>? IFieldEditSettings<TExecutionContext>.OnWrite
         {
             get
             {
@@ -65,7 +65,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
         }
 
-        Func<IResolveFieldContext, object, object, Task>? IFieldEditSettings<TExecutionContext>.OnWriteAsync
+        Func<IResolveFieldContext, object, object?, Task>? IFieldEditSettings<TExecutionContext>.OnWriteAsync
         {
             get
             {

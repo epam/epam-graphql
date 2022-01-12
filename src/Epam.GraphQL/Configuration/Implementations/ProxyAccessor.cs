@@ -106,11 +106,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 foreach (var calculatedField in Fields)
                 {
                     var name = calculatedField.Name;
-
-                    if (calculatedField.FieldType != null)
-                    {
-                        fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
-                    }
+                    fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
                 }
 
                 var i = 1;

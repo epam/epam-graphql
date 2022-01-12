@@ -8,12 +8,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
 
+#nullable enable
+
 namespace Epam.GraphQL.Loaders
 {
     public abstract class IdentifiableLoader<TEntity, TId, TExecutionContext> : Loader<TEntity, TExecutionContext>, IIdentifiableLoader<TEntity, TId>
         where TEntity : class
     {
-        private Func<TEntity, TId> _idGetter;
+        private Func<TEntity, TId> _idGetter = null!;
 
         protected internal abstract Expression<Func<TEntity, TId>> IdExpression { get; }
 
@@ -22,7 +24,7 @@ namespace Epam.GraphQL.Loaders
             return query.OrderBy(IdExpression);
         }
 
-        object IIdentifiableLoader.GetId(object entity) => GetId((TEntity)entity);
+        object? IIdentifiableLoader.GetId(object entity) => GetId((TEntity)entity);
 
         TId IIdentifiableLoader<TEntity, TId>.GetId(TEntity entity) => GetId(entity);
 

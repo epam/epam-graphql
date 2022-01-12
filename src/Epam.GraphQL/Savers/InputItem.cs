@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Savers
 {
     internal static class InputItem
     {
-        public static IInputItem Create(Type entityType, object payload, IDictionary<string, object> properties)
+        public static IInputItem Create(Type entityType, object payload, IDictionary<string, object?> properties)
         {
             var type = typeof(InputItem<>).MakeGenericType(entityType);
             return (IInputItem)type.CreateInstanceAndHoistBaseException(payload, properties);
@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Savers
 
     internal class InputItem<TEntity> : IInputItem
     {
-        public InputItem(TEntity payload, IDictionary<string, object> properties)
+        public InputItem(TEntity payload, IDictionary<string, object?> properties)
         {
             Payload = payload;
             Properties = properties;
@@ -30,7 +30,7 @@ namespace Epam.GraphQL.Savers
 
         public TEntity Payload { get; }
 
-        public IDictionary<string, object> Properties { get; }
+        public IDictionary<string, object?> Properties { get; }
 
         object? IInputItem.Payload => Payload;
     }

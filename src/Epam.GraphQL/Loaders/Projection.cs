@@ -8,36 +8,38 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
 
+#nullable enable
+
 namespace Epam.GraphQL.Loaders
 {
     public abstract class Projection<TEntity, TExecutionContext> : ProjectionBase<TEntity, TExecutionContext>
         where TEntity : class
     {
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(Expression<Func<TEntity, TReturnType>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
            where TReturnType : struct => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TReturnType, TExecutionContext>(AddField(null, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
             where TReturnType : struct => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TReturnType, TExecutionContext>(AddField(name, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null)
             where TReturnType : struct => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TReturnType, TExecutionContext>(AddField(name, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(Expression<Func<TEntity, TReturnType?>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(Expression<Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType : struct => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType?, TReturnType, TExecutionContext>(AddField(null, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType : struct => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType?, TReturnType, TExecutionContext>(AddField(name, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType : struct => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType?, TReturnType, TExecutionContext>(AddField(name, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, string> Field(Expression<Func<TEntity, string>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, string> Field(Expression<Func<TEntity, string>> expression, string? deprecationReason = null)
             => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, string, string, TExecutionContext>(AddField(null, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, string> Field(string name, Expression<Func<TEntity, string>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, string> Field(string name, Expression<Func<TEntity, string>> expression, string? deprecationReason = null)
             => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, string, string, TExecutionContext>(AddField(name, expression, deprecationReason));
 
-        protected internal IHasFilterableAndSortableAndGroupable<TEntity, string> Field(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string deprecationReason = null)
+        protected internal IHasFilterableAndSortableAndGroupable<TEntity, string> Field(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string? deprecationReason = null)
             => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, string, string, TExecutionContext>(AddField(name, expression, deprecationReason));
 
         protected internal void Filter<TValueType>(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)

@@ -29,12 +29,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
-        public FieldBase(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, Type fieldType)
-            : this(registry, parent, name)
-        {
-            FieldType = fieldType;
-        }
-
         public LazyQueryArguments? Arguments { get; set; }
 
         public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => throw new NotImplementedException();
@@ -43,7 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public string? DeprecationReason { get; set; }
 
-        public Type? FieldType { get; protected set; }
+        public virtual Type FieldType => throw new NotImplementedException();
 
         public virtual bool CanResolve => false;
 
@@ -56,7 +50,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         internal BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> Parent { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string DebuggerDisplay => $"{GetType().GetGenericTypeDefinition().Name}({FieldType?.Name} {typeof(TEntity).Name}.{Name})";
+        private string DebuggerDisplay => $"{GetType().GetGenericTypeDefinition().Name}({FieldType.Name} {typeof(TEntity).Name}.{Name})";
 
         public virtual FieldType AsFieldType()
         {

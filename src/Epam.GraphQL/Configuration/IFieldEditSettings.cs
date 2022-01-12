@@ -21,9 +21,9 @@ namespace Epam.GraphQL.Configuration
 
         Func<IResolveFieldContext, object, object>? GetDefaultValue { get; set; }
 
-        Action<IResolveFieldContext, object, object>? OnWrite { get; }
+        Action<IResolveFieldContext, object, object?>? OnWrite { get; }
 
-        Func<IResolveFieldContext, object, object, Task>? OnWriteAsync { get; }
+        Func<IResolveFieldContext, object, object?, Task>? OnWriteAsync { get; }
     }
 
     internal interface IFieldEditSettings<TEntity, TExecutionContext> : IFieldEditSettings<TExecutionContext>

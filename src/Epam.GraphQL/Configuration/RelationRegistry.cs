@@ -214,7 +214,7 @@ namespace Epam.GraphQL.Configuration
             }
         }
 
-        public bool HasFakePropertyValues<TEntity>(Type loaderType, TEntity entity, IDictionary<string, object> propertyValues)
+        public bool HasFakePropertyValues<TEntity>(Type loaderType, TEntity entity, IDictionary<string, object?> propertyValues)
             where TEntity : class
         {
             if (_relationMap.TryGetValue((loaderType, typeof(TEntity)), out var childRels))
@@ -268,7 +268,7 @@ namespace Epam.GraphQL.Configuration
             childRelations.Register<TPropertyType, TChildPropertyType>(propName, isFakePropValue, loader.GetId);
         }
 
-        public bool HasFakePropertyValuesPostponedForSave<TChildEntity>(TChildEntity entity, IDictionary<string, object> propertyValues)
+        public bool HasFakePropertyValuesPostponedForSave<TChildEntity>(TChildEntity entity, IDictionary<string, object?> propertyValues)
             where TChildEntity : class
         {
             if (_relationMapPostponedForSave.TryGetValue(typeof(TChildEntity), out var rel))

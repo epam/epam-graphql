@@ -15,7 +15,7 @@ namespace Epam.GraphQL.Savers
     internal class SaveResult<TEntity, TId, TExecutionContext> : ISaveResult<TExecutionContext>
     {
         public SaveResult(
-            List<SaveResultItem<TEntity, TId>> processedItems,
+            List<SaveResultItem<TEntity?, TId>> processedItems,
             List<SaveResultItem<TEntity, TId>> pendingItems,
             List<SaveResultItem<TEntity, TId>> postponedItems,
             IMutableLoader<TExecutionContext> loader,
@@ -30,7 +30,7 @@ namespace Epam.GraphQL.Savers
             MutationType = mutationType;
         }
 
-        public List<SaveResultItem<TEntity, TId>> ProcessedItems { get; set; }
+        public List<SaveResultItem<TEntity?, TId>> ProcessedItems { get; set; }
 
         public List<SaveResultItem<TEntity, TId>> PendingItems { get; set; }
 

@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Configuration
     {
         string Name { get; }
 
-        Type? FieldType { get; }
+        Type FieldType { get; }
 
         bool CanResolve { get; }
 

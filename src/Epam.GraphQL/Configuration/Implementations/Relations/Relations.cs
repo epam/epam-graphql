@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
 
         public abstract IEnumerable<IRelation> Items { get; }
 
-        public abstract bool HasFakePropertyValues(object entity, IDictionary<string, object> propertyValues);
+        public abstract bool HasFakePropertyValues(object entity, IDictionary<string, object?> propertyValues);
 
         public abstract void UpdateFakeProperties(object? parent, object? child, IDictionary<string, object?> childPropertyValues, object? propertyValue);
     }
@@ -61,7 +61,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             _postponedRelations.Add(relation);
         }
 
-        public override bool HasFakePropertyValues(object entity, IDictionary<string, object> propertyValues)
+        public override bool HasFakePropertyValues(object entity, IDictionary<string, object?> propertyValues)
         {
             if (entity is TChildEntity e)
             {
@@ -71,7 +71,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             throw new InvalidOperationException();
         }
 
-        public bool HasFakePropertyValues(TChildEntity childEntity, IDictionary<string, object> childPropertyValues) => Items.Any(relation => relation.HasFakePropertyValue(childEntity, childPropertyValues));
+        public bool HasFakePropertyValues(TChildEntity childEntity, IDictionary<string, object?> childPropertyValues) => Items.Any(relation => relation.HasFakePropertyValue(childEntity, childPropertyValues));
 
         public override void UpdateFakeProperties(object? parent, object? child, IDictionary<string, object?> childPropertyValues, object? propertyValue)
         {

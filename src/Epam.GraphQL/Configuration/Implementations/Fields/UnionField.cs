@@ -86,8 +86,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             : base(
                   registry,
                   parent,
-                  name,
-                  isList ? typeof(IEnumerable<>).MakeGenericType(TypeHelpers.GetTheBestCommonBaseType(unionTypes)) : TypeHelpers.GetTheBestCommonBaseType(unionTypes))
+                  name)
         {
             UnionGraphType = unionGraphType;
             IsList = isList;
@@ -96,6 +95,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => IsList ? UnionGraphType.MakeListDescriptor() : UnionGraphType;
+
+        public override Type FieldType => IsList ? typeof(IEnumerable<>).MakeGenericType(TypeHelpers.GetTheBestCommonBaseType(UnionTypes)) : TypeHelpers.GetTheBestCommonBaseType(UnionTypes);
 
         public UnionGraphTypeDescriptor<TExecutionContext> UnionGraphType { get; }
 

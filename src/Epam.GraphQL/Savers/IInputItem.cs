@@ -15,6 +15,6 @@ namespace Epam.GraphQL.Savers
     {
         object? Payload { get; }
 
-        IDictionary<string, object> Properties { get; }
+        IDictionary<string, object?> Properties { get; }
     }
 }

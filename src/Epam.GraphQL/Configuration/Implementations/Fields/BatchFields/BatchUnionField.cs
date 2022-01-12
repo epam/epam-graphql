@@ -25,6 +25,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
     {
         private readonly IBatchCompoundResolver<TEntity, TExecutionContext> _resolver;
         private readonly UnionGraphTypeDescriptor<TExecutionContext> _unionGraphType = new();
+        private readonly Type _fieldType;
 
         // TODO Implement unions of more than two batches
         public BatchUnionField(
@@ -44,13 +45,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             _resolver.Add(firstResolver);
             _resolver.Add(secondResolver);
 
-            FieldType = TypeHelpers.GetTheBestCommonBaseType(firstType, secondType);
+            _fieldType = TypeHelpers.GetTheBestCommonBaseType(firstType, secondType);
             _unionGraphType.Add(firstGraphType);
             _unionGraphType.Add(secondGraphType);
-            _unionGraphType.Name = parent.GetGraphQLTypeName(FieldType, null, this);
+            _unionGraphType.Name = parent.GetGraphQLTypeName(_fieldType, null, this);
 
             EditSettings = new FieldEditSettings<TEntity, IEnumerable<object>, TExecutionContext>();
         }
+
+        public override Type FieldType => _fieldType;
 
         public new IFieldEditSettings<TEntity, IEnumerable<object>, TExecutionContext>? EditSettings
         {
