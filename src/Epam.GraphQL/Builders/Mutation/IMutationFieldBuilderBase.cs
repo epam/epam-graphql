@@ -5,12 +5,14 @@
 
 using System;
 using System.Threading.Tasks;
+using Epam.GraphQL.Builders.Projection;
 using Epam.GraphQL.Builders.RootProjection;
 using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationFieldBuilderBase<TExecutionContext> :
+        IUnionableProjectionFieldBuilder<IMutationFieldBuilderBase<TExecutionContext>, TExecutionContext>,
         IRootProjectionFieldBuilder<TExecutionContext>
     {
         void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve);

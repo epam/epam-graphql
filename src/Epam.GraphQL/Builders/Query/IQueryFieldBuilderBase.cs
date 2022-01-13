@@ -3,13 +3,14 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Builders.Projection;
+using Epam.GraphQL.Builders.RootProjection;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Builders.Query
 {
-    public interface IProjectionFieldBuilder<TEntity, TExecutionContext> :
-        IProjectionFieldBuilderBase<TEntity, TExecutionContext>,
-        IHasFromIQueryable<TEntity, TExecutionContext>
+    public interface IQueryFieldBuilderBase<TExecutionContext> :
+        IUnionableProjectionFieldBuilder<IQueryFieldBuilderBase<TExecutionContext>, TExecutionContext>,
+        IRootProjectionFieldBuilder<TExecutionContext>
     {
     }
 }

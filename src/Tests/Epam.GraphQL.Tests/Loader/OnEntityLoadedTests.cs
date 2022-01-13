@@ -1000,7 +1000,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromIQueryable<Unit>(
+                        .FromIQueryable(
                             ctx => FakeData.Units.AsQueryable(),
                             (p, u) => u.Id == p.UnitId,
                             builder =>

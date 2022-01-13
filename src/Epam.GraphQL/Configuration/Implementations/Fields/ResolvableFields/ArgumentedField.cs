@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), isList, Arguments);
@@ -159,7 +159,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), isList, Arguments);
@@ -245,7 +245,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), isList, Arguments);
@@ -331,7 +331,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), isList, Arguments);
@@ -417,7 +417,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), isList, Arguments);

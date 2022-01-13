@@ -11,7 +11,6 @@ using Epam.GraphQL.Loaders;
 namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationFieldBuilder<TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TExecutionContext>
     {
         IMutationPayloadFieldBuilder<TType, TExecutionContext> PayloadField<TType>(string name);

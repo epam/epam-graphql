@@ -967,6 +967,9 @@ namespace Epam.GraphQL.Configuration.Implementations
                 typeof(TAnotherReturnType)));
         }
 
+        internal TField AddField<TField>(TField field, string? deprecationReason)
+            where TField : FieldBase<TEntity, TExecutionContext> => InternalAddField(field, deprecationReason);
+
         protected virtual void OnConfigure()
         {
         }

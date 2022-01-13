@@ -292,7 +292,7 @@ namespace Epam.GraphQL.Builders.Loader
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
     }
-    public interface ILoaderFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFromLoader<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IProjectionFieldBuilder<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Projection.IProjectionFieldBuilder<TEntity, TExecutionContext>, TExecutionContext>
+    public interface ILoaderFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFromLoader<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IProjectionFieldBuilderBase<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IProjectionFieldBuilder<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Projection.IProjectionFieldBuilderBase<TEntity, TExecutionContext>, TExecutionContext>
         where TEntity :  class { }
 }
 namespace Epam.GraphQL.Builders.MutableLoader
@@ -540,7 +540,7 @@ namespace Epam.GraphQL.Builders.Mutation
             where TEntity :  class;
     }
     public interface IMutationArgumentBuilder<out TArgType1, out TArgType2, out TArgType3, out TArgType4, out TArgType5, TExecutionContext> : Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, Epam.GraphQL.Builders.Mutation.IMutationFieldBuilder<Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Mutation.IMutationFieldBuilder<Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> { }
-    public interface IMutationFieldBuilderBase<TExecutionContext> : Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext>
+    public interface IMutationFieldBuilderBase<TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext>
     {
         void Resolve<TReturnType>(System.Func<TExecutionContext, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve);
         void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve);
@@ -582,7 +582,7 @@ namespace Epam.GraphQL.Builders.Mutation
         void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
         void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
     }
-    public interface IMutationFieldBuilder<TExecutionContext> : Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Mutation.IMutationFieldBuilder<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext>
+    public interface IMutationFieldBuilder<TExecutionContext> : Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Mutation.IMutationFieldBuilderBase<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext>
     {
         Epam.GraphQL.Builders.Mutation.IMutationArgumentBuilder<TType, TExecutionContext> Argument<TType>(string name);
         Epam.GraphQL.Builders.Mutation.IMutationArgumentBuilder<System.Linq.Expressions.Expression<System.Func<TEntity, bool>>, TExecutionContext> FilterArgument<TEntity>(System.Type projectionType, string name)
@@ -642,7 +642,7 @@ namespace Epam.GraphQL.Builders.Mutation
 }
 namespace Epam.GraphQL.Builders.Projection
 {
-    public interface IProjectionFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Projection.IProjectionFieldBuilder<TEntity, TExecutionContext>, TExecutionContext>
+    public interface IProjectionFieldBuilderBase<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Projection.IProjectionFieldBuilderBase<TEntity, TExecutionContext>, TExecutionContext>
     {
         void Resolve<TReturnType>(System.Func<TEntity, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
         void Resolve<TReturnType>(System.Func<TEntity, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
@@ -669,6 +669,7 @@ namespace Epam.GraphQL.Builders.Projection
         void Resolve<TReturnType>(System.Func<TExecutionContext, TEntity, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
+    public interface IProjectionFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IProjectionFieldBuilderBase<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Projection.IProjectionFieldBuilderBase<TEntity, TExecutionContext>, TExecutionContext> { }
     public interface IUnionableProjectionFieldBuilder<out TThisType, TExecutionContext>
     {
         TThisType And<TType>(System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TType, TExecutionContext>>? build = null)
@@ -722,7 +723,8 @@ namespace Epam.GraphQL.Builders.Query
             where TEntity :  class;
     }
     public interface IQueryArgumentBuilder<out TArgType1, out TArgType2, out TArgType3, out TArgType4, out TArgType5, TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Query.IQueryFieldBuilder<Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.Query.IQueryFieldBuilder<Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> { }
-    public interface IQueryFieldBuilder<TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Query.IQueryFieldBuilder<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext>
+    public interface IQueryFieldBuilderBase<TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Query.IQueryFieldBuilderBase<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext> { }
+    public interface IQueryFieldBuilder<TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Query.IQueryFieldBuilderBase<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.Query.IQueryFieldBuilderBase<TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TExecutionContext>
     {
         Epam.GraphQL.Builders.Query.IQueryArgumentBuilder<TType, TExecutionContext> Argument<TType>(string name);
         Epam.GraphQL.Builders.Query.IQueryArgumentBuilder<System.Linq.Expressions.Expression<System.Func<TEntity, bool>>, TExecutionContext> FilterArgument<TEntity>(System.Type projectionType, string name)

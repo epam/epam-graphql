@@ -91,20 +91,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
             return ApplyField(unionField);
         }
 
-        public new IArgumentedField<TEntity, TArgType, TArgType2, TExecutionContext> ApplyArgument<TArgType2>(string argName)
+        public IArgumentedField<TEntity, TArgType, TArgType2, TExecutionContext> ApplyArgument<TArgType2>(string argName)
         {
             var argumentedField = new ArgumentedUnionField<TEntity, TArgType, TArgType2, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType2>(argName));
             return ApplyField(argumentedField);
         }
 
-        public new IArgumentedField<TEntity, TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+        public IArgumentedField<TEntity, TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
@@ -206,20 +206,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
             return ApplyField(unionField);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyArgument<TArgType3>(string argName)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyArgument<TArgType3>(string argName)
         {
             var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType3>(argName));
             return ApplyField(argumentedField);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
@@ -321,20 +321,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
             return ApplyField(unionField);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyArgument<TArgType4>(string argName)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyArgument<TArgType4>(string argName)
         {
             var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType4>(argName));
             return ApplyField(argumentedField);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
@@ -436,20 +436,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
             return ApplyField(unionField);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyArgument<TArgType5>(string argName)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyArgument<TArgType5>(string argName)
         {
             var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType5>(argName));
             return ApplyField(argumentedField);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
@@ -551,7 +551,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        public IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
             where TLastElementType : class
         {
             var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);

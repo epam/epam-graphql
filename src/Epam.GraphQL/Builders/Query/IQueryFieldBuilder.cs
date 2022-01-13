@@ -13,9 +13,7 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Query
 {
-    public partial interface IQueryFieldBuilder<TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IQueryFieldBuilder<TExecutionContext>, TExecutionContext>,
-        IRootProjectionFieldBuilder<TExecutionContext>
+    public interface IQueryFieldBuilder<TExecutionContext> : IQueryFieldBuilderBase<TExecutionContext>
     {
         IQueryPayloadFieldBuilder<TType, TExecutionContext> PayloadField<TType>(string name);
 

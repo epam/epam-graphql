@@ -4,15 +4,19 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Configuration.Implementations.Fields;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
-    internal interface IFieldSupportsApplyUnion<TEntity, TExecutionContext>
+    internal interface IUnionableField<TEntity, TExecutionContext> : IResolvableField<TEntity, TExecutionContext>
         where TEntity : class
     {
-        UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build, bool isList)
+        IUnionableField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class;
+
+        IUnionableField<TEntity, TExecutionContext> ApplyUnion<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : IEnumerable<TElementType>
+            where TElementType : class;
     }
 }

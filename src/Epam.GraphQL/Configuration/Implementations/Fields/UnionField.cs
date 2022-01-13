@@ -5,15 +5,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
@@ -36,8 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
     internal class UnionField<TEntity, TExecutionContext> :
         FieldBase<TEntity, TExecutionContext>,
-        IResolvableField<TEntity, TExecutionContext>,
-        IFieldSupportsApplyUnion<TEntity, TExecutionContext>
+        IUnionableField<TEntity, TExecutionContext>
         where TEntity : class
     {
         public UnionField(
@@ -146,27 +142,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             ResolvableTypedFieldHelpers.ApplyResolve(this, Resolvers.ConvertFieldResolver(resolve), build, optionsBuilder);
         }
 
-        public UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>>? build, bool isList)
+        public IUnionableField<TEntity, TExecutionContext> ApplyUnion<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>>? build)
             where TLastElementType2 : class
         {
-            var unionField = new UnionField<TEntity, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType2), UnionField.CreateTypeResolver<TEntity, TLastElementType2, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList);
+            var unionField = new UnionField<TEntity, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType2), UnionField.CreateTypeResolver<TEntity, TLastElementType2, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList);
             return ApplyField(unionField);
         }
 
-        public ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(string argName)
-            => Parent.ApplyArgument<TArgType>(this, argName);
-
-        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-            => Parent.ApplyFilterArgument<TProjection, TEntity1>(this, argName);
-
-        public ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyPayloadField<TArgType>(string argName)
-            => Parent.ApplyPayloadField<TArgType>(this, argName);
-
-        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterPayloadField<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-            => Parent.ApplyFilterPayloadField<TProjection, TEntity1>(this, argName);
+        public IUnionableField<TEntity, TExecutionContext> ApplyUnion<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : IEnumerable<TElementType>
+            where TElementType : class
+        {
+            var unionField = new UnionField<TEntity, TExecutionContext>(Registry, Parent, Name, typeof(TElementType), UnionField.CreateTypeResolver<TEntity, TElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, true);
+            return ApplyField(unionField);
+        }
     }
 }

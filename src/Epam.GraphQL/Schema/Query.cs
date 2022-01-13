@@ -21,8 +21,9 @@ namespace Epam.GraphQL
     {
         protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
-            var field = AddField(name, deprecationReason);
-            return new QueryFieldBuilder<Field<object, TExecutionContext>, TExecutionContext>(field);
+            ThrowIfIsNotConfiguring();
+            var field = Configurator.AddField(new QueryField<TExecutionContext>(Registry, Configurator, name), deprecationReason);
+            return new QueryFieldBuilder<QueryField<TExecutionContext>, TExecutionContext>(field);
         }
 
         protected internal IConnectionBuilder Connection<TChildLoader>(string name, string? deprecationReason = null)

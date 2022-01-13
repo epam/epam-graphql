@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
     internal class BaseLoaderFieldBuilder<TField, TEntity, TLoader, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>
         where TLoader : Projection<TEntity, TExecutionContext>, new()
         where TEntity : class
-        where TField : FieldBase<TEntity, TExecutionContext>, IResolvableField<TEntity, TExecutionContext>, IFieldSupportsApplyUnion<TEntity, TExecutionContext>
+        where TField : FieldBase<TEntity, TExecutionContext>, IUnionableField<TEntity, TExecutionContext>
     {
         internal BaseLoaderFieldBuilder(RelationRegistry<TExecutionContext> registry, TField fieldType)
             : base(fieldType)

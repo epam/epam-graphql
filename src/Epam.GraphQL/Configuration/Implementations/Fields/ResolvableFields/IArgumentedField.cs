@@ -10,6 +10,22 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
+    internal interface IArgumentedField<TEntity, TExecutionContext> : IUnionableField<TEntity, TExecutionContext>
+        where TEntity : class
+    {
+        IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(string argName);
+
+        IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>
+            where TEntity1 : class;
+
+        IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyPayloadField<TArgType>(string argName);
+
+        IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterPayloadField<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>
+            where TEntity1 : class;
+    }
+
     internal interface IArgumentedField<TEntity, TArgType, TExecutionContext> : IResolvableField<TEntity, TArgType, TExecutionContext>
         where TEntity : class
     {
