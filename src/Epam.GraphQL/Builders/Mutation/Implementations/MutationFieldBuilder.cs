@@ -66,32 +66,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             return methodInfo.InvokeAndHoistBaseException<IMutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        private MutationArgumentBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
+        private MutationArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = Field.ApplyFilterArgument<TProjection, TEntity1>(name);
-            return new MutationArgumentBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext>(argumentedField);
+            var argumentedField = Field.FilterArgument<TProjection, TEntity1>(name);
+            return new MutationArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>(argumentedField);
         }
 
-        private MutationArgumentBuilder<object, TType, TExecutionContext> ArgumentImpl<TType>(string name)
+        private MutationArgumentBuilder<TType, TExecutionContext> ArgumentImpl<TType>(string name)
         {
-            var argumentedField = Field.ApplyArgument<TType>(name);
-            return new MutationArgumentBuilder<object, TType, TExecutionContext>(argumentedField);
+            var argumentedField = Field.Argument<TType>(name);
+            return new MutationArgumentBuilder<TType, TExecutionContext>(argumentedField);
         }
 
-        private MutationPayloadFieldBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadFieldImpl<TProjection, TEntity1>(string name)
+        private MutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadFieldImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var payloadedField = Field.ApplyFilterPayloadField<TProjection, TEntity1>(name);
-            return new MutationPayloadFieldBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext>(payloadedField);
+            var payloadedField = Field.FilterPayloadField<TProjection, TEntity1>(name);
+            return new MutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>(payloadedField);
         }
 
-        private MutationPayloadFieldBuilder<object, TType, TExecutionContext> PayloadFieldImpl<TType>(string name)
+        private MutationPayloadFieldBuilder<TType, TExecutionContext> PayloadFieldImpl<TType>(string name)
         {
-            var payloadedField = Field.ApplyPayloadField<TType>(name);
-            return new MutationPayloadFieldBuilder<object, TType, TExecutionContext>(payloadedField);
+            var payloadedField = Field.PayloadField<TType>(name);
+            return new MutationPayloadFieldBuilder<TType, TExecutionContext>(payloadedField);
         }
     }
 }

@@ -196,14 +196,14 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
-            return new ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.ApplyUnion(build));
+            return new ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.AsUnionOf(build));
         }
 
         private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return new ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.ApplyUnion<TEnumerable, TElementType>(build));
+            return new ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
         }
 
         private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)

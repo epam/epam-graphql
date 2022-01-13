@@ -86,27 +86,27 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ReplaceField(this, resolvedField);
         }
 
-        public IUnionableField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
             => Parent.ApplyUnion(this, build, false);
 
-        public IUnionableField<TEntity, TExecutionContext> ApplyUnion<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TElementType>
             where TElementType : class
             => Parent.ApplyUnion(this, build, true);
 
-        public IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(string argName)
+        public IArgumentedField<TEntity, TArgType, TExecutionContext> Argument<TArgType>(string argName)
             => Parent.ApplyArgument<TArgType>(this, argName);
 
-        public IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
+        public IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
             => Parent.ApplyFilterArgument<TProjection, TEntity1>(this, argName);
 
-        public IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyPayloadField<TArgType>(string argName)
+        public IArgumentedField<TEntity, TArgType, TExecutionContext> PayloadField<TArgType>(string argName)
             => Parent.ApplyPayloadField<TArgType>(this, argName);
 
-        public IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterPayloadField<TProjection, TEntity1>(string argName)
+        public IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
             => Parent.ApplyFilterPayloadField<TProjection, TEntity1>(this, argName);

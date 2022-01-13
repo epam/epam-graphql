@@ -9,7 +9,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Loader.Implementations;
 using Epam.GraphQL.Configuration;
-using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
@@ -17,7 +16,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
 {
     internal class QueryFieldBuilder<TField, TExecutionContext> : QueryFieldBuilderBase<TField, TExecutionContext>,
         IQueryFieldBuilder<TExecutionContext>
-        where TField : FieldBase<object, TExecutionContext>, IQueryField<TExecutionContext>
+        where TField : IQueryField<TExecutionContext>
     {
         public QueryFieldBuilder(TField field)
             : base(field)
@@ -78,32 +77,32 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new FromIQueryableBuilder<object, TReturnType, TExecutionContext>(Field.FromIQueryable(query, configure));
         }
 
-        private QueryArgumentBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
+        private QueryArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = Field.ApplyFilterArgument<TProjection, TEntity1>(name);
-            return new QueryArgumentBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext>(argumentedField);
+            var argumentedField = Field.FilterArgument<TProjection, TEntity1>(name);
+            return new QueryArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>(argumentedField);
         }
 
-        private QueryArgumentBuilder<object, TType, TExecutionContext> ArgumentImpl<TType>(string name)
+        private QueryArgumentBuilder<TType, TExecutionContext> ArgumentImpl<TType>(string name)
         {
-            var argumentedField = Field.ApplyArgument<TType>(name);
-            return new QueryArgumentBuilder<object, TType, TExecutionContext>(argumentedField);
+            var argumentedField = Field.Argument<TType>(name);
+            return new QueryArgumentBuilder<TType, TExecutionContext>(argumentedField);
         }
 
-        private QueryPayloadFieldBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadFieldImpl<TProjection, TEntity1>(string name)
+        private QueryPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadFieldImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var payloadedField = Field.ApplyFilterPayloadField<TProjection, TEntity1>(name);
-            return new QueryPayloadFieldBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext>(payloadedField);
+            var payloadedField = Field.FilterPayloadField<TProjection, TEntity1>(name);
+            return new QueryPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>(payloadedField);
         }
 
-        private QueryPayloadFieldBuilder<object, TType, TExecutionContext> PayloadFieldImpl<TType>(string name)
+        private QueryPayloadFieldBuilder<TType, TExecutionContext> PayloadFieldImpl<TType>(string name)
         {
-            var payloadedField = Field.ApplyPayloadField<TType>(name);
-            return new QueryPayloadFieldBuilder<object, TType, TExecutionContext>(payloadedField);
+            var payloadedField = Field.PayloadField<TType>(name);
+            return new QueryPayloadFieldBuilder<TType, TExecutionContext>(payloadedField);
         }
     }
 }

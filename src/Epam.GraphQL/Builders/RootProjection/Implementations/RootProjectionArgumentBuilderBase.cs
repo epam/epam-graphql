@@ -11,9 +11,8 @@ using Epam.GraphQL.Configuration.Implementations;
 
 namespace Epam.GraphQL.Builders.RootProjection.Implementations
 {
-    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext> : IRootProjectionFieldBuilder<TArgType, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TArgType, TExecutionContext> : IRootProjectionFieldBuilder<TArgType, TExecutionContext>
+        where TFieldType : IResolvableField<object, TArgType, TExecutionContext>
     {
         protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
@@ -95,9 +94,8 @@ namespace Epam.GraphQL.Builders.RootProjection.Implementations
         }
     }
 
-    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>
+        where TFieldType : IResolvableField<object, TArgType1, TArgType2, TExecutionContext>
     {
         protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
@@ -179,9 +177,8 @@ namespace Epam.GraphQL.Builders.RootProjection.Implementations
         }
     }
 
-    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>
+        where TFieldType : IResolvableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
         protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
@@ -263,9 +260,8 @@ namespace Epam.GraphQL.Builders.RootProjection.Implementations
         }
     }
 
-    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+        where TFieldType : IResolvableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
         protected RootProjectionArgumentBuilderBase(TFieldType field)
         {
@@ -351,9 +347,8 @@ namespace Epam.GraphQL.Builders.RootProjection.Implementations
         }
     }
 
-    internal class RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+    internal class RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+        where TFieldType : IResolvableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
         internal RootProjectionArgumentBuilderBase(TFieldType field)
         {

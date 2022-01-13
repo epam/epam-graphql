@@ -138,14 +138,14 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
         private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
-            return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion(build));
+            return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.AsUnionOf(build));
         }
 
         private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.ApplyUnion<TEnumerable, TElementType>(build));
+            return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
         }
 
         private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)

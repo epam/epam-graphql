@@ -3,20 +3,47 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Collections.Generic;
-using Epam.GraphQL.Builders.Loader;
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
-    internal interface IUnionableField<TEntity, TExecutionContext> : IResolvableField<TEntity, TExecutionContext>
+    internal interface IUnionableField<TEntity, TExecutionContext> :
+        IResolvableField<TEntity, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>
         where TEntity : class
     {
-        IUnionableField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class;
+    }
 
-        IUnionableField<TEntity, TExecutionContext> ApplyUnion<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : IEnumerable<TElementType>
-            where TElementType : class;
+    internal interface IUnionableField<TEntity, TArgType, TExecutionContext> :
+        IResolvableField<TEntity, TArgType, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType, TExecutionContext>, TEntity, TExecutionContext>
+        where TEntity : class
+    {
+    }
+
+    internal interface IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext> :
+        IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext>, TEntity, TExecutionContext>
+        where TEntity : class
+    {
+    }
+
+    internal interface IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> :
+        IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>, TEntity, TExecutionContext>
+        where TEntity : class
+    {
+    }
+
+    internal interface IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
+        IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TEntity, TExecutionContext>
+        where TEntity : class
+    {
+    }
+
+    internal interface IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
+        IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TEntity, TExecutionContext>
+        where TEntity : class
+    {
     }
 }
