@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
@@ -136,7 +137,7 @@ namespace Epam.GraphQL.Helpers
             throw new ArgumentOutOfRangeException(nameof(condition), $"Cannot use expression {condition} as a relation between {typeof(T1).HumanizedName()} and {typeof(T2).HumanizedName()} types.");
         }
 
-        public static bool TryFactorizeCondition<T1, T2>(Expression<Func<T1, T2, bool>> expression, out ConditionFactorizationResult<T2>? result)
+        public static bool TryFactorizeCondition<T1, T2>(Expression<Func<T1, T2, bool>> expression, [NotNullWhen(true)] out ConditionFactorizationResult<T2>? result)
         {
             var factorizationResult = Factorize(expression);
 

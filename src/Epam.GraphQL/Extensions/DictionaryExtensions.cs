@@ -113,7 +113,7 @@ namespace Epam.GraphQL.Extensions
             });
         }
 
-        public static Type? MakeProxyType(this IDictionary<string, Type>? properties, string typeName)
+        public static Type MakeProxyType(this IDictionary<string, Type> properties, string typeName)
         {
             if (properties == null)
             {
