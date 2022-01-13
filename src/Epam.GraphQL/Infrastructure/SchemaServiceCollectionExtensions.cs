@@ -36,5 +36,27 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return services;
         }
+
+        /// <summary>
+        /// Adds the <see cref="SchemaExecuter{TQuery, TExecutionContext}"/> and related services to the <see cref="IServiceCollection"/>.
+        /// </summary>
+        /// <typeparam name="TQuery"> The type of the query to be used for GraphQL schema. </typeparam>
+        /// <typeparam name="TExecutionContext"> The type of the user context to be used for queries and mutations. </typeparam>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
+        /// <param name="configure"> An action used to create or modify options for this schema. </param>
+        /// <returns>The <see cref="IServiceCollection"/>  so that additional calls can be chained.</returns>
+        public static IServiceCollection AddEpamGraphQLSchema<TQuery, TExecutionContext>(this IServiceCollection services, Action<SchemaOptionsBuilder<TExecutionContext>> configure = null)
+            where TQuery : Query<TExecutionContext>, new()
+        {
+            services.AddSingleton<ISchemaExecuter<TQuery, TExecutionContext>>(serviceProvider =>
+            {
+                var schemaOptionsBuilder = new SchemaOptionsBuilder<TExecutionContext>(services);
+                configure?.Invoke(schemaOptionsBuilder);
+
+                return new SchemaExecuter<TQuery, TExecutionContext>(schemaOptionsBuilder.Options);
+            });
+
+            return services;
+        }
     }
 }
