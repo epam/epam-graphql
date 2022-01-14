@@ -9,7 +9,7 @@ using Epam.GraphQL.Builders.Loader;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
-    internal interface IUnionableFieldBase<out TThisType, TEntity, TExecutionContext> : IResolvableField<TEntity, TExecutionContext>
+    internal interface IUnionableFieldBase<out TThisType, TEntity, TExecutionContext>
         where TEntity : class
     {
         TThisType AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)

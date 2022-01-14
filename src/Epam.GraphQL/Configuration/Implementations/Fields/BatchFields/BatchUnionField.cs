@@ -15,7 +15,7 @@ using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchUnionField<TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>,
+    internal class BatchUnionField<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>,
         IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>,
         IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, IEnumerable<object>, TExecutionContext>

@@ -10,7 +10,7 @@ using Epam.GraphQL.Configuration.Implementations.Descriptors;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedUnionFieldBase<TArguments, TEntity, TExecutionContext> :
-        UnionField<TEntity, TExecutionContext>
+        UnionFieldBase<TEntity, TExecutionContext>
         where TArguments : IArguments
         where TEntity : class
     {
@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             bool isList,
             TArguments arguments)
             : base(registry, parent, name, unionType, typeResolver, isList)
@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             bool isList,

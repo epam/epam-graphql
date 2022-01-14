@@ -11,7 +11,7 @@ using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
-    internal class SubmitField<TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>
+    internal class SubmitField<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
         where TEntity : class
     {
         private readonly Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> _resolve;
