@@ -34,7 +34,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType, TExecutionContext>, TArgType, TExecutionContext> And<TType>(
@@ -49,7 +49,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -58,24 +58,10 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new QueryArgumentBuilderBase<IUnionableField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new QueryArgumentBuilderBase<IUnionableField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
-        }
-
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
     }
 
@@ -101,7 +87,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> And<TType>(
@@ -116,7 +102,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -125,24 +111,10 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
-        }
-
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
     }
 
@@ -168,7 +140,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> And<TType>(
@@ -183,7 +155,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -192,24 +164,10 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
-        }
-
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
     }
 
@@ -235,7 +193,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TType>(
@@ -250,7 +208,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -259,24 +217,10 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
-        }
-
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
     }
 
@@ -302,7 +246,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IQueryFieldBuilder<IRootProjectionFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TType>(
@@ -317,7 +261,7 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -326,24 +270,10 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);
-        }
-
-        private QueryArgumentBuilderBase<IUnionableField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
         }
     }
 }

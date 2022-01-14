@@ -20,9 +20,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList)
+            : base(registry, parent, name, unionType, typeResolver)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);
@@ -36,9 +35,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);
@@ -50,9 +48,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             TArguments arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType, isList)
+            : base(registry, parent, name, unionTypes, unionGraphType)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);

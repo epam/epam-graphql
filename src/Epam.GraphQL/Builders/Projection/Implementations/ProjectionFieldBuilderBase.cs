@@ -177,7 +177,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IProjectionFieldBuilderBase<TEntity, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -190,7 +190,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -199,22 +199,8 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             return new ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
-        {
-            return AsUnionOfImpl(build);
-        }
-
-        private ProjectionFieldBuilderBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
         {
             return AsUnionOfImpl(build);
         }

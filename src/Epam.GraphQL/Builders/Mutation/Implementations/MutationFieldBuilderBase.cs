@@ -119,7 +119,7 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
+            return AsUnionOf(build);
         }
 
         public IMutationFieldBuilderBase<TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -132,7 +132,7 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             where TEnumerable : class, IEnumerable<TElementType>
             where TElementType : class
         {
-            return AndImpl<TEnumerable, TElementType>(build);
+            return And(build);
         }
 
         private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
@@ -141,22 +141,8 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.AsUnionOf<TEnumerable, TElementType>(build));
-        }
-
         private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
-        {
-            return AsUnionOfImpl(build);
-        }
-
-        private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
         {
             return AsUnionOfImpl(build);
         }

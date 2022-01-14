@@ -4,7 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using Epam.GraphQL.Builders.Loader;
 
 namespace Epam.GraphQL.Configuration.Implementations
@@ -14,9 +13,5 @@ namespace Epam.GraphQL.Configuration.Implementations
     {
         TThisType AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class;
-
-        TThisType AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : IEnumerable<TElementType>
-            where TElementType : class;
     }
 }

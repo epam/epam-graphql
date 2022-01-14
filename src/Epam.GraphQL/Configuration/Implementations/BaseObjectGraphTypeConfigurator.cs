@@ -780,11 +780,10 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(
             FieldBase<TEntity, TExecutionContext> field,
-            Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build,
-            bool isList)
+            Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = UnionField.Create(Registry, this, field.Name, build, isList);
+            var unionField = UnionField.Create(Registry, this, field.Name, build);
             return ReplaceField(field, unionField);
         }
 

@@ -79,12 +79,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
-            => Parent.ApplyUnion(this, build, false);
-
-        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
-            where TEnumerable : IEnumerable<TElementType>
-            where TElementType : class
-            => Parent.ApplyUnion(this, build, true);
+            => Parent.ApplyUnion(this, build);
 
         public IArgumentedField<TEntity, TArgType, TExecutionContext> Argument<TArgType>(string argName)
             => Parent.ApplyArgument<TArgType>(this, argName);
