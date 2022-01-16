@@ -5,19 +5,41 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationArgumentBuilder<TArgType, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType, TExecutionContext>, TArgType, TExecutionContext>,
         IMutationArgumentBuilder<TArgType, TExecutionContext>
     {
-        public MutationArgumentBuilder(IArgumentedField<object, TArgType, TExecutionContext> argumentedField)
+        public MutationArgumentBuilder(IArgumentedMutationField<TArgType, TExecutionContext> argumentedField)
             : base(argumentedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationArgumentBuilder<TArgType, TType, TExecutionContext> Argument<TType>(string name)
@@ -59,12 +81,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationArgumentBuilder<TArgType1, TArgType2, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>,
         IMutationArgumentBuilder<TArgType1, TArgType2, TExecutionContext>
     {
-        public MutationArgumentBuilder(IArgumentedField<object, TArgType1, TArgType2, TExecutionContext> argumentedField)
+        public MutationArgumentBuilder(IArgumentedMutationField<TArgType1, TArgType2, TExecutionContext> argumentedField)
             : base(argumentedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationArgumentBuilder<TArgType1, TArgType2, TType, TExecutionContext> Argument<TType>(string name)
@@ -106,12 +148,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>,
         IMutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
-        public MutationArgumentBuilder(IArgumentedField<object, TArgType1, TArgType2, TArgType3, TExecutionContext> argumentedField)
+        public MutationArgumentBuilder(IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext> argumentedField)
             : base(argumentedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TType, TExecutionContext> Argument<TType>(string name)
@@ -153,12 +215,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
         IMutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
-        public MutationArgumentBuilder(IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> argumentedField)
+        public MutationArgumentBuilder(IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> argumentedField)
             : base(argumentedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TType, TExecutionContext> Argument<TType>(string name)
@@ -200,12 +282,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
         IMutationArgumentBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
-        public MutationArgumentBuilder(IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> argumentedField)
+        public MutationArgumentBuilder(IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> argumentedField)
             : base(argumentedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 }

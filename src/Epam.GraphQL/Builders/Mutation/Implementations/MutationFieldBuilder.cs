@@ -5,19 +5,41 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationFieldBuilder<TField, TExecutionContext> : MutationFieldBuilderBase<TField, TExecutionContext>,
         IMutationFieldBuilder<TExecutionContext>
-        where TField : IArgumentedField<object, TExecutionContext>
+        where TField : IArgumentedMutationField<TExecutionContext>
     {
         public MutationFieldBuilder(TField field)
             : base(field)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string name)

@@ -42,19 +42,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             Arguments.ApplyTo(this);
         }
 
-        protected ArgumentedUnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            TArguments arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType)
-        {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
-            Arguments.ApplyTo(this);
-        }
-
         protected new TArguments Arguments { get; }
     }
 }

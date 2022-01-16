@@ -52,7 +52,7 @@ namespace Epam.GraphQL
             _submitInputTypeRegistry = new Lazy<SubmitInputTypeRegistry<TExecutionContext>>(() => Registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>());
         }
 
-        private SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
+        internal SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
 
         internal async Task<IEnumerable<object>> DoAfterSave(IResolveFieldContext context, IEnumerable<object> entities)
         {
@@ -113,8 +113,9 @@ namespace Epam.GraphQL
 
         protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
-            var field = AddField(name, deprecationReason);
-            return new MutationFieldBuilder<Field<object, TExecutionContext>, TExecutionContext>(field);
+            ThrowIfIsNotConfiguring();
+            var field = Configurator.AddField(new MutationField<TExecutionContext>(this, Registry, Configurator, name), deprecationReason);
+            return new MutationFieldBuilder<MutationField<TExecutionContext>, TExecutionContext>(field);
         }
 
         protected override void AfterConfigure()

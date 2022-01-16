@@ -8,13 +8,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations;
-using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationFieldBuilderBase<TField, TExecutionContext> :
         IMutationFieldBuilderBase<TExecutionContext>
-        where TField : IUnionableField<object, TExecutionContext>
+        where TField : IUnionableMutationField<TExecutionContext>
     {
         public MutationFieldBuilderBase(TField field)
         {
@@ -89,26 +88,6 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             Field.Resolve((ctx, entity) => resolve(ctx), build, optionsBuilder);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve)
-        {
-            Field.Resolve((ctx, entity) => resolve(ctx), null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve)
-        {
-            Field.Resolve((ctx, entity) => resolve(ctx), null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.Resolve((ctx, entity) => resolve(ctx), optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.Resolve((ctx, entity) => resolve(ctx), optionsBuilder);
-        }
-
         public IMutationFieldBuilderBase<TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
@@ -135,13 +114,13 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             return And(build);
         }
 
-        private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+        private MutationFieldBuilderBase<IUnionableMutationField<TExecutionContext>, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
-            return new MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext>(Field.AsUnionOf(build));
+            return new MutationFieldBuilderBase<IUnionableMutationField<TExecutionContext>, TExecutionContext>(Field.AsUnionOf(build));
         }
 
-        private MutationFieldBuilderBase<IUnionableField<object, TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+        private MutationFieldBuilderBase<IUnionableMutationField<TExecutionContext>, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
             where TType : class
         {
             return AsUnionOfImpl(build);

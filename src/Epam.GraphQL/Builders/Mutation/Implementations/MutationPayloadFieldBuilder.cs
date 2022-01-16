@@ -5,19 +5,41 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
     internal class MutationPayloadFieldBuilder<TArgType, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType, TExecutionContext>, TArgType, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType, TExecutionContext>, TArgType, TExecutionContext>,
         IMutationPayloadFieldBuilder<TArgType, TExecutionContext>
     {
-        public MutationPayloadFieldBuilder(IArgumentedField<object, TArgType, TExecutionContext> payloadedField)
+        public MutationPayloadFieldBuilder(IArgumentedMutationField<TArgType, TExecutionContext> payloadedField)
             : base(payloadedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationPayloadFieldBuilder<TArgType, TType, TExecutionContext> PayloadField<TType>(string name)
@@ -59,12 +81,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationPayloadFieldBuilder<TArgType1, TArgType2, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>,
         IMutationPayloadFieldBuilder<TArgType1, TArgType2, TExecutionContext>
     {
-        public MutationPayloadFieldBuilder(IArgumentedField<object, TArgType1, TArgType2, TExecutionContext> payloadedField)
+        public MutationPayloadFieldBuilder(IArgumentedMutationField<TArgType1, TArgType2, TExecutionContext> payloadedField)
             : base(payloadedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationPayloadFieldBuilder<TArgType1, TArgType2, TType, TExecutionContext> PayloadField<TType>(string name)
@@ -106,12 +148,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>,
         IMutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
-        public MutationPayloadFieldBuilder(IArgumentedField<object, TArgType1, TArgType2, TArgType3, TExecutionContext> payloadedField)
+        public MutationPayloadFieldBuilder(IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext> payloadedField)
             : base(payloadedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TType, TExecutionContext> PayloadField<TType>(string name)
@@ -153,12 +215,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
         IMutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
-        public MutationPayloadFieldBuilder(IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> payloadedField)
+        public MutationPayloadFieldBuilder(IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> payloadedField)
             : base(payloadedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TType, TExecutionContext> PayloadField<TType>(string name)
@@ -200,12 +282,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
     }
 
     internal class MutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
-        MutationArgumentBuilderBase<IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
+        MutationArgumentBuilderBase<IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
         IMutationPayloadFieldBuilder<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
-        public MutationPayloadFieldBuilder(IArgumentedField<object, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> payloadedField)
+        public MutationPayloadFieldBuilder(IArgumentedMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> payloadedField)
             : base(payloadedField)
         {
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve)
+        {
+            Field.Resolve(resolve, null);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            Field.Resolve(resolve, optionsBuilder);
         }
     }
 }

@@ -130,6 +130,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
         }
 
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(Func<TExecutionContext, TReturnType> func)
+        {
+            return ctx => func(ctx.GetUserContext<TExecutionContext>());
+        }
+
         public static IEnumerable<T> ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, IEnumerable<T> items)
         {
             if (executer == null)

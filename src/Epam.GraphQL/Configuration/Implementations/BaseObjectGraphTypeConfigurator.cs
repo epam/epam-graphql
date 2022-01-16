@@ -25,6 +25,7 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Sorters;
 using Epam.GraphQL.Sorters.Implementations;
 using GraphQL;
+using GraphQL.Resolvers;
 using GraphQL.Types;
 using TypeExtensions = Epam.GraphQL.Extensions.TypeExtensions;
 
@@ -778,43 +779,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             return ReplaceField(field, result);
         }
 
-        public UnionField<TEntity, TExecutionContext> ApplyUnion<TLastElementType>(
-            FieldBase<TEntity, TExecutionContext> field,
-            Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
-        {
-            var unionField = UnionField.Create(Registry, this, field.Name, build);
-            return ReplaceField(field, unionField);
-        }
-
-        public ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyArgument<TArgType>(FieldBase<TEntity, TExecutionContext> field, string argName)
-        {
-            var argumentedField = new ArgumentedField<TEntity, TArgType, TExecutionContext>(Registry, this, field.Name, new Arguments<TArgType, TExecutionContext>(Registry, argName));
-            return ReplaceField(field, argumentedField);
-        }
-
-        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(FieldBase<TEntity, TExecutionContext> field, string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, this, field.Name, new Arguments<Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, argName, typeof(TProjection), typeof(TEntity1)));
-            return ReplaceField(field, argumentedField);
-        }
-
-        public ArgumentedField<TEntity, TArgType, TExecutionContext> ApplyPayloadField<TArgType>(FieldBase<TEntity, TExecutionContext> field, string argName)
-        {
-            var payloadedField = new ArgumentedField<TEntity, TArgType, TExecutionContext>(Registry, this, field.Name, new PayloadFields<TArgType, TExecutionContext>(field.Name, Registry, argName));
-            return ReplaceField(field, payloadedField);
-        }
-
-        public ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterPayloadField<TProjection, TEntity1>(FieldBase<TEntity, TExecutionContext> field, string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, this, field.Name, new PayloadFields<Expression<Func<TEntity1, bool>>, TExecutionContext>(field.Name, Registry, argName, typeof(TProjection), typeof(TEntity1)));
-            return ReplaceField(field, argumentedField);
-        }
-
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(FieldBase<TEntity, TExecutionContext> field, IResolver<TEntity> resolver)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
@@ -966,76 +930,20 @@ namespace Epam.GraphQL.Configuration.Implementations
                 typeof(TAnotherReturnType)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolvedField<TReturnType>(
+        public void ApplyResolvedField<TReturnType>(
             FieldBase<TEntity, TExecutionContext> field,
             IGraphTypeDescriptor<TExecutionContext> graphType,
-            Func<IResolveFieldContext, TReturnType> resolver,
-            Action<ResolveOptionsBuilder>? optionsBuilder)
+            IFieldResolver resolver)
         {
-            var resolvedField = ResolvedField.Create<TEntity, TReturnType, TExecutionContext>(
+            var resolvedField = new ResolvedField<TEntity, TReturnType, TExecutionContext>(
                 Registry,
                 this,
                 field.Name,
                 graphType,
                 resolver,
-                field.Arguments,
-                optionsBuilder);
+                field.Arguments);
 
-            return ReplaceField(field, resolvedField);
-        }
-
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolvedField<TReturnType>(
-            FieldBase<TEntity, TExecutionContext> field,
-            IGraphTypeDescriptor<TExecutionContext> graphType,
-            Func<IResolveFieldContext, Task<TReturnType>> resolver,
-            Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            var resolvedField = ResolvedField.Create<TEntity, TReturnType, TExecutionContext>(
-                Registry,
-                this,
-                field.Name,
-                graphType,
-                resolver,
-                field.Arguments,
-                optionsBuilder);
-
-            return ReplaceField(field, resolvedField);
-        }
-
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolvedField<TReturnType>(
-            FieldBase<TEntity, TExecutionContext> field,
-            IGraphTypeDescriptor<TExecutionContext> graphType,
-            Func<IResolveFieldContext, IEnumerable<TReturnType>> resolver,
-            Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            var resolvedField = ResolvedField.Create<TEntity, TReturnType, TExecutionContext>(
-                Registry,
-                this,
-                field.Name,
-                graphType,
-                resolver,
-                field.Arguments,
-                optionsBuilder);
-
-            return ReplaceField(field, resolvedField);
-        }
-
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolvedField<TReturnType>(
-            FieldBase<TEntity, TExecutionContext> field,
-            IGraphTypeDescriptor<TExecutionContext> graphType,
-            Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolver,
-            Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            var resolvedField = ResolvedField.Create<TEntity, TReturnType, TExecutionContext>(
-                Registry,
-                this,
-                field.Name,
-                graphType,
-                resolver,
-                field.Arguments,
-                optionsBuilder);
-
-            return ReplaceField(field, resolvedField);
+            ReplaceField(field, resolvedField);
         }
 
         internal TField AddField<TField>(TField field, string? deprecationReason)

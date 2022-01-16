@@ -7,42 +7,42 @@ namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IUnionableField<TEntity, TExecutionContext> :
         IResolvableField<TEntity, TExecutionContext>,
-        IUnionableFieldBase<IUnionableField<TEntity, TExecutionContext>, TEntity, TExecutionContext>
+        IUnionableFieldBase<IUnionableField<TEntity, TExecutionContext>, TExecutionContext>
         where TEntity : class
     {
     }
 
     internal interface IUnionableField<TEntity, TArgType, TExecutionContext> :
         IResolvableField<TEntity, TArgType, TExecutionContext>,
-        IUnionableFieldBase<IUnionableField<TEntity, TArgType, TExecutionContext>, TEntity, TExecutionContext>
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType, TExecutionContext>, TExecutionContext>
         where TEntity : class
     {
     }
 
     internal interface IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext> :
         IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>,
-        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext>, TEntity, TExecutionContext>
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext>, TExecutionContext>
         where TEntity : class
     {
     }
 
     internal interface IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> :
         IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>,
-        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>, TEntity, TExecutionContext>
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>, TExecutionContext>
         where TEntity : class
     {
     }
 
     internal interface IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
         IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
-        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TEntity, TExecutionContext>
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TExecutionContext>
         where TEntity : class
     {
     }
 
     internal interface IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
         IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
-        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TEntity, TExecutionContext>
+        IUnionableFieldBase<IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TExecutionContext>
         where TEntity : class
     {
     }
