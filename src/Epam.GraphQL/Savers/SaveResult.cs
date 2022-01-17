@@ -12,7 +12,23 @@ namespace Epam.GraphQL.Savers
 {
     internal class SaveResult<TEntity, TId, TExecutionContext> : ISaveResult<TExecutionContext>
     {
-        public List<SaveResultItem<TEntity, TId>> ProcessedItems { get; set; }
+        public SaveResult(
+            List<SaveResultItem<TEntity?, TId>> processedItems,
+            List<SaveResultItem<TEntity, TId>> pendingItems,
+            List<SaveResultItem<TEntity, TId>> postponedItems,
+            IMutableLoader<TExecutionContext> loader,
+            string fieldName,
+            Type mutationType)
+        {
+            ProcessedItems = processedItems;
+            PendingItems = pendingItems;
+            PostponedItems = postponedItems;
+            Loader = loader;
+            FieldName = fieldName;
+            MutationType = mutationType;
+        }
+
+        public List<SaveResultItem<TEntity?, TId>> ProcessedItems { get; set; }
 
         public List<SaveResultItem<TEntity, TId>> PendingItems { get; set; }
 
@@ -38,15 +54,13 @@ namespace Epam.GraphQL.Savers
 
         public SaveResult<TEntity, TId, TExecutionContext> CloneAndMovePostponedToPending()
         {
-            return new SaveResult<TEntity, TId, TExecutionContext>
-            {
-                ProcessedItems = ProcessedItems,
-                PendingItems = PostponedItems,
-                PostponedItems = new List<SaveResultItem<TEntity, TId>>(),
-                Loader = Loader,
-                FieldName = FieldName,
-                MutationType = MutationType,
-            };
+            return new SaveResult<TEntity, TId, TExecutionContext>(
+                processedItems: ProcessedItems,
+                pendingItems: PostponedItems,
+                postponedItems: new List<SaveResultItem<TEntity, TId>>(),
+                loader: Loader,
+                fieldName: FieldName,
+                mutationType: MutationType);
         }
 
         public SaveResult<TEntity, TId, TExecutionContext> Merge(SaveResult<TEntity, TId, TExecutionContext> obj)
@@ -56,15 +70,13 @@ namespace Epam.GraphQL.Savers
                 .Select(group => group.Aggregate((first, second) => first.Merge(second)))
                 .ToList();
 
-            return new SaveResult<TEntity, TId, TExecutionContext>
-            {
-                ProcessedItems = ProcessedItems.Concat(obj.ProcessedItems).ToList(),
-                PendingItems = pendingItems,
-                PostponedItems = obj.PostponedItems.Concat(obj.PostponedItems).ToList(),
-                Loader = Loader,
-                FieldName = FieldName,
-                MutationType = MutationType,
-            };
+            return new SaveResult<TEntity, TId, TExecutionContext>(
+                processedItems: ProcessedItems.Concat(obj.ProcessedItems).ToList(),
+                pendingItems: pendingItems,
+                postponedItems: obj.PostponedItems.Concat(obj.PostponedItems).ToList(),
+                loader: Loader,
+                fieldName: FieldName,
+                mutationType: MutationType);
         }
     }
 }

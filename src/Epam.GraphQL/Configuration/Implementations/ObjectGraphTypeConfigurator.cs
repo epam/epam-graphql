@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Extensions;
@@ -15,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations
     internal class ObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
         where TEntity : class
     {
-        public ObjectGraphTypeConfigurator(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
+        public ObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, RelationRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
             : base(parent, registry, isAuto)
         {
             if (shouldSetNames)
@@ -24,12 +25,12 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        public override string GetGraphQLTypeName(Type entityType, Type projectionType, IField<TExecutionContext> field)
+        public override string GetGraphQLTypeName(Type entityType, Type? projectionType, IField<TExecutionContext> field)
         {
             return Registry.GetGraphQLTypeName(entityType, null, false, field);
         }
 
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             return Registry.GetGraphTypeDescriptor(parent, build);
         }
@@ -96,10 +97,10 @@ namespace Epam.GraphQL.Configuration.Implementations
         where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
         where TEntity : class
     {
-        private TProjection _projection;
-        private BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> _baseConfigurator;
+        private TProjection? _projection;
+        private BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
-        public ObjectGraphTypeConfigurator(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry)
+        public ObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, RelationRegistry<TExecutionContext> registry)
             : base(parent, registry, isAuto: false, shouldSetNames: false)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(false);
@@ -132,12 +133,12 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        protected override BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> GetBaseObjectGraphTypeConfiguratorForFilters()
+        protected override BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfiguratorForFilters()
         {
             return GetBaseObjectGraphTypeConfigurator((first, second) => first.FilterEquals(second));
         }
 
-        protected BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> GetBaseObjectGraphTypeConfigurator(Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> predicate)
+        protected BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfigurator(Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> predicate)
         {
             if (_baseConfigurator == null)
             {
@@ -155,7 +156,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             return null;
         }
 
-        protected override void SetGraphQLTypeName(string oldName, string newName)
+        protected override void SetGraphQLTypeName(string? oldName, string newName)
         {
             Registry.SetGraphQLTypeName<TProjection, TEntity>(oldName, newName);
         }
@@ -168,6 +169,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
+        [MemberNotNull(nameof(_projection))]
         private TProjection GetProjection()
         {
             if (_projection == null)

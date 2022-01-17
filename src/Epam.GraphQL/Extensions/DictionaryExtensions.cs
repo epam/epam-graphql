@@ -14,8 +14,6 @@ using System.Text;
 using System.Threading;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class DictionaryExtensions
@@ -45,7 +43,7 @@ namespace Epam.GraphQL.Extensions
                 throw new ArgumentNullException(nameof(typeName));
             }
 
-            return _typeCache.GetOrAdd((parent, typeName!, properties), key =>
+            return _typeCache.GetOrAdd((parent, typeName, properties), key =>
             {
                 Interlocked.Increment(ref _typeCacheCount);
 
@@ -115,7 +113,7 @@ namespace Epam.GraphQL.Extensions
             });
         }
 
-        public static Type? MakeProxyType(this IDictionary<string, Type>? properties, string typeName)
+        public static Type MakeProxyType(this IDictionary<string, Type> properties, string typeName)
         {
             if (properties == null)
             {

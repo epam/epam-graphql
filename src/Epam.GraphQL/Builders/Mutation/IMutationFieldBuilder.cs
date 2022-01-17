@@ -5,15 +5,23 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Projection;
+using System.Threading.Tasks;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation
 {
     public interface IMutationFieldBuilder<TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TExecutionContext>
     {
+        void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
         IMutationPayloadFieldBuilder<TType, TExecutionContext> PayloadField<TType>(string name);
 
         IMutationPayloadFieldBuilder<Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity>(string name)
@@ -34,32 +42,62 @@ namespace Epam.GraphQL.Builders.Mutation
     }
 
     public interface IMutationFieldBuilder<out TThisType, out TArgType, TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TThisType, TArgType, TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TArgType, TExecutionContext>
     {
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
     }
 
     public interface IMutationFieldBuilder<out TThisType, out TArgType1, out TArgType2, TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TThisType, TArgType1, TArgType2, TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TArgType1, TArgType2, TExecutionContext>
     {
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
     }
 
     public interface IMutationFieldBuilder<out TThisType, out TArgType1, out TArgType2, out TArgType3, TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TThisType, TArgType1, TArgType2, TArgType3, TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
     }
 
     public interface IMutationFieldBuilder<out TThisType, out TArgType1, out TArgType2, out TArgType3, out TArgType4, TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TThisType, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
     }
 
     public interface IMutationFieldBuilder<out TThisType, out TArgType1, out TArgType2, out TArgType3, out TArgType4, out TArgType5, TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IMutationFieldBuilder<TThisType, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TExecutionContext>,
         IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
     }
 }

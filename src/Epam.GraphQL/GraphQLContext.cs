@@ -12,8 +12,6 @@ using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.TaskBatcher;
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     internal class GraphQLContext
@@ -72,7 +70,7 @@ namespace Epam.GraphQL
             RelationRegistry<TExecutionContext>? registry,
             ILogger? logger,
             IEnumerable<ISchemaExecutionListener>? listeners,
-            TExecutionContext executionContext) // TODO Mark it nullable
+            TExecutionContext? executionContext)
             : base(dataContext, profiler, batcher, registry, logger, listeners)
         {
             ExecutionContext = executionContext ?? throw new ArgumentNullException(nameof(executionContext));

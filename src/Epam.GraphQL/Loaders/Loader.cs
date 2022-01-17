@@ -63,7 +63,7 @@ namespace Epam.GraphQL.Loaders
             return new DataLoaderResult<bool>(Registry.CanViewParentAsync(GetType(), context, entity));
         }
 
-        protected internal new ILoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string deprecationReason = null)
+        protected internal new ILoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             var fieldType = AddField(name, deprecationReason);
             var fieldBuilderType = typeof(LoaderFieldBuilder<,,>).MakeGenericType(typeof(TEntity), GetType(), typeof(TExecutionContext));

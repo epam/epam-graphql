@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
         /// <param name="configure"> An action used to create or modify options for this schema. </param>
         /// <returns>The <see cref="IServiceCollection"/>  so that additional calls can be chained.</returns>
-        public static IServiceCollection AddEpamGraphQLSchema<TQuery, TMutation, TExecutionContext>(this IServiceCollection services, Action<SchemaOptionsBuilder<TExecutionContext>> configure = null)
+        public static IServiceCollection AddEpamGraphQLSchema<TQuery, TMutation, TExecutionContext>(this IServiceCollection services, Action<SchemaOptionsBuilder<TExecutionContext>>? configure = null)
             where TQuery : Query<TExecutionContext>, new()
             where TMutation : Mutation<TExecutionContext>, new()
         {

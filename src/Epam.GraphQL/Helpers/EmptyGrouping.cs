@@ -7,8 +7,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class EmptyGrouping<TKey, TElement> : IGrouping<TKey, TElement>

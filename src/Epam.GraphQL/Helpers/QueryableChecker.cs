@@ -6,8 +6,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class QueryableChecker : ExpressionVisitor

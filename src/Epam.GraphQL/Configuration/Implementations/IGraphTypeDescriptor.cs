@@ -6,15 +6,13 @@
 using System;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IGraphTypeDescriptor<TExecutionContext>
     {
         IGraphType? GraphType { get; }
 
-        Type Type { get; }
+        Type? Type { get; }
 
         IObjectGraphTypeConfigurator<TExecutionContext>? Configurator { get; }
 

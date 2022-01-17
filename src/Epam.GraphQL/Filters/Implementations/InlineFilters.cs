@@ -13,8 +13,6 @@ using Epam.GraphQL.Filters.Inputs;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal sealed class InlineFilters<TEntity, TExecutionContext> : IInlineFilters<TEntity, TExecutionContext>
@@ -65,7 +63,7 @@ namespace Epam.GraphQL.Filters.Implementations
             }
         }
 
-        public IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object? filter, IEnumerable<string>? filterFieldNames)
+        public IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter)
         {
             var resultExpression = BuildExpression(context, filter);
 
@@ -207,7 +205,9 @@ namespace Epam.GraphQL.Filters.Implementations
                 }
             }
 
-            return ExpressionRewriter.Rewrite(resultExpression ?? (x => true));
+            return resultExpression != null
+                ? ExpressionRewriter.Rewrite(resultExpression)
+                : FuncConstants<TEntity>.TrueExpression;
         }
     }
 }

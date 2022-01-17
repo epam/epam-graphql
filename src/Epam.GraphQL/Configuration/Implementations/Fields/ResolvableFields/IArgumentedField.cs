@@ -5,19 +5,29 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Loaders;
-
-#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
-    internal interface IArgumentedField<TEntity, TArgType, TExecutionContext> : IResolvableField<TEntity, TArgType, TExecutionContext>
+    internal interface IArgumentedField<TEntity, TExecutionContext> : IUnionableField<TEntity, TExecutionContext>
         where TEntity : class
     {
-        IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class;
+        IArgumentedField<TEntity, TArgType, TExecutionContext> Argument<TArgType>(string argName);
 
+        IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>
+            where TEntity1 : class;
+
+        IArgumentedField<TEntity, TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
+
+        IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>
+            where TEntity1 : class;
+    }
+
+    internal interface IArgumentedField<TEntity, TArgType, TExecutionContext> : IUnionableField<TEntity, TArgType, TExecutionContext>
+        where TEntity : class
+    {
         IArgumentedField<TEntity, TArgType, TArgType2, TExecutionContext> ApplyArgument<TArgType2>(string argName);
 
         IArgumentedField<TEntity, TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
@@ -25,12 +35,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TEntity1 : class;
     }
 
-    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> : IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>
+    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> : IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext>
         where TEntity : class
     {
-        IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class;
-
         IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyArgument<TArgType3>(string argName);
 
         IArgumentedField<TEntity, TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
@@ -38,12 +45,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TEntity1 : class;
     }
 
-    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
+    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> : IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
         where TEntity : class
     {
-        IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class;
-
         IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyArgument<TArgType4>(string argName);
 
         IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
@@ -51,12 +55,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TEntity1 : class;
     }
 
-    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
         where TEntity : class
     {
-        IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class;
-
         IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyArgument<TArgType5>(string argName);
 
         IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
@@ -64,10 +65,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TEntity1 : class;
     }
 
-    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+    internal interface IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
         where TEntity : class
     {
-        IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
-            where TLastElementType : class;
     }
 }

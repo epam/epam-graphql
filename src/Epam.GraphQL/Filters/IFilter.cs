@@ -4,11 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Infrastructure;
-
-#nullable enable
 
 namespace Epam.GraphQL.Filters
 {
@@ -17,6 +14,6 @@ namespace Epam.GraphQL.Filters
     {
         Type FilterType { get; }
 
-        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object? filter, IEnumerable<string>? filterFieldNames);
+        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter);
     }
 }

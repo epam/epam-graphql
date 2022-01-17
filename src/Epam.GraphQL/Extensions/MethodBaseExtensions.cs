@@ -8,8 +8,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class MethodBaseExtensions

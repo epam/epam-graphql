@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         where TReturnType : struct
         where TEntity : class
     {
-        public StructExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
+        public StructExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
             : base(registry, parent, expression, name)
         {
         }

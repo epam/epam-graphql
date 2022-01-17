@@ -95,8 +95,8 @@ namespace Epam.GraphQL.Relay
                 }
             }
 
-            IEnumerable<Edge<TSource>> edges = null;
-            IEnumerable<TSource> items = null;
+            IEnumerable<Edge<TSource>>? edges = null;
+            IEnumerable<TSource>? items = null;
 
             if (shouldComputeEdges && shouldComputeItems)
             {

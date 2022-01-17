@@ -7,8 +7,6 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
     internal class EnumerableField<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>

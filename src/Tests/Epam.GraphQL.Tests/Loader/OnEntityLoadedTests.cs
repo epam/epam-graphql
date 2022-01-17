@@ -9,8 +9,6 @@ using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
 
-#nullable enable
-
 namespace Epam.GraphQL.Tests.Loader
 {
     [TestFixture]
@@ -1002,7 +1000,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromIQueryable<Unit>(
+                        .FromIQueryable(
                             ctx => FakeData.Units.AsQueryable(),
                             (p, u) => u.Id == p.UnitId,
                             builder =>
@@ -1065,7 +1063,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromIQueryable<Unit>(
+                        .FromIQueryable(
                             ctx => FakeData.Units.AsQueryable(),
                             (p, u) => u.Id == p.UnitId,
                             builder =>

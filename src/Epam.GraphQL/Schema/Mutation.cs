@@ -12,6 +12,7 @@ using Epam.GraphQL.Builders.Mutation;
 using Epam.GraphQL.Builders.Mutation.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -37,7 +38,7 @@ namespace Epam.GraphQL
         private readonly PropertyInfo _mutationResultDataPropInfo;
         private readonly Lazy<SubmitInputTypeRegistry<TExecutionContext>> _submitInputTypeRegistry;
 
-        private Type _submitOutputType;
+        private Type _submitOutputType = null!; // Initialized in AfterConfigure method
 
         protected Mutation()
         {
@@ -51,15 +52,15 @@ namespace Epam.GraphQL
             _submitInputTypeRegistry = new Lazy<SubmitInputTypeRegistry<TExecutionContext>>(() => Registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>());
         }
 
-        private SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
+        internal SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
 
-        internal async Task<IEnumerable<object>> DoAfterSave(GraphQLContext<TExecutionContext> context, IEnumerable<object> entities)
+        internal async Task<IEnumerable<object>> DoAfterSave(IResolveFieldContext context, IEnumerable<object> entities)
         {
-            var profiler = context.Profiler;
+            var profiler = context.GetProfiler();
 
             using (profiler.Step(nameof(DoAfterSave)))
             {
-                return await AfterSaveAsync(context.ExecutionContext, entities).ConfigureAwait(false);
+                return await AfterSaveAsync(context.GetUserContext<TExecutionContext>(), entities).ConfigureAwait(false);
             }
         }
 
@@ -110,10 +111,11 @@ namespace Epam.GraphQL
             SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
         }
 
-        protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
+        protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
-            var field = AddField(name, deprecationReason);
-            return new MutationFieldBuilder<TExecutionContext>(field);
+            ThrowIfIsNotConfiguring();
+            var field = Configurator.AddField(new MutationField<TExecutionContext>(this, Registry, Configurator, name), deprecationReason);
+            return new MutationFieldBuilder<MutationField<TExecutionContext>, TExecutionContext>(field);
         }
 
         protected override void AfterConfigure()
@@ -160,7 +162,7 @@ namespace Epam.GraphQL
                 inputItems.Add(
                     kv.Key,
                     (kv.Value as System.Collections.IEnumerable)
-                        .Cast<IDictionary<string, object>>()
+                        .Cast<IDictionary<string, object?>>()
                         .Select(entity => InputItem.Create(entityType, entity.ToObject(entityType, graphType), entity)));
             }
 

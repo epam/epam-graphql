@@ -16,8 +16,6 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     // TODO Make base class for queryable resolvers, move Transform to this class

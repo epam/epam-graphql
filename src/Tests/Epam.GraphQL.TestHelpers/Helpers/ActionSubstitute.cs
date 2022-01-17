@@ -7,8 +7,6 @@ using System;
 using System.Linq.Expressions;
 using NSubstitute;
 
-#nullable enable
-
 namespace Epam.GraphQL.Tests.Helpers
 {
     public static class ActionSubstitute
@@ -39,7 +37,7 @@ namespace Epam.GraphQL.Tests.Helpers
         public static void HasBeenCalledOnce<T1, T2>(this Action<T1, T2> substitute) => HasBeenCalledTimes(substitute, 1);
 
 #pragma warning disable NS1004 // Argument matcher used with a non-virtual member of a class.
-        public static void HasBeenCalledOnce<T1, T2>(this Action<T1, T2> substitute, Expression<Predicate<T1>>? arg1 = null, Expression<Predicate<T2>>? arg2 = null)
+        public static void HasBeenCalledOnce<T1, T2>(this Action<T1, T2> substitute, Expression<Predicate<T1>> arg1 = null, Expression<Predicate<T2>> arg2 = null)
         {
             SubstituteExtensions.Received(substitute, 1)
                 .Invoke(

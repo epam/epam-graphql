@@ -13,18 +13,16 @@ using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.TaskBatcher
 {
     internal interface IBatcher
     {
-        IDataLoader<TId, TItem> Get<TId, TItem, TExecutionContext>(
+        IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> loader);
 
-        IDataLoader<TId, TItem> Get<TId, TItem, TExecutionContext>(
+        IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>> loader);

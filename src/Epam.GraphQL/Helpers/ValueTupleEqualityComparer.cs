@@ -6,8 +6,6 @@
 using System;
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
 #pragma warning disable SA1414 // Tuple types in signatures should have element names

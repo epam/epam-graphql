@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal static partial class CachedReflectionInfo

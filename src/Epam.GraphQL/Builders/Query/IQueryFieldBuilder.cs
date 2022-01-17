@@ -13,9 +13,7 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Query
 {
-    public partial interface IQueryFieldBuilder<TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IQueryFieldBuilder<TExecutionContext>, TExecutionContext>,
-        IRootProjectionFieldBuilder<TExecutionContext>
+    public interface IQueryFieldBuilder<TExecutionContext> : IQueryFieldBuilderBase<TExecutionContext>
     {
         IQueryPayloadFieldBuilder<TType, TExecutionContext> PayloadField<TType>(string name);
 
@@ -35,7 +33,9 @@ namespace Epam.GraphQL.Builders.Query
         IQueryArgumentBuilder<Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TEntity>(Type projectionType, string name)
             where TEntity : class;
 
-        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(Func<TExecutionContext, IQueryable<TReturnType>> query, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> configure = null)
+        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure = null)
             where TReturnType : class;
     }
 

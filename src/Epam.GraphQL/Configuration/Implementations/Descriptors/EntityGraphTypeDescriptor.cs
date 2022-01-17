@@ -28,9 +28,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
                 : projection.ObjectGraphTypeConfigurator;
         }
 
-        public IGraphType GraphType => null;
+        public IGraphType? GraphType => null;
 
-        public Type Type => _type.Value;
+        public Type? Type => _type.Value;
 
         public IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> Configurator { get; }
 

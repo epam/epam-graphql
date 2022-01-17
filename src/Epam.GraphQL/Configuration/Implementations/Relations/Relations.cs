@@ -16,13 +16,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
 {
     internal abstract class Relations
     {
-        public Type ChildEntityType { get; set; }
+        public abstract Type ChildEntityType { get; }
 
         public abstract IEnumerable<IRelation> Items { get; }
 
-        public abstract bool HasFakePropertyValues(object entity, IDictionary<string, object> propertyValues);
+        public abstract bool HasFakePropertyValues(object entity, IDictionary<string, object?> propertyValues);
 
-        public abstract void UpdateFakeProperties(object parent, object child, IDictionary<string, object> childPropertyValues, object propertyValue);
+        public abstract void UpdateFakeProperties(object? parent, object? child, IDictionary<string, object?> childPropertyValues, object? propertyValue);
     }
 
     internal class Relations<TChildEntity> : Relations
@@ -30,20 +30,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
         private readonly HashSet<IRelation> _relations = new();
         private readonly List<IRelation> _postponedRelations = new();
 
-        public Relations()
-        {
-            ChildEntityType = typeof(TChildEntity);
-        }
+        public override Type ChildEntityType => typeof(TChildEntity);
 
         public override IEnumerable<IRelation> Items => _relations.Concat(_postponedRelations);
 
         public void Register<TEntity, TLoader, TProperty, TChildProperty, TExecutionContext>(
             RelationRegistry<TExecutionContext> registry,
             Expression<Func<TEntity, TProperty>> property,
-            Expression<Func<TEntity, TChildEntity>> navigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? navigationProperty,
             Expression<Func<TChildEntity, TChildProperty>> childProperty,
-            Expression<Func<TChildEntity, TEntity>> childNavigationProperty,
-            Func<Type, PropertyInfo> getPrimaryKeyPropertyInfo,
+            Expression<Func<TChildEntity, TEntity>>? childNavigationProperty,
+            Func<Type, PropertyInfo?> getPrimaryKeyPropertyInfo,
             RelationType relationType)
             where TLoader : Loader<TEntity, TExecutionContext>, new()
             where TEntity : class
@@ -56,13 +53,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             }
         }
 
-        public void Register<TPropertyType, TChildPropertyType>(string propName, Predicate<TPropertyType> isFakePropValue, Func<object, object> idGetter)
+        public void Register<TPropertyType, TChildPropertyType>(string propName, Predicate<TPropertyType> isFakePropValue, Func<object, object?> idGetter)
         {
             var relation = new ForeignKeyRelation<TPropertyType>(propName, isFakePropValue, idGetter);
             _postponedRelations.Add(relation);
         }
 
-        public override bool HasFakePropertyValues(object entity, IDictionary<string, object> propertyValues)
+        public override bool HasFakePropertyValues(object entity, IDictionary<string, object?> propertyValues)
         {
             if (entity is TChildEntity e)
             {
@@ -72,9 +69,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             throw new InvalidOperationException();
         }
 
-        public bool HasFakePropertyValues(TChildEntity childEntity, IDictionary<string, object> childPropertyValues) => Items.Any(relation => relation.HasFakePropertyValue(childEntity, childPropertyValues));
+        public bool HasFakePropertyValues(TChildEntity childEntity, IDictionary<string, object?> childPropertyValues) => Items.Any(relation => relation.HasFakePropertyValue(childEntity, childPropertyValues));
 
-        public override void UpdateFakeProperties(object parent, object child, IDictionary<string, object> childPropertyValues, object propertyValue)
+        public override void UpdateFakeProperties(object? parent, object? child, IDictionary<string, object?> childPropertyValues, object? propertyValue)
         {
             if (child is TChildEntity childEntity)
             {
@@ -97,7 +94,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return true;
         }
 
-        private void UpdateFakeProperties(object entity, TChildEntity childEntity, IDictionary<string, object> childPropertyValues, object fakePropertyValue)
+        private void UpdateFakeProperties(object? entity, TChildEntity childEntity, IDictionary<string, object?> childPropertyValues, object? fakePropertyValue)
         {
             foreach (var relation in Items)
             {

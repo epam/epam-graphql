@@ -8,8 +8,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal abstract class LoadEntityHook<TEntity, TExecutionContext>

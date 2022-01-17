@@ -5,22 +5,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields.Helpers;
-using Epam.GraphQL.Loaders;
 using GraphQL;
-
-#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedUnionField<TEntity, TArgType, TExecutionContext> :
         ArgumentedUnionFieldBase<IArguments<TArgType, TExecutionContext>, TEntity, TExecutionContext>,
-        IResolvableField<TEntity, TArgType, TExecutionContext>,
-        IArgumentedField<TEntity, TArgType, TExecutionContext>
+        IUnionableField<TEntity, TArgType, TExecutionContext>
         where TEntity : class
     {
         public ArgumentedUnionField(
@@ -28,10 +22,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             IArguments<TArgType, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, arguments)
         {
         }
 
@@ -40,78 +33,95 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             IArguments<TArgType, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
         {
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public new IArgumentedField<TEntity, TArgType, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+        public IUnionableField<TEntity, TArgType, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionField<TEntity, TArgType, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
+            var unionField = new ArgumentedUnionField<TEntity, TArgType, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, Arguments);
             return ApplyField(unionField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType, TArgType2, TExecutionContext> ApplyArgument<TArgType2>(string argName)
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType, TArgType2, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType2>(argName));
-            return ApplyField(argumentedField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.AddFilter<TProjection, TEntity1>(argName));
-            return ApplyField(argumentedField);
         }
 
         private Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve)
@@ -122,8 +132,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal class ArgumentedUnionField<TEntity, TArgType1, TArgType2, TExecutionContext> :
         ArgumentedUnionFieldBase<IArguments<TArgType1, TArgType2, TExecutionContext>, TEntity, TExecutionContext>,
-        IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>,
-        IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext>
+        IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext>
         where TEntity : class
     {
         public ArgumentedUnionField(
@@ -131,10 +140,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             IArguments<TArgType1, TArgType2, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, arguments)
         {
         }
 
@@ -143,90 +151,95 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             IArguments<TArgType1, TArgType2, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
         {
         }
 
-        public ArgumentedUnionField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
-            IArguments<TArgType1, TArgType2, TExecutionContext> arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType, isList, arguments)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
-        }
-
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+        public IUnionableField<TEntity, TArgType1, TArgType2, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
+            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, Arguments);
             return ApplyField(unionField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyArgument<TArgType3>(string argName)
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType3>(argName));
-            return ApplyField(argumentedField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.AddFilter<TProjection, TEntity1>(argName));
-            return ApplyField(argumentedField);
         }
 
         private Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve)
@@ -237,19 +250,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal class ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> :
         ArgumentedUnionFieldBase<IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext>, TEntity, TExecutionContext>,
-        IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>,
-        IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
+        IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
         where TEntity : class
     {
         public ArgumentedUnionField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
+            Type unionType,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext> arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
         {
         }
 
@@ -258,90 +271,93 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, arguments)
         {
         }
 
-        public ArgumentedUnionField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
-            IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList, arguments)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
-        }
-
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+        public IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
+            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, Arguments);
             return ApplyField(unionField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyArgument<TArgType4>(string argName)
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType4>(argName));
-            return ApplyField(argumentedField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.AddFilter<TProjection, TEntity1>(argName));
-            return ApplyField(argumentedField);
         }
 
         private Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve)
@@ -352,19 +368,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal class ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
         ArgumentedUnionFieldBase<IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TEntity, TExecutionContext>,
-        IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
-        IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+        IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
         where TEntity : class
     {
         public ArgumentedUnionField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
+            Type unionType,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
         {
         }
 
@@ -373,90 +389,93 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, arguments)
         {
         }
 
-        public ArgumentedUnionField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
-            IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList, arguments)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
-        }
-
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+        public IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
+            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, Arguments);
             return ApplyField(unionField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyArgument<TArgType5>(string argName)
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.Add<TArgType5>(argName));
-            return ApplyField(argumentedField);
-        }
-
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext> ApplyFilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, UnionTypes, UnionGraphType, IsList, Arguments.AddFilter<TProjection, TEntity1>(argName));
-            return ApplyField(argumentedField);
         }
 
         private Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve)
@@ -467,19 +486,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal class ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
         ArgumentedUnionFieldBase<IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TEntity, TExecutionContext>,
-        IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
-        IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+        IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
         where TEntity : class
     {
         public ArgumentedUnionField(
             RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
+            Type unionType,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
         {
         }
 
@@ -488,75 +507,92 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList, arguments)
+            : base(registry, parent, name, unionType, typeResolver, arguments)
         {
         }
 
-        public ArgumentedUnionField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
-            IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList, arguments)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
-        {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
-        }
-
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, TReturnType, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType;
+            Parent.ApplyResolvedField<TReturnType>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public ResolvedField<TEntity, IEnumerable<TReturnType>, TExecutionContext> ApplyResolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
             where TReturnType : class
         {
-            return ResolvableTypedFieldHelpers.ApplyResolve(this, ConvertFieldResolver(resolve), build, false, optionsBuilder);
+            var graphType = GraphType.MakeListDescriptor();
+            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                this,
+                graphType,
+                ResolvedFieldResolverFactory.Create(ConvertFieldResolver(resolve)));
         }
 
-        public new IArgumentedField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ApplyUnion<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>> build, bool isList)
+        public IUnionableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, IsList || isList, Arguments);
+            var unionField = new ArgumentedUnionField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType, Arguments);
             return ApplyField(unionField);
         }
 

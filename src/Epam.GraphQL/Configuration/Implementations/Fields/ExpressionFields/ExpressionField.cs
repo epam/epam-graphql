@@ -4,28 +4,27 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using GraphQL;
 using GraphQL.Resolvers;
+using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
-    internal class ExpressionField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>
+    internal class ExpressionField<TEntity, TReturnType, TExecutionContext> :
+        TypedField<TEntity, TReturnType, TExecutionContext>,
+        IExpressionField<TEntity, TExecutionContext>
         where TEntity : class
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
 
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
+        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
             : base(
                   registry,
                   parent,
@@ -56,7 +55,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             {
                 IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
 
-                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !EditSettings.IsMandatoryForUpdate)
+                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !(EditSettings?.IsMandatoryForUpdate ?? false))
                 {
                     graphType = graphType.UnwrapIfNonNullable();
                 }
@@ -65,19 +64,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
         }
 
-        public override bool IsExpression => true;
+        public bool IsFilterable { get; set; }
 
-        public override bool IsFilterable { get; protected set; }
+        public bool IsGroupable { get; protected set; }
 
-        public override bool IsGroupable { get; protected set; }
-
-        public override PropertyInfo PropertyInfo => _expression?.PropertyInfo;
+        public PropertyInfo? PropertyInfo => _expression?.PropertyInfo;
 
         public override bool CanResolve => true;
 
-        public override LambdaExpression ContextExpression => _expression.ContextedExpression;
+        public LambdaExpression ContextExpression => _expression.ContextedExpression;
 
-        public override LambdaExpression OriginalExpression => _expression.OriginalExpression;
+        public LambdaExpression OriginalExpression => _expression.OriginalExpression;
 
         protected virtual bool IsSupportFiltering => false;
 
@@ -85,7 +82,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected virtual bool IsSupportGrouping => false;
 
-        public override object Resolve(IResolveFieldContext context)
+        public override object? Resolve(IResolveFieldContext context)
         {
             return _expression.Resolve(context, context.Source);
         }
@@ -130,6 +127,31 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             IsGroupable = true;
         }
 
+        public override FieldType AsFieldType()
+        {
+            var result = base.AsFieldType();
+
+            // Hack against GraphQL.NET: ComplexGraphType<object>.ORIGINAL_EXPRESSION_PROPERTY_NAME is internal.
+            result.Metadata.Add("ORIGINAL_EXPRESSION_PROPERTY_NAME", PropertyInfo?.Name);
+
+            return result;
+        }
+
+        public IInlineFilter<TExecutionContext> CreateInlineFilter()
+        {
+            if (IsFilterable)
+            {
+                return OnCreateInlineFilter();
+            }
+
+            throw new NotSupportedException();
+        }
+
+        public virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter()
+        {
+            throw new NotSupportedException();
+        }
+
         public override int GetHashCode()
         {
             var hashCode = default(HashCode);
@@ -150,53 +172,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             return base.Equals(other);
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
         protected override IFieldResolver GetResolver() => _expression;
 
-        private static string GenerateName(string name, Expression<Func<TEntity, TReturnType>> expression)
+        private static string GenerateName(string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
             if (expression == null)
             {
@@ -215,7 +193,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     internal class ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> : ExpressionField<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
+        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
             : base(registry, parent, expression, name)
         {
         }
@@ -227,11 +205,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected override bool IsSupportFiltering => true;
 
-        protected TFilterValueType[] DefaultValues { get; private set; }
+        protected TFilterValueType[]? DefaultValues { get; private set; }
 
         protected NullOption? NullValue { get; private set; }
 
-        public void Filterable(TFilterValueType[] defaultValues = null)
+        public void Filterable(TFilterValueType[]? defaultValues = null)
         {
             if (defaultValues != null && defaultValues.Any(value => value == null))
             {
@@ -256,21 +234,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
             NullValue = nullValue;
             IsFilterable = true;
-        }
-
-        public override IInlineFilter<TExecutionContext> CreateInlineFilter()
-        {
-            if (IsFilterable)
-            {
-                return OnCreateInlineFilter();
-            }
-
-            throw new NotSupportedException();
-        }
-
-        public virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter()
-        {
-            throw new NotSupportedException();
         }
     }
 }

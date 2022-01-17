@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -22,17 +22,17 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         protected Func<IResolveFieldContext, TEntity, TReturnType> Resolver { get; }
 
-        public IDataLoader<TEntity, object> GetBatchLoader(IResolveFieldContext context)
+        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
         {
-            return BatchLoader.FromResult<TEntity, object>(Resolver(context, (TEntity)context.Source));
+            return BatchLoader.FromResult<TEntity, object?>(Resolver(context, (TEntity)context.Source));
         }
 
-        public IDataLoader<Proxy<TEntity>, object> GetProxiedBatchLoader(IResolveFieldContext context)
+        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
         {
-            return BatchLoader.FromResult<Proxy<TEntity>, object>(Resolver(context, ((Proxy<TEntity>)context.Source).GetOriginal()));
+            return BatchLoader.FromResult<Proxy<TEntity>, object?>(Resolver(context, ((Proxy<TEntity>)context.Source).GetOriginal()));
         }
 
-        public object Resolve(IResolveFieldContext context)
+        public object? Resolve(IResolveFieldContext context)
         {
             var boundResolver = context.Bind(Resolver);
             return context.Source is Proxy<TEntity> proxy

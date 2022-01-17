@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Infrastructure;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     [InternalApi]

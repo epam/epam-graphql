@@ -122,13 +122,13 @@ namespace Epam.GraphQL
 
             GraphQLSchema.Initialize();
 
-            var typeGraphType = GraphQLSchema.FindType(nameof(__Type)) as __Type;
+            var typeGraphType = (__Type)GraphQLSchema.FindType(nameof(__Type));
             var field = new FieldType()
             {
                 Name = "metadata",
                 Type = typeof(TypeMetadataGraphType),
-                ResolvedType = new TypeMetadataGraphType(GraphQLSchema.FindType(nameof(__Field)) as __Field, typeGraphType),
-                Resolver = new FuncFieldResolver<IGraphType, TypeMetadata>(ResolveTypeMetadata),
+                ResolvedType = new TypeMetadataGraphType((__Field)GraphQLSchema.FindType(nameof(__Field)), typeGraphType),
+                Resolver = new FuncFieldResolver<IGraphType, TypeMetadata?>(ResolveTypeMetadata),
             };
 
             typeGraphType.AddField(field);
@@ -139,7 +139,7 @@ namespace Epam.GraphQL
             schema.Query = registry.ResolveObjectGraphTypeWrapper<TQuery, object>();
         }
 
-        private TypeMetadata ResolveTypeMetadata(IResolveFieldContext<IGraphType> ctx)
+        private TypeMetadata? ResolveTypeMetadata(IResolveFieldContext<IGraphType> ctx)
         {
             var metadata = Registry.GetMetadata(ctx.Source);
             return metadata;

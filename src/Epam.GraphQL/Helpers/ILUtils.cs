@@ -8,8 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal static class ILUtils

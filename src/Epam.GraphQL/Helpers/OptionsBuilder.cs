@@ -5,8 +5,6 @@
 
 using System;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     public class OptionsBuilder<TOptions>

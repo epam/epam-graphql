@@ -11,8 +11,8 @@ namespace Epam.GraphQL.Savers
     [InternalApi]
     public interface IInputItem
     {
-        object Payload { get; }
+        object? Payload { get; }
 
-        IDictionary<string, object> Properties { get; }
+        IDictionary<string, object?> Properties { get; }
     }
 }

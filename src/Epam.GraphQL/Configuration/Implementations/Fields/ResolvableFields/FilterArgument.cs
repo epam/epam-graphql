@@ -8,8 +8,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterArgument<TExecutionContext> : IArgument<IResolveFieldContext>
@@ -27,6 +25,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             _inlineFilters = new Lazy<IInlineFilters<TExecutionContext>>(() =>
             {
                 var configurator = registry.GetObjectGraphTypeConfigurator(_entityType, _projectionType);
+
+                if (configurator == null)
+                {
+                    throw new NotSupportedException();
+                }
+
                 var inlineFilters = configurator.CreateInlineFilters();
                 return inlineFilters;
             });

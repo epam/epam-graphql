@@ -19,8 +19,6 @@ using Epam.GraphQL.Types;
 using GraphQL;
 using GraphQL.Types;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
     internal abstract class QueryableFieldBase<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>
@@ -82,10 +80,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
             if (HasFilter)
             {
-                Argument("filter", () => new QueryArgument(Registry.GenerateInputGraphType(ObjectGraphTypeConfigurator?.CreateInlineFilters().FilterType))
-                {
-                    Name = "filter",
-                });
+                Argument("filter", CreateFilterArgument);
             }
 
             var sortableFields = ObjectGraphTypeConfigurator?.Sorters.Select(f => f.Name).ToArray();
@@ -98,6 +93,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             if (searcher != null)
             {
                 Argument("search", typeof(string));
+            }
+
+            QueryArgument CreateFilterArgument()
+            {
+                if (ObjectGraphTypeConfigurator == null)
+                {
+                    throw new NotSupportedException();
+                }
+
+                return new QueryArgument(Registry.GenerateInputGraphType(ObjectGraphTypeConfigurator.CreateInlineFilters().FilterType))
+                {
+                    Name = "filter",
+                };
             }
         }
 
@@ -114,6 +122,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected virtual IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolver => QueryableFieldResolverBase.Reorder(ApplySort(ObjectGraphTypeConfigurator?.Sorters, Searcher, NaturalSorters));
 
         protected IQueryableResolver<TEntity, TReturnType, TExecutionContext> QueryableFieldResolverBase => (IQueryableResolver<TEntity, TReturnType, TExecutionContext>)EnumerableFieldResolver;
+
+        public void Argument<TArgumentType>(string name, string? description = null) => Argument(name, typeof(TArgumentType), description);
 
         public virtual QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
             where TLoaderFilter : Filter<TReturnType, TFilter, TExecutionContext>
@@ -205,7 +215,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                     {
                         var listener = context.GetListener();
                         var ctx = context.GetUserContext<TExecutionContext>();
-                        query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
+                        query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType));
                     }
 
                     return query;
@@ -218,7 +228,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return (context, query) =>
             {
                 var listener = context.GetListener();
-                return filter.All(listener, query, context.GetUserContext<TExecutionContext>(), context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
+                return filter.All(listener, query, context.GetUserContext<TExecutionContext>(), context.GetFilterValue(filter.FilterType));
             };
         }
 

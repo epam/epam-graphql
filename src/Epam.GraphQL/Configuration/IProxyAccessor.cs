@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration
 {
     internal interface IProxyAccessor<TExecutionContext>
@@ -46,5 +44,7 @@ namespace Epam.GraphQL.Configuration
         void AddMembers<TChildEntity>(string childFieldName, IProxyAccessor<TChildEntity, TExecutionContext> childProxyAccessor, ExpressionFactorizationResult factorizationResult);
 
         void AddAllMembers(string childFieldName);
+
+        void AddMembers(IEnumerable<LambdaExpression> members);
     }
 }

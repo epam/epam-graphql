@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -19,7 +19,9 @@ namespace Epam.GraphQL.Builders.MutableLoader
 
         IHasEditableAndOnWriteAndMandatoryForUpdate<TEntity, string, TExecutionContext> Select(Func<TReturnType, string> selector);
 
-        IHasEditableAndOnWriteAndMandatoryForUpdate<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build = null)
+        IHasEditableAndOnWriteAndMandatoryForUpdate<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build = null)
             where TReturnType1 : class;
     }
 }

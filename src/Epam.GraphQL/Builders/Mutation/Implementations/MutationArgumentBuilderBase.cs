@@ -4,160 +4,275 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.RootProjection.Implementations;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
-using Epam.GraphQL.Mutation;
+using Epam.GraphQL.Configuration.Implementations;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
-    internal class MutationArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext> : RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType, TExecutionContext>
+    internal class MutationArgumentBuilderBase<TFieldType, TArgType, TExecutionContext> :
+        RootProjectionArgumentBuilderBase<TFieldType, TArgType, TExecutionContext>,
+        IMutationFieldBuilderBase<TArgType, TExecutionContext>
+        where TFieldType : IUnionableMutationField<TArgType, TExecutionContext>
     {
         protected MutationArgumentBuilderBase(TFieldType field)
             : base(field)
         {
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve)
+        public IMutationFieldBuilderBase<TArgType, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOfImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve)
+        public IMutationFieldBuilderBase<TArgType, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOf(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return AndImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return And(build);
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType, TExecutionContext>, TArgType, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return new MutationArgumentBuilderBase<IUnionableMutationField<TArgType, TExecutionContext>, TArgType, TExecutionContext>(Field.AsUnionOf(build));
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType, TExecutionContext>, TArgType, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return AsUnionOfImpl(build);
         }
     }
 
-    internal class MutationArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TExecutionContext> : RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TExecutionContext>
+    internal class MutationArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TExecutionContext> :
+        RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TExecutionContext>,
+        IMutationFieldBuilderBase<TArgType1, TArgType2, TExecutionContext>
+        where TFieldType : IUnionableMutationField<TArgType1, TArgType2, TExecutionContext>
     {
         protected MutationArgumentBuilderBase(TFieldType field)
             : base(field)
         {
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOfImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOf(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return AndImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return And(build);
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return new MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext>(Field.AsUnionOf(build));
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TExecutionContext>, TArgType1, TArgType2, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return AsUnionOfImpl(build);
         }
     }
 
-    internal class MutationArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext> : RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TExecutionContext>
+    internal class MutationArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TExecutionContext> :
+        RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TExecutionContext>,
+        IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TExecutionContext>
+        where TFieldType : IUnionableMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
         protected MutationArgumentBuilderBase(TFieldType field)
             : base(field)
         {
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOfImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOf(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return AndImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return And(build);
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return new MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext>(Field.AsUnionOf(build));
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>, TArgType1, TArgType2, TArgType3, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return AsUnionOfImpl(build);
         }
     }
 
-    internal class MutationArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+    internal class MutationArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
+        RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>,
+        IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
+        where TFieldType : IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
         protected MutationArgumentBuilderBase(TFieldType field)
             : base(field)
         {
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOfImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOf(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return AndImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return And(build);
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return new MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Field.AsUnionOf(build));
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return AsUnionOfImpl(build);
         }
     }
 
-    internal class MutationArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : RootProjectionArgumentBuilderBase<TFieldType, TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
-        where TEntity : class
-        where TFieldType : IResolvableField<TEntity, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+    internal class MutationArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
+        RootProjectionArgumentBuilderBase<TFieldType, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>,
+        IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
+        where TFieldType : IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
         protected MutationArgumentBuilderBase(TFieldType field)
             : base(field)
         {
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOfImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve);
+            return AsUnionOf(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TType>(
+            Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return AndImpl(build);
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        public IMutationFieldBuilderBase<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TEnumerable, TElementType>(
+            Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : class, IEnumerable<TElementType>
+            where TElementType : class
         {
-            Field.ApplyResolve(resolve, optionsBuilder);
+            return And(build);
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return new MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Field.AsUnionOf(build));
+        }
+
+        private MutationArgumentBuilderBase<IUnionableMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+            where TType : class
+        {
+            return AsUnionOfImpl(build);
         }
     }
 }

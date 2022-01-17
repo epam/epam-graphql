@@ -9,8 +9,6 @@ using System.Linq;
 using Epam.GraphQL.Extensions;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal abstract class ArgumentsBase<TResolveArgumentContext, TExecutionContext> : IArguments

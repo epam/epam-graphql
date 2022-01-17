@@ -6,11 +6,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Extensions;
-
-#nullable enable
 
 namespace Epam.GraphQL.Helpers
 {
@@ -96,7 +95,7 @@ namespace Epam.GraphQL.Helpers
             return ValueAccessExpressionCacher<TEntity, TProperty>.MakeValueAccessExpression(selector);
         }
 
-        public static Expression<Func<object, object>> MakeWeakLambdaExpression(LambdaExpression selector)
+        public static Expression<Func<object?, object?>> MakeWeakLambdaExpression(LambdaExpression selector)
         {
             if (selector.Parameters.Count != 1)
             {
@@ -107,7 +106,7 @@ namespace Epam.GraphQL.Helpers
             var convertParamExpression = Expression.Convert(paramExpression, selector.Parameters[0].Type);
             var keySelectorExpression = ParameterRebinder.ReplaceParameter(selector.Body, selector.Parameters[0], convertParamExpression);
             var convertResultExpression = Expression.Convert(keySelectorExpression, typeof(object));
-            var result = Expression.Lambda<Func<object, object>>(convertResultExpression, paramExpression);
+            var result = Expression.Lambda<Func<object?, object?>>(convertResultExpression, paramExpression);
 
             return result;
         }
@@ -138,7 +137,7 @@ namespace Epam.GraphQL.Helpers
             throw new ArgumentOutOfRangeException(nameof(condition), $"Cannot use expression {condition} as a relation between {typeof(T1).HumanizedName()} and {typeof(T2).HumanizedName()} types.");
         }
 
-        public static bool TryFactorizeCondition<T1, T2>(Expression<Func<T1, T2, bool>> expression, out ConditionFactorizationResult<T2>? result)
+        public static bool TryFactorizeCondition<T1, T2>(Expression<Func<T1, T2, bool>> expression, [NotNullWhen(true)] out ConditionFactorizationResult<T2>? result)
         {
             var factorizationResult = Factorize(expression);
 

@@ -13,6 +13,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

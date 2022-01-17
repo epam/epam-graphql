@@ -13,8 +13,6 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class QueryableExtensions
@@ -26,7 +24,7 @@ namespace Epam.GraphQL.Extensions
             Expression<Func<TEntity, TTransformedEntity>> transform,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
-            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter,
+            ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>? sorters)
         {
             var filtered = query.Where(ExpressionHelpers.MakeContainsExpression(propValues, propSelector));
@@ -40,7 +38,7 @@ namespace Epam.GraphQL.Extensions
             Expression<Func<TEntity, TTransformedEntity>> transform,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
-            ILoaderHooksExecuter<TTransformedEntity> hooksExecuter,
+            ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>? sorters)
             where TProperty : struct
         {

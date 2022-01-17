@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using Epam.GraphQL.Extensions;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class ResolveFieldContextBinder

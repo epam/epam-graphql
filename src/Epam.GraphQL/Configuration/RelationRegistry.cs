@@ -54,11 +54,11 @@ namespace Epam.GraphQL.Configuration
         private readonly ConcurrentDictionary<(Type Loader, Type Entity), IObjectGraphTypeConfigurator<TExecutionContext>> _loadersToInputObjectGraphTypeConfiguratorsMap = new();
         private readonly ConcurrentDictionary<Type, IObjectGraphTypeConfigurator<TExecutionContext>> _autoEntityTypesToConfiguratorsMap = new();
         private readonly ConcurrentDictionary<Type, IObjectGraphTypeConfigurator<TExecutionContext>> _inputAutoEntityTypesToConfiguratorsMap = new();
-        private readonly Dictionary<(Type InlineType, Delegate Builder, IField<TExecutionContext> Parent, bool IsInput), IInlineGraphTypeResolver<TExecutionContext>> _inlineConfiguratorsToResolversMap = new(
-            new ValueTupleEqualityComparer<Type, Delegate, IField<TExecutionContext>, bool>(thirdItemComparer: ReferenceEqualityComparer.Instance));
+        private readonly Dictionary<(Type InlineType, Delegate? Builder, IField<TExecutionContext> Parent, bool IsInput), IInlineGraphTypeResolver<TExecutionContext>> _inlineConfiguratorsToResolversMap = new(
+            new ValueTupleEqualityComparer<Type, Delegate?, IField<TExecutionContext>, bool>(thirdItemComparer: ReferenceEqualityComparer.Instance));
 
         private readonly ConcurrentDictionary<Type, object> _cache = new();
-        private readonly Dictionary<string, (Type Entity, Type Projection)> _typeNamesToTypesMap = new();
+        private readonly Dictionary<string, (Type Entity, Type? Projection)> _typeNamesToTypesMap = new();
         private readonly Dictionary<Type, (Type GraphType, string Name)> _enumTypesMap = new();
         private readonly HashSet<string> _enumTypeNames = new();
         private readonly ConcurrentDictionary<Delegate, Delegate> _funcsToWrappedByContextFuncsMap = new();
@@ -78,8 +78,8 @@ namespace Epam.GraphQL.Configuration
             Type loaderType,
             Type childLoaderType,
             Expression<Func<TEntity, TChildEntity, bool>> relationCondition,
-            Expression<Func<TChildEntity, TEntity>> navigationProperty,
-            Expression<Func<TEntity, TChildEntity>> childNavigationProperty,
+            Expression<Func<TChildEntity, TEntity>>? navigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? childNavigationProperty,
             RelationType relationType)
         {
             RegisterHelper(loaderType, childLoaderType, relationCondition, navigationProperty, childNavigationProperty, relationType);
@@ -112,7 +112,7 @@ namespace Epam.GraphQL.Configuration
             _loadersToInputObjectGraphTypeConfiguratorsMap[key].ConfigureGraphType(graphType);
         }
 
-        public IInlineGraphTypeResolver<TReturnType, TExecutionContext> Register<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, bool isInputType)
+        public IInlineGraphTypeResolver<TReturnType, TExecutionContext> Register<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, bool isInputType)
             where TReturnType : class
         {
             if (typeof(TReturnType).IsValueType || typeof(TReturnType) == typeof(string))
@@ -122,10 +122,10 @@ namespace Epam.GraphQL.Configuration
 
             return (IInlineGraphTypeResolver<TReturnType, TExecutionContext>)_inlineConfiguratorsToResolversMap.GetOrAdd(
                 (typeof(TReturnType), build, parent, isInputType),
-                key => new InlineObjectBuilder<TReturnType, TExecutionContext>(key.Parent, this, (Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>)key.Builder, key.IsInput));
+                key => new InlineObjectBuilder<TReturnType, TExecutionContext>(key.Parent, this, (Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>?)key.Builder, key.IsInput));
         }
 
-        public ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> Register<TProjection, TEntity>(IField<TExecutionContext> parent)
+        public ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> Register<TProjection, TEntity>(IField<TExecutionContext>? parent)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class
         {
@@ -135,14 +135,14 @@ namespace Epam.GraphQL.Configuration
                 _ => new ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>(parent, this));
         }
 
-        public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType, IField<TExecutionContext> parent)
+        public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
             where TEntity : class
         {
             var methodInfo = GetType().GetGenericMethod(nameof(Register), new[] { projectionType, typeof(TEntity) }, new[] { typeof(IField<TExecutionContext>) });
             return methodInfo.InvokeAndHoistBaseException<ObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
         }
 
-        public InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> RegisterInput<TProjection, TEntity>(IField<TExecutionContext> parent)
+        public InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> RegisterInput<TProjection, TEntity>(IField<TExecutionContext>? parent)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class
         {
@@ -152,14 +152,14 @@ namespace Epam.GraphQL.Configuration
                 _ => new InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>(parent, this));
         }
 
-        public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext> parent)
+        public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
             where TEntity : class
         {
             var methodInfo = GetType().GetGenericMethod(nameof(RegisterInput), new[] { projectionType, typeof(TEntity) }, new[] { typeof(IField<TExecutionContext>) });
             return methodInfo.InvokeAndHoistBaseException<InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
         }
 
-        public IObjectGraphTypeConfigurator<TExecutionContext> GetObjectGraphTypeConfigurator(Type type, Type loaderType = null)
+        public IObjectGraphTypeConfigurator<TExecutionContext>? GetObjectGraphTypeConfigurator(Type type, Type? loaderType = null)
         {
             if (loaderType != null)
             {
@@ -212,7 +212,7 @@ namespace Epam.GraphQL.Configuration
             }
         }
 
-        public bool HasFakePropertyValues<TEntity>(Type loaderType, TEntity entity, IDictionary<string, object> propertyValues)
+        public bool HasFakePropertyValues<TEntity>(Type loaderType, TEntity entity, IDictionary<string, object?> propertyValues)
             where TEntity : class
         {
             if (_relationMap.TryGetValue((loaderType, typeof(TEntity)), out var childRels))
@@ -227,7 +227,7 @@ namespace Epam.GraphQL.Configuration
             return false;
         }
 
-        public void UpdateFakePropertyValues(object parent, object childEntity, IDictionary<string, object> childPropertyValues, object fakePropertyValue, Type childLoaderType, Type childEntityType)
+        public void UpdateFakePropertyValues(object? parent, object? childEntity, IDictionary<string, object?> childPropertyValues, object? fakePropertyValue, Type childLoaderType, Type childEntityType)
         {
             if (_relationMap.TryGetValue((childLoaderType, childEntityType), out var childRelations))
             {
@@ -240,7 +240,7 @@ namespace Epam.GraphQL.Configuration
         {
             if (_relationMap.TryGetValue((childLoaderType, typeof(TChildEntity)), out var rel))
             {
-                var relations = rel as Relations<TChildEntity>;
+                var relations = (Relations<TChildEntity>)rel;
                 return relations.CanViewParentAsync(context, entity);
             }
 
@@ -254,7 +254,7 @@ namespace Epam.GraphQL.Configuration
             Relations<TEntity> childRelations;
             if (_relationMapPostponedForSave.TryGetValue(typeof(TEntity), out var childRel))
             {
-                childRelations = childRel as Relations<TEntity>;
+                childRelations = (Relations<TEntity>)childRel;
             }
             else
             {
@@ -263,22 +263,22 @@ namespace Epam.GraphQL.Configuration
             }
 
             var loader = ResolveLoader<TChildEntityLoader, TChildEntity>();
-            childRelations.Register<TPropertyType, TChildPropertyType>(propName, isFakePropValue, loader.IdGetter);
+            childRelations.Register<TPropertyType, TChildPropertyType>(propName, isFakePropValue, loader.GetId);
         }
 
-        public bool HasFakePropertyValuesPostponedForSave<TChildEntity>(TChildEntity entity, IDictionary<string, object> propertyValues)
+        public bool HasFakePropertyValuesPostponedForSave<TChildEntity>(TChildEntity entity, IDictionary<string, object?> propertyValues)
             where TChildEntity : class
         {
             if (_relationMapPostponedForSave.TryGetValue(typeof(TChildEntity), out var rel))
             {
-                var relations = rel as Relations<TChildEntity>;
+                var relations = (Relations<TChildEntity>)rel;
                 return relations.HasFakePropertyValues(entity, propertyValues);
             }
 
             return false;
         }
 
-        public void UpdatePostponedFakePropertyValues(object parent, object childEntity, IDictionary<string, object> childPropertyValues, object fakePropertyValue, Type childEntityType)
+        public void UpdatePostponedFakePropertyValues(object? parent, object? childEntity, IDictionary<string, object?> childPropertyValues, object? fakePropertyValue, Type childEntityType)
         {
             if (_relationMapPostponedForSave.TryGetValue(childEntityType, out var relations))
             {
@@ -286,14 +286,14 @@ namespace Epam.GraphQL.Configuration
             }
         }
 
-        public TypeMetadata GetMetadata(IGraphType graphType)
+        public TypeMetadata? GetMetadata(IGraphType graphType)
         {
             if (graphType is IHasGetEntityType p and IObjectGraphType og)
             {
                 var loaderType = p.GetProjectionType();
                 var entityType = p.GetEntityType();
-                FieldType[] primaryKeys = null;
-                IEnumerable<ForeignKeyMetadata> foreignKeys = null;
+                FieldType[]? primaryKeys = null;
+                IEnumerable<ForeignKeyMetadata>? foreignKeys = null;
                 if (_primaryKeys.TryGetValue(entityType, out var propertyInfo))
                 {
                     var primaryKeyField = og.Fields.SingleOrDefault(field => field.Name.Equals(propertyInfo.Name, StringComparison.OrdinalIgnoreCase));
@@ -305,7 +305,7 @@ namespace Epam.GraphQL.Configuration
 
                 if (_relationMap.TryGetValue((loaderType, entityType), out var relations))
                 {
-                    foreignKeys = relations.Items.Select(rel => rel.GetForeignKeyMetadata(og)).Where(fk => fk != null);
+                    foreignKeys = relations.Items.Select(rel => rel.GetForeignKeyMetadata(og)).Where(fk => fk != null)!;
                 }
 
                 return new TypeMetadata(primaryKeys, foreignKeys);
@@ -358,7 +358,15 @@ namespace Epam.GraphQL.Configuration
 
             var loader = (ProjectionBase<TExecutionContext>)type.CreateInstanceAndHoistBaseException();
             _cache[type] = loader;
-            _projectionEntityTypes.Add(TypeHelpers.FindMatchingGenericBaseType(type, typeof(Projection<,>)).GenericTypeArguments[0]);
+
+            var baseType = TypeHelpers.FindMatchingGenericBaseType(type, typeof(Projection<,>));
+
+            if (baseType == null)
+            {
+                throw new ArgumentException($"Cannot resolve loader of type {type}", nameof(type));
+            }
+
+            _projectionEntityTypes.Add(baseType.GenericTypeArguments[0]);
             loader.Registry = this;
             loader.AfterConstruction();
             loader.Configure();
@@ -383,13 +391,13 @@ namespace Epam.GraphQL.Configuration
             return (IObjectGraphType)_serviceProvider.GetRequiredService(GetEntityGraphType<TLoader, TEntity>());
         }
 
-        public string GetGraphQLTypeName<TEntity>(bool isInput, IField<TExecutionContext> parent)
+        public string GetGraphQLTypeName<TEntity>(bool isInput, IField<TExecutionContext>? parent)
             where TEntity : class
         {
             return GetGraphQLTypeName(typeof(TEntity), null, isInput, parent);
         }
 
-        public string GetGraphQLTypeName(Type entityType, Type projectionType, bool isInput, IField<TExecutionContext> parent, string name = null)
+        public string GetGraphQLTypeName(Type entityType, Type? projectionType, bool isInput, IField<TExecutionContext>? parent, string? name = null)
         {
             name ??= entityType.GraphQLTypeName(isInput);
 
@@ -507,7 +515,7 @@ namespace Epam.GraphQL.Configuration
                 return name;
             }
 
-            string possibleName = null;
+            string? possibleName = null;
 
             if (TypeHelpers.FindMatchingGenericBaseType(projectionType, typeof(Query<>)) != null || TypeHelpers.FindMatchingGenericBaseType(projectionType, typeof(Mutation<>)) != null)
             {
@@ -517,13 +525,13 @@ namespace Epam.GraphQL.Configuration
             return GetGraphQLTypeName(entityType, projectionType, isInput, null, possibleName);
         }
 
-        public void SetGraphQLTypeName<TEntity>(string oldName, string newName)
+        public void SetGraphQLTypeName<TEntity>(string? oldName, string newName)
             where TEntity : class
         {
             SetGraphQLTypeName(null, typeof(TEntity), oldName, newName);
         }
 
-        public void SetGraphQLTypeName<TProjection, TEntity>(string oldName, string newName)
+        public void SetGraphQLTypeName<TProjection, TEntity>(string? oldName, string newName)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>
             where TEntity : class
         {
@@ -629,13 +637,13 @@ namespace Epam.GraphQL.Configuration
             }
         }
 
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
             return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, false);
         }
 
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
             return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, true);
@@ -753,7 +761,7 @@ namespace Epam.GraphQL.Configuration
             return _typeNamesToTypesMap.ContainsKey(typeName) || _enumTypeNames.Contains(typeName);
         }
 
-        private void RegisterProjectionType(string typeName, Type entityType, Type projectionType)
+        private void RegisterProjectionType(string typeName, Type entityType, Type? projectionType)
         {
             _typeNamesToTypesMap.Add(typeName, (entityType, projectionType));
         }
@@ -763,7 +771,7 @@ namespace Epam.GraphQL.Configuration
             _typeNamesToTypesMap.Remove(typeName);
         }
 
-        private bool TryGetRegisteredType(string typeName, out (Type Entity, Type Projection) result)
+        private bool TryGetRegisteredType(string typeName, out (Type Entity, Type? Projection) result)
         {
             return _typeNamesToTypesMap.TryGetValue(typeName, out result);
         }
@@ -789,7 +797,7 @@ namespace Epam.GraphQL.Configuration
             _enumTypeNames.Add(name);
         }
 
-        private void SetGraphQLTypeName(Type projectionType, Type entityType, string oldName, string newName)
+        private void SetGraphQLTypeName(Type? projectionType, Type entityType, string? oldName, string newName)
         {
             if (TryGetRegisteredType(newName, out var oldType))
             {
@@ -817,8 +825,8 @@ namespace Epam.GraphQL.Configuration
         private void Register<TEntity, TLoader, TChildEntity, TChildLoader, TProperty, TChildProperty>(
             Expression<Func<TEntity, TProperty>> property,
             Expression<Func<TChildEntity, TChildProperty>> childProperty,
-            Expression<Func<TEntity, TChildEntity>> navigationProperty,
-            Expression<Func<TChildEntity, TEntity>> childNavigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? navigationProperty,
+            Expression<Func<TChildEntity, TEntity>>? childNavigationProperty,
             RelationType relationType)
             where TEntity : class
             where TLoader : Loader<TEntity, TExecutionContext>, new()
@@ -851,7 +859,7 @@ namespace Epam.GraphQL.Configuration
             Relations<TChildEntity> childRelations;
             if (_relationMap.TryGetValue((typeof(TChildLoader), typeof(TChildEntity)), out var childRel))
             {
-                childRelations = childRel as Relations<TChildEntity>;
+                childRelations = (Relations<TChildEntity>)childRel;
             }
             else
             {
@@ -866,8 +874,8 @@ namespace Epam.GraphQL.Configuration
             Type loaderType,
             Type childLoaderType,
             Expression<Func<TEntity, TChildEntity, bool>> relationCondition,
-            Expression<Func<TChildEntity, TEntity>> navigationProperty,
-            Expression<Func<TEntity, TChildEntity>> childNavigationProperty,
+            Expression<Func<TChildEntity, TEntity>>? navigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? childNavigationProperty,
             RelationType relationType)
         {
             var relationInfo = relationCondition.GetExpressionInfo();
@@ -913,7 +921,7 @@ namespace Epam.GraphQL.Configuration
             }
         }
 
-        private PropertyInfo GetPrimaryKeyPropertyInfo(Type type)
+        private PropertyInfo? GetPrimaryKeyPropertyInfo(Type type)
         {
             if (_primaryKeys.TryGetValue(type, out var result))
             {

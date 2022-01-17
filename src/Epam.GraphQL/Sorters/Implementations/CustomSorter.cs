@@ -28,7 +28,7 @@ namespace Epam.GraphQL.Sorters.Implementations
 
         public LambdaExpression BuildExpression(TExecutionContext context) => _selector;
 
-        public bool Equals(CustomSorter<TEntity, TValueType, TExecutionContext> other)
+        public bool Equals(CustomSorter<TEntity, TValueType, TExecutionContext>? other)
         {
             if (other == null)
             {

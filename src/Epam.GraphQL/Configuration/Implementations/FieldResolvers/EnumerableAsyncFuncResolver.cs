@@ -13,8 +13,6 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class EnumerableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> : AsyncFuncResolver<TEntity, IEnumerable<TReturnType>?>, IEnumerableResolver<TEntity, TReturnType, TExecutionContext>

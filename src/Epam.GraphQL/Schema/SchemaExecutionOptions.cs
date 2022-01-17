@@ -25,28 +25,28 @@ namespace Epam.GraphQL
 
         public bool EnableMetrics { get; set; }
 
-        public ComplexityConfiguration ComplexityConfiguration { get; set; }
+        public ComplexityConfiguration? ComplexityConfiguration { get; set; }
 
-        public TExecutionContext ExecutionContext { get; set; }
+        public TExecutionContext? ExecutionContext { get; set; }
 
         [Obsolete("UserContext has been renamed to ExecutionContext. Use ExecutionContext instead")]
-        public TExecutionContext UserContext { get => ExecutionContext; set => ExecutionContext = value; }
+        public TExecutionContext? UserContext { get => ExecutionContext; set => ExecutionContext = value; }
 
-        public IEnumerable<IValidationRule> ValidationRules { get; set; }
+        public IEnumerable<IValidationRule>? ValidationRules { get; set; }
 
         public CancellationToken CancellationToken { get; set; }
 
 #pragma warning disable CA2227 // Collection properties should be read only
-        public Dictionary<string, object> Variables { get; set; }
+        public Dictionary<string, object>? Variables { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
 
-        public Document Document { get; set; }
+        public Document? Document { get; set; }
 
-        public string OperationName { get; set; }
+        public string? OperationName { get; set; }
 
-        public string Query { get; set; }
+        public string? Query { get; set; }
 
-        public IDataContext DataContext { get; set; }
+        public IDataContext? DataContext { get; set; }
 
         internal ExecutionOptions ToExecutionOptions(SchemaExecuter<TExecutionContext> schema)
         {

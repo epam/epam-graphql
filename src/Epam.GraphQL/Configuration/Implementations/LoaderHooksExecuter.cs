@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class LoaderHooksExecuter<T, TExecutionContext> : ILoaderHooksExecuter<Proxy<T>>

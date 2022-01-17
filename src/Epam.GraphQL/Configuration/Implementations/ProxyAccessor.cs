@@ -24,8 +24,8 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         private readonly ConcurrentDictionary<ICollection<string>, Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>> _createSelectorExpressionCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
         private readonly ConcurrentDictionary<ICollection<string>, Type> _concreteProxyTypeCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
-        private Type _proxyGenericType;
-        private Type _proxyType;
+        private Type? _proxyGenericType;
+        private Type? _proxyType;
 
         public ProxyAccessor(IReadOnlyList<IField<TEntity, TExecutionContext>> fields)
         {
@@ -43,7 +43,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                     Configure();
                 }
 
-                return _proxyGenericType;
+                return _proxyGenericType!;
             }
         }
 
@@ -56,7 +56,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                     _proxyType = ProxyGenericType.MakeGenericType(typeof(TEntity));
                 }
 
-                return _proxyType;
+                return _proxyType!;
             }
         }
 
@@ -104,11 +104,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 foreach (var calculatedField in Fields)
                 {
                     var name = calculatedField.Name;
-
-                    if (calculatedField.FieldType != null)
-                    {
-                        fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
-                    }
+                    fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
                 }
 
                 var i = 1;
@@ -136,7 +132,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                     }
                 }
 
-                if (Fields.Any(f => f.IsGroupable))
+                if (Fields.OfType<IExpressionField<TEntity, TExecutionContext>>().Any(f => f.IsGroupable))
                 {
                     fieldTypes.Add("<>$count", typeof(int));
                 }
@@ -169,7 +165,8 @@ namespace Epam.GraphQL.Configuration.Implementations
                 return result;
             }
 
-            var field = Fields.FirstOrDefault(field => field.IsExpression && ExpressionEqualityComparer.Instance.Equals(originalExpression, field.OriginalExpression));
+            var field = Fields.OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .FirstOrDefault(field => ExpressionEqualityComparer.Instance.Equals(originalExpression, field.OriginalExpression));
 
             if (field != null)
             {
@@ -198,7 +195,9 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public Expression<Func<TExecutionContext, TEntity, TType>> CreateGroupSelectorExpression<TType>(IEnumerable<string> fieldNames)
         {
-            var unorderedFields = Fields.Where(field => field.IsExpression && field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var unorderedFields = Fields
+                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .Where(field => field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var orderedFields = fieldNames.Select(f => unorderedFields.First(u => u.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
 
             var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
@@ -233,7 +232,9 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public LambdaExpression CreateGroupKeySelectorExpression(IEnumerable<string> subFields, IEnumerable<string> aggregateQueriedFields)
         {
-            var fields = Fields.Where(field => field.IsExpression && field.IsGroupable && subFields.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var fields = Fields
+                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .Where(field => field.IsGroupable && subFields.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var sourceType = GetConcreteProxyType(subFields.Concat(aggregateQueriedFields));
 
             var groupingType = typeof(IGrouping<,>).MakeGenericType(sourceType, sourceType);
@@ -269,7 +270,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             return Expression.Lambda(initExpr, param);
         }
 
-        public ILoaderHooksExecuter<Proxy<TEntity>> CreateHooksExecuter(TExecutionContext executionContext)
+        public ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(TExecutionContext executionContext)
         {
             if (!HasHooks)
             {
@@ -291,7 +292,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         public void AddMembers<TChildEntity>(string childFieldName, IProxyAccessor<TChildEntity, TExecutionContext> childProxyAccessor, ExpressionFactorizationResult factorizationResult)
         {
             AddMembers(childFieldName, factorizationResult.LeftExpressions.SelectMany(ExpressionHelpers.GetMembers));
-            (childProxyAccessor as ProxyAccessor<TChildEntity, TExecutionContext>).AddMembers(factorizationResult.RightExpressions.SelectMany(ExpressionHelpers.GetMembers));
+            childProxyAccessor.AddMembers(factorizationResult.RightExpressions.SelectMany(ExpressionHelpers.GetMembers));
         }
 
         public void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member)
@@ -324,6 +325,11 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
 
             fieldDependencies.DependOnAllMembers = true;
+        }
+
+        public void AddMembers(IEnumerable<LambdaExpression> members)
+        {
+            _members.UnionWith(members);
         }
 
         public void AddLoadHook<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
@@ -360,13 +366,16 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .ThenBy(p => p.DeclaringType != ProxyType)
                 .ToList();
 
-            var bindings = queriedFields.Where(field => field.IsExpression).Select(f =>
-            {
-                var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
-                return Expression.Bind(
-                    properties.First(p => p.Name.Equals(f.Name, StringComparison.OrdinalIgnoreCase)),
-                    expr.Body.ReplaceParameter(expr.Parameters[0], entityParam));
-            }).ToList();
+            var bindings = queriedFields
+                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .Select(f =>
+                {
+                    var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
+                    return Expression.Bind(
+                        properties.First(p => p.Name.Equals(f.Name, StringComparison.OrdinalIgnoreCase)),
+                        expr.Body.ReplaceParameter(expr.Parameters[0], entityParam));
+                })
+                .ToList();
 
             var allMembers = _conditionMembers
                 .Where(kv => queriedFields.Select(field => field.Name).Contains(kv.Key))
@@ -390,11 +399,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             var result = Expression.Lambda<Func<TExecutionContext, TEntity, Proxy<TEntity>>>(initExpr, contextParam, entityParam);
             return result;
-        }
-
-        private void AddMembers(IEnumerable<LambdaExpression> members)
-        {
-            _members.UnionWith(members);
         }
 
         private void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members)

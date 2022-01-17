@@ -4,137 +4,42 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Mutation;
 
 namespace Epam.GraphQL.Builders.Mutation.Implementations
 {
-    internal class MutationFieldBuilder<TExecutionContext> :
+    internal class MutationFieldBuilder<TField, TExecutionContext> : MutationFieldBuilderBase<TField, TExecutionContext>,
         IMutationFieldBuilder<TExecutionContext>
+        where TField : IArgumentedMutationField<TExecutionContext>
     {
-        public MutationFieldBuilder(Field<object, TExecutionContext> field)
+        public MutationFieldBuilder(TField field)
+            : base(field)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
-        }
-
-        protected Field<object, TExecutionContext> Field { get; set; }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve)
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), build, false, null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), build, false, null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve)
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve)
-        {
-            Resolve(resolve, (Action<ResolveOptionsBuilder>)null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
-        {
-            Resolve(resolve, build, null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve)
-        {
-            Resolve(resolve, (Action<ResolveOptionsBuilder>)null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
-        {
-            Resolve(resolve, build, null);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), build, false, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, optionsBuilder);
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class
-        {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), build, false, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, null);
+            Field.Resolve(resolve, null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, null);
+            Field.Resolve(resolve, null);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, MutationResult<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, optionsBuilder);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, Task<MutationResult<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
         {
-            Field.ApplyResolve((ctx, entity) => resolve(ctx), false, optionsBuilder);
-        }
-
-        public IMutationFieldBuilder<TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
-            where TType : class
-        {
-            return AsUnionOfImpl(build);
-        }
-
-        public IMutationFieldBuilder<TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl<TEnumerable, TElementType>(build);
-        }
-
-        public IMutationFieldBuilder<TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
-            where TType : class
-        {
-            return AndImpl(build);
-        }
-
-        public IMutationFieldBuilder<TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AndImpl<TEnumerable, TElementType>(build);
+            Field.Resolve(resolve, optionsBuilder);
         }
 
         public IMutationArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string name)
@@ -183,60 +88,32 @@ namespace Epam.GraphQL.Builders.Mutation.Implementations
             return methodInfo.InvokeAndHoistBaseException<IMutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>>(this, name);
         }
 
-        private MutationFieldBuilder<TExecutionContext> AsUnionOfImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
-            where TType : class
-        {
-            Field = Field.ApplyUnion(build, false);
-            return this;
-        }
-
-        private MutationFieldBuilder<TExecutionContext> AsUnionOfImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            Field = Field.ApplyUnion(build, true);
-            return this;
-        }
-
-        private MutationFieldBuilder<TExecutionContext> AndImpl<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>> build)
-            where TType : class
-        {
-            return AsUnionOfImpl(build);
-        }
-
-        private MutationFieldBuilder<TExecutionContext> AndImpl<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>> build)
-            where TEnumerable : class, IEnumerable<TElementType>
-            where TElementType : class
-        {
-            return AsUnionOfImpl(build);
-        }
-
-        private MutationArgumentBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
+        private MutationArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = Field.ApplyFilterArgument<TProjection, TEntity1>(name);
-            return new MutationArgumentBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext>(argumentedField);
+            var argumentedField = Field.FilterArgument<TProjection, TEntity1>(name);
+            return new MutationArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>(argumentedField);
         }
 
-        private MutationArgumentBuilder<object, TType, TExecutionContext> ArgumentImpl<TType>(string name)
+        private MutationArgumentBuilder<TType, TExecutionContext> ArgumentImpl<TType>(string name)
         {
-            var argumentedField = Field.ApplyArgument<TType>(name);
-            return new MutationArgumentBuilder<object, TType, TExecutionContext>(argumentedField);
+            var argumentedField = Field.Argument<TType>(name);
+            return new MutationArgumentBuilder<TType, TExecutionContext>(argumentedField);
         }
 
-        private MutationPayloadFieldBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadFieldImpl<TProjection, TEntity1>(string name)
+        private MutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadFieldImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var payloadedField = Field.ApplyFilterPayloadField<TProjection, TEntity1>(name);
-            return new MutationPayloadFieldBuilder<object, Expression<Func<TEntity1, bool>>, TExecutionContext>(payloadedField);
+            var payloadedField = Field.FilterPayloadField<TProjection, TEntity1>(name);
+            return new MutationPayloadFieldBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext>(payloadedField);
         }
 
-        private MutationPayloadFieldBuilder<object, TType, TExecutionContext> PayloadFieldImpl<TType>(string name)
+        private MutationPayloadFieldBuilder<TType, TExecutionContext> PayloadFieldImpl<TType>(string name)
         {
-            var payloadedField = Field.ApplyPayloadField<TType>(name);
-            return new MutationPayloadFieldBuilder<object, TType, TExecutionContext>(payloadedField);
+            var payloadedField = Field.PayloadField<TType>(name);
+            return new MutationPayloadFieldBuilder<TType, TExecutionContext>(payloadedField);
         }
     }
 }

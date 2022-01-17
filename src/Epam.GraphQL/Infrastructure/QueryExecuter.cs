@@ -11,8 +11,6 @@ using Epam.GraphQL.Helpers;
 using GraphQL;
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL.Infrastructure
 {
     internal class QueryExecuter : IQueryExecuter

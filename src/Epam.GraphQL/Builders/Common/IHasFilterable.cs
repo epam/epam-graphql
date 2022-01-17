@@ -5,8 +5,6 @@
 
 using Epam.GraphQL.Configuration.Enums;
 
-#nullable enable
-
 namespace Epam.GraphQL.Builders.Common
 {
     public interface IHasFilterable<TEntity, TFilterValueType, TReturnType>

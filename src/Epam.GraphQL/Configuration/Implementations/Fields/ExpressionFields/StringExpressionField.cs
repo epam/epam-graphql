@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     internal class StringExpressionField<TEntity, TExecutionContext> : ExpressionField<TEntity, string, string, TExecutionContext>
         where TEntity : class
     {
-        public StringExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, string>> expression, string name)
+        public StringExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, string>> expression, string? name)
             : base(registry, parent, expression, name)
         {
         }

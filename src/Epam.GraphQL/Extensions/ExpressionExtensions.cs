@@ -12,8 +12,6 @@ using Epam.GraphQL.Enums;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class ExpressionExtensions
@@ -324,9 +322,7 @@ namespace Epam.GraphQL.Extensions
                     $"Expression '{propertyLambda}' refers to a property that does not have a setter.");
             }
 
-#pragma warning disable CS8601 // Possible null reference assignment.
-            return (source, value) => setMethodInfo.Invoke(source, new object[] { value });
-#pragma warning restore CS8601 // Possible null reference assignment.
+            return (source, value) => setMethodInfo.Invoke(source, new object?[] { value });
         }
 
         public static Func<TSource, TProperty> GetGetter<TSource, TProperty>(

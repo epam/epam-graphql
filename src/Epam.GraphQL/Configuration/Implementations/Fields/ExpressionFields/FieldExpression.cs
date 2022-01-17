@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
         private readonly Expression<Func<TEntity, TReturnType>> _originalExpression;
-        private Func<TEntity, TReturnType> _resolver;
+        private Func<TEntity, TReturnType>? _resolver;
 
         public FieldExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TEntity, TReturnType>> expression)
         {
@@ -43,7 +43,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public string Name { get; }
 
-        public PropertyInfo PropertyInfo => _originalExpression.IsProperty() ? _originalExpression.GetPropertyInfo() : null;
+        public PropertyInfo? PropertyInfo => _originalExpression.IsProperty() ? _originalExpression.GetPropertyInfo() : null;
 
         public bool IsGroupable => _field.IsGroupable;
 
@@ -56,14 +56,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             ExpressionValidator.Validate(_originalExpression);
         }
 
-        public TReturnType Resolve(IResolveFieldContext context, object source)
+        public TReturnType? Resolve(IResolveFieldContext context, object source)
         {
             // TODO Check for input field (!_field.IsInputField && ...)
             if (context.Source is Proxy<TEntity> proxy)
             {
                 var name = _field.Name;
                 var func = proxy.GetType().GetPropertyDelegate(name);
-                return (TReturnType)func(proxy);
+                return (TReturnType?)func(proxy);
             }
 
             if (_resolver == null)
@@ -74,12 +74,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             return _resolver((TEntity)source);
         }
 
-        public TReturnType Resolve(IResolveFieldContext context)
+        public TReturnType? Resolve(IResolveFieldContext context)
         {
             return Resolve(context, context.Source);
         }
 
-        object IFieldResolver.Resolve(IResolveFieldContext context)
+        object? IFieldResolver.Resolve(IResolveFieldContext context)
         {
             return Resolve(context);
         }

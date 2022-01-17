@@ -8,13 +8,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using GraphQL;
-
-#nullable enable
 
 namespace Epam.GraphQL.Sorters.Implementations
 {
@@ -65,7 +64,8 @@ namespace Epam.GraphQL.Sorters.Implementations
 
             var subFields = context.GetGroupConnectionQueriedFields()
                 .Where(name => !sorting.Any(s => string.Equals(s.Field, name, StringComparison.Ordinal)))
-                .Select(name => proxyAccessor.Fields.FirstOrDefault(field => string.Equals(field.Name, name, StringComparison.Ordinal)));
+                .Select(name => proxyAccessor.Fields.FirstOrDefault(field => string.Equals(field.Name, name, StringComparison.Ordinal)))
+                .OfType<IExpressionField<TChildEntity, TExecutionContext>>();
 
             var result = sortFields.Select(f => (proxyAccessor.GetProxyExpression(f.Item1.OriginalExpression), f.Direction))
                 .Concat(subFields.Select(f => (proxyAccessor.GetProxyExpression(f.OriginalExpression ?? throw new NotSupportedException()), SortDirection.Asc)));

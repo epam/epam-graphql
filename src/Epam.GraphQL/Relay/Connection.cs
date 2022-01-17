@@ -12,10 +12,10 @@ namespace Epam.GraphQL.Relay
     {
         public int TotalCount { get; set; }
 
-        public PageInfo PageInfo { get; set; }
+        public PageInfo? PageInfo { get; set; }
 
-        public IEnumerable<Edge<T>> Edges { get; set; }
+        public IEnumerable<Edge<T>>? Edges { get; set; }
 
-        public IEnumerable<T> Items { get; set; }
+        public IEnumerable<T>? Items { get; set; }
     }
 }

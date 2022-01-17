@@ -9,8 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class ObjectExtensions
@@ -107,7 +105,7 @@ namespace Epam.GraphQL.Extensions
             MethodInfo constructedHelper = _func2DelegateHelperMethod.MakeGenericMethod(
                 methodInfo.DeclaringType, methodInfo.ReturnType);
 
-            return constructedHelper.Invoke<Func<object, object?>>(null, methodInfo);
+            return constructedHelper.Invoke<Func<object, object>>(null, methodInfo);
         }
 
         private static Action<object, object?> CreateAction2Delegate(PropertyInfo propertyInfo)
@@ -119,27 +117,27 @@ namespace Epam.GraphQL.Extensions
             MethodInfo constructedHelper = _action2DelegateHelperMethod.MakeGenericMethod(
                 methodInfo.DeclaringType, methodInfo.GetParameters().First().ParameterType);
 
-            return constructedHelper.Invoke<Action<object?, object?>>(null, methodInfo);
+            return constructedHelper.Invoke<Action<object, object?>>(null, methodInfo);
         }
 
-        private static Func<object?, object?> Func2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
+        private static Func<object, object?> Func2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
         {
             // Convert the slow MethodInfo into a fast, strongly typed, open delegate
             Func<TTarget, TReturn> func = (Func<TTarget, TReturn>)Delegate.CreateDelegate(typeof(Func<TTarget, TReturn>), methodInfo);
 
             // Now create a more weakly typed delegate which will call the strongly typed one
-            return (object? target) => func((TTarget)target!);
+            return (object target) => func((TTarget)target);
         }
 
-        private static Action<object?, object?> Action2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
+        private static Action<object, object?> Action2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
         {
             // Convert the slow MethodInfo into a fast, strongly typed, open delegate
             Action<TTarget, TReturn> action = (Action<TTarget, TReturn>)Delegate.CreateDelegate(typeof(Action<TTarget, TReturn>), methodInfo);
 
             // Now create a more weakly typed delegate which will call the strongly typed one
-            return (object? target, object? value) =>
+            return (object target, object? value) =>
             {
-                action((TTarget)target!, (TReturn)value!);
+                action((TTarget)target, (TReturn)value!);
             };
         }
     }

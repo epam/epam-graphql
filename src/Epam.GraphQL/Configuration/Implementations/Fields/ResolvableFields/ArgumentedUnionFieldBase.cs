@@ -10,7 +10,7 @@ using Epam.GraphQL.Configuration.Implementations.Descriptors;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedUnionFieldBase<TArguments, TEntity, TExecutionContext> :
-        UnionField<TEntity, TExecutionContext>
+        UnionFieldBase<TEntity, TExecutionContext>
         where TArguments : IArguments
         where TEntity : class
     {
@@ -19,10 +19,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            bool isList,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver, isList)
+            : base(registry, parent, name, unionType, typeResolver)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);
@@ -33,26 +32,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
-            Func<UnionField<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
+            Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType, isList)
-        {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
-            Arguments.ApplyTo(this);
-        }
-
-        protected ArgumentedUnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
-            bool isList,
-            TArguments arguments)
-            : base(registry, parent, name, unionTypes, unionGraphType, isList)
+            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);

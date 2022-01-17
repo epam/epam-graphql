@@ -8,8 +8,6 @@ using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Resolvers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IResolver<TEntity> : IFieldResolver
