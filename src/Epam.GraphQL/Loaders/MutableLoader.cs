@@ -251,8 +251,7 @@ namespace Epam.GraphQL.Loaders
                     {
                         var batcher = context.GetBatcher();
                         var queryExecuter = context.GetQueryExecuter();
-                        var executionContext = context.GetUserContext<TExecutionContext>();
-                        var hooksExecuter = ObjectGraphTypeConfigurator.ProxyAccessor.CreateHooksExecuter(executionContext);
+                        var hooksExecuter = ObjectGraphTypeConfigurator.ProxyAccessor.CreateHooksExecuter(context);
 
                         var itemsFoundTasks = itemsToUpdate
                             .Select(item => BatchHelpers

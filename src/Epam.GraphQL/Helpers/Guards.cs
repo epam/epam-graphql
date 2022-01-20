@@ -4,12 +4,18 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using GraphQL.DataLoader;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Epam.GraphQL.Configuration
+namespace Epam.GraphQL.Helpers
 {
-    internal interface ILoaderHooksExecuter<TEntity>
+    internal static class Guards
     {
-        IDataLoader<T, T> Execute<T>(Func<T, TEntity> key);
+        public static void ThrowIfNull<T>([NotNull] T? argument, string paramName)
+        {
+            if (argument is null)
+            {
+                throw new ArgumentNullException(paramName);
+            }
+        }
     }
 }

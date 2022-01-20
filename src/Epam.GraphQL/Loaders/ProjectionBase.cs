@@ -4,8 +4,10 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Projection;
 using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
@@ -224,6 +226,30 @@ namespace Epam.GraphQL.Loaders
             {
                 ThrowIfIsNotConfiguring();
                 Configurator.AddOnEntityLoaded(proxyExpression, hook);
+            }
+        }
+
+        private protected void AddOnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            if (!IsConfiguringInputType)
+            {
+                ThrowIfIsNotConfiguring();
+                Configurator.AddOnEntityLoaded(keyExpression, batchFunc, hook);
+            }
+        }
+
+        private protected void AddOnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            if (!IsConfiguringInputType)
+            {
+                ThrowIfIsNotConfiguring();
+                Configurator.AddOnEntityLoaded(keyExpression, batchFunc, hook);
             }
         }
     }

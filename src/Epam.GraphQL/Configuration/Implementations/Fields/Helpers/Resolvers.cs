@@ -4,7 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,7 +11,6 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Relay;
 using GraphQL;
-using DataObjects = GraphQL.Types.Relay.DataObjects;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 {
@@ -44,27 +42,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 shouldComputeItems);
 
             return connection;
-        }
-
-        public static Func<IResolveFieldContext, IQueryable<Proxy<TReturnType>>, Connection<Proxy<TReturnType>>> ToConnection<TChildEntity, TReturnType, TExecutionContext>(IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor)
-        {
-            return (context, children) =>
-            {
-                var connection = Resolve(context, children);
-
-                var executer = proxyAccessor?.CreateHooksExecuter(context.GetUserContext<TExecutionContext>());
-
-                if (connection.Items != null)
-                {
-                    connection.Items = executer.ExecuteHooks(connection.Items);
-                }
-                else if (connection.Edges != null)
-                {
-                    connection.Edges = executer.ExecuteHooks(connection.Edges);
-                }
-
-                return connection;
-            };
         }
 
         public static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>()
@@ -133,54 +110,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
         public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(Func<TExecutionContext, TReturnType> func)
         {
             return ctx => func(ctx.GetUserContext<TExecutionContext>());
-        }
-
-        public static IEnumerable<T> ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, IEnumerable<T> items)
-        {
-            if (executer == null)
-            {
-                return items;
-            }
-
-            return Impl(executer, items);
-
-            static IEnumerable<T> Impl(ILoaderHooksExecuter<T> executer, IEnumerable<T> items)
-            {
-                foreach (var item in items)
-                {
-                    executer.Execute(item);
-                    yield return item;
-                }
-            }
-        }
-
-        public static T ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, T item)
-        {
-            if (executer != null)
-            {
-                executer.Execute(item);
-            }
-
-            return item;
-        }
-
-        private static IEnumerable<DataObjects.Edge<T>> ExecuteHooks<T>(this ILoaderHooksExecuter<T>? executer, IEnumerable<DataObjects.Edge<T>> items)
-        {
-            if (executer == null)
-            {
-                return items;
-            }
-
-            return Impl(executer, items);
-
-            static IEnumerable<DataObjects.Edge<T>> Impl(ILoaderHooksExecuter<T> executer, IEnumerable<DataObjects.Edge<T>> items)
-            {
-                foreach (var edge in items)
-                {
-                    executer.Execute(edge.Node);
-                    yield return edge;
-                }
-            }
         }
     }
 }

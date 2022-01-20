@@ -193,7 +193,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                             ctx => Transform2(ctx, transform),
                             outerExpression,
                             innerExpression,
-                            new LoaderHooksExecuter<TChildEntity, Proxy<TReturnType>, TExecutionContext>(context.GetUserContext<TExecutionContext>(), _innerProxyAccessor))
+                            new LoaderHooksExecuter<TChildEntity, Proxy<TReturnType>, TExecutionContext>(context, _innerProxyAccessor))
                         .Then(group => Grouping.Create(group.Key, group.Select(g => g.Item2)));
 
                     return result;
@@ -209,7 +209,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                         ctx => Transform(ctx, transform),
                         outerExpression,
                         innerExpression,
-                        _returnTypeProxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>()));
+                        _returnTypeProxyAccessor.CreateHooksExecuter(context));
 
                 return result;
             };

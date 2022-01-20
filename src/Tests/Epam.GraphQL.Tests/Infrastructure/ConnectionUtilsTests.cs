@@ -560,7 +560,7 @@ namespace Epam.GraphQL.Tests.Infrastructure
             {
             }
 
-            public TestResult(Connection<int> connection)
+            internal TestResult(Connection<int> connection)
             {
                 if (connection == null)
                 {

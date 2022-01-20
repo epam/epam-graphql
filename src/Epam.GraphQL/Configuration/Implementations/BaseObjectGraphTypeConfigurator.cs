@@ -289,6 +289,22 @@ namespace Epam.GraphQL.Configuration.Implementations
             ProxyAccessor.AddLoadHook(proxyExpression, hook);
         }
 
+        public void AddOnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            ProxyAccessor.AddLoadHook(keyExpression, batchFunc, hook);
+        }
+
+        public void AddOnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            ProxyAccessor.AddLoadHook(keyExpression, batchFunc, hook);
+        }
+
         public IInlineFilters<TEntity, TExecutionContext> CreateInlineFilters()
         {
             if (_filters == null)

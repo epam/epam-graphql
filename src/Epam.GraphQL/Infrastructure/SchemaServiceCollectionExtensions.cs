@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
         /// <param name="configure"> An action used to create or modify options for this schema. </param>
         /// <returns>The <see cref="IServiceCollection"/>  so that additional calls can be chained.</returns>
-        public static IServiceCollection AddEpamGraphQLSchema<TQuery, TExecutionContext>(this IServiceCollection services, Action<SchemaOptionsBuilder<TExecutionContext>> configure = null)
+        public static IServiceCollection AddEpamGraphQLSchema<TQuery, TExecutionContext>(this IServiceCollection services, Action<SchemaOptionsBuilder<TExecutionContext>>? configure = null)
             where TQuery : Query<TExecutionContext>, new()
         {
             services.AddSingleton<ISchemaExecuter<TQuery, TExecutionContext>>(serviceProvider =>

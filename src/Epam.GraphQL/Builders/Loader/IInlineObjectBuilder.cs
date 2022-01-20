@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Loaders;
 
@@ -66,7 +67,19 @@ namespace Epam.GraphQL.Builders.Loader
 
         IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null);
 
-        void OnEntityLoaded<T>(Expression<Func<TSourceType, T>> proxyExpression, Action<TExecutionContext, T> hook);
+        void OnEntityLoaded<T>(
+            Expression<Func<TSourceType, T>> expression,
+            Action<TExecutionContext, T> action);
+
+        void OnEntityLoaded<TKey, T>(
+            Expression<Func<TSourceType, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> fetch,
+            Action<TExecutionContext, T> action);
+
+        void OnEntityLoaded<TKey, T>(
+            Expression<Func<TSourceType, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> fetch,
+            Action<TExecutionContext, T> action);
 
         void ConfigureFrom<TProjection>()
             where TProjection : Projection<TSourceType, TExecutionContext>;
