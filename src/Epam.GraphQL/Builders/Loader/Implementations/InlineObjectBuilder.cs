@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
@@ -202,9 +203,38 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return _objectGraphTypeConfigurator;
         }
 
-        public void OnEntityLoaded<T>(Expression<Func<TSourceType, T>> proxyExpression, Action<TExecutionContext, T> hook)
+        public void OnEntityLoaded<T>(
+            Expression<Func<TSourceType, T>> expression,
+            Action<TExecutionContext, T> action)
         {
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(proxyExpression, hook);
+            Guards.ThrowIfNull(expression, nameof(expression));
+            Guards.ThrowIfNull(action, nameof(action));
+
+            _objectGraphTypeConfigurator.AddOnEntityLoaded(expression, action);
+        }
+
+        public void OnEntityLoaded<TKey, T>(
+            Expression<Func<TSourceType, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> fetch,
+            Action<TExecutionContext, T> action)
+        {
+            Guards.ThrowIfNull(keyExpression, nameof(keyExpression));
+            Guards.ThrowIfNull(fetch, nameof(fetch));
+            Guards.ThrowIfNull(action, nameof(action));
+
+            _objectGraphTypeConfigurator.AddOnEntityLoaded(keyExpression, fetch, action);
+        }
+
+        public void OnEntityLoaded<TKey, T>(
+            Expression<Func<TSourceType, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> fetch,
+            Action<TExecutionContext, T> action)
+        {
+            Guards.ThrowIfNull(keyExpression, nameof(keyExpression));
+            Guards.ThrowIfNull(fetch, nameof(fetch));
+            Guards.ThrowIfNull(action, nameof(action));
+
+            _objectGraphTypeConfigurator.AddOnEntityLoaded(keyExpression, fetch, action);
         }
     }
 }

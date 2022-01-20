@@ -261,6 +261,25 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             var innerExpression = factorizationResult.RightExpression;
             var rightCondition = factorizationResult.RightCondition;
 
+            if (_innerProxyAccessor.HasHooks)
+            {
+                return context =>
+                {
+                    var hooksExecuter = _innerProxyAccessor.CreateHooksExecuter(context);
+
+                    var result = context
+                        .Get<TOuterEntity, TReturnType, Proxy<TReturnType>>(
+                            ctx => queryTransform(ctx, resolver(ctx)).SafeWhere(rightCondition),
+                            sorters: sorters,
+                            Transform,
+                            outerExpression.Value,
+                            innerExpression,
+                            _innerProxyAccessor.CreateHooksExecuter(context));
+
+                    return result;
+                };
+            }
+
             return context =>
             {
                 var result = context
@@ -270,7 +289,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                         Transform,
                         outerExpression.Value,
                         innerExpression,
-                        _innerProxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>()));
+                        null);
 
                 return result;
             };
@@ -459,7 +478,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                             ctx => Transform2(ctx, transform),
                             outerExpression.Value,
                             innerExpression,
-                            new LoaderHooksExecuter<TChildEntity, TReturnType, TExecutionContext>(context.GetUserContext<TExecutionContext>(), _innerProxyAccessor))
+                            new LoaderHooksExecuter<TChildEntity, TReturnType, TExecutionContext>(context, _innerProxyAccessor))
                         .Then(group => Grouping.Create(group.Key, group.Select(g => g.Item2)));
 
                     return result;

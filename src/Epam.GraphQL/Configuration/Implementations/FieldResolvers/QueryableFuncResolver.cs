@@ -53,10 +53,20 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public object Resolve(IResolveFieldContext context)
         {
-            return _proxyAccessor == null
-                ? context.ExecuteQuery(Resolver)
-                : _proxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>()).ExecuteHooks(
-                    context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx))));
+            if (_proxyAccessor == null)
+            {
+                return context.ExecuteQuery(Resolver);
+            }
+
+            if (_proxyAccessor.HasHooks)
+            {
+                var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
+                return hooksExecuter!
+                    .Execute(FuncConstants<Proxy<TReturnType>>.Identity)
+                    .LoadAsync(context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx))));
+            }
+
+            return context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)));
         }
 
         public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
@@ -96,14 +106,14 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         {
             return _proxyAccessor == null
                 ? new FuncResolver<TEntity, TReturnType>((ctx, src) => ctx.ExecuteQuery(Resolver, query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)))
-                : new ProxiedFuncResolver<TEntity, TReturnType>(ctx => _proxyAccessor.CreateHooksExecuter(ctx.GetUserContext<TExecutionContext>()).ExecuteHooks(ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault))));
+                : new ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)));
         }
 
         public IResolver<TEntity> FirstOrDefault()
         {
             return _proxyAccessor == null
                 ? new FuncResolver<TEntity, TReturnType>((ctx, src) => ctx.ExecuteQuery(Resolver, query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)))
-                : new ProxiedFuncResolver<TEntity, TReturnType>(ctx => _proxyAccessor.CreateHooksExecuter(ctx.GetUserContext<TExecutionContext>()).ExecuteHooks(ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault))));
+                : new ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)));
         }
 
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
@@ -144,14 +154,60 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsConnection()
         {
+            if (_proxyAccessor == null)
+            {
+                throw new NotSupportedException();
+            }
+
             var resolver = new ConnectionFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, _resolver, _transform, _sorters);
-            var connectionResolver = Resolvers.ToConnection<TEntity, TReturnType, TExecutionContext>(_proxyAccessor);
+
+            if (_proxyAccessor.HasHooks)
+            {
+                return new FuncResolver<TEntity, object>(
+                    (context, src) =>
+                    {
+                        var resolved = resolver.Resolver(context).Select(resolver.Transform(context));
+                        var selected = Resolvers.Resolve(context, resolved);
+
+                        var connection = new Connection<IDataLoaderResult<IEnumerable<Proxy<TReturnType>>>, IDataLoaderResult<global::GraphQL.Types.Relay.DataObjects.Edge<Proxy<TReturnType>>[]>>
+                        {
+                            PageInfo = selected.PageInfo,
+                            TotalCount = selected.TotalCount,
+                        };
+
+                        if (selected.Edges != null)
+                        {
+                            var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
+                            connection.Edges = hooksExecuter!
+                                .Execute<global::GraphQL.Types.Relay.DataObjects.Edge<Proxy<TReturnType>>>(edge => edge.Node)
+                                .LoadAsync(selected.Edges);
+
+                            if (selected.Items != null)
+                            {
+                                connection.Items = connection.Edges.Then(edges => edges.Select(edge => edge.Node));
+                            }
+
+                            return connection;
+                        }
+
+                        if (selected.Items != null)
+                        {
+                            var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
+                            connection.Items = hooksExecuter!
+                                .Execute(FuncConstants<Proxy<TReturnType>>.Identity)
+                                .LoadAsync(selected.Items)
+                                .Then(items => items.AsEnumerable());
+                        }
+
+                        return connection;
+                    });
+            }
 
             return new FuncResolver<TEntity, Connection<Proxy<TReturnType>>>(
                 (ctx, src) =>
                 {
                     var resolved = resolver.Resolver(ctx).Select(resolver.Transform(ctx));
-                    var selected = connectionResolver(ctx, resolved);
+                    var selected = Resolvers.Resolve(ctx, resolved);
 
                     return selected;
                 });

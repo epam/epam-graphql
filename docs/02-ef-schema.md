@@ -49,6 +49,14 @@ public class GraphQLDbContext : DbContext
 }
 ```
 
+## Execution Context
+```csharp
+public class GraphQLExecutionContext
+{
+    public GraphQLDbContext DbContext { get; set; }
+}
+```
+
 ## Data
 Suppose the underlying model's tables contain the following data:
 

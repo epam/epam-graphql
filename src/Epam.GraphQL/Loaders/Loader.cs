@@ -4,8 +4,10 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Loader.Implementations;
 using Epam.GraphQL.Configuration.Enums;
@@ -70,8 +72,81 @@ namespace Epam.GraphQL.Loaders
             return (ILoaderFieldBuilder<TEntity, TExecutionContext>)fieldBuilderType.CreateInstanceAndHoistBaseException(Registry, fieldType);
         }
 
-        protected internal void OnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook) =>
-            AddOnEntityLoaded(proxyExpression, hook);
+        /// <summary>
+        /// Registers a delegate that will be executed for each entity, queried by loader and ready to be sent to a GraphQL client.
+        /// </summary>
+        /// <typeparam name="T">The type of the second parameter of the <paramref name="action"/>.</typeparam>
+        /// <param name="expression">The expression to calculate a value for passing to the <paramref name="action"/> as a first argument.</param>
+        /// <param name="action">
+        /// The delegate to be executed for each entity, queried by loader and ready to be sent to a GraphQL client.
+        /// The first argument of the callback is an execution context, globally passed to a GraphQL query.
+        /// The second argument of the callback is a value, calculated using <paramref name="expression"/> for queried entity.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="action"/> is <see langword="null"/>.</exception>
+        protected internal void OnEntityLoaded<T>(
+            Expression<Func<TEntity, T>> expression,
+            Action<TExecutionContext, T> action)
+        {
+            Guards.ThrowIfNull(expression, nameof(expression));
+            Guards.ThrowIfNull(action, nameof(action));
+
+            AddOnEntityLoaded(expression, action);
+        }
+
+        /// <summary>
+        /// Registers a delegate that will be executed for each entity, queried by loader and ready to be sent to a GraphQL client.
+        /// </summary>
+        /// <typeparam name="TKey">The type of the keys that depend on queried entities.</typeparam>
+        /// <typeparam name="T">The type of the second parameter of the <paramref name="action"/>.</typeparam>
+        /// <param name="keyExpression">The expression to be used for calculating keys for passing to the <paramref name="fetch"/>.</param>
+        /// <param name="fetch">The delegate to be executed for calculating values, which will pass to the <paramref name="action"/>.</param>
+        /// <param name="action">
+        /// The delegate to be executed for each entity, queried by loader and ready to be sent to a GraphQL client.
+        /// The first argument of the callback is an execution context, globally passed to a GraphQL query.
+        /// The second argument of the callback is a value, fetched using <paramref name="fetch"/> for queried entity.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="keyExpression"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="fetch"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="action"/> is <see langword="null"/>.</exception>
+        protected internal void OnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> fetch,
+            Action<TExecutionContext, T> action)
+        {
+            Guards.ThrowIfNull(keyExpression, nameof(keyExpression));
+            Guards.ThrowIfNull(fetch, nameof(fetch));
+            Guards.ThrowIfNull(action, nameof(action));
+
+            AddOnEntityLoaded(keyExpression, fetch, action);
+        }
+
+        /// <summary>
+        /// Registers a delegate that will be executed for each entity, queried by loader and ready to be sent to a GraphQL client.
+        /// </summary>
+        /// <typeparam name="TKey">The type of the keys that depend on queried entities.</typeparam>
+        /// <typeparam name="T">The type of the second parameter of the <paramref name="action"/>.</typeparam>
+        /// <param name="keyExpression">The expression to be used for calculating keys for passing to the <paramref name="fetch"/>.</param>
+        /// <param name="fetch">The asynchronous delegate to be executed for calculating values, which will pass to the <paramref name="action"/>.</param>
+        /// <param name="action">
+        /// The delegate to be executed for each entity, queried by loader and ready to be sent to a GraphQL client.
+        /// The first argument of the callback is an execution context, globally passed to a GraphQL query.
+        /// The second argument of the callback is a value, fetched using <paramref name="fetch"/> for queried entity.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="keyExpression"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="fetch"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="action"/> is <see langword="null"/>.</exception>
+        protected internal void OnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> fetch,
+            Action<TExecutionContext, T> action)
+        {
+            Guards.ThrowIfNull(keyExpression, nameof(keyExpression));
+            Guards.ThrowIfNull(fetch, nameof(fetch));
+            Guards.ThrowIfNull(action, nameof(action));
+
+            AddOnEntityLoaded(keyExpression, fetch, action);
+        }
 
         protected abstract IQueryable<TEntity> GetBaseQuery(TExecutionContext context);
 

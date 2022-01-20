@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
+using GraphQL;
 
 namespace Epam.GraphQL.Configuration
 {
@@ -33,7 +34,7 @@ namespace Epam.GraphQL.Configuration
 
         Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression(IEnumerable<string> fieldNames);
 
-        ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(TExecutionContext executionContext);
+        ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(IResolveFieldContext context);
 
         void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member);
 

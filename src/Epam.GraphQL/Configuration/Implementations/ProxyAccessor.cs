@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using GraphQL;
@@ -270,14 +271,14 @@ namespace Epam.GraphQL.Configuration.Implementations
             return Expression.Lambda(initExpr, param);
         }
 
-        public ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(TExecutionContext executionContext)
+        public ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(IResolveFieldContext context)
         {
             if (!HasHooks)
             {
                 return null;
             }
 
-            return new LoaderHooksExecuter<TEntity, TExecutionContext>(_loadEntityHooks, executionContext);
+            return new LoaderHooksExecuter<TEntity, TExecutionContext>(_loadEntityHooks, context);
         }
 
         public void ReplaceField(IField<TExecutionContext> oldField, IField<TExecutionContext> newField)
@@ -334,18 +335,23 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public void AddLoadHook<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
         {
-            if (proxyExpression == null)
-            {
-                throw new ArgumentNullException(nameof(proxyExpression));
-            }
-
-            if (hook == null)
-            {
-                throw new ArgumentNullException(nameof(hook));
-            }
-
-            _members.Add(proxyExpression);
             _loadEntityHooks.Add(new LoadEntityHook<TEntity, T, TExecutionContext>(this, proxyExpression, hook));
+        }
+
+        public void AddLoadHook<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            _loadEntityHooks.Add(new LoadEntityHook<TEntity, TKey, T, TExecutionContext>(this, keyExpression, hook, batchFunc));
+        }
+
+        public void AddLoadHook<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            _loadEntityHooks.Add(new LoadEntityHook<TEntity, TKey, T, TExecutionContext>(this, keyExpression, hook, batchFunc));
         }
 
         private Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression<TType>(IEnumerable<string> fieldNames)

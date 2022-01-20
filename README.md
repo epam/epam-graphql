@@ -36,7 +36,7 @@ We have built **Epam.GraphQL** on top of [GraphQL.NET](https://github.com/graphq
 
 * [Get Started](docs/01-get-started.md)
 * Entity Framework Core Usage
-  * [Automapping](docs/02-ef-core/01.automapping.md)
+  * [Automapping](docs/02-ef-core/01-automapping.md)
 
 ## Packages
 

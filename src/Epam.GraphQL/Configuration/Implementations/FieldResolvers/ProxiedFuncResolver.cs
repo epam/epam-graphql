@@ -11,28 +11,41 @@ using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class ProxiedFuncResolver<TEntity, TReturnType> : IResolver<TEntity>
+    internal class ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext> : IResolver<TEntity>
         where TEntity : class
     {
+        private readonly IProxyAccessor<TReturnType, TExecutionContext> _proxyAccessor;
         private readonly Func<IResolveFieldContext, Proxy<TReturnType>> _resolver;
 
-        public ProxiedFuncResolver(Func<IResolveFieldContext, Proxy<TReturnType>> resolver)
+        public ProxiedFuncResolver(
+            IProxyAccessor<TReturnType, TExecutionContext> proxyAccessor,
+            Func<IResolveFieldContext, Proxy<TReturnType>> resolver)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            _proxyAccessor = proxyAccessor;
+            _resolver = resolver;
         }
 
         public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
         {
-            return BatchLoader.FromResult<TEntity, object?>(_resolver(context));
+            return BatchLoader.FromResult<TEntity, object?>(Resolve(context));
         }
 
         public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
         {
-            return BatchLoader.FromResult<Proxy<TEntity>, object?>(_resolver(context));
+            return BatchLoader.FromResult<Proxy<TEntity>, object?>(Resolve(context));
         }
 
         public object Resolve(IResolveFieldContext context)
         {
+            var executer = _proxyAccessor.CreateHooksExecuter(context);
+
+            if (executer != null)
+            {
+                return executer
+                    .Execute(FuncConstants<Proxy<TReturnType>>.Identity)
+                    .LoadAsync(_resolver(context));
+            }
+
             return _resolver(context);
         }
     }

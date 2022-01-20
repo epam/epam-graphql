@@ -281,7 +281,9 @@ namespace Epam.GraphQL.Builders.Loader
             where TReturnType :  struct;
         Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, TReturnType?>> expression, string? deprecationReason = null)
             where TReturnType :  struct;
-        void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TSourceType, T>> proxyExpression, System.Action<TExecutionContext, T> hook);
+        void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TSourceType, T>> expression, System.Action<TExecutionContext, T> action);
+        void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Collections.Generic.IDictionary<TKey, T>> fetch, System.Action<TExecutionContext, T> action);
+        void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKey, T>>> fetch, System.Action<TExecutionContext, T> action);
     }
     public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>
         where TEntity :  class
@@ -1247,7 +1249,9 @@ namespace Epam.GraphQL.Loaders
         protected virtual System.Linq.IQueryable<TEntity> ApplySecurityFilter(TExecutionContext context, System.Linq.IQueryable<TEntity> query) { }
         protected Epam.GraphQL.Builders.Loader.ILoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null) { }
         protected abstract System.Linq.IQueryable<TEntity> GetBaseQuery(TExecutionContext context);
-        protected void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TEntity, T>> proxyExpression, System.Action<TExecutionContext, T> hook) { }
+        protected void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TEntity, T>> expression, System.Action<TExecutionContext, T> action) { }
+        protected void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TEntity, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Collections.Generic.IDictionary<TKey, T>> fetch, System.Action<TExecutionContext, T> action) { }
+        protected void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TEntity, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKey, T>>> fetch, System.Action<TExecutionContext, T> action) { }
     }
     public abstract class MutableLoader<TEntity, TId, TExecutionContext> : Epam.GraphQL.Loaders.IdentifiableLoader<TEntity, TId, TExecutionContext>, Epam.GraphQL.Loaders.IIdentifiableLoader, Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext>
         where TEntity :  class
@@ -1350,17 +1354,6 @@ namespace Epam.GraphQL.Mutation
         public MutationResult() { }
         public TData Data { get; set; }
         public System.Collections.Generic.IEnumerable<object>? Payload { get; set; }
-    }
-}
-namespace Epam.GraphQL.Relay
-{
-    public class Connection<T>
-    {
-        public Connection() { }
-        public System.Collections.Generic.IEnumerable<GraphQL.Types.Relay.DataObjects.Edge<T>>? Edges { get; set; }
-        public System.Collections.Generic.IEnumerable<T>? Items { get; set; }
-        public GraphQL.Types.Relay.DataObjects.PageInfo? PageInfo { get; set; }
-        public int TotalCount { get; set; }
     }
 }
 namespace Epam.GraphQL.Savers

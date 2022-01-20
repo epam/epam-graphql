@@ -8,14 +8,18 @@ using GraphQL.Types.Relay.DataObjects;
 
 namespace Epam.GraphQL.Relay
 {
-    public class Connection<T>
+    internal class Connection<TItemsType, TEdgesType>
     {
         public int TotalCount { get; set; }
 
         public PageInfo? PageInfo { get; set; }
 
-        public IEnumerable<Edge<T>>? Edges { get; set; }
+        public TEdgesType? Edges { get; set; }
 
-        public IEnumerable<T>? Items { get; set; }
+        public TItemsType? Items { get; set; }
+    }
+
+    internal class Connection<T> : Connection<IEnumerable<T>, IEnumerable<Edge<T>>>
+    {
     }
 }

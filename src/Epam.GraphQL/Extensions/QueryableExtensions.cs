@@ -12,6 +12,7 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
+using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -149,31 +150,63 @@ namespace Epam.GraphQL.Extensions
             }
 
             var resultQuery = orderedQuery.Select(CreateExpression(propSelector, transform));
-            var orderedItems = queryExecuter.ToAsyncEnumerable(stepNameFactory, resultQuery);
 
             var comparer = EqualityComparer<TProperty>.Default;
             Grouping<TProperty, TTransformedEntity>? grouping = null;
 
-            await foreach (var item in orderedItems)
+            if (hooksExecuter == null)
             {
-                hooksExecuter?.Execute(item.Value);
+                var orderedItems = queryExecuter.ToAsyncEnumerable(stepNameFactory, resultQuery);
 
-                if (grouping == null)
+                await foreach (var item in orderedItems)
                 {
-                    grouping = new Grouping<TProperty, TTransformedEntity>(item.Key, item.Value);
-                }
-                else
-                {
-                    var newKey = item.Key;
-
-                    if (comparer.Equals(grouping.Key, newKey))
+                    if (grouping == null)
                     {
-                        grouping.Add(item.Value);
+                        grouping = new Grouping<TProperty, TTransformedEntity>(item.Key, item.Value);
                     }
                     else
                     {
-                        yield return grouping;
-                        grouping = new Grouping<TProperty, TTransformedEntity>(newKey, item.Value);
+                        var newKey = item.Key;
+
+                        if (comparer.Equals(grouping.Key, newKey))
+                        {
+                            grouping.Add(item.Value);
+                        }
+                        else
+                        {
+                            yield return grouping;
+                            grouping = new Grouping<TProperty, TTransformedEntity>(newKey, item.Value);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var orderedItems = await hooksExecuter
+                    .Execute<KeyValue<TProperty, TTransformedEntity>>(keyValue => keyValue.Value)
+                    .LoadAsync(queryExecuter.ToEnumerable(stepNameFactory, resultQuery))
+                    .GetResultAsync()
+                    .ConfigureAwait(false);
+
+                foreach (var item in orderedItems)
+                {
+                    if (grouping == null)
+                    {
+                        grouping = new Grouping<TProperty, TTransformedEntity>(item.Key, item.Value);
+                    }
+                    else
+                    {
+                        var newKey = item.Key;
+
+                        if (comparer.Equals(grouping.Key, newKey))
+                        {
+                            grouping.Add(item.Value);
+                        }
+                        else
+                        {
+                            yield return grouping;
+                            grouping = new Grouping<TProperty, TTransformedEntity>(newKey, item.Value);
+                        }
                     }
                 }
             }
