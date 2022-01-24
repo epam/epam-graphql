@@ -4,13 +4,12 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Linq;
 using System.Linq.Expressions;
 
-namespace Epam.GraphQL.Builders.Common
+namespace Epam.GraphQL.Configuration
 {
-    public interface IHasAsConnection<TEntity>
+    public interface IWereableField<out TThis, TEntity>
     {
-        IConnectionBuilder AsConnection(Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order);
+        TThis Where(Expression<Func<TEntity, bool>> predicate);
     }
 }

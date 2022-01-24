@@ -10,7 +10,6 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
-using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Sorters;
@@ -21,8 +20,9 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal abstract class QueryableFieldBase<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>
+    internal abstract class QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
+        where TThis : QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected QueryableFieldBase(
             RelationRegistry<TExecutionContext> registry,
@@ -125,7 +125,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public void Argument<TArgumentType>(string name, string? description = null) => Argument(name, typeof(TArgumentType), description);
 
-        public virtual QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
+        public virtual TThisIntf WithFilter<TLoaderFilter, TFilter>()
             where TLoaderFilter : Filter<TReturnType, TFilter, TExecutionContext>
             where TFilter : Input
         {
@@ -142,32 +142,45 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(ReplaceResolver(QueryableFieldResolverBase.Select(GetFilteredQuery(filter))));
         }
 
-        public QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplySearch<TSearcher>()
+        public TThisIntf WithSearch<TSearcher>()
+            where TSearcher : ISearcher<TReturnType, TExecutionContext>
         {
-            var searcherBaseType = TypeHelpers.FindMatchingGenericBaseType(typeof(TSearcher), typeof(Searcher<,>));
-
-            if (searcherBaseType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for filter: {typeof(TSearcher)}");
-            }
-
             if (Searcher != null)
             {
                 throw new InvalidOperationException("Cannot apply search twice.");
             }
 
-            Searcher = Registry.ResolveSearcher<TReturnType>(typeof(TSearcher));
+            Searcher = Registry.ResolveSearcher<TSearcher, TReturnType>();
             Argument("search", typeof(string));
             return ApplyField(ReplaceResolver(QueryableFieldResolverBase.Select(GetSearchQuery(Searcher))));
         }
 
-        public abstract QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order);
+        public TThisIntf Where(Expression<Func<TReturnType, bool>> predicate)
+        {
+            return (TThis)ApplyWhere(predicate);
+        }
 
-        protected abstract QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver);
+        protected abstract TThis ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver);
 
         protected override EnumerableFieldBase<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
         {
             var queryableField = ReplaceResolver(QueryableFieldResolverBase.Where(predicate));
+            return queryableField;
+        }
+
+        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
+        {
+            var queryableField = new QueryableField<TEntity, TReturnType1, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
+                graphType,
+                graphType.Configurator,
+                Arguments,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
             return queryableField;
         }
 

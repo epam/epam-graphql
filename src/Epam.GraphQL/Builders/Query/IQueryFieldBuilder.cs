@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Projection;
 using Epam.GraphQL.Builders.RootProjection;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Query
@@ -37,6 +38,10 @@ namespace Epam.GraphQL.Builders.Query
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure = null)
             where TReturnType : class;
+
+        ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
+            where TChildEntity : class;
     }
 
     public interface IQueryFieldBuilder<out TThisType, out TArgType, TExecutionContext> :

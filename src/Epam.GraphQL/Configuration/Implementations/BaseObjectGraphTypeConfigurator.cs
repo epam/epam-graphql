@@ -164,65 +164,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableObjectExpressionField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string? deprecationReason)
            where TReturnType : class => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
 
-        public ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> AddConnectionLoaderField<TChildLoader, TChildEntity>(
-            string name,
-            string deprecationReason)
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
-        {
-            var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
-                this,
-                name,
-                condition: null,
-                graphResultType,
-                arguments: null,
-                searcher: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            var connectionField = field.ApplyConnection();
-            return InternalAddField(connectionField, deprecationReason);
-        }
-
-        public QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> AddConnectionLoaderField<TChildLoader, TChildEntity>(
-            string name,
-            Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order,
-            string deprecationReason)
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
-        {
-            var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
-                this,
-                name,
-                condition: null,
-                graphResultType,
-                arguments: null,
-                searcher: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            var connectionField = field.ApplyConnection(order);
-            return InternalAddField(connectionField, deprecationReason);
-        }
-
-        public GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> AddGroupLoaderField<TChildLoader, TChildEntity>(string name, string? deprecationReason = null)
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
-        {
-            var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
-            var graphResultType = GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
-                this,
-                name,
-                graphResultType,
-                arguments: null,
-                naturalSorters: loader.ApplyNaturalOrderBy(Enumerable.Empty<TChildEntity>().AsQueryable()).GetSorters());
-            return InternalAddField(field, deprecationReason);
-        }
-
         public SubmitField<TEntity, TExecutionContext> AddSubmitField(string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type graphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType, string? deprecationReason = null)
         {
             var field = new SubmitField<TEntity, TExecutionContext>(Registry, this, name, returnGraphType, argName, graphType, resolve, fieldType);

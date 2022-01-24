@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
@@ -14,8 +15,17 @@ using Epam.GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
 #pragma warning disable CA1501
-    internal class ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
+    internal sealed class ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
 #pragma warning restore CA1501
+        ConnectionLoaderFieldBase<
+            ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
+            TEntity,
+            TChildLoader,
+            TChildEntity,
+            TExecutionContext>,
+        IConnectionField<TChildEntity, TExecutionContext>,
+        IConnectionField,
+        IVoid
         where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
@@ -42,29 +52,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
-
-            Argument<string>(
-                "after",
-                "Only look at connected edges with cursors greater than the value of `after`.");
-
-            Argument<int?>(
-                "first",
-                "Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.");
-
-            Argument<string>(
-                "before",
-                "Only look at connected edges with cursors smaller than the value of `before`.");
-
-            Argument<int?>(
-                "last",
-                "Specifies the number of edges to return counting reversely from `before`, or the last entry if `before` is not specified.");
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
         public override IResolver<TEntity> FieldResolver => QueryableFieldResolver.AsConnection();
 
-        protected override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        protected override ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             return new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 Registry,

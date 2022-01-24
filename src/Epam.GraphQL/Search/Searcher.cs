@@ -10,12 +10,5 @@ namespace Epam.GraphQL.Search
     public abstract class Searcher<TEntity, TExecutionContext> : ISearcher<TEntity, TExecutionContext>
     {
         public abstract IQueryable<TEntity> All(IQueryable<TEntity> query, TExecutionContext context, string? search);
-
-        public override int GetHashCode() => GetType().GetHashCode();
-
-        public override bool Equals(object obj) => Equals(obj as ISearcher<TEntity, TExecutionContext>);
-
-        public bool Equals(ISearcher<TEntity, TExecutionContext>? other) => other != null
-            && other.GetType() == GetType();
     }
 }

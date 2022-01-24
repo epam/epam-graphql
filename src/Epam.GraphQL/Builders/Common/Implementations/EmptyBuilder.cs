@@ -3,10 +3,12 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
+using Epam.GraphQL.Helpers;
+
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
-    public class EmptyBuilder : IEmptyBuilder
+    public class EmptyBuilder : IVoid
     {
-        public static IEmptyBuilder Instance { get; } = new EmptyBuilder();
+        public static IVoid Instance { get; } = new EmptyBuilder();
     }
 }

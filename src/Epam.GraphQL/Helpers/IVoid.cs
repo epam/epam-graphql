@@ -3,17 +3,11 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq;
-using Epam.GraphQL.Infrastructure;
-
-namespace Epam.GraphQL.Filters
+namespace Epam.GraphQL.Helpers
 {
-    [InternalApi]
-    public interface IFilter<TEntity, TExecutionContext>
+#pragma warning disable CA1040 // Avoid empty interfaces
+    public interface IVoid
+#pragma warning restore CA1040 // Avoid empty interfaces
     {
-        Type FilterType { get; }
-
-        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter);
     }
 }

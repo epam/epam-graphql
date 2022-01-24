@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Linq;
 
 namespace Epam.GraphQL.Search
@@ -14,7 +13,7 @@ namespace Epam.GraphQL.Search
     {
     }
 
-    public interface ISearcher<TEntity, TExecutionContext> : ISearcher, IEquatable<ISearcher<TEntity, TExecutionContext>>
+    public interface ISearcher<TEntity, TExecutionContext> : ISearcher
     {
         IQueryable<TEntity> All(IQueryable<TEntity> query, TExecutionContext context, string? search);
     }

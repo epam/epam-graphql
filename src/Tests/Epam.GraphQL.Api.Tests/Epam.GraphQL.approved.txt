@@ -13,18 +13,10 @@ namespace Epam.GraphQL.Adapters
 }
 namespace Epam.GraphQL.Builders.Common
 {
-    public interface IConnectionBuilder
-    {
-        Epam.GraphQL.Builders.Common.IConnectionBuilder WithFilter(System.Type loaderFilterType);
-        Epam.GraphQL.Builders.Common.IConnectionBuilder WithFilter<TLoaderFilter>();
-        Epam.GraphQL.Builders.Common.IConnectionBuilder WithSearch(System.Type searcherType);
-        Epam.GraphQL.Builders.Common.IConnectionBuilder WithSearch<TSearcher>();
-    }
-    public interface IEmptyBuilder { }
-    public interface IFromLoaderBuilder<TEntity, TChildEntity, TResult, TExecutionContext> : Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>, Epam.GraphQL.Builders.Common.IHasAsConnection<TResult>, Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TResult>
+    public interface IFromLoaderBuilder<TEntity, TChildEntity, TResult, TExecutionContext> : Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>, Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TResult>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Configuration.IConnectionField, TResult>
         where TChildEntity :  class
     {
-        Epam.GraphQL.Builders.Common.IConnectionBuilder AsConnection();
+        Epam.GraphQL.Configuration.IConnectionField AsConnection();
     }
     public interface IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult> : Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TResult>
     {
@@ -32,17 +24,13 @@ namespace Epam.GraphQL.Builders.Common
         Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, T> Select<T>(System.Linq.Expressions.Expression<System.Func<TEntity, TResult, T>> selector);
         Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult> Where(System.Linq.Expressions.Expression<System.Func<TResult, bool>> predicate);
     }
-    public interface IHasAsConnection<TEntity>
-    {
-        Epam.GraphQL.Builders.Common.IConnectionBuilder AsConnection(System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order);
-    }
     public interface IHasEnumerableMethods<TSourceType>
     {
         void FirstOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
         void SingleOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
     }
     public interface IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> : Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable> { }
-    public interface IHasFilterableAndSortable<TEntity, TFilterValueType> : Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IEmptyBuilder>>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IEmptyBuilder> { }
+    public interface IHasFilterableAndSortable<TEntity, TFilterValueType> : Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Helpers.IVoid>>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Helpers.IVoid> { }
     public interface IHasFilterable<TEntity, TFilterValueType, TReturnType>
     {
         TReturnType Filterable();
@@ -70,15 +58,15 @@ namespace Epam.GraphQL.Builders.Common
 }
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
-    public class EmptyBuilder : Epam.GraphQL.Builders.Common.IEmptyBuilder
+    public class EmptyBuilder : Epam.GraphQL.Helpers.IVoid
     {
         public EmptyBuilder() { }
-        public static Epam.GraphQL.Builders.Common.IEmptyBuilder Instance { get; }
+        public static Epam.GraphQL.Helpers.IVoid Instance { get; }
     }
 }
 namespace Epam.GraphQL.Builders.Loader
 {
-    public interface IFromIQueryableBuilder<TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasAsConnection<TReturnType>, Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TReturnType>, Epam.GraphQL.Builders.Loader.IHasEnumerableMethodsAndSelect<TReturnType, TExecutionContext>
+    public interface IFromIQueryableBuilder<TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TReturnType>, Epam.GraphQL.Builders.Loader.IHasEnumerableMethodsAndSelect<TReturnType, TExecutionContext>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TReturnType>
     {
         Epam.GraphQL.Builders.Loader.IFromIQueryableBuilder<TReturnType, TExecutionContext> Where(System.Linq.Expressions.Expression<System.Func<TReturnType, bool>> predicate);
     }
@@ -739,6 +727,9 @@ namespace Epam.GraphQL.Builders.Query
             where TEntity :  class;
         Epam.GraphQL.Builders.Loader.IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure = null)
             where TReturnType :  class;
+        Epam.GraphQL.Configuration.ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+            where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
+            where TChildEntity :  class;
         Epam.GraphQL.Builders.Query.IQueryPayloadFieldBuilder<TType, TExecutionContext> PayloadField<TType>(string name);
     }
     public interface IQueryFieldBuilder<out TThisType, out TArgType, TExecutionContext> : Epam.GraphQL.Builders.Projection.IUnionableProjectionFieldBuilder<Epam.GraphQL.Builders.Query.IQueryFieldBuilder<TThisType, TArgType, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Builders.RootProjection.IRootProjectionFieldBuilder<TArgType, TExecutionContext> { }
@@ -921,6 +912,40 @@ namespace Epam.GraphQL.Configuration.Enums
         NotNullValues = 1,
     }
 }
+namespace Epam.GraphQL.Configuration
+{
+    public interface IConnectableField<out TThis>
+    {
+        TThis AsConnection();
+    }
+    public interface IConnectableField<out TThis, TEntity>
+    {
+        TThis AsConnection(System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> naturalOrder);
+    }
+    public interface IConnectionField
+    {
+        Epam.GraphQL.Configuration.IConnectionField WithFilter<TFilter>();
+        Epam.GraphQL.Configuration.IConnectionField WithSearch<TSearcher>()
+            where TSearcher : Epam.GraphQL.Search.ISearcher;
+    }
+    public interface IConnectionField<TEntity, TExecutionContext> : Epam.GraphQL.Configuration.ILegacyFilterableField<Epam.GraphQL.Configuration.IConnectionField<TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IConnectionField<TEntity, TExecutionContext>, TEntity, TExecutionContext> { }
+    public interface ILegacyFilterableField<out TThis, TEntity, TExecutionContext>
+    {
+        TThis WithFilter<TLoaderFilter, TFilter>()
+            where TLoaderFilter : Epam.GraphQL.Filters.Filter<TEntity, TFilter, TExecutionContext>
+            where TFilter : Epam.GraphQL.Loaders.Input;
+    }
+    public interface ILoaderField<TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TEntity>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.ILoaderField<TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWereableField<Epam.GraphQL.Configuration.ILoaderField<TEntity, TExecutionContext>, TEntity> { }
+    public interface ISearchableField<out TThis, TEntity, TExecutionContext>
+    {
+        TThis WithSearch<TSearcher>()
+            where TSearcher : Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>;
+    }
+    public interface IWereableField<out TThis, TEntity>
+    {
+        TThis Where(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate);
+    }
+}
 namespace Epam.GraphQL.EntityFrameworkCore
 {
     public static class ResolveOptionsBuilderExtensions
@@ -997,15 +1022,13 @@ namespace Epam.GraphQL
     public abstract class Query<TExecutionContext> : Epam.GraphQL.Loaders.RootProjection<TExecutionContext>
     {
         protected Query() { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection(System.Type childLoaderType, string name, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TChildLoader>(string name, string? deprecationReason = null)
+        protected Epam.GraphQL.Configuration.IConnectionField Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader :  class { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TEntity>(System.Type childLoaderType, string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder Connection<TChildLoader, TEntity>(string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TEntity>, System.Linq.IOrderedQueryable<TEntity>>> order, string? deprecationReason = null)
-            where TChildLoader :  class { }
+        protected Epam.GraphQL.Configuration.IConnectionField Connection<TChildLoader, TChildEntity>(string name, System.Linq.Expressions.Expression<System.Func<System.Linq.IQueryable<TChildEntity>, System.Linq.IOrderedQueryable<TChildEntity>>> order, string? deprecationReason = null)
+            where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
+            where TChildEntity :  class { }
         protected Epam.GraphQL.Builders.Query.IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder GroupConnection(System.Type childLoaderType, string name, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IConnectionBuilder GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
+        protected Epam.GraphQL.Configuration.IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader :  class { }
     }
     public class ResolveOptions : Epam.GraphQL.Helpers.Options<Epam.GraphQL.ResolveOptions>
@@ -1112,17 +1135,14 @@ namespace Epam.GraphQL
 }
 namespace Epam.GraphQL.Filters
 {
-    public abstract class Filter<TEntity, TFilter, TExecutionContext> : Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>, System.IEquatable<Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>>
+    public abstract class Filter<TEntity, TFilter, TExecutionContext> : Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>
         where TFilter : Epam.GraphQL.Loaders.Input
     {
         protected Filter() { }
         protected abstract System.Linq.IQueryable<TEntity> ApplyFilter(TExecutionContext context, System.Linq.IQueryable<TEntity> query, TFilter filter);
-        public bool Equals(Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>? other) { }
-        public override bool Equals(object obj) { }
-        public override int GetHashCode() { }
     }
     [Epam.GraphQL.Infrastructure.InternalApi]
-    public interface IFilter<TEntity, TExecutionContext> : System.IEquatable<Epam.GraphQL.Filters.IFilter<TEntity, TExecutionContext>>
+    public interface IFilter<TEntity, TExecutionContext>
     {
         System.Type FilterType { get; }
         System.Linq.IQueryable<TEntity> All(Epam.GraphQL.Infrastructure.ISchemaExecutionListener listener, System.Linq.IQueryable<TEntity> query, TExecutionContext context, object filter);
@@ -1138,6 +1158,7 @@ namespace Epam.GraphQL.Filters.Inputs
 }
 namespace Epam.GraphQL.Helpers
 {
+    public interface IVoid { }
     public class OptionsBuilder<TOptions>
         where TOptions : Epam.GraphQL.Helpers.Options<TOptions>, new ()
     {
@@ -1210,7 +1231,8 @@ namespace Epam.GraphQL.Loaders
     {
         TId GetId(TEntity entity);
     }
-    public interface ILoader<TEntity, TExecutionContext>
+    public interface ILoader<TExecutionContext> { }
+    public interface ILoader<TEntity, TExecutionContext> : Epam.GraphQL.Loaders.ILoader<TExecutionContext>
     {
         System.Linq.IQueryable<TEntity> All(TExecutionContext context);
         System.Linq.IOrderedQueryable<TEntity> ApplyNaturalOrderBy(System.Linq.IQueryable<TEntity> query);
@@ -1237,7 +1259,7 @@ namespace Epam.GraphQL.Loaders
     {
         public Input() { }
     }
-    public abstract class Loader<TEntity, TExecutionContext> : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.ILoader<TEntity, TExecutionContext>
+    public abstract class Loader<TEntity, TExecutionContext> : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.ILoader<TExecutionContext>, Epam.GraphQL.Loaders.ILoader<TEntity, TExecutionContext>
         where TEntity :  class
     {
         protected Loader() { }
@@ -1390,29 +1412,26 @@ namespace Epam.GraphQL.Savers
 }
 namespace Epam.GraphQL.Search
 {
-    public interface IOrderedSearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
+    public interface IOrderedSearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>
     {
         System.Linq.IOrderedQueryable<TEntity> ApplySearchOrderBy(System.Linq.IQueryable<TEntity> query, string search);
         System.Linq.IOrderedQueryable<TEntity> ApplySearchThenBy(System.Linq.IOrderedQueryable<TEntity> query, string search);
     }
     public interface ISearcher { }
-    public interface ISearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
+    public interface ISearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher
     {
         System.Linq.IQueryable<TEntity> All(System.Linq.IQueryable<TEntity> query, TExecutionContext context, string? search);
     }
-    public abstract class OrderedSearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.Searcher<TEntity, TExecutionContext>, Epam.GraphQL.Search.IOrderedSearcher<TEntity, TExecutionContext>, Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
+    public abstract class OrderedSearcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.Searcher<TEntity, TExecutionContext>, Epam.GraphQL.Search.IOrderedSearcher<TEntity, TExecutionContext>, Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>
     {
         protected OrderedSearcher() { }
         public abstract System.Linq.IOrderedQueryable<TEntity> ApplySearchOrderBy(System.Linq.IQueryable<TEntity> query, string search);
         public abstract System.Linq.IOrderedQueryable<TEntity> ApplySearchThenBy(System.Linq.IOrderedQueryable<TEntity> query, string search);
     }
-    public abstract class Searcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>, System.IEquatable<Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>>
+    public abstract class Searcher<TEntity, TExecutionContext> : Epam.GraphQL.Search.ISearcher, Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>
     {
         protected Searcher() { }
         public abstract System.Linq.IQueryable<TEntity> All(System.Linq.IQueryable<TEntity> query, TExecutionContext context, string? search);
-        public bool Equals(Epam.GraphQL.Search.ISearcher<TEntity, TExecutionContext>? other) { }
-        public override bool Equals(object obj) { }
-        public override int GetHashCode() { }
     }
 }
 namespace Microsoft.Extensions.DependencyInjection

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
@@ -14,7 +15,15 @@ using Epam.GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
 #pragma warning disable CA1501
-    internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> : QueryableField<TEntity, TReturnType, TExecutionContext>
+    internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> :
+        QueryableFieldBase<
+            ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>,
+            IConnectionField<TReturnType, TExecutionContext>,
+            TEntity,
+            TReturnType,
+            TExecutionContext>,
+        IConnectionField<TReturnType, TExecutionContext>,
+        IVoid
 #pragma warning restore CA1501
         where TEntity : class
     {
@@ -67,7 +76,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IResolver<TEntity> FieldResolver => QueryableFieldResolver.AsConnection();
 
-        protected override QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
+        protected override ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
             return new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
                 Registry,

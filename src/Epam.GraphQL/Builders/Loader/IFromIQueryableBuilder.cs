@@ -5,13 +5,14 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Common;
+using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IFromIQueryableBuilder<TReturnType, TExecutionContext> :
         IHasEnumerableMethodsAndSelect<TReturnType, TExecutionContext>,
-        IHasAsConnection<TReturnType>
+        IConnectableField<IVoid, TReturnType>
     {
         IFromIQueryableBuilder<TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate);
     }

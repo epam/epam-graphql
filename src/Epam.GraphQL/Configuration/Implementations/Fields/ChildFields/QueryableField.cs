@@ -9,13 +9,20 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
-using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class QueryableField<TEntity, TReturnType, TExecutionContext> : QueryableFieldBase<TEntity, TReturnType, TExecutionContext>
+    internal sealed class QueryableField<TEntity, TReturnType, TExecutionContext> :
+        QueryableFieldBase<
+            QueryableField<TEntity, TReturnType, TExecutionContext>,
+            QueryableField<TEntity, TReturnType, TExecutionContext>,
+            TEntity,
+            TReturnType,
+            TExecutionContext>,
+        IConnectableField<IVoid, TReturnType>
         where TEntity : class
     {
         public QueryableField(
@@ -65,7 +72,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
         }
 
-        public override QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
+        public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
             var connectionField = new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
                 Registry,
@@ -80,23 +87,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
-        {
-            var queryableField = new QueryableField<TEntity, TReturnType1, TExecutionContext>(
-                Registry,
-                Parent,
-                Name,
-                QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
-                graphType,
-                graphType.Configurator,
-                Arguments,
-                searcher: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            return queryableField;
-        }
-
-        protected override QueryableFieldBase<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
+        protected override QueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
             return new QueryableField<TEntity, TReturnType, TExecutionContext>(
                 Registry,

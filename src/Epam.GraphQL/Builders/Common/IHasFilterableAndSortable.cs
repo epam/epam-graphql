@@ -3,11 +3,13 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
+using Epam.GraphQL.Helpers;
+
 namespace Epam.GraphQL.Builders.Common
 {
     public interface IHasFilterableAndSortable<TEntity, TFilterValueType> :
-        IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IEmptyBuilder>>,
-        IHasSortable<TEntity, IEmptyBuilder>
+        IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>,
+        IHasSortable<TEntity, IVoid>
     {
     }
 }

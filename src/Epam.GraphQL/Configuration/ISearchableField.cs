@@ -3,17 +3,13 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq;
-using Epam.GraphQL.Infrastructure;
+using Epam.GraphQL.Search;
 
-namespace Epam.GraphQL.Filters
+namespace Epam.GraphQL.Configuration
 {
-    [InternalApi]
-    public interface IFilter<TEntity, TExecutionContext>
+    public interface ISearchableField<out TThis, TEntity, TExecutionContext>
     {
-        Type FilterType { get; }
-
-        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter);
+        TThis WithSearch<TSearcher>()
+           where TSearcher : ISearcher<TEntity, TExecutionContext>;
     }
 }

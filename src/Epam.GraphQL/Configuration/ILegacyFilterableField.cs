@@ -3,11 +3,15 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-namespace Epam.GraphQL.Builders.Common
+using Epam.GraphQL.Filters;
+using Epam.GraphQL.Loaders;
+
+namespace Epam.GraphQL.Configuration
 {
-#pragma warning disable CA1040 // Avoid empty interfaces
-    public interface IEmptyBuilder
-#pragma warning restore CA1040 // Avoid empty interfaces
+    public interface ILegacyFilterableField<out TThis, TEntity, TExecutionContext>
     {
+        TThis WithFilter<TLoaderFilter, TFilter>()
+            where TLoaderFilter : Filter<TEntity, TFilter, TExecutionContext>
+            where TFilter : Input;
     }
 }

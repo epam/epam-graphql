@@ -20,8 +20,14 @@ using GraphQL;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
 #pragma warning disable CA1501
-    internal class GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
+    internal sealed class GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
 #pragma warning restore CA1501
+        ConnectionLoaderFieldBase<
+            GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
+            TEntity,
+            TChildLoader,
+            TChildEntity,
+            TExecutionContext>
         where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
@@ -46,7 +52,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
-            Initialize();
         }
 
         private GroupLoaderField(
@@ -69,7 +74,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
-            Initialize();
         }
 
         public override IResolver<TEntity> FieldResolver => QueryableFieldResolver
@@ -77,7 +81,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        protected override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        protected override GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             return new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 Registry,
@@ -129,25 +133,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
                 return result;
             };
-        }
-
-        private void Initialize()
-        {
-            Argument<string>(
-                "after",
-                "Only look at connected edges with cursors greater than the value of `after`.");
-
-            Argument<int?>(
-                "first",
-                "Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.");
-
-            Argument<string>(
-                "before",
-                "Only look at connected edges with cursors smaller than the value of `before`.");
-
-            Argument<int?>(
-                "last",
-                "Specifies the number of edges to return counting reversely from `before`, or the last entry if `before` is not specified.");
         }
     }
 }

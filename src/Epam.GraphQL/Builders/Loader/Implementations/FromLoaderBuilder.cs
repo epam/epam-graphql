@@ -7,14 +7,14 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class FromLoaderBuilder<TLoader, TEntity, TChildLoader, TChildEntity, TExecutionContext> : FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>,
+    internal class FromLoaderBuilder<TLoader, TEntity, TChildLoader, TChildEntity, TExecutionContext> :
+        FromLoaderInlineObjectBuilder<LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>, TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>,
         IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext>
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TChildEntity : class
@@ -22,16 +22,15 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         where TEntity : class
     {
         public FromLoaderBuilder(
-            RelationRegistry<TExecutionContext> registry,
             LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> fieldType)
-            : base(registry, fieldType)
+            : base(fieldType)
         {
         }
 
-        public IConnectionBuilder AsConnection() =>
-            new ConnectionBuilder<TEntity, TChildEntity, TExecutionContext>(((LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>)Field).ApplyConnection());
+        public IConnectionField AsConnection() =>
+            (IConnectionField)Field.AsConnection();
 
-        public IConnectionBuilder AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order) =>
-            new ConnectionBuilder<TEntity, TChildEntity, TExecutionContext>(((LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>)Field).ApplyConnection(order));
+        public IConnectionField AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order) =>
+            (IConnectionField)Field.AsConnection(order);
     }
 }

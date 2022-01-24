@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Tests.Connection
             void Builder(Query<TestUserContext> query)
             {
                 query
-                    .Connection<Person>(personLoaderType, "people", query => query.OrderByDescending(x => x.Id));
+                    .Connection<Person, TestUserContext>(personLoaderType, "people", query => query.OrderByDescending(x => x.Id));
             }
 
             TestHelpers.TestQuery(
@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Tests.Connection
         }
 
         [Test]
-        public void ShouldWorkWIthFromLoader()
+        public void ShouldWorkWithFromLoader()
         {
             var unitLoaderType = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
                 onConfigure: loader => loader.Field(p => p.Id),
@@ -70,7 +70,7 @@ namespace Epam.GraphQL.Tests.Connection
             void Builder(Query<TestUserContext> query)
             {
                 query
-                    .Connection<Person>(personLoaderType, "people", query => query.OrderByDescending(x => x.Id));
+                    .Connection<Person, TestUserContext>(personLoaderType, "people", query => query.OrderByDescending(x => x.Id));
             }
 
             TestHelpers.TestQuery(
@@ -137,7 +137,7 @@ namespace Epam.GraphQL.Tests.Connection
             void Builder(Query<TestUserContext> query)
             {
                 query
-                    .Connection<Person>(personLoaderType, "people", query => query.OrderByDescending(x => x.Id));
+                    .Connection<Person, TestUserContext>(personLoaderType, "people", query => query.OrderByDescending(x => x.Id));
             }
 
             TestHelpers.TestQuery(
@@ -211,7 +211,7 @@ namespace Epam.GraphQL.Tests.Connection
             void Builder(Query<TestUserContext> query)
             {
                 query
-                    .Connection<Unit>(unitLoaderType, "units", query => query.OrderByDescending(x => x.Id));
+                    .Connection<Unit, TestUserContext>(unitLoaderType, "units", query => query.OrderByDescending(x => x.Id));
             }
 
             TestHelpers.TestQuery(
@@ -274,7 +274,7 @@ namespace Epam.GraphQL.Tests.Connection
             void Builder(Query<TestUserContext> query)
             {
                 query
-                    .Connection<Unit>(unitLoaderType, "units", query => query.OrderByDescending(x => x.Id));
+                    .Connection<Unit, TestUserContext>(unitLoaderType, "units", query => query.OrderByDescending(x => x.Id));
             }
 
             TestHelpers.TestQuery(
@@ -340,7 +340,7 @@ namespace Epam.GraphQL.Tests.Connection
             void Builder(Query<TestUserContext> query)
             {
                 query
-                    .Connection<Unit>(unitLoaderType, "units", query => query.OrderByDescending(x => x.Id));
+                    .Connection<Unit, TestUserContext>(unitLoaderType, "units", query => query.OrderByDescending(x => x.Id));
             }
 
             TestHelpers.TestQuery(

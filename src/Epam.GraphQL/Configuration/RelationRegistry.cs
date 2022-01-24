@@ -379,9 +379,10 @@ namespace Epam.GraphQL.Configuration
             return (IFilter<TEntity, TExecutionContext>)_cache.GetOrAdd(loaderFilterType, type => loaderFilterType.CreateInstanceAndHoistBaseException());
         }
 
-        public ISearcher<TEntity, TExecutionContext> ResolveSearcher<TEntity>(Type loaderSearcherType)
+        public ISearcher<TEntity, TExecutionContext> ResolveSearcher<TSearcher, TEntity>()
+            where TSearcher : ISearcher<TEntity, TExecutionContext>
         {
-            return (ISearcher<TEntity, TExecutionContext>)_cache.GetOrAdd(loaderSearcherType, type => loaderSearcherType.CreateInstanceAndHoistBaseException());
+            return (ISearcher<TEntity, TExecutionContext>)_cache.GetOrAdd(typeof(TSearcher), type => type.CreateInstanceAndHoistBaseException());
         }
 
         public IObjectGraphType ResolveObjectGraphTypeWrapper<TLoader, TEntity>()

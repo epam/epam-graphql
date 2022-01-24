@@ -19,13 +19,6 @@ namespace Epam.GraphQL.Filters
         IQueryable<TEntity> IFilter<TEntity, TExecutionContext>.All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter) =>
             All(listener, query, context, (TFilter)filter);
 
-        public override int GetHashCode() => GetType().GetHashCode();
-
-        public override bool Equals(object obj) => Equals(obj as IFilter<TEntity, TExecutionContext>);
-
-        public bool Equals(IFilter<TEntity, TExecutionContext>? other) => other != null
-            && other.GetType() == GetType();
-
         protected abstract IQueryable<TEntity> ApplyFilter(TExecutionContext context, IQueryable<TEntity> query, TFilter filter);
 
         private IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, TFilter filter)

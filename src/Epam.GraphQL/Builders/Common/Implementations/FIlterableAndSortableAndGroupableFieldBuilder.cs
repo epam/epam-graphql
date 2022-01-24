@@ -5,6 +5,7 @@
 
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
@@ -36,19 +37,19 @@ namespace Epam.GraphQL.Builders.Common.Implementations
             return this;
         }
 
-        IHasSortable<TEntity, IEmptyBuilder> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IEmptyBuilder>>.Filterable()
+        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>.Filterable()
         {
             Filterable();
             return this;
         }
 
-        IHasSortable<TEntity, IEmptyBuilder> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IEmptyBuilder>>.Filterable(params TFilterValueType[] defaultValues)
+        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>.Filterable(params TFilterValueType[] defaultValues)
         {
             Filterable(defaultValues);
             return this;
         }
 
-        IHasSortable<TEntity, IEmptyBuilder> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IEmptyBuilder>>.Filterable(NullOption nullValue)
+        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>.Filterable(NullOption nullValue)
         {
             Filterable(nullValue);
             return this;

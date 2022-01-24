@@ -102,6 +102,8 @@ namespace Epam.GraphQL
 
         protected internal void SubmitField(Type loaderType, string fieldName)
         {
+            Guards.ThrowIfNull(loaderType, nameof(loaderType));
+
             var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(loaderType, typeof(MutableLoader<,,>));
             if (baseLoaderType == null)
             {

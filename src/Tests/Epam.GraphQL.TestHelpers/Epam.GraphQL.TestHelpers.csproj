@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Epam.GraphQL.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Epam.GraphQL\Epam.GraphQL.csproj" />
   </ItemGroup>
 
