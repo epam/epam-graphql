@@ -1028,6 +1028,9 @@ namespace Epam.GraphQL
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class { }
         protected Epam.GraphQL.Builders.Query.IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Configuration.ILoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
+            where TLoader : Epam.GraphQL.Loaders.Loader<TEntity, TExecutionContext>, new ()
+            where TEntity :  class { }
         protected Epam.GraphQL.Configuration.IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader :  class { }
     }

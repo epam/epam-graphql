@@ -31,6 +31,14 @@ namespace Epam.GraphQL
             return new QueryFieldBuilder<QueryField<TExecutionContext>, TExecutionContext>(field);
         }
 
+        protected internal ILoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
+            where TLoader : Loader<TEntity, TExecutionContext>, new()
+            where TEntity : class
+        {
+            return Field(name, deprecationReason)
+                .FromLoader<TLoader, TEntity>();
+        }
+
         protected internal IConnectionField Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {

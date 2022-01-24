@@ -14,6 +14,16 @@ namespace Epam.GraphQL.Tests
 {
     public static class TestExtensions
     {
+        public static ILoaderField<TChildEntity, TExecutionContext> Field<TChildEntity, TExecutionContext>(this Query<TExecutionContext> query, string name, Type loaderType)
+        {
+            var methodInfo = typeof(Query<TExecutionContext>).GetNonPublicGenericMethod(
+                nameof(Query<TExecutionContext>.Field),
+                new[] { loaderType, typeof(TChildEntity) },
+                new[] { typeof(string), typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<ILoaderField<TChildEntity, TExecutionContext>>(query, name, null);
+        }
+
         public static ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildEntity, TExecutionContext>(this IQueryFieldBuilder<TExecutionContext> builder, Type loaderType)
         {
             var methodInfo = typeof(IQueryFieldBuilder<TExecutionContext>).GetPublicGenericMethod(
