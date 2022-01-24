@@ -6,13 +6,14 @@
 using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
     internal class SortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext> :
         GroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>,
         IHasSortableAndGroupable<TEntity>,
-        IHasSortable<TEntity, IEmptyBuilder>
+        IHasSortable<TEntity, IVoid>
         where TEntity : class
     {
         internal SortableAndGroupableFieldBuilder(ExpressionField<TEntity, TReturnType, TExecutionContext> field)
@@ -32,13 +33,13 @@ namespace Epam.GraphQL.Builders.Common.Implementations
             return this;
         }
 
-        IEmptyBuilder IHasSortable<TEntity, IEmptyBuilder>.Sortable()
+        IVoid IHasSortable<TEntity, IVoid>.Sortable()
         {
             Sortable();
             return EmptyBuilder.Instance;
         }
 
-        IEmptyBuilder IHasSortable<TEntity, IEmptyBuilder>.Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
+        IVoid IHasSortable<TEntity, IVoid>.Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
             Sortable(sorter);
             return EmptyBuilder.Instance;

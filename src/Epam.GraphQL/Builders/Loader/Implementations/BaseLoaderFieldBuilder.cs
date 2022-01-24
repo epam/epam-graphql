@@ -81,7 +81,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
             var builderType = typeof(FromLoaderBuilder<,,,,>).MakeGenericType(typeof(TLoader), typeof(TEntity), childLoaderType, typeof(TChildEntity), typeof(TExecutionContext));
             var builder = (IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext>)builderType.CreateInstanceAndHoistBaseException(
-                Registry, field);
+                field);
             return builder;
         }
     }

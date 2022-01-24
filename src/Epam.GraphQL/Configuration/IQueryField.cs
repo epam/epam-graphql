@@ -8,14 +8,19 @@ using System.Linq;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
+using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Configuration
 {
     internal interface IQueryField<TExecutionContext> : IArgumentedField<object, TExecutionContext>
     {
-        public QueryableField<object, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        QueryableField<object, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
             where TReturnType : class;
+
+        ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
+            where TChildEntity : class;
     }
 }

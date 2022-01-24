@@ -5,15 +5,17 @@
 
 using System;
 using System.Linq;
-using Epam.GraphQL.Infrastructure;
+using System.Linq.Expressions;
 
-namespace Epam.GraphQL.Filters
+namespace Epam.GraphQL.Configuration
 {
-    [InternalApi]
-    public interface IFilter<TEntity, TExecutionContext>
+    public interface IConnectableField<out TThis>
     {
-        Type FilterType { get; }
+        TThis AsConnection();
+    }
 
-        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter);
+    public interface IConnectableField<out TThis, TEntity>
+    {
+        TThis AsConnection(Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> naturalOrder);
     }
 }

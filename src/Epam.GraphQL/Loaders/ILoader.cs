@@ -7,7 +7,13 @@ using System.Linq;
 
 namespace Epam.GraphQL.Loaders
 {
-    public interface ILoader<TEntity, TExecutionContext>
+#pragma warning disable CA1040 // Avoid empty interfaces
+    public interface ILoader<TExecutionContext>
+#pragma warning restore CA1040 // Avoid empty interfaces
+    {
+    }
+
+    public interface ILoader<TEntity, TExecutionContext> : ILoader<TExecutionContext>
     {
         IQueryable<TEntity> All(TExecutionContext context);
 

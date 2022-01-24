@@ -77,6 +77,13 @@ namespace Epam.GraphQL.Builders.Query.Implementations
             return new FromIQueryableBuilder<object, TReturnType, TExecutionContext>(Field.FromIQueryable(query, configure));
         }
 
+        public ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
+            where TChildEntity : class
+        {
+            return Field.FromLoader<TChildLoader, TChildEntity>();
+        }
+
         private QueryArgumentBuilder<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgumentImpl<TProjection, TEntity1>(string name)
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class

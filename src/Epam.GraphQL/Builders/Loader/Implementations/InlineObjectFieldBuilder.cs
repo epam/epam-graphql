@@ -13,6 +13,7 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
+using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
@@ -35,7 +36,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TChildEntity : class
         {
             var field = Field.Parent.FromLoader<TChildLoader, TChildEntity>(Field, condition, Field.Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>());
-            return new FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>(_registry, field);
+            return new FromLoaderInlineObjectBuilder<EnumerableFieldBase<TEntity, TChildEntity, TExecutionContext>, TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>(field);
         }
 
         public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildEntity>(Type typeOfChildLoader, Expression<Func<TEntity, TChildEntity, bool>> condition)

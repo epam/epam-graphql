@@ -10,13 +10,22 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : QueryableFieldBase<TEntity, TChildEntity, TExecutionContext>
+    internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
+        LoaderFieldBase<
+            LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
+            ILoaderField<TChildEntity, TExecutionContext>,
+            TEntity,
+            TChildLoader,
+            TChildEntity,
+            TExecutionContext>,
+        ILoaderField<TChildEntity, TExecutionContext>
         where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
@@ -30,35 +39,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
-            : this(
+            : base(
                   registry,
                   parent,
                   name,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
                   condition,
                   elementGraphType,
-                  arguments,
-                  searcher,
-                  naturalSorters)
-        {
-        }
-
-        protected LoaderField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments? arguments,
-            ISearcher<TChildEntity, TExecutionContext>? searcher,
-            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  resolver,
-                  elementGraphType,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
                   arguments,
                   searcher,
                   naturalSorters)
@@ -81,43 +67,28 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   name,
                   resolver,
                   elementGraphType,
-                  loader.ObjectGraphTypeConfigurator,
+                  loader,
                   arguments,
                   searcher,
                   naturalSorters)
         {
-            Loader = loader;
         }
 
-        private LoaderField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            TChildLoader loader,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments? arguments,
-            ISearcher<TChildEntity, TExecutionContext>? searcher,
-            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
-            : base(
-                  registry,
-                  parent,
-                  name,
-                  query: context => loader.DoGetBaseQuery(context.GetUserContext<TExecutionContext>()),
-                  transform: (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query),
-                  condition,
-                  elementGraphType,
-                  loader.ObjectGraphTypeConfigurator,
-                  arguments,
-                  searcher,
-                  naturalSorters)
+        public IVoid AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> naturalOrder)
         {
-            Loader = loader;
+            var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Registry,
+                Parent,
+                Name,
+                QueryableFieldResolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+                naturalOrder.GetSorters());
+            return ApplyField(connectionField);
         }
 
-        protected TChildLoader Loader { get; }
-
-        public ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ApplyConnection()
+        public IVoid AsConnection()
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 Registry,
@@ -131,47 +102,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        public override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order)
-        {
-            var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
-                Parent,
-                Name,
-                QueryableFieldResolver,
-                ElementGraphType,
-                Arguments,
-                Searcher,
-                order.GetSorters());
-            return ApplyField(connectionField);
-        }
-
-        public override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
-        {
-            if (HasFilter)
-            {
-                throw new NotSupportedException($"{typeof(TChildEntity).HumanizedName()}: Simultaneous use of .WithFilter() and .Filterable() is not supported. Consider to use either .WithFilter() or .Filterable().");
-            }
-
-            return base.ApplyFilter<TLoaderFilter, TFilter>();
-        }
-
-        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TChildEntity, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
-        {
-            var queryableField = new QueryableField<TEntity, TReturnType1, TExecutionContext>(
-                Registry,
-                Parent,
-                Name,
-                QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
-                graphType,
-                graphType.Configurator,
-                Arguments,
-                searcher: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            return queryableField;
-        }
-
-        protected override QueryableFieldBase<TEntity, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        protected override LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 Registry,
@@ -189,7 +120,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
     }
 
 #pragma warning disable CA1501
-    internal class LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
+    internal sealed class LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
 #pragma warning restore CA1501
         where TLoader : Loader<TEntity, TExecutionContext>, new()
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()

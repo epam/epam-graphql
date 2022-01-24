@@ -25,8 +25,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -73,8 +71,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Sortable().Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -121,8 +117,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -172,8 +166,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -223,8 +215,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Filterable().Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -274,8 +264,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -328,8 +316,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -385,8 +371,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -442,8 +426,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -499,8 +481,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -567,8 +547,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -641,8 +619,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field("unitId1", p => p.UnitId * 2).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -692,8 +668,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field("unitId", p => p.UnitId * 2).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -743,8 +717,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -796,8 +768,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -844,8 +814,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -935,8 +903,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             var filterType = GraphQLTypeBuilder.CreateLoaderFilterType<Person, PersonFilter, TestUserContext>((ctx, query, filter) => query.Where(p => filter.Ids.Contains(p.Id)));
@@ -991,8 +957,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             var searchType = GraphQLTypeBuilder.CreateSearcherType<Person, TestUserContext>((query, ctx, search) => query.Where(p => p.FullName.Contains(search)));
@@ -1047,8 +1011,6 @@ namespace Epam.GraphQL.Tests.Connection
                 {
                     loader.Field(p => p.ManagerId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -1091,8 +1053,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)

@@ -6,35 +6,32 @@
 using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, TResult, TExecutionContext> : IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>
+    internal class FromLoaderInlineObjectBuilder<TField, TEntity, TChildLoader, TChildEntity, TResult, TExecutionContext> : IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TEntity : class
         where TChildEntity : class
+        where TField : EnumerableFieldBase<TEntity, TResult, TExecutionContext>
     {
-        internal FromLoaderInlineObjectBuilder(RelationRegistry<TExecutionContext> registry, EnumerableFieldBase<TEntity, TResult, TExecutionContext> field)
+        internal FromLoaderInlineObjectBuilder(TField field)
         {
-            Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             Field = field;
         }
 
-        protected EnumerableFieldBase<TEntity, TResult, TExecutionContext> Field { get; private set; }
-
-        protected RelationRegistry<TExecutionContext> Registry { get; }
+        protected TField Field { get; private set; }
 
         public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, T> Select<T>(Expression<Func<TResult, T>> selector)
         {
-            return new FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, T, TExecutionContext>(Registry, Field.ApplySelect(selector));
+            return new FromLoaderInlineObjectBuilder<EnumerableFieldBase<TEntity, T, TExecutionContext>, TEntity, TChildLoader, TChildEntity, T, TExecutionContext>(Field.ApplySelect(selector));
         }
 
         public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, T> Select<T>(Expression<Func<TEntity, TResult, T>> selector)
         {
-            return new FromLoaderInlineObjectBuilder<TEntity, TChildLoader, TChildEntity, T, TExecutionContext>(Registry, Field.ApplySelect(selector));
+            return new FromLoaderInlineObjectBuilder<EnumerableFieldBase<TEntity, T, TExecutionContext>, TEntity, TChildLoader, TChildEntity, T, TExecutionContext>(Field.ApplySelect(selector));
         }
 
         public virtual void SingleOrDefault(Expression<Func<TResult, bool>>? predicate)
@@ -49,8 +46,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult> Where(Expression<Func<TResult, bool>> predicate)
         {
-            Field = Field.ApplyWhere(predicate);
-            return this;
+            return new FromLoaderInlineObjectBuilder<EnumerableFieldBase<TEntity, TResult, TExecutionContext>, TEntity, TChildLoader, TChildEntity, TResult, TExecutionContext>(
+                Field.ApplyWhere(predicate));
         }
     }
 }

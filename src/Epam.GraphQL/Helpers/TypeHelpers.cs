@@ -25,6 +25,16 @@ namespace Epam.GraphQL.Helpers
                 baseType = baseType.BaseType;
             }
 
+            foreach (var intf in sourceType.GetInterfaces())
+            {
+                baseType = FindMatchingGenericBaseType(intf, matchingType);
+
+                if (baseType != null)
+                {
+                    return baseType;
+                }
+            }
+
             return null;
         }
 

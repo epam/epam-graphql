@@ -223,11 +223,21 @@ namespace Epam.GraphQL.Extensions
             Type[] genericTypes,
             Type[] parameterTypes) => GetGenericMethod(type, name, genericTypes, parameterTypes);
 
+        public static MethodInfo GetPublicGenericMethod(
+            this Type type,
+            Action<GenericMethodParameters> configure)
+            => GetGenericMethod(type, configure, BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+
         public static MethodInfo GetNonPublicGenericMethod(
             this Type type,
             string name,
             Type[] genericTypes,
             Type[] parameterTypes) => GetGenericMethod(type, name, genericTypes, parameterTypes, BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+
+        public static MethodInfo GetNonPublicGenericMethod(
+            this Type type,
+            Action<GenericMethodParameters> configure)
+            => GetGenericMethod(type, configure, BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
 
         public static MethodInfo GetGenericMethod(
             this Type type,
@@ -393,6 +403,118 @@ namespace Epam.GraphQL.Extensions
 
             // Now create a more weakly typed delegate which will call the strongly typed one
             return (object target) => func((TTarget)target);
+        }
+
+        private static MethodInfo GetGenericMethod(Type type, Action<GenericMethodParameters> configure, BindingFlags bindingFlags)
+        {
+            var parameters = new GenericMethodParameters();
+            configure(parameters);
+
+            var methodInfo = type.GetMethods(bindingFlags)
+                .SingleOrDefault(parameters);
+
+            if (methodInfo != null)
+            {
+                return methodInfo;
+            }
+
+            return type
+                .GetTypeInfo()
+                .ImplementedInterfaces
+                .SelectMany(intf => intf.GetMethods(bindingFlags))
+                .Single(parameters);
+        }
+
+        public class GenericMethodParameters
+        {
+            private readonly List<ParameterInfo> _parameters = new();
+            private string? _methodName;
+            private int? _genericTypeArgumentCount;
+
+            public static implicit operator Func<MethodInfo, bool>(GenericMethodParameters parameters)
+            {
+                return parameters.Match;
+            }
+
+            public GenericMethodParameters HasName(string methodName)
+            {
+                _methodName = methodName;
+                return this;
+            }
+
+            public GenericMethodParameters HasOneGenericTypeParameter()
+            {
+                _genericTypeArgumentCount = 1;
+                return this;
+            }
+
+            public GenericMethodParameters HasTwoGenericTypeParameters()
+            {
+                _genericTypeArgumentCount = 2;
+                return this;
+            }
+
+            public GenericMethodParameters Parameter<T>()
+            {
+                _parameters.Add(new ParameterInfo<T>(_parameters.Count));
+                return this;
+            }
+
+            public GenericMethodParameters GenericTypeParameter(int position)
+            {
+                _parameters.Add(new GenericTypeParameterInfo(_parameters.Count, position));
+                return this;
+            }
+
+            private bool Match(MethodInfo methodInfo)
+            {
+                Guards.ThrowIfNull(_methodName, "methodName");
+                Guards.ThrowIfNull(_genericTypeArgumentCount, "methodName");
+
+                return methodInfo.IsGenericMethodDefinition
+                    && methodInfo.Name.Equals(_methodName, StringComparison.OrdinalIgnoreCase)
+                    && methodInfo.GetGenericArguments().Length == _genericTypeArgumentCount.Value
+                    && _parameters.All(param => param.Match(methodInfo));
+            }
+
+            private abstract class ParameterInfo
+            {
+                public abstract bool Match(MethodInfo methodInfo);
+            }
+
+            private class GenericTypeParameterInfo : ParameterInfo
+            {
+                private readonly int _position;
+                private readonly int _index;
+
+                public GenericTypeParameterInfo(int index, int position)
+                {
+                    _position = position;
+                    _index = index;
+                }
+
+                public override bool Match(MethodInfo methodInfo)
+                {
+                    var param = methodInfo.GetParameters()[_index];
+                    return param.ParameterType.IsGenericType && param.ParameterType.GenericParameterPosition == _position;
+                }
+            }
+
+            private class ParameterInfo<T> : ParameterInfo
+            {
+                private readonly int _index;
+
+                public ParameterInfo(int index)
+                {
+                    _index = index;
+                }
+
+                public override bool Match(MethodInfo methodInfo)
+                {
+                    var param = methodInfo.GetParameters()[_index];
+                    return param.ParameterType == typeof(T);
+                }
+            }
         }
 
         private class SimpleTypeComparer : IEqualityComparer<Type>

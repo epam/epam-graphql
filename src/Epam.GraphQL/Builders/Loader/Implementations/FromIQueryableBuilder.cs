@@ -6,10 +6,9 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
@@ -32,17 +31,17 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         IHasEnumerableMethodsAndSelect<TReturnType, TExecutionContext>
         where TSourceType : class
     {
-        private readonly QueryableFieldBase<TSourceType, TReturnType, TExecutionContext> _fieldType;
+        private readonly QueryableField<TSourceType, TReturnType, TExecutionContext> _fieldType;
 
-        public FromIQueryableBuilder(QueryableFieldBase<TSourceType, TReturnType, TExecutionContext> fieldType)
+        public FromIQueryableBuilder(QueryableField<TSourceType, TReturnType, TExecutionContext> fieldType)
             : base(fieldType)
         {
             _fieldType = fieldType ?? throw new ArgumentNullException(nameof(fieldType));
         }
 
-        public IConnectionBuilder AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
+        public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
-            return new ConnectionBuilder<TSourceType, TReturnType, TExecutionContext>(_fieldType.ApplyConnection(order));
+            return _fieldType.AsConnection(order);
         }
 
         public IFromIQueryableBuilder<TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> condition)
