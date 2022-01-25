@@ -513,8 +513,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ArgumentsOfCorrectTypeError),
-                "Argument \"payload\" has invalid value {people: [{id: 1, departmentName: \"Test\"}]}.\n" +
-                "In field \"people\": In element #1: In field \"departmentId\": Expected \"Int!\", found null.",
+                "Argument 'payload' has invalid value. In field 'people': [In element #1: [Missing required field 'departmentId' of type 'Int'.]]",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -1219,8 +1218,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ArgumentsOfCorrectTypeError),
-                "Argument \"payload\" has invalid value {people: [{id: -1, netSalary: 100}]}.\n" +
-                "In field \"people\": In element #1: In field \"netSalary\": Unknown field.",
+                "Argument 'payload' has invalid value. In field 'people': [In element #1: [In field 'netSalary': Unknown field.]]",
                 @"mutation {
                     submit(payload: {
                         people: [{

@@ -559,8 +559,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ArgumentsOfCorrectTypeError),
-                "Argument \"payload\" has invalid value {people: [{id: 1, fullName: \"Test\"}]}.\n" +
-                "In field \"people\": In element #1: In field \"salary\": Expected \"Decimal!\", found null.",
+                "Argument 'payload' has invalid value. In field 'people': [In element #1: [Missing required field 'salary' of type 'Decimal'.]]",
                 @"mutation {
                     submit(payload: {
                         people: [{

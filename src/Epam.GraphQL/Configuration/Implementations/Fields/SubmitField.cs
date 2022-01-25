@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         protected override IFieldResolver GetResolver()
         {
-            return new AsyncFieldResolver<object>(ctx => _resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"]));
+            return new AsyncFieldResolver<object>(ctx => _resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"].Value));
         }
     }
 }

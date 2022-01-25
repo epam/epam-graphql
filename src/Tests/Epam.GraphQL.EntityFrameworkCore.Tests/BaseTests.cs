@@ -9,6 +9,7 @@ using System.Linq;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL.Execution;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -90,7 +91,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
 
             var converter = new DecimalFormatConverter();
             var expectedJson = JsonConvert.SerializeObject(expectedResult, converter);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data, converter);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue(), converter);
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -98,11 +99,9 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
         {
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType(queryBuilder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var actualResult = ExecuteHelpers.ExecuteQuery<TestUserContext>(
                 queryType,
-                mutationType,
                 schemaOptionBuilder => schemaOptionBuilder.UseLoggerFactory(_loggerFactory),
                 executionBuilder => executionBuilder
                     .ThrowOnUnhandledException(true)
@@ -113,7 +112,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
         }
 

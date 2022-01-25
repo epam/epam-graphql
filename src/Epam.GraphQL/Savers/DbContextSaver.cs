@@ -196,7 +196,7 @@ namespace Epam.GraphQL.Savers
         {
             var initialDictionary = context.SubFields;
 
-            if (context.ReturnType.GetType().IsGenericType && (context.ReturnType.GetType().GetGenericTypeDefinition() == typeof(MutationResultGraphType<,,>)))
+            if (context.FieldDefinition.ResolvedType.GetType().IsGenericType && (context.FieldDefinition.ResolvedType.GetType().GetGenericTypeDefinition() == typeof(MutationResultGraphType<,,>)))
             {
                 if (!initialDictionary.ContainsKey("payload"))
                 {
@@ -218,7 +218,7 @@ namespace Epam.GraphQL.Savers
                 return Enumerable.Empty<string>();
             }
 
-            var fields = initialDictionary["payload"].GetSubFieldsNames(context.Fragments, _ => true);
+            var fields = initialDictionary["payload"].GetSubFieldsNames(context.Document.Fragments, _ => true);
 
             return fields;
         }

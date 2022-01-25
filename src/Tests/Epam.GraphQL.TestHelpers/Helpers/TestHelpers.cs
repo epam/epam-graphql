@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Epam.Contracts.Models;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL.Execution;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -24,12 +25,10 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 query,
                 dataContext,
                 configure: schemaOptionsBuilder =>
@@ -41,7 +40,7 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke();
@@ -58,19 +57,17 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 query,
                 configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
 
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -79,12 +76,10 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.Throws(Is.TypeOf(exceptionType).And.Message.EqualTo(message), () =>
                 {
                     var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
-                    var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
                     using var loggerFactory = CreateLoggerFactory();
                     var result = ExecuteHelpers.ExecuteQuery(
                         queryType,
-                        mutationType,
                         query,
                         configure: schemaOptionsBuilder =>
                         {
@@ -117,7 +112,7 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var converter = new DecimalFormatConverter();
             var expectedJson = JsonConvert.SerializeObject(expectedResult, converter);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data, converter);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue(), converter);
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke(dataContext);

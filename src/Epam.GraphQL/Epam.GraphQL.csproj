@@ -22,7 +22,8 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="GraphQL" Version="3.3.2" />
+    <PackageReference Include="GraphQL" Version="4.1.0" />
+    <PackageReference Include="GraphQL.DataLoader" Version="4.1.0" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.9" />

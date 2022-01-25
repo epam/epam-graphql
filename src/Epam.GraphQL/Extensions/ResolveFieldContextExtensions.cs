@@ -14,6 +14,7 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Execution;
 using GraphQL.Language.AST;
 
 namespace Epam.GraphQL.Extensions
@@ -62,7 +63,7 @@ namespace Epam.GraphQL.Extensions
                 return false;
             }
 
-            return pageInfo.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("endCursor", StringComparison.OrdinalIgnoreCase)).Any();
+            return pageInfo.GetSubFieldsNames(context.Document.Fragments, c => !c.Name.Equals("endCursor", StringComparison.OrdinalIgnoreCase)).Any();
         }
 
         public static string GetPath(this IResolveFieldContext context) => string.Join(".", context.Path.SafeNull());
@@ -99,7 +100,7 @@ namespace Epam.GraphQL.Extensions
 
         public static IEnumerable<string> GetQueriedFields(this IResolveFieldContext context)
         {
-            var result = context.FieldAst.GetSubFieldsNames(context.Fragments, _ => true);
+            var result = context.FieldAst.GetSubFieldsNames(context.Document.Fragments, _ => true);
             return result;
         }
 
@@ -111,7 +112,7 @@ namespace Epam.GraphQL.Extensions
                 edges = GetSubField(context, edges, "node");
             }
 
-            return items.GetSubFieldsNames(context.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Fragments, f => true)).Distinct();
+            return items.GetSubFieldsNames(context.Document.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Document.Fragments, f => true)).Distinct(StringComparer.Ordinal);
         }
 
         public static IEnumerable<string> GetGroupConnectionQueriedFields(this IResolveFieldContext context)
@@ -130,7 +131,7 @@ namespace Epam.GraphQL.Extensions
                 }
             }
 
-            return items.GetSubFieldsNames(context.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Fragments, f => true)).Distinct();
+            return items.GetSubFieldsNames(context.Document.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Document.Fragments, f => true)).Distinct(StringComparer.Ordinal);
         }
 
         public static IEnumerable<string> GetGroupConnectionAggregateQueriedFields(this IResolveFieldContext context)
@@ -142,8 +143,8 @@ namespace Epam.GraphQL.Extensions
                 edges = GetSubField(context, edges, "node");
             }
 
-            return items.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))
-                .Concat(edges.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))).Distinct();
+            return items.GetSubFieldsNames(context.Document.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))
+                .Concat(edges.GetSubFieldsNames(context.Document.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))).Distinct(StringComparer.Ordinal);
         }
 
         public static object GetFilterValue(this IResolveFieldContext context, Type filterType)
@@ -190,7 +191,7 @@ namespace Epam.GraphQL.Extensions
 
             var fragmentNames = parent.SelectionSet.Children.OfType<FragmentSpread>().Select(fragment => fragment.Name);
 
-            return context.Fragments
+            return context.Document.Fragments
                 .Where(fragment => fragmentNames.Contains(fragment.Name))
                 .SelectMany(f => f.SelectionSet.Children.OfType<Field>())
                 .FirstOrDefault();
@@ -205,7 +206,7 @@ namespace Epam.GraphQL.Extensions
         [return: NotNullIfNotNull("defaultValue")]
         private static object? GetArgument(IResolveFieldContext context, Type argumentType, string name, object? defaultValue)
         {
-            if (!HasArgument(context, name) || context.Arguments[name] == null)
+            if (!HasArgument(context, name) || context.Arguments[name].Value == null)
             {
                 if (defaultValue is IDictionary<string, object> dict)
                 {
@@ -216,7 +217,7 @@ namespace Epam.GraphQL.Extensions
             }
 
             var arg = context.Arguments[name];
-            if (arg is IDictionary<string, object> inputObject)
+            if (arg.Value is IDictionary<string, object> inputObject)
             {
                 if (typeof(IDictionary<string, object>).IsAssignableFrom(argumentType))
                 {
@@ -226,7 +227,7 @@ namespace Epam.GraphQL.Extensions
                 return inputObject.ToObject(argumentType);
             }
 
-            return arg.GetPropertyValue(argumentType);
+            return arg.Value.GetPropertyValue(argumentType);
         }
 
         private static bool HasArgument(IResolveFieldContext context, string argumentName)

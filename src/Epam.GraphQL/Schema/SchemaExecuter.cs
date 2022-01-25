@@ -37,7 +37,7 @@ namespace Epam.GraphQL
             Registry = schemaServiceProvider.GetRequiredService<RelationRegistry<TExecutionContext>>();
 
             ValueConverter.Register(typeof(string), typeof(SortDirection), StringToSortDirection);
-            GraphQLSchema.RegisterValueConverter(new SortDirectionAstValueConverter());
+            GraphQLSchema.RegisterTypeMapping<SortDirection, SortDirectionGraphType>();
         }
 
         internal RelationRegistry<TExecutionContext> Registry { get; }
@@ -122,12 +122,13 @@ namespace Epam.GraphQL
 
             GraphQLSchema.Initialize();
 
-            var typeGraphType = (__Type)GraphQLSchema.FindType(nameof(__Type));
+            var typeGraphType = (__Type)GraphQLSchema.TypeMetaFieldType.ResolvedType;
+            var fieldGraphType = (__Field)GraphQLSchema.AllTypes[nameof(__Field)];
             var field = new FieldType()
             {
                 Name = "metadata",
                 Type = typeof(TypeMetadataGraphType),
-                ResolvedType = new TypeMetadataGraphType((__Field)GraphQLSchema.FindType(nameof(__Field)), typeGraphType),
+                ResolvedType = new TypeMetadataGraphType(fieldGraphType, typeGraphType),
                 Resolver = new FuncFieldResolver<IGraphType, TypeMetadata?>(ResolveTypeMetadata),
             };
 

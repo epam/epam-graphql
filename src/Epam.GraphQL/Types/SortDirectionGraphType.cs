@@ -3,6 +3,7 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
+using System;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.Language.AST;
@@ -19,11 +20,6 @@ namespace Epam.GraphQL.Types
 
         public override object? ParseLiteral(IValue value)
         {
-            if (value is SortDirectionValue sortDirectionValue)
-            {
-                return ParseValue(sortDirectionValue.Value);
-            }
-
             if (value is EnumValue enumValue)
             {
                 return ParseValue(enumValue.Name);
@@ -34,17 +30,43 @@ namespace Epam.GraphQL.Types
                 return ParseValue(stringValue.Value);
             }
 
-            return null;
+            return ThrowLiteralConversionError(value);
         }
 
-        public override object ParseValue(object value)
+        public override object ParseValue(object? value)
         {
-            return ValueConverter.ConvertTo(value, typeof(SortDirection));
+            if (value is string stringValue)
+            {
+                if (stringValue.Equals("ASC", StringComparison.Ordinal) || stringValue.Equals("asc", StringComparison.Ordinal))
+                {
+                    return SortDirection.Asc;
+                }
+
+                if (stringValue.Equals("DESC", StringComparison.Ordinal) || stringValue.Equals("desc", StringComparison.Ordinal))
+                {
+                    return SortDirection.Desc;
+                }
+            }
+
+            return ThrowValueConversionError(value);
         }
 
-        public override object Serialize(object value)
+        public override object? Serialize(object? value)
         {
-            return ValueConverter.ConvertTo(value, typeof(SortDirection));
+            if (value is SortDirection direction)
+            {
+                if (direction == SortDirection.Asc)
+                {
+                    return "ASC";
+                }
+
+                if (direction == SortDirection.Desc)
+                {
+                    return "DESC";
+                }
+            }
+
+            return ThrowSerializationError(value);
         }
     }
 }

@@ -110,15 +110,13 @@ namespace Epam.GraphQL.Tests
         {
             public Task<INodeVisitor> ValidateAsync(ValidationContext context)
             {
-                return Task.FromResult<INodeVisitor>(new EnterLeaveListener(x =>
+                return Task.FromResult<INodeVisitor>(new MatchingNodeVisitor<Field>((field, context) =>
                 {
-                    x.Match<Field>(
-                        field => context.ReportError(new ValidationError(
-                            context.OriginalQuery,
-                            "403",
-                            "Permissions denied",
-                            new UnauthorizedAccessException(),
-                            field)));
+                    context.ReportError(new ValidationError(
+                        context.Document.OriginalQuery,
+                        "403",
+                        "Permissions denied",
+                        new UnauthorizedAccessException()));
                 }));
             }
         }
