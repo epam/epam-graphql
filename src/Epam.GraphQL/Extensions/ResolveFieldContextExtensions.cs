@@ -14,7 +14,6 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
-using GraphQL.Execution;
 using GraphQL.Language.AST;
 
 namespace Epam.GraphQL.Extensions

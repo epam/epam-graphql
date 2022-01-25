@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Configuration
 
         bool IsMandatoryForUpdate { get; set; }
 
-        Func<IResolveFieldContext, object, object>? GetDefaultValue { get; set; }
+        Func<IResolveFieldContext, object, object?>? GetDefaultValue { get; set; }
 
         Action<IResolveFieldContext, object, object?>? OnWrite { get; }
 

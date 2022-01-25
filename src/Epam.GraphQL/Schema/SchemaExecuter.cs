@@ -38,6 +38,7 @@ namespace Epam.GraphQL
 
             ValueConverter.Register(typeof(string), typeof(SortDirection), StringToSortDirection);
             GraphQLSchema.RegisterTypeMapping<SortDirection, SortDirectionGraphType>();
+            GraphQLSchema.RegisterType<LegacyDateTimeGraphType>();
         }
 
         internal RelationRegistry<TExecutionContext> Registry { get; }

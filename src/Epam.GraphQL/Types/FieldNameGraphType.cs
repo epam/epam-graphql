@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Types
             _fieldNames = fieldNames ?? throw new ArgumentNullException(nameof(fieldNames));
         }
 
-        public override object? ParseValue(object value)
+        public override object? ParseValue(object? value)
         {
             return ValidateResult(base.ParseValue(value));
         }
@@ -32,7 +32,7 @@ namespace Epam.GraphQL.Types
             return ValidateResult(base.ParseLiteral(value));
         }
 
-        private string? ValidateResult(object value)
+        private string? ValidateResult(object? value)
         {
             var result = value as string;
             if (result != null && !_fieldNames.Contains(result))

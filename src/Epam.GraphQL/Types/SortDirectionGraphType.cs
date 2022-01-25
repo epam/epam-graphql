@@ -5,7 +5,6 @@
 
 using System;
 using Epam.GraphQL.Loaders;
-using GraphQL;
 using GraphQL.Language.AST;
 using GraphQL.Types;
 

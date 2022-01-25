@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public bool IsReadOnly => OnWrite == null && OnWriteAsync == null && _canNotBeChangedDirectly;
 
-        public Func<IResolveFieldContext, object, object>? GetDefaultValue { get; set; }
+        public Func<IResolveFieldContext, object, object?>? GetDefaultValue { get; set; }
 
         public Func<IResolveFieldContext, IDataLoader<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)>>? CanEdit { get; set; }
 
@@ -56,7 +56,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 {
                     value = value is IDictionary<string, object> dict
                         ? dict.ToObject(typeof(TReturnType))
-                        : value.GetPropertyValue(typeof(TReturnType));
+                        : value?.GetPropertyValue(typeof(TReturnType));
 
                     OnWrite(ctx, (TEntity)e, (TReturnType)value);
                 };
@@ -76,7 +76,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 {
                     value = value is IDictionary<string, object> dict
                         ? dict.ToObject(typeof(TReturnType))
-                        : value.GetPropertyValue(typeof(TReturnType));
+                        : value?.GetPropertyValue(typeof(TReturnType));
 
                     return OnWriteAsync(ctx, (TEntity)e, (TReturnType)value);
                 };

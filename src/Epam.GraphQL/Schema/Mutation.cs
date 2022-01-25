@@ -164,7 +164,7 @@ namespace Epam.GraphQL
                 inputItems.Add(
                     kv.Key,
                     (kv.Value as System.Collections.IEnumerable)
-                        .Cast<IDictionary<string, object?>>()
+                        .Cast<IDictionary<string, object>>()
                         .Select(entity => InputItem.Create(entityType, entity.ToObject(entityType, graphType), entity)));
             }
 
