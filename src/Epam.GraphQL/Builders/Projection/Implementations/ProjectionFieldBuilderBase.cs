@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Configuration;
 
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {

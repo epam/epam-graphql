@@ -3,14 +3,14 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Configuration.Implementations;
 
-namespace Epam.GraphQL.Configuration.Implementations
+namespace Epam.GraphQL.Configuration
 {
-    internal interface IUnionableFieldBase<out TThisType, TExecutionContext>
+    internal interface IUnionableField<TEntity, TExecutionContext> :
+        IResolvableField<TEntity, TExecutionContext>,
+        IUnionableFieldBase<IUnionableField<TEntity, TExecutionContext>, TExecutionContext>
+        where TEntity : class
     {
-        TThisType AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class;
     }
 }

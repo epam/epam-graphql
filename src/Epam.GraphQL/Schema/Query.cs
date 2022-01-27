@@ -7,8 +7,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Epam.GraphQL.Builders.Query;
-using Epam.GraphQL.Builders.Query.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
@@ -24,11 +22,11 @@ namespace Epam.GraphQL
         private static MethodInfo? _connectionMethodInfo;
         private static MethodInfo? _groupConnectionMethodInfo;
 
-        protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
+        protected internal new IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
             var field = Configurator.AddField(new QueryField<TExecutionContext>(Registry, Configurator, name), deprecationReason);
-            return new QueryFieldBuilder<QueryField<TExecutionContext>, TExecutionContext>(field);
+            return field;
         }
 
         protected internal ILoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)

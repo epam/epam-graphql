@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
-using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;

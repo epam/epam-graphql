@@ -8,8 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Mutation;
-using Epam.GraphQL.Builders.Mutation.Implementations;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.Fields;
@@ -113,11 +112,11 @@ namespace Epam.GraphQL
             SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
         }
 
-        protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
+        protected internal new IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
             var field = Configurator.AddField(new MutationField<TExecutionContext>(this, Registry, Configurator, name), deprecationReason);
-            return new MutationFieldBuilder<MutationField<TExecutionContext>, TExecutionContext>(field);
+            return field;
         }
 
         protected override void AfterConfigure()
