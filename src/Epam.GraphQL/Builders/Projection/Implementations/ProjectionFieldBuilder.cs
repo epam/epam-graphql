@@ -8,7 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Loader.Implementations;
-using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
 namespace Epam.GraphQL.Builders.Projection.Implementations

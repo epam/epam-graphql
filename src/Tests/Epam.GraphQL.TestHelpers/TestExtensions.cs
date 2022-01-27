@@ -6,7 +6,6 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Query;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
 
@@ -24,10 +23,10 @@ namespace Epam.GraphQL.Tests
             return methodInfo.InvokeAndHoistBaseException<ILoaderField<TChildEntity, TExecutionContext>>(query, name, null);
         }
 
-        public static ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildEntity, TExecutionContext>(this IQueryFieldBuilder<TExecutionContext> builder, Type loaderType)
+        public static ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildEntity, TExecutionContext>(this IQueryField<TExecutionContext> builder, Type loaderType)
         {
-            var methodInfo = typeof(IQueryFieldBuilder<TExecutionContext>).GetPublicGenericMethod(
-                nameof(IQueryFieldBuilder<TExecutionContext>.FromLoader),
+            var methodInfo = typeof(IQueryField<TExecutionContext>).GetPublicGenericMethod(
+                nameof(IQueryField<TExecutionContext>.FromLoader),
                 new[] { loaderType, typeof(TChildEntity) },
                 Type.EmptyTypes);
 
@@ -92,6 +91,206 @@ namespace Epam.GraphQL.Tests
                 new[] { typeof(string), typeof(string) });
 
             return methodInfo.InvokeAndHoistBaseException<IConnectionField>(query, fieldName, null);
+        }
+
+        public static IArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TEntity, TExecutionContext>(this IQueryField<TExecutionContext> builder, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IQueryField<TExecutionContext>).GetPublicGenericMethod(
+                nameof(IQueryField<TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>>(builder, argName);
+        }
+
+        public static IArgumentedQueryField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TEntity, TExecutionContext>(this IArgumentedQueryField<TArg1, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedQueryField<TArg1, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedQueryField<TArg1, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedQueryField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IArgumentedQueryField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TArg2, TEntity, TExecutionContext>(this IArgumentedQueryField<TArg1, TArg2, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedQueryField<TArg1, TArg2, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedQueryField<TArg1, TArg2, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedQueryField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IArgumentedQueryField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TArg2, TArg3, TEntity, TExecutionContext>(this IArgumentedQueryField<TArg1, TArg2, TArg3, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedQueryField<TArg1, TArg2, TArg3, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedQueryField<TArg1, TArg2, TArg3, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedQueryField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TArg2, TArg3, TArg4, TEntity, TExecutionContext>(this IArgumentedQueryField<TArg1, TArg2, TArg3, TArg4, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedQueryField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedQueryField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IPayloadFieldedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TEntity, TExecutionContext>(this IQueryField<TExecutionContext> builder, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IQueryField<TExecutionContext>).GetPublicGenericMethod(
+                nameof(IQueryField<TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>>(builder, argName);
+        }
+
+        public static IPayloadFieldedQueryField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TEntity, TExecutionContext>(this IPayloadFieldedQueryField<TArg1, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedQueryField<TArg1, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedQueryField<TArg1, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedQueryField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IPayloadFieldedQueryField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TArg2, TEntity, TExecutionContext>(this IPayloadFieldedQueryField<TArg1, TArg2, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedQueryField<TArg1, TArg2, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedQueryField<TArg1, TArg2, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedQueryField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IPayloadFieldedQueryField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TArg2, TArg3, TEntity, TExecutionContext>(this IPayloadFieldedQueryField<TArg1, TArg2, TArg3, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedQueryField<TArg1, TArg2, TArg3, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedQueryField<TArg1, TArg2, TArg3, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedQueryField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TArg2, TArg3, TArg4, TEntity, TExecutionContext>(this IPayloadFieldedQueryField<TArg1, TArg2, TArg3, TArg4, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedQueryField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedQueryField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IArgumentedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TEntity, TExecutionContext>(this IMutationField<TExecutionContext> builder, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IMutationField<TExecutionContext>).GetPublicGenericMethod(
+                nameof(IMutationField<TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext>>(builder, argName);
+        }
+
+        public static IArgumentedMutationField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TEntity, TExecutionContext>(this IArgumentedMutationField<TArg1, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedMutationField<TArg1, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedMutationField<TArg1, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedMutationField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IArgumentedMutationField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TArg2, TEntity, TExecutionContext>(this IArgumentedMutationField<TArg1, TArg2, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedMutationField<TArg1, TArg2, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedMutationField<TArg1, TArg2, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedMutationField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IArgumentedMutationField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TArg2, TArg3, TEntity, TExecutionContext>(this IArgumentedMutationField<TArg1, TArg2, TArg3, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedMutationField<TArg1, TArg2, TArg3, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedMutationField<TArg1, TArg2, TArg3, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IArgumentedMutationField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TArg1, TArg2, TArg3, TArg4, TEntity, TExecutionContext>(this IArgumentedMutationField<TArg1, TArg2, TArg3, TArg4, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IArgumentedMutationField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IArgumentedMutationField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>.FilterArgument),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IPayloadFieldedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TEntity, TExecutionContext>(this IMutationField<TExecutionContext> builder, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IMutationField<TExecutionContext>).GetPublicGenericMethod(
+                nameof(IMutationField<TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext>>(builder, argName);
+        }
+
+        public static IPayloadFieldedMutationField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TEntity, TExecutionContext>(this IPayloadFieldedMutationField<TArg1, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedMutationField<TArg1, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedMutationField<TArg1, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedMutationField<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IPayloadFieldedMutationField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TArg2, TEntity, TExecutionContext>(this IPayloadFieldedMutationField<TArg1, TArg2, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedMutationField<TArg1, TArg2, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedMutationField<TArg1, TArg2, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedMutationField<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IPayloadFieldedMutationField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TArg2, TArg3, TEntity, TExecutionContext>(this IPayloadFieldedMutationField<TArg1, TArg2, TArg3, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedMutationField<TArg1, TArg2, TArg3, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedMutationField<TArg1, TArg2, TArg3, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IPayloadFieldedMutationField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
+        }
+
+        public static IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TArg1, TArg2, TArg3, TArg4, TEntity, TExecutionContext>(this IPayloadFieldedMutationField<TArg1, TArg2, TArg3, TArg4, TExecutionContext> field, Type loaderType, string argName)
+        {
+            var methodInfo = typeof(IPayloadFieldedMutationField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>).GetPublicGenericMethod(
+                nameof(IPayloadFieldedMutationField<TArg1, TArg2, TArg3, TArg4, TExecutionContext>.FilterPayloadField),
+                new[] { loaderType, typeof(TEntity) },
+                new[] { typeof(string) });
+
+            return methodInfo.InvokeAndHoistBaseException<IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
         }
     }
 }

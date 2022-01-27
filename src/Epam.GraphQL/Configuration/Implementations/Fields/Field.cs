@@ -5,19 +5,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
-using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class Field<TEntity, TExecutionContext> :
         FieldBase<TEntity, TExecutionContext>,
-        IArgumentedField<TEntity, TExecutionContext>
+        IUnionableField<TEntity, TExecutionContext>
         where TEntity : class
     {
         public Field(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
@@ -108,32 +106,24 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             return Parent.ReplaceField(this, unionField);
         }
 
-        public IArgumentedField<TEntity, TArgType, TExecutionContext> Argument<TArgType>(string argName)
+        public IUnionableField<TEntity, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+            where TLastElementType : class
         {
-            var argumentedField = new ArgumentedField<TEntity, TArgType, TExecutionContext>(Registry, Parent, Name, new Arguments<TArgType, TExecutionContext>(Registry, argName));
-            return Parent.ReplaceField(this, argumentedField);
+            return AsUnionOf(build);
         }
 
-        public IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
+        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+            where TEnumerable : IEnumerable<TLastElementType>
+            where TLastElementType : class
         {
-            var argumentedField = new ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, new Arguments<Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, argName, typeof(TProjection), typeof(TEntity1)));
-            return Parent.ReplaceField(this, argumentedField);
+            return AsUnionOf(build);
         }
 
-        public IArgumentedField<TEntity, TArgType, TExecutionContext> PayloadField<TArgType>(string argName)
+        public IUnionableField<TEntity, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+            where TEnumerable : IEnumerable<TLastElementType>
+            where TLastElementType : class
         {
-            var payloadedField = new ArgumentedField<TEntity, TArgType, TExecutionContext>(Registry, Parent, Name, new PayloadFields<TArgType, TExecutionContext>(Name, Registry, argName));
-            return Parent.ReplaceField(this, payloadedField);
-        }
-
-        public IArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class
-        {
-            var argumentedField = new ArgumentedField<TEntity, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, new PayloadFields<Expression<Func<TEntity1, bool>>, TExecutionContext>(Name, Registry, argName, typeof(TProjection), typeof(TEntity1)));
-            return Parent.ReplaceField(this, argumentedField);
+            return AsUnionOf(build);
         }
     }
 }
