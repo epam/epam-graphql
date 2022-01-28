@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public ArgumentedMutationField(
             MutationField<TExecutionContext> mutationField,
             IArguments<TArgType, TExecutionContext> arguments)
-            : base(mutationField.Registry, mutationField.Parent, mutationField.Name, arguments)
+            : base(mutationField.Parent, mutationField.Name, arguments)
         {
             MutationField = mutationField;
         }
@@ -209,7 +209,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionMutationField<TArgType, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionMutationField<TArgType, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -261,7 +261,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public ArgumentedMutationField(
             MutationField<TExecutionContext> mutationField,
             IArguments<TArgType1, TArgType2, TExecutionContext> arguments)
-            : base(mutationField.Registry, mutationField.Parent, mutationField.Name, arguments)
+            : base(mutationField.Parent, mutationField.Name, arguments)
         {
             MutationField = mutationField;
         }
@@ -415,7 +415,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -491,7 +491,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public ArgumentedMutationField(
             MutationField<TExecutionContext> mutationField,
             IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext> arguments)
-            : base(mutationField.Registry, mutationField.Parent, mutationField.Name, arguments)
+            : base(mutationField.Parent, mutationField.Name, arguments)
         {
             MutationField = mutationField;
         }
@@ -645,7 +645,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -721,7 +721,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public ArgumentedMutationField(
             MutationField<TExecutionContext> mutationField,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> arguments)
-            : base(mutationField.Registry, mutationField.Parent, mutationField.Name, arguments)
+            : base(mutationField.Parent, mutationField.Name, arguments)
         {
             MutationField = mutationField;
         }
@@ -875,7 +875,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -951,7 +951,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public ArgumentedMutationField(
             MutationField<TExecutionContext> mutationField,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> arguments)
-            : base(mutationField.Registry, mutationField.Parent, mutationField.Name, arguments)
+            : base(mutationField.Parent, mutationField.Name, arguments)
         {
             MutationField = mutationField;
         }
@@ -1105,7 +1105,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 

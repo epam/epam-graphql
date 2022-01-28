@@ -18,8 +18,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         IUnionableField<TEntity, TExecutionContext>
         where TEntity : class
     {
-        public Field(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
-            : base(registry, parent, name)
+        public Field(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : base(parent, name)
         {
         }
 
@@ -102,7 +102,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = UnionField.Create(Registry, Parent, Name, build);
+            var unionField = UnionField.Create(Parent, Name, build);
             return Parent.ReplaceField(this, unionField);
         }
 

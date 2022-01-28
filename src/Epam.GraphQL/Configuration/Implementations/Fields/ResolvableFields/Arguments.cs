@@ -12,12 +12,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class Arguments<TArg1, TExecutionContext> : ArgumentsBase<TArg1, IResolveFieldContext, TExecutionContext>, IArguments<TArg1, TExecutionContext>
     {
-        public Arguments(RelationRegistry<TExecutionContext> registry, string argName)
+        public Arguments(IRegistry<TExecutionContext> registry, string argName)
             : base(registry, new Argument<TArg1>(argName))
         {
         }
 
-        public Arguments(RelationRegistry<TExecutionContext> registry, string argName, Type projectionType, Type entityType)
+        public Arguments(IRegistry<TExecutionContext> registry, string argName, Type projectionType, Type entityType)
             : base(registry, new FilterArgument<TExecutionContext>(registry, argName, projectionType, entityType))
         {
         }

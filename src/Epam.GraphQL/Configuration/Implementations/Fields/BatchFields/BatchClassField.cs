@@ -18,13 +18,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         where TReturnType : class
     {
         public BatchClassField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : base(
-                  registry,
                   parent,
                   name,
                   batchFunc,
@@ -33,13 +31,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchClassField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : base(
-                  registry,
                   parent,
                   name,
                   batchFunc,
@@ -122,14 +118,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         where TReturnType : class
     {
         public BatchClassField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : base(
-                registry,
                 parent,
                 name,
                 new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -138,14 +132,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchClassField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : base(
-                registry,
                 parent,
                 name,
                 new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),

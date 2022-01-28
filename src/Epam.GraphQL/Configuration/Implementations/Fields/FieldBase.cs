@@ -20,9 +20,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
         where TEntity : class
     {
-        protected FieldBase(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+        protected FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
         {
-            Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             Name = name.ToCamelCase();
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
@@ -43,7 +42,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         IFieldEditSettings<TExecutionContext>? IField<TExecutionContext>.EditSettings => EditSettings;
 
-        internal RelationRegistry<TExecutionContext> Registry { get; }
+        internal IRegistry<TExecutionContext> Registry => Parent.Registry;
 
         internal BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> Parent { get; }
 

@@ -12,11 +12,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         where TEntity : class
     {
         protected ArgumentedFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             TArguments arguments)
-            : base(registry, parent, name)
+            : base(parent, name)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);

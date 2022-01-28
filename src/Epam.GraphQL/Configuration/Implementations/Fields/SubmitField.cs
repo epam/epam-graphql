@@ -18,8 +18,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
         private readonly Type _fieldType;
 
-        public SubmitField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
-            : base(registry, parent, name)
+        public SubmitField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
+            : base(parent, name)
         {
             _graphType = returnGraphType ?? throw new ArgumentNullException(nameof(returnGraphType));
             _resolve = resolve ?? throw new ArgumentNullException(nameof(resolve));

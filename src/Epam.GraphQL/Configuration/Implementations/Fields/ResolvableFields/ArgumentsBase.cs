@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal abstract class ArgumentsBase<TResolveArgumentContext, TExecutionContext> : IArguments
     {
-        protected ArgumentsBase(RelationRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
+        protected ArgumentsBase(IRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
             : this(registry, Enumerable.Empty<IArgument<TResolveArgumentContext>>(), arg)
         {
         }
@@ -23,13 +23,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         {
         }
 
-        private ArgumentsBase(RelationRegistry<TExecutionContext> registry, IEnumerable<IArgument<TResolveArgumentContext>> args, IArgument<TResolveArgumentContext> lastArg)
+        private ArgumentsBase(IRegistry<TExecutionContext> registry, IEnumerable<IArgument<TResolveArgumentContext>> args, IArgument<TResolveArgumentContext> lastArg)
         {
             Items = args.Concat(Enumerable.Repeat(lastArg, 1)).ToArray();
             Registry = registry;
         }
 
-        public RelationRegistry<TExecutionContext> Registry { get; }
+        public IRegistry<TExecutionContext> Registry { get; }
 
         protected IArgument<TResolveArgumentContext>[] Items { get; }
 
@@ -40,7 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
     internal abstract class ArgumentsBase<TArg1, TResolveArgumentContext, TExecutionContext> : ArgumentsBase<TResolveArgumentContext, TExecutionContext>
     {
-        protected ArgumentsBase(RelationRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
+        protected ArgumentsBase(IRegistry<TExecutionContext> registry, IArgument<TResolveArgumentContext> arg)
             : base(registry, arg)
         {
         }

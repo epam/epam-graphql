@@ -43,7 +43,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         private string? _name;
 
-        protected BaseObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, RelationRegistry<TExecutionContext> registry, bool isAuto)
+        protected BaseObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry, bool isAuto)
         {
             Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             Parent = parent;
@@ -99,7 +99,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public IReadOnlyList<ISorter<TExecutionContext>> Sorters => _sorters;
 
-        protected RelationRegistry<TExecutionContext> Registry { get; }
+        public IRegistry<TExecutionContext> Registry { get; }
 
         public TField ReplaceField<TField>(FieldBase<TEntity, TExecutionContext> oldField, TField newField)
             where TField : FieldBase<TEntity, TExecutionContext>
@@ -118,55 +118,55 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public Field<TEntity, TExecutionContext> AddField(string name, string? deprecationReason)
         {
-            var field = new Field<TEntity, TExecutionContext>(Registry, this, name);
+            var field = new Field<TEntity, TExecutionContext>(this, name);
             return InternalAddField(field, deprecationReason);
         }
 
         public StructExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string? name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new StructExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new StructExpressionField<TEntity, TReturnType, TExecutionContext>(this, expression, name), deprecationReason);
 
         public StructExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new StructExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new StructExpressionField<TEntity, TReturnType, TExecutionContext>(this, expression, name), deprecationReason);
 
         public NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string? name, Expression<Func<TEntity, TReturnType?>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new NullableExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new NullableExpressionField<TEntity, TReturnType, TExecutionContext>(this, expression, name), deprecationReason);
 
         public NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new NullableExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new NullableExpressionField<TEntity, TReturnType, TExecutionContext>(this, expression, name), deprecationReason);
 
         public StringExpressionField<TEntity, TExecutionContext> AddExpressionField(string? name, Expression<Func<TEntity, string>> expression, string? deprecationReason)
-            => InternalAddField(new StringExpressionField<TEntity, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            => InternalAddField(new StringExpressionField<TEntity, TExecutionContext>(this, expression, name), deprecationReason);
 
         public StringExpressionField<TEntity, TExecutionContext> AddExpressionField(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string? deprecationReason)
-            => InternalAddField(new StringExpressionField<TEntity, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            => InternalAddField(new StringExpressionField<TEntity, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string? name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<TReturnType>>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string? name, Expression<Func<TEntity, IEnumerable<TReturnType?>>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext> AddEnumerableExpressionField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<TReturnType?>>> expression, string? deprecationReason)
-            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            where TReturnType : struct => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType?>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<string>, TExecutionContext> AddEnumerableExpressionField(string? name, Expression<Func<TEntity, IEnumerable<string>>> expression, string? deprecationReason)
-            => InternalAddField(new ExpressionField<TEntity, IEnumerable<string>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            => InternalAddField(new ExpressionField<TEntity, IEnumerable<string>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<string>, TExecutionContext> AddEnumerableExpressionField(string name, Expression<Func<TExecutionContext, TEntity, IEnumerable<string>>> expression, string? deprecationReason)
-            => InternalAddField(new ExpressionField<TEntity, IEnumerable<string>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+            => InternalAddField(new ExpressionField<TEntity, IEnumerable<string>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, TReturnType, TExecutionContext> AddObjectExpressionField<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason)
-           where TReturnType : class => InternalAddField(new ExpressionField<TEntity, TReturnType, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+           where TReturnType : class => InternalAddField(new ExpressionField<TEntity, TReturnType, TExecutionContext>(this, expression, name), deprecationReason);
 
         public ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext> AddEnumerableObjectExpressionField<TReturnType>(string name, Expression<Func<TEntity, IEnumerable<TReturnType>>> expression, string? deprecationReason)
-           where TReturnType : class => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, this, expression, name), deprecationReason);
+           where TReturnType : class => InternalAddField(new ExpressionField<TEntity, IEnumerable<TReturnType>, TExecutionContext>(this, expression, name), deprecationReason);
 
         public SubmitField<TEntity, TExecutionContext> AddSubmitField(string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type graphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType, string? deprecationReason = null)
         {
-            var field = new SubmitField<TEntity, TExecutionContext>(Registry, this, name, returnGraphType, argName, graphType, resolve, fieldType);
+            var field = new SubmitField<TEntity, TExecutionContext>(this, name, returnGraphType, argName, graphType, resolve, fieldType);
             return InternalAddField(field, deprecationReason);
         }
 
@@ -372,7 +372,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchClassField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchClassField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -383,7 +383,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -395,7 +395,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -407,7 +407,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -416,7 +416,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -425,7 +425,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchEnumerableField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchEnumerableField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -435,7 +435,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -445,7 +445,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -524,7 +524,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchClassField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchClassField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -535,7 +535,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -548,7 +548,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -560,7 +560,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            var result = new BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -569,7 +569,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -578,7 +578,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchEnumerableField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, batchFunc, graphType);
+            var result = new BatchEnumerableField<TEntity, TReturnType, TExecutionContext>(this, field.Name, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -588,7 +588,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -598,7 +598,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            var result = new BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>(Registry, this, field.Name, keySelector, batchFunc, graphType);
+            var result = new BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>(this, field.Name, keySelector, batchFunc, graphType);
             return ReplaceField(field, result);
         }
 
@@ -679,7 +679,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
             var result = new QueryableField<TEntity, TSelectType, TExecutionContext>(
-                Registry,
                 this,
                 field.Name,
                 query,
@@ -706,7 +705,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             var equality = Expression.Equal(factorizationResult.LeftExpression.Body, factorizationResult.RightExpression.Body);
             var lambda = Expression.Lambda<Func<TEntity, TChildEntity, bool>>(equality, condition.Parameters);
 
-            var result = ReplaceField(field, new LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext>(Registry, this, field.Name, lambda, relationType, navigationProperty, reverseNavigationProperty, graphResultType));
+            var result = ReplaceField(field, new LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext>(this, field.Name, lambda, relationType, navigationProperty, reverseNavigationProperty, graphResultType));
 
             if (factorizationResult.RightCondition != null)
             {
@@ -724,7 +723,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TChildEntity : class
         {
             var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 this,
                 field.Name,
                 condition,
@@ -739,12 +737,12 @@ namespace Epam.GraphQL.Configuration.Implementations
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(FieldBase<TEntity, TExecutionContext> field, IResolver<TEntity> resolver)
         {
             var graphType = GetGraphQLTypeDescriptor<TReturnType>(field);
-            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType));
+            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(this, field.Name, resolver, graphType));
         }
 
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(FieldBase<TEntity, TExecutionContext> field, IResolver<TEntity> resolver, IGraphTypeDescriptor<TExecutionContext> graphType)
         {
-            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType));
+            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(this, field.Name, resolver, graphType));
         }
 
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(
@@ -754,7 +752,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             where TReturnType : class
         {
             var graphType = GetGraphQLTypeDescriptor(field, build);
-            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(Registry, this, field.Name, resolver, graphType));
+            return ReplaceField(field, new SelectField<TEntity, TReturnType, TExecutionContext>(this, field.Name, resolver, graphType));
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TAnotherReturnType>(
@@ -876,7 +874,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             var secondGraphType = GetGraphQLTypeDescriptor(field, build);
 
             return ReplaceField(field, new BatchUnionField<TEntity, TExecutionContext>(
-                Registry,
                 this,
                 field.Name,
                 firstResolver,
@@ -893,7 +890,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             IFieldResolver resolver)
         {
             var resolvedField = new ResolvedField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
                 this,
                 field.Name,
                 graphType,
@@ -915,7 +911,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Registry.SetGraphQLTypeName<TEntity>(oldName, newName);
         }
 
-        protected virtual BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfiguratorForFilters() => null;
+        protected virtual IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfiguratorForFilters() => null;
 
         private protected abstract void ValidateFields();
 

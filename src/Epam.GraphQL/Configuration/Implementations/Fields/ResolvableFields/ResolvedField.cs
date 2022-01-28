@@ -15,13 +15,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public ResolvedField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,
             IFieldResolver resolver,
             LazyQueryArguments? arguments)
-            : base(registry, parent, name)
+            : base(parent, name)
         {
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             _graphType = graphType;

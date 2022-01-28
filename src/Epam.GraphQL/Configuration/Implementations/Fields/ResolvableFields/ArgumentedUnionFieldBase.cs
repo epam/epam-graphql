@@ -15,20 +15,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         where TEntity : class
     {
         protected ArgumentedUnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver)
+            : base(parent, name, unionType, typeResolver)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);
         }
 
         protected ArgumentedUnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -36,7 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType)
+            : base(parent, name, unionType, typeResolver, unionTypes, unionGraphType)
         {
             Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             Arguments.ApplyTo(this);

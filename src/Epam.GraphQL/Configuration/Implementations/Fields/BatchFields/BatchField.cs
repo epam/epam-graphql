@@ -23,13 +23,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public BatchField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
-                registry,
                 parent,
                 name,
                 new BatchResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
@@ -38,13 +36,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
-                registry,
                 parent,
                 name,
                 new BatchTaskResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
@@ -53,12 +49,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         protected BatchField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, TReturnType> resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(registry, parent, name)
+            : base(parent, name)
         {
             _graphType = graphType;
 
@@ -127,14 +122,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         where TEntity : class
     {
         public BatchField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
-                registry,
                 parent,
                 name,
                 new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -143,14 +136,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
-                registry,
                 parent,
                 name,
                 new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -159,12 +150,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         protected BatchField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, TReturnType> resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(registry, parent, name, resolver, graphType)
+            : base(parent, name, resolver, graphType)
         {
         }
     }

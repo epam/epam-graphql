@@ -14,13 +14,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
     {
         private readonly PayloadFieldsContextAccessor<TExecutionContext> _contextAccessor;
 
-        public PayloadFields(string fieldName, RelationRegistry<TExecutionContext> registry, string argName)
+        public PayloadFields(string fieldName, IRegistry<TExecutionContext> registry, string argName)
             : base(registry, new PayloadField<TArg1, TExecutionContext>(argName))
         {
             _contextAccessor = new PayloadFieldsContextAccessor<TExecutionContext>(fieldName, Items);
         }
 
-        public PayloadFields(string fieldName, RelationRegistry<TExecutionContext> registry, string argName, Type projectionType, Type entityType)
+        public PayloadFields(string fieldName, IRegistry<TExecutionContext> registry, string argName, Type projectionType, Type entityType)
             : base(registry, new FilterPayloadField<TExecutionContext>(registry, argName, projectionType, entityType))
         {
             _contextAccessor = new PayloadFieldsContextAccessor<TExecutionContext>(fieldName, Items);

@@ -19,13 +19,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TEntity : class
     {
         public EnumerableFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : base(
-                  registry,
                   parent,
                   name)
         {
@@ -66,7 +64,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType1>(this);
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector),

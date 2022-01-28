@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Savers
     {
         public static ResolveOptions DefaultOptions { get; } = new ResolveOptions();
 
-        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext>(RelationRegistry<TExecutionContext> registry, IEnumerable<object> entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext>(IRegistry<TExecutionContext> registry, IEnumerable<object> entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
         {
             var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
             var profiler = executionContext.Profiler;
@@ -61,7 +61,7 @@ namespace Epam.GraphQL.Savers
             }
         }
 
-        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext, TData>(RelationRegistry<TExecutionContext> registry, MutationResult<TData> mutationResult, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext, TData>(IRegistry<TExecutionContext> registry, MutationResult<TData> mutationResult, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
         {
             var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
             var profiler = executionContext.Profiler;
@@ -99,7 +99,7 @@ namespace Epam.GraphQL.Savers
             return (Task<object>)methodInfo.InvokeAndHoistBaseException(null, registry, mutationResult, mutation, context, options);
         }
 
-        public static async Task<IEnumerable<ISaveResult<TExecutionContext>>> SaveChangesAndReload<TExecutionContext>(RelationRegistry<TExecutionContext> registry, IEnumerable<object>? entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<IEnumerable<ISaveResult<TExecutionContext>>> SaveChangesAndReload<TExecutionContext>(IRegistry<TExecutionContext> registry, IEnumerable<object>? entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
         {
             var dataContext = context.GetDataContext();
             var batcher = context.GetBatcher();

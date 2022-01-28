@@ -13,13 +13,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TEntity : class
     {
         public EnumerableField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : base(
-                  registry,
                   parent,
                   name,
                   resolver,
@@ -30,7 +28,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected override EnumerableFieldBase<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = new EnumerableField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Where(predicate),
@@ -42,7 +39,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
         {
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),

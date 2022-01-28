@@ -20,8 +20,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         FieldBase<object, TExecutionContext>,
         IMutationField<TExecutionContext>
     {
-        public MutationField(Mutation<TExecutionContext> mutation, RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
-            : base(registry, parent, name)
+        public MutationField(Mutation<TExecutionContext> mutation, BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
+            : base(parent, name)
         {
             Mutation = mutation;
         }
