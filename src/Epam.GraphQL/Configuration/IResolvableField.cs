@@ -8,47 +8,27 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 
-namespace Epam.GraphQL.Builders.Projection
+namespace Epam.GraphQL.Configuration
 {
-    public interface IProjectionFieldBuilderBase<TEntity, TExecutionContext> :
-        IUnionableProjectionFieldBuilder<IProjectionFieldBuilderBase<TEntity, TExecutionContext>, TExecutionContext>
+    public interface IResolvableField<TEntity, TExecutionContext>
+        where TEntity : class
     {
-        void Resolve<TReturnType>(Func<TEntity, TReturnType> resolve);
-
-        void Resolve<TReturnType>(Func<TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class;
-
-        void Resolve<TReturnType>(Func<TEntity, Task<TReturnType>> resolve);
-
-        void Resolve<TReturnType>(Func<TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class;
-
-        void Resolve<TReturnType>(Func<TEntity, IEnumerable<TReturnType>> resolve);
-
-        void Resolve<TReturnType>(Func<TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class;
-
-        void Resolve<TReturnType>(Func<TEntity, Task<IEnumerable<TReturnType>>> resolve);
-
-        void Resolve<TReturnType>(Func<TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class;
-
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve);
+
+        void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve);
 
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class;
-
-        void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve);
 
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class;
 
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve);
 
+        void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve);
+
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class;
-
-        void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve);
 
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class;
