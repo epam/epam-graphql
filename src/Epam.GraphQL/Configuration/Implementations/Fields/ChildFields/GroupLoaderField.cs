@@ -94,9 +94,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return (context, query) =>
             {
                 var subFields = context.GetGroupConnectionQueriedFields();
-                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
+                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields();
 
-                var sourceType = proxyAccessor.GetConcreteProxyType(subFields.Concat(aggregateQueriedFields));
+                var sourceType = proxyAccessor.GetConcreteProxyType(subFields.Concat(aggregateQueriedFields.Select(field => $"${field}")));
 
                 // ApplyGroupBy
                 // Actual type of lambda returning value is loader.ObjectGraphTypeConfigurator.ExtendedType, not typeof(TChildEntity)
@@ -110,7 +110,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 var groupBy = grouping.ApplyGroupBy(ExpressionHelpers.MakeIdentity(sourceType));
 
                 // .Select(g => new EntityExt { Country = g.Key.Country, Language = g.Key.Language, Count = g.Count(); })
-                var selectKey = groupBy.ApplySelect(proxyAccessor.CreateGroupKeySelectorExpression(subFields, aggregateQueriedFields));
+                var selectKey = groupBy.ApplySelect(proxyAccessor.CreateGroupKeySelectorExpression(subFields, aggregateQueriedFields.Select(field => $"${field}")));
 
                 return (IQueryable<Proxy<TChildEntity>>)selectKey;
             };

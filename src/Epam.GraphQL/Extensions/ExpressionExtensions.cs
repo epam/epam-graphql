@@ -241,7 +241,7 @@ namespace Epam.GraphQL.Extensions
             return result;
         }
 
-        public static bool IsProperty<TSource, TProperty>(this Expression<Func<TSource, TProperty>> propertyLambda)
+        public static bool IsProperty(this LambdaExpression propertyLambda)
         {
             if (propertyLambda.Body is not MemberExpression member)
             {
@@ -259,7 +259,7 @@ namespace Epam.GraphQL.Extensions
                 return false;
             }
 
-            var type = typeof(TSource);
+            var type = propertyLambda.Parameters[0].Type;
             if (type != propInfo.ReflectedType && !propInfo.ReflectedType.IsAssignableFrom(type))
             {
                 return false;
@@ -268,8 +268,8 @@ namespace Epam.GraphQL.Extensions
             return true;
         }
 
-        public static PropertyInfo GetPropertyInfo<TSource, TProperty>(
-            this Expression<Func<TSource, TProperty>> propertyLambda)
+        public static PropertyInfo GetPropertyInfo(
+            this LambdaExpression propertyLambda)
         {
             MemberExpression? member;
 
@@ -296,7 +296,7 @@ namespace Epam.GraphQL.Extensions
                 throw new ArgumentException($"Expression '{propertyLambda}' refers to a field, not a property.");
             }
 
-            var type = typeof(TSource);
+            var type = propertyLambda.Parameters[0].Type;
             if (type != propInfo.ReflectedType && !propInfo.ReflectedType.IsAssignableFrom(type))
             {
                 throw new ArgumentException(

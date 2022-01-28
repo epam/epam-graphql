@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Epam.GraphQL.Extensions;
 
 namespace Epam.GraphQL.Helpers
@@ -233,7 +234,7 @@ namespace Epam.GraphQL.Helpers
 
         public class MemberInitBuilder<TResult>
         {
-            private readonly List<MemberAssignment> _assignments = new();
+            private readonly Dictionary<PropertyInfo, LambdaExpression> _assignments = new();
             private readonly ParameterExpression _param;
 
             public MemberInitBuilder(Type paramType)
@@ -243,7 +244,22 @@ namespace Epam.GraphQL.Helpers
 
             public MemberInitBuilder<TResult> Property<TProperty>(Expression<Func<TResult, TProperty>> property, LambdaExpression initializer)
             {
-                _assignments.Add(Expression.Bind(property.GetPropertyInfo(), initializer.Body.ReplaceParameter(initializer.Parameters[0], _param)));
+                return Property(property.GetPropertyInfo(), initializer);
+            }
+
+            public MemberInitBuilder<TResult> Property(PropertyInfo property, LambdaExpression initializer)
+            {
+                if (_assignments.TryGetValue(property, out var existingInitializer))
+                {
+                    if (!ExpressionEqualityComparer.Instance.Equals(initializer, existingInitializer))
+                    {
+                        throw new InvalidOperationException($"Attempt to create two different initilizers ({existingInitializer} and {initializer})for a property {property.Name} of type {typeof(TResult)}.");
+                    }
+
+                    return this;
+                }
+
+                _assignments.Add(property, initializer);
                 return this;
             }
 
@@ -251,7 +267,8 @@ namespace Epam.GraphQL.Helpers
             {
                 var ctor = typeof(TResult).GetConstructors().Single(c => c.GetParameters().Length == 0);
                 var newExpr = Expression.New(ctor);
-                var initExpr = Expression.MemberInit(newExpr, _assignments);
+                var memberAssignments = _assignments.Select(kv => Expression.Bind(kv.Key, kv.Value.Body.ReplaceParameter(kv.Value.Parameters[0], _param)));
+                var initExpr = Expression.MemberInit(newExpr, memberAssignments);
 
                 return Expression.Lambda(initExpr, _param);
             }

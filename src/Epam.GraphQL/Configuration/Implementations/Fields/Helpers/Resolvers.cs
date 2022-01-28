@@ -49,7 +49,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return (context, children) =>
             {
                 var subFields = context.GetGroupConnectionQueriedFields();
-                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
+                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields();
 
                 var sourceType = children.ElementType;
 
@@ -64,10 +64,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 var shouldComputeItems = context.HasItems();
 
                 IQueryable<object> items;
-                if (aggregateQueriedFields.Contains("<>$count"))
+                if (aggregateQueriedFields.Contains("count"))
                 {
                     var param = Expression.Parameter(sourceType);
-                    var member = Expression.Property(param, sourceType.GetProperty("<>$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+                    var member = Expression.Property(param, sourceType.GetProperty("$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
                     var result = Expression.Lambda(member, param);
 
                     var lambda = ExpressionHelpers.MakeMemberInit<GroupResult<Proxy<TChildEntity>>>(sourceType)
