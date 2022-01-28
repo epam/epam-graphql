@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
     [TestFixture]
     public class NoArgsTests : BaseTests
     {
-        [Test(Description = "Field<int>(...).Resolve(_ => 10)")]
+        [Test]
         public void ShouldResolveIntFieldWithTypeParam()
         {
             var resolver = Substitute.For<Func<TestUserContext, Person, int>>();
@@ -58,6 +58,49 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
 
             resolver.Received(2)
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+        }
+
+        [Test]
+        public void ShouldResolveIntFieldWithTypeParamNoContext()
+        {
+            var resolver = Substitute.For<Func<Person, int>>();
+            resolver
+                .Invoke(Arg.Any<Person>())
+                .Returns(callInfo => callInfo.ArgAt<Person>(0).Id);
+
+            TestHelpers.TestLoader(
+                builder: builder =>
+                {
+                    builder.Field(p => p.Id);
+                    builder.Field("test")
+                        .Resolve(resolver);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
+                connectionName: "people",
+                query: @"
+                    query {
+                        people {
+                            items {
+                                id
+                                test
+                            }
+                        }
+                    }",
+                expected: @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                test: 1
+                            },{
+                                id: 2,
+                                test: 2
+                            }]
+                        }
+                    }");
+
+            resolver.Received(2)
+                .Invoke(Arg.Any<Person>());
         }
 
         [Test(Description = "Field<int>(...).Resolve(_ => Task 10)")]
@@ -923,10 +966,12 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
             TestHelpers.TestLoader(
                 builder: builder =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<Line>, Line>()
                             .And<IEnumerable<Circle>, Circle>()
                         .Resolve(resolver);
+#pragma warning restore CS0618 // Type or member is obsolete
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
                 connectionName: "people",
@@ -989,9 +1034,11 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
             TestHelpers.TestLoader(
                 builder: builder =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
                             .And<IEnumerable<CustomObject<string, int>>, CustomObject<string, int>>()
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
@@ -1058,6 +1105,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
             TestHelpers.TestLoader(
                 builder: builder =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>(b =>
                         {
@@ -1072,6 +1120,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                                 b.Field(o => o.FirstField);
                                 b.Field(o => o.SecondField);
                             })
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),

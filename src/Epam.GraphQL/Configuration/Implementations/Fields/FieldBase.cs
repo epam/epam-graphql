@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
         where TEntity : class
     {
-        public FieldBase(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+        protected FieldBase(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
         {
             Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             Name = name.ToCamelCase();
