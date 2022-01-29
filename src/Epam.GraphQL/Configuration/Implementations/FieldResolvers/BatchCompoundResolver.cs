@@ -17,9 +17,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     internal class BatchCompoundResolver<TEntity, TExecutionContext> : IBatchCompoundResolver<TEntity, TExecutionContext>
         where TEntity : class
     {
-        private readonly List<IResolver<TEntity>> _resolvers = new();
+        private readonly List<IBatchResolver<TEntity>> _resolvers = new();
 
-        public void Add(IResolver<TEntity> resolver)
+        public void Add(IBatchResolver<TEntity> resolver)
         {
             _resolvers.Add(resolver);
         }

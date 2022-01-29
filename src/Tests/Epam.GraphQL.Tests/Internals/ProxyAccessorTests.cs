@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
@@ -20,28 +19,58 @@ namespace Epam.GraphQL.Tests.Internals
     public class ProxyAccessorTests : BaseTests
     {
         [Test]
-        public void ExpressionCreation()
+        public void ExpressionField()
         {
             var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
                 parent: null,
                 registry: Substitute.For<IRegistry<TestUserContext>>(),
                 isAuto: false);
 
-            var fields = new List<IField<Person, TestUserContext>>()
-            {
+            configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
-            };
+                null);
 
-            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(fields);
+            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(configurator);
             var expression = proxyAccessor.CreateSelectorExpression(new[] { "id" })
                 .Compile();
             var context = new TestUserContext(null);
 
             var proxy = expression(context, FakeData.SophieGandley);
             Assert.AreEqual(FakeData.SophieGandley.Id, proxy.GetPropertyValue(proxy.GetType().GetProperty("id")));
+        }
+
+        [Test]
+        public void ExpressionFieldsDuplication()
+        {
+            var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
+                parent: null,
+                registry: Substitute.For<IRegistry<TestUserContext>>(),
+                isAuto: false);
+
+            configurator.AddField(
+                new ExpressionField<Person, int, TestUserContext>(
+                    parent: configurator,
+                    expression: person => person.Id,
+                    name: null),
+                null);
+            configurator.AddField(
+                new ExpressionField<Person, int, TestUserContext>(
+                    parent: configurator,
+                    expression: person => person.Id,
+                    name: "duplicateId"),
+                null);
+
+            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(configurator);
+            var expression = proxyAccessor.CreateSelectorExpression(new[] { "id", "duplicateId" })
+                .Compile();
+            var context = new TestUserContext(null);
+
+            var proxy = expression(context, FakeData.SophieGandley);
+            Assert.AreEqual(FakeData.SophieGandley.Id, proxy.GetPropertyValue(proxy.GetType().GetProperty("id")));
+            Assert.AreEqual(FakeData.SophieGandley.Id, proxy.GetPropertyValue(proxy.GetType().GetProperty("duplicateId")));
         }
 
         [Test]
@@ -52,15 +81,14 @@ namespace Epam.GraphQL.Tests.Internals
                 registry: Substitute.For<IRegistry<TestUserContext>>(),
                 isAuto: false);
 
-            var fields = new List<IField<Person, TestUserContext>>()
-            {
+            configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
-            };
+                null);
 
-            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(fields);
+            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(configurator);
             proxyAccessor.AddMember("children", person => person.Id);
 
             var proxyType = proxyAccessor.ProxyGenericType;
@@ -77,18 +105,19 @@ namespace Epam.GraphQL.Tests.Internals
                 registry: Substitute.For<IRegistry<TestUserContext>>(),
                 isAuto: false);
 
-            var fields = new List<IField<Person, TestUserContext>>()
-            {
+            configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
+                null);
+            configurator.AddField(
                 new TypedField<Person, int, TestUserContext>(
                     parent: configurator,
                     name: "unitId"),
-            };
+                null);
 
-            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(fields);
+            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(configurator);
             proxyAccessor.AddMember("unit", person => person.UnitId);
 
             var proxyType = proxyAccessor.ProxyGenericType;
@@ -105,15 +134,14 @@ namespace Epam.GraphQL.Tests.Internals
                 registry: Substitute.For<IRegistry<TestUserContext>>(),
                 isAuto: false);
 
-            var fields = new List<IField<Person, TestUserContext>>()
-            {
+            configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
-            };
+                null);
 
-            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(fields);
+            var proxyAccessor = new ProxyAccessor<Person, TestUserContext>(configurator);
             proxyAccessor.AddMember("unit", person => person.UnitId);
 
             var proxyType = proxyAccessor.ProxyGenericType;

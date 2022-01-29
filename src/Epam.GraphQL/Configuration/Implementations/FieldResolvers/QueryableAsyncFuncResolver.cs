@@ -64,22 +64,14 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public object Resolve(IResolveFieldContext context)
         {
-            var batchLoader = new Lazy<IDataLoader<TEntity, IQueryable<Proxy<TReturnType>>>>(() => context.Bind(Resolver));
-            var proxiedBatchLoader = new Lazy<IDataLoader<Proxy<TEntity>, IQueryable<Proxy<TReturnType>>>>(() => context.Bind(ProxiedResolver));
+            if (context.Source is Proxy<TEntity> proxy)
+            {
+                var proxiedBatchLoader = context.Bind(ProxiedResolver);
+                return proxiedBatchLoader.LoadAsync(proxy);
+            }
 
-            return context.Source is Proxy<TEntity> proxy
-                ? proxiedBatchLoader.Value.LoadAsync(proxy)
-                : batchLoader.Value.LoadAsync((TEntity)context.Source);
-        }
-
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return Resolver(context).Then(FuncConstants<IQueryable<object>>.WeakIdentity);
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return ProxiedResolver(context).Then(FuncConstants<IQueryable<object>>.WeakIdentity);
+            var batchLoader = context.Bind(Resolver);
+            return batchLoader.LoadAsync((TEntity)context.Source);
         }
 
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(
@@ -349,16 +341,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return context.Source is Proxy<TEntity> proxy
                 ? proxiedBatchLoader.Value.LoadAsync(proxy)
                 : batchLoader.Value.LoadAsync((TEntity)context.Source);
-        }
-
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return Resolver(context).Then(FuncConstants<IEnumerable<TReturnType>>.WeakIdentity);
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return ProxiedResolver(context).Then(FuncConstants<IEnumerable<TReturnType>>.WeakIdentity);
         }
 
         public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)

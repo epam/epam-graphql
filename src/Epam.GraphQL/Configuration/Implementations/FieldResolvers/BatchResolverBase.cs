@@ -21,6 +21,16 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         {
         }
 
+        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
+        {
+            return Resolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
+        }
+
+        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
+        {
+            return ProxiedResolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
+        }
+
         public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, TReturnType, TSelectType> selector)
         {
             return new BatchResolverBase<TEntity, TSelectType>(

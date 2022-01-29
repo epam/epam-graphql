@@ -29,8 +29,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         public BatchUnionField(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            IResolver<TEntity> firstResolver,
-            IResolver<TEntity> secondResolver,
+            IBatchResolver<TEntity> firstResolver,
+            IBatchResolver<TEntity> secondResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Type firstType,
             IGraphTypeDescriptor<TExecutionContext> secondGraphType,

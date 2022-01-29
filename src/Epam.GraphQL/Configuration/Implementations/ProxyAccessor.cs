@@ -21,6 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations
     {
         private static MethodInfo? _createGroupSelectorExpressionMethodInfo;
         private static MethodInfo? _createSelectorExpressionMethodInfo;
+        private readonly IObjectGraphTypeConfigurator<TEntity, TExecutionContext> _owner;
         private readonly HashSet<LambdaExpression> _members = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<LambdaExpression, string> _expressionNames = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<string, FieldDependencies<TExecutionContext>> _conditionMembers = new(StringComparer.Ordinal);
@@ -31,12 +32,12 @@ namespace Epam.GraphQL.Configuration.Implementations
         private Type? _proxyGenericType;
         private Type? _proxyType;
 
-        public ProxyAccessor(IReadOnlyList<IField<TEntity, TExecutionContext>> fields)
+        public ProxyAccessor(IObjectGraphTypeConfigurator<TEntity, TExecutionContext> owner)
         {
-            Fields = fields ?? throw new ArgumentNullException(nameof(fields));
+            _owner = owner;
         }
 
-        public IReadOnlyList<IField<TEntity, TExecutionContext>> Fields { get; }
+        public IReadOnlyList<IField<TEntity, TExecutionContext>> Fields => _owner.Fields;
 
         public Type ProxyGenericType
         {

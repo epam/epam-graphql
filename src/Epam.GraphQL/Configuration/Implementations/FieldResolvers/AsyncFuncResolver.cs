@@ -5,7 +5,6 @@
 
 using System;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
@@ -25,16 +24,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         protected Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType>> Resolver { get; }
 
         protected Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType>> ProxiedResolver { get; }
-
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return Resolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return ProxiedResolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
-        }
 
         public object Resolve(IResolveFieldContext context)
         {

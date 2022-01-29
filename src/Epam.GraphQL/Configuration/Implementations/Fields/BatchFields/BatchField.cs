@@ -10,27 +10,25 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
-        IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>,
-        IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>
+    internal class BatchField<TEntity, TReturnType, TExecutionContext> : BatchField<TEntity, TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
-        private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
-
         public BatchField(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : this(
+            : base(
                 parent,
                 name,
-                new BatchResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
+                FuncConstants<TEntity>.IdentityExpression,
+                batchFunc,
                 graphType)
         {
         }
@@ -40,10 +38,47 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             string name,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
+            : base(
+                parent,
+                name,
+                FuncConstants<TEntity>.IdentityExpression,
+                batchFunc,
+                graphType)
+        {
+        }
+    }
+
+    internal class BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
+        IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>,
+        IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>
+        where TEntity : class
+    {
+        private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
+
+        public BatchField(
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
+            IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
                 parent,
                 name,
-                new BatchTaskResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
+                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
+                graphType)
+        {
+        }
+
+        public BatchField(
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
+            IGraphTypeDescriptor<TExecutionContext> graphType)
+            : this(
+                parent,
+                name,
+                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }
@@ -115,47 +150,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         protected override IFieldResolver GetResolver()
         {
             return FieldResolver;
-        }
-    }
-
-    internal class BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> : BatchField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public BatchField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TKeyType>> keySelector,
-            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : this(
-                parent,
-                name,
-                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
-                graphType)
-        {
-        }
-
-        public BatchField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TKeyType>> keySelector,
-            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : this(
-                parent,
-                name,
-                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
-                graphType)
-        {
-        }
-
-        protected BatchField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            IBatchResolver<TEntity, TReturnType> resolver,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(parent, name, resolver, graphType)
-        {
         }
     }
 }

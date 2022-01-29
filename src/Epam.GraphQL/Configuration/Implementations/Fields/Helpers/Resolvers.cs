@@ -104,7 +104,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
         public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func)
             where TEntity : class
         {
-            return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
+            return Resolver;
+
+            TReturnType Resolver(IResolveFieldContext ctx)
+            {
+                var context = ctx.GetUserContext<TExecutionContext>();
+                if (ctx.Source is Proxy<TEntity> proxy)
+                {
+                    return func(context, proxy.GetOriginal());
+                }
+
+                return func(ctx.GetUserContext<TExecutionContext>(), (TEntity)ctx.Source);
+            }
         }
 
         public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(Func<TExecutionContext, TReturnType> func)

@@ -47,7 +47,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             Registry = registry ?? throw new ArgumentNullException(nameof(registry));
             Parent = parent;
-            ProxyAccessor = new ProxyAccessor<TEntity, TExecutionContext>(_fields);
+            ProxyAccessor = new ProxyAccessor<TEntity, TExecutionContext>(this);
 
             if (isAuto)
             {
@@ -763,7 +763,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchResolver<TEntity, TAnotherReturnType, TExecutionContext>(field.Name, batchFunc, ProxyAccessor);
+            var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
 
             return ApplyBatchUnion(field, firstResolver, firstGraphType, batchResolver, build);
         }
@@ -776,7 +776,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchResolver<TEntity, TAnotherReturnType, TExecutionContext>(field.Name, (ctx, e) => batchFunc(e), ProxyAccessor);
+            var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
 
             return ApplyBatchUnion(field, firstResolver, firstGraphType, batchResolver, build);
         }
@@ -817,7 +817,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchTaskResolver<TEntity, TAnotherReturnType, TExecutionContext>(field.Name, batchFunc, ProxyAccessor);
+            var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
 
             return ApplyBatchUnion(field, firstResolver, firstGraphType, batchResolver, build);
         }
@@ -830,7 +830,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchTaskResolver<TEntity, TAnotherReturnType, TExecutionContext>(field.Name, (ctx, e) => batchFunc(e), ProxyAccessor);
+            var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
 
             return ApplyBatchUnion(field, firstResolver, firstGraphType, batchResolver, build);
         }
