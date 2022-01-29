@@ -336,6 +336,17 @@ namespace Epam.GraphQL.Configuration.Implementations
             childProxyAccessor.AddMembers(factorizationResult.RightExpressions.SelectMany(ExpressionHelpers.GetMembers));
         }
 
+        public void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members)
+        {
+            if (!_conditionMembers.TryGetValue(childFieldName, out var dependendMembers))
+            {
+                dependendMembers = new FieldDependencies<TExecutionContext>();
+                _conditionMembers.Add(childFieldName, dependendMembers);
+            }
+
+            dependendMembers.AddRange(members);
+        }
+
         public void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member)
         {
             if (!_conditionMembers.TryGetValue(childFieldName, out var dependendMembers))
@@ -438,17 +449,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             var result = builder.Lambda();
             return Expression.Lambda<Func<TExecutionContext, TEntity, Proxy<TEntity>>>(result.Body, contextParam, result.Parameters[0]);
-        }
-
-        private void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members)
-        {
-            if (!_conditionMembers.TryGetValue(childFieldName, out var dependendMembers))
-            {
-                dependendMembers = new FieldDependencies<TExecutionContext>();
-                _conditionMembers.Add(childFieldName, dependendMembers);
-            }
-
-            dependendMembers.AddRange(members);
         }
     }
 }

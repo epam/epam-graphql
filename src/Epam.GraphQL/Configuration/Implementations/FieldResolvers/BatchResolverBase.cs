@@ -31,13 +31,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return ProxiedResolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
         }
 
-        public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, TReturnType, TSelectType> selector)
-        {
-            return new BatchResolverBase<TEntity, TSelectType>(
-                ctx => Resolver(ctx).Then((e, r) => r == null ? default : selector(e, r)),
-                ctx => ProxiedResolver(ctx).Then((e, r) => r == null ? default : selector(e.GetOriginal(), r)));
-        }
-
         public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TReturnType, TSelectType> selector)
         {
             return new BatchResolverBase<TEntity, TSelectType>(

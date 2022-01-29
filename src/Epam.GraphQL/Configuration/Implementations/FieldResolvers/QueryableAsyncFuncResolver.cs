@@ -58,9 +58,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             outerProxyAccessor.AddMembers(fieldName, innerProxyAccessor, factorizationResults);
         }
 
-        protected Func<IResolveFieldContext, IDataLoader<TEntity, IQueryable<Proxy<TReturnType>>>> Resolver => ctx => _batchTaskResolver.Value(ctx).Then(items => items.SafeNull().AsQueryable());
+        protected Func<IResolveFieldContext, IDataLoader<TEntity, IEnumerable<Proxy<TReturnType>>>> Resolver => ctx => _batchTaskResolver.Value(ctx).Then(items => items.SafeNull());
 
-        protected Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IQueryable<Proxy<TReturnType>>>> ProxiedResolver => ctx => _proxiedBatchTaskResolver.Value(ctx).Then(items => items.SafeNull().AsQueryable());
+        protected Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IEnumerable<Proxy<TReturnType>>>> ProxiedResolver => ctx => _proxiedBatchTaskResolver.Value(ctx).Then(items => items.SafeNull());
 
         public object Resolve(IResolveFieldContext context)
         {
@@ -85,50 +85,91 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             var factorizationResult = ExpressionHelpers.Factorize(selector);
             _outerProxyAccessor.AddMembers(_fieldName, _innerProxyAccessor, factorizationResult);
 
-            var outerProxyParam = Expression.Parameter(typeof(Proxy<TEntity>));
-            var innerProxyParam = Expression.Parameter(typeof(Proxy<TReturnType>));
-            var outers = factorizationResult.LeftExpressions
-                .Select(e => _outerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TEntity>>())
-                .Select(e => e.Body.ReplaceParameter(e.Parameters[0], outerProxyParam))
-                .ToList();
-
-            var inners = factorizationResult.RightExpressions
-                .Select(e => _innerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TReturnType>>())
-                .Select(e => e.Body.ReplaceParameter(e.Parameters[0], innerProxyParam))
-                .ToList();
-
-            var paramMap = new Dictionary<ParameterExpression, Expression>();
-
-            var parameters = factorizationResult.Expression.Parameters;
-
-            for (int i = 0; i < outers.Count; i++)
+            var proxiedSelector = new Lazy<Func<Proxy<TEntity>, Proxy<TReturnType>, TSelectType>>(() =>
             {
-                paramMap.Add(parameters[i], outers[i]);
-            }
+                var outerProxyParam = Expression.Parameter(typeof(Proxy<TEntity>));
+                var innerProxyParam = Expression.Parameter(typeof(Proxy<TReturnType>));
+                var outers = factorizationResult.LeftExpressions
+                    .Select(e => _outerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TEntity>>())
+                    .Select(e => e.Body.ReplaceParameter(e.Parameters[0], outerProxyParam))
+                    .ToList();
 
-            for (int i = 0; i < inners.Count; i++)
+                var inners = factorizationResult.RightExpressions
+                    .Select(e => _innerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TReturnType>>())
+                    .Select(e => e.Body.ReplaceParameter(e.Parameters[0], innerProxyParam))
+                    .ToList();
+
+                var paramMap = new Dictionary<ParameterExpression, Expression>();
+
+                var parameters = factorizationResult.Expression.Parameters;
+
+                for (int i = 0; i < outers.Count; i++)
+                {
+                    paramMap.Add(parameters[i], outers[i]);
+                }
+
+                for (int i = 0; i < inners.Count; i++)
+                {
+                    paramMap.Add(parameters[i + outers.Count], inners[i]);
+                }
+
+                var exprBody = ExpressionHelpers.ParameterRebinder.ReplaceParameters(paramMap, factorizationResult.Expression.Body);
+                var expr = Expression.Lambda<Func<Proxy<TEntity>, Proxy<TReturnType>, TSelectType>>(exprBody, outerProxyParam, innerProxyParam);
+
+                var compiledExpr = expr.Compile();
+
+                return compiledExpr;
+            });
+
+            var compiledSelector = new Lazy<Func<TEntity, Proxy<TReturnType>, TSelectType>>(() =>
             {
-                paramMap.Add(parameters[i + outers.Count], inners[i]);
-            }
+                var outerParam = Expression.Parameter(typeof(TEntity));
+                var innerProxyParam = Expression.Parameter(typeof(Proxy<TReturnType>));
+                var outers = factorizationResult.LeftExpressions
+                    .Select(e => e.Body.ReplaceParameter(e.Parameters[0], outerParam))
+                    .ToList();
 
-            var exprBody = ExpressionHelpers.ParameterRebinder.ReplaceParameters(paramMap, factorizationResult.Expression.Body);
-            var expr = Expression.Lambda<Func<Proxy<TEntity>, Proxy<TReturnType>, TSelectType>>(exprBody, outerProxyParam, innerProxyParam);
+                var inners = factorizationResult.RightExpressions
+                    .Select(e => _innerProxyAccessor.GetProxyExpression(e).CastFirstParamTo<Proxy<TReturnType>>())
+                    .Select(e => e.Body.ReplaceParameter(e.Parameters[0], innerProxyParam))
+                    .ToList();
 
-            var compiledSelector = selector.Compile();
-            var compiledExpr = expr.Compile();
+                var paramMap = new Dictionary<ParameterExpression, Expression>();
+
+                var parameters = factorizationResult.Expression.Parameters;
+
+                for (int i = 0; i < outers.Count; i++)
+                {
+                    paramMap.Add(parameters[i], outers[i]);
+                }
+
+                for (int i = 0; i < inners.Count; i++)
+                {
+                    paramMap.Add(parameters[i + outers.Count], inners[i]);
+                }
+
+                var exprBody = ExpressionHelpers.ParameterRebinder.ReplaceParameters(paramMap, factorizationResult.Expression.Body);
+                var expr = Expression.Lambda<Func<TEntity, Proxy<TReturnType>, TSelectType>>(exprBody, outerParam, innerProxyParam);
+
+                var compiledExpr = expr.Compile();
+
+                return compiledExpr;
+            });
 
             return new EnumerableAsyncFuncResolver<TEntity, TSelectType, TExecutionContext>(
+                _fieldName,
                 ctx => Resolver(ctx).Then(Continuation),
-                ctx => ProxiedResolver(ctx).Then(ProxiedContinuation));
+                ctx => ProxiedResolver(ctx).Then(ProxiedContinuation),
+                _outerProxyAccessor);
 
-            IEnumerable<TSelectType>? Continuation(TEntity source, IQueryable<Proxy<TReturnType>> items)
+            IEnumerable<TSelectType>? Continuation(TEntity source, IEnumerable<Proxy<TReturnType>> items)
             {
-                return items.Select(item => compiledSelector(source, item.GetOriginal())).AsEnumerable();
+                return items.Select(item => compiledSelector.Value(source, item)).AsEnumerable();
             }
 
-            IEnumerable<TSelectType>? ProxiedContinuation(Proxy<TEntity> source, IQueryable<Proxy<TReturnType>> items)
+            IEnumerable<TSelectType>? ProxiedContinuation(Proxy<TEntity> source, IEnumerable<Proxy<TReturnType>> items)
             {
-                return items.Select(item => compiledExpr(source, item)).AsEnumerable();
+                return items.Select(item => proxiedSelector.Value(source, item)).AsEnumerable();
             }
         }
 

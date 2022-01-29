@@ -28,16 +28,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context) => GetProxiedBatchLoader<object?>(context);
 
-        public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, IEnumerable<object>, TSelectType> selector)
-        {
-            return new AsyncBatchResolver<TEntity, TSelectType>(
-                context => GetBatchLoader<IEnumerable<object>>(context).Then(selector),
-                context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then((e, r) => selector(e.GetOriginal(), r)));
-        }
-
         public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<IEnumerable<object>, TSelectType> selector)
         {
-            return new AsyncBatchResolver<TEntity, TSelectType>(
+            return new BatchResolverBase<TEntity, TSelectType>(
                 context => GetBatchLoader<IEnumerable<object>>(context).Then(selector),
                 context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then(selector));
         }

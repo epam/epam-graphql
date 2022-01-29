@@ -21,8 +21,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     internal interface IBatchResolver<TEntity, TReturnType> : IBatchResolver<TEntity>
         where TEntity : class
     {
-        IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, TReturnType, TSelectType> selector);
-
         IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TReturnType, TSelectType> selector);
     }
 }
