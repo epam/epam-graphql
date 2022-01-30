@@ -69,7 +69,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<TReturnType>(
                 this,
                 GraphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve)
@@ -77,7 +77,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<TReturnType>(
                 this,
                 GraphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<TReturnType>(
                 this,
                 GraphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -95,7 +95,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<TReturnType>(
                 this,
                 GraphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve)
@@ -104,7 +104,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
                 this,
                 graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve)
@@ -113,7 +113,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
                 this,
                 graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -123,7 +123,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
                 this,
                 graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -133,7 +133,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
                 this,
                 graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
+                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>>? build)

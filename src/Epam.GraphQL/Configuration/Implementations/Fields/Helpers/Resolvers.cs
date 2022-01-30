@@ -101,9 +101,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             };
         }
 
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func)
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, TReturnType> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
             where TEntity : class
         {
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                (Func<Proxy<TEntity>, TEntity>)proxyAccessor.GetProxyExpression(FuncConstants<TEntity>.IdentityExpression).CastFirstParamTo<Proxy<TEntity>>().Compile());
+
             return Resolver;
 
             TReturnType Resolver(IResolveFieldContext ctx)
@@ -111,10 +118,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 var context = ctx.GetUserContext<TExecutionContext>();
                 if (ctx.Source is Proxy<TEntity> proxy)
                 {
-                    return func(context, proxy.GetOriginal());
+                    return func(context, converter.Value(proxy));
                 }
 
-                return func(ctx.GetUserContext<TExecutionContext>(), (TEntity)ctx.Source);
+                return func(context, (TEntity)ctx.Source);
             }
         }
 
