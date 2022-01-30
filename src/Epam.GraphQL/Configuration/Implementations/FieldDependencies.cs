@@ -18,8 +18,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
         }
 
-        public bool DependOnAllMembers { get; set; }
-
         public IReadOnlyList<LambdaExpression> DependentOn => _dependentOn;
 
         public void AddRange(IEnumerable<LambdaExpression> expressions)

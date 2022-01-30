@@ -46,8 +46,6 @@ namespace Epam.GraphQL.Configuration
 
         void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members);
 
-        void AddAllMembers(string childFieldName);
-
         void AddMembers(IEnumerable<LambdaExpression> members);
     }
 }

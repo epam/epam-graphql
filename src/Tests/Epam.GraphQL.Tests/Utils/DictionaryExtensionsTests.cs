@@ -32,21 +32,10 @@ namespace Epam.GraphQL.Tests.Utils
             Assert.NotNull(propInfo.GetGetMethod());
             Assert.NotNull(propInfo.GetSetMethod());
 
-            var originalPropInfo = proxyType.GetProperty("$original");
-            Assert.NotNull(originalPropInfo);
-            Assert.AreEqual(typeof(object), originalPropInfo.PropertyType);
-            Assert.NotNull(originalPropInfo.GetGetMethod());
-            Assert.NotNull(originalPropInfo.GetSetMethod());
-
             var instance = (Proxy<object>)Activator.CreateInstance(proxyType);
-
-            Assert.Throws<NotImplementedException>(() => instance.GetOriginal());
 
             Assert.Throws<NotImplementedException>(() => propInfo.GetGetMethod().InvokeAndHoistBaseException(instance));
             Assert.Throws<NotImplementedException>(() => propInfo.GetSetMethod().InvokeAndHoistBaseException(instance, "test"));
-
-            Assert.Throws<NotImplementedException>(() => originalPropInfo.GetGetMethod().InvokeAndHoistBaseException(instance));
-            Assert.Throws<NotImplementedException>(() => originalPropInfo.GetSetMethod().InvokeAndHoistBaseException(instance, (object)null));
         }
 
         [Test]
@@ -67,21 +56,10 @@ namespace Epam.GraphQL.Tests.Utils
             Assert.NotNull(propInfo.GetGetMethod());
             Assert.NotNull(propInfo.GetSetMethod());
 
-            var originalPropInfo = proxyType.GetProperty("$original");
-            Assert.NotNull(originalPropInfo);
-            Assert.AreEqual(typeof(SimpleType), originalPropInfo.PropertyType);
-            Assert.NotNull(originalPropInfo.GetGetMethod());
-            Assert.NotNull(originalPropInfo.GetSetMethod());
-
             var instance = (Proxy<SimpleType>)Activator.CreateInstance(proxyType);
-
-            Assert.Throws<NotImplementedException>(() => instance.GetOriginal());
 
             Assert.Throws<NotImplementedException>(() => propInfo.GetGetMethod().InvokeAndHoistBaseException(instance));
             Assert.Throws<NotImplementedException>(() => propInfo.GetSetMethod().InvokeAndHoistBaseException(instance, "test"));
-
-            Assert.Throws<NotImplementedException>(() => originalPropInfo.GetGetMethod().InvokeAndHoistBaseException(instance));
-            Assert.Throws<NotImplementedException>(() => originalPropInfo.GetSetMethod().InvokeAndHoistBaseException(instance, (SimpleType)null));
         }
 
         public class SimpleType

@@ -25,8 +25,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             _graphType = graphType;
             Arguments = arguments;
-
-            parent.ProxyAccessor.AddAllMembers(Name);
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;

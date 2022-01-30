@@ -78,8 +78,6 @@ namespace Epam.GraphQL.Configuration.Implementations
                 var dependendFields = conditionalFields
                     .Select(field => _conditionMembers[field.Name]);
 
-                var dependOnOriginal = dependendFields.Any(dep => dep.DependOnAllMembers);
-
                 var dependencies = dependendFields
                     .SelectMany(dep => dep.DependentOn)
                     .Select(dep => _expressionNames[dep]);
@@ -91,8 +89,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                             .Where(name => !conditionalFieldNames.Contains(name, StringComparer.Ordinal))
                         .Concat(_members.Select(m => _expressionNames[m]))
                         .Concat(dependencies)
-                        .Distinct(),
-                    dependOnOriginal);
+                        .Distinct());
             });
         }
 
@@ -368,17 +365,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             _members.Remove(member);
         }
 
-        public void AddAllMembers(string childFieldName)
-        {
-            if (!_conditionMembers.TryGetValue(childFieldName, out var fieldDependencies))
-            {
-                fieldDependencies = new FieldDependencies<TExecutionContext>();
-                _conditionMembers.Add(childFieldName, fieldDependencies);
-            }
-
-            fieldDependencies.DependOnAllMembers = true;
-        }
-
         public void AddMembers(IEnumerable<LambdaExpression> members)
         {
             _members.UnionWith(members);
@@ -437,14 +423,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             {
                 var propertyInfo = ProxyType.GetProperty(_expressionNames[memberExpression], BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 builder.Property(propertyInfo, memberExpression);
-            }
-
-            var dependOnAllMembers = _conditionMembers
-                .Any(kv => kv.Value.DependOnAllMembers && queriedFields.Select(field => field.Name).Contains(kv.Key));
-
-            if (dependOnAllMembers)
-            {
-                builder.Property(ProxyType.GetProperty("$original"), FuncConstants<TEntity>.IdentityExpression);
             }
 
             var result = builder.Lambda();

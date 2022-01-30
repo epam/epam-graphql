@@ -29,8 +29,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             {
                 new LazyQueryArgument(argName, argGraphType),
             };
-
-            parent.ProxyAccessor.AddAllMembers(Name);
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
