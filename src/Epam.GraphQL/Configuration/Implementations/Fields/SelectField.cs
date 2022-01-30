@@ -19,12 +19,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         private readonly IResolver<TEntity> _resolver;
 
         public SelectField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IResolver<TEntity> resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(registry, parent, name)
+            : base(parent, name)
         {
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();

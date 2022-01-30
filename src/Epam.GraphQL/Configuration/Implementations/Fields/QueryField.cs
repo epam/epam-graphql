@@ -27,8 +27,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     {
         private static MethodInfo? _fromLoaderImplMethodInfo;
 
-        public QueryField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
-            : base(registry, parent, name)
+        public QueryField(BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
+            : base(parent, name)
         {
         }
 
@@ -46,7 +46,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphResultType = Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
             return Parent.ReplaceField(this, new LoaderField<object, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 condition: null,
@@ -135,7 +134,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = UnionQueryField.Create(Registry, Parent, Name, build);
+            var unionField = UnionQueryField.Create(Parent, Name, build);
             return Parent.ReplaceField(this, unionField);
         }
 
@@ -161,7 +160,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IArgumentedQueryField<TArgType, TExecutionContext> Argument<TArgType>(string argName)
         {
-            var argumentedField = new ArgumentedQueryField<TArgType, TExecutionContext>(Registry, Parent, Name, new Arguments<TArgType, TExecutionContext>(Registry, argName));
+            var argumentedField = new ArgumentedQueryField<TArgType, TExecutionContext>(Parent, Name, new Arguments<TArgType, TExecutionContext>(Registry, argName));
             return Parent.ReplaceField(this, argumentedField);
         }
 
@@ -169,13 +168,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TProjection : Projection<TEntity, TExecutionContext>
             where TEntity : class
         {
-            var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(Registry, Parent, Name, new Arguments<Expression<Func<TEntity, bool>>, TExecutionContext>(Registry, argName, typeof(TProjection), typeof(TEntity)));
+            var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(Parent, Name, new Arguments<Expression<Func<TEntity, bool>>, TExecutionContext>(Registry, argName, typeof(TProjection), typeof(TEntity)));
             return Parent.ReplaceField(this, argumentedField);
         }
 
         public IPayloadFieldedQueryField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName)
         {
-            var payloadedField = new ArgumentedQueryField<TArgType, TExecutionContext>(Registry, Parent, Name, new PayloadFields<TArgType, TExecutionContext>(Name, Registry, argName));
+            var payloadedField = new ArgumentedQueryField<TArgType, TExecutionContext>(Parent, Name, new PayloadFields<TArgType, TExecutionContext>(Name, Registry, argName));
             return Parent.ReplaceField(this, payloadedField);
         }
 
@@ -183,7 +182,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TProjection : Projection<TEntity, TExecutionContext>
             where TEntity : class
         {
-            var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(Registry, Parent, Name, new PayloadFields<Expression<Func<TEntity, bool>>, TExecutionContext>(Name, Registry, argName, typeof(TProjection), typeof(TEntity)));
+            var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(Parent, Name, new PayloadFields<Expression<Func<TEntity, bool>>, TExecutionContext>(Name, Registry, argName, typeof(TProjection), typeof(TEntity)));
             return Parent.ReplaceField(this, argumentedField);
         }
 

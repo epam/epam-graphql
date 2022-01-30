@@ -5,7 +5,6 @@
 
 using System.Linq;
 using Epam.GraphQL.Tests.Helpers;
-using Epam.GraphQL.Tests.Mock;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
 
@@ -14,12 +13,13 @@ namespace Epam.GraphQL.Tests
     public partial class FromLoaderTests
     {
         [Test]
-        public void TestFromLoaderWithSelect()
+        public void TestFromLoaderWithSelectEntityAndSelect()
         {
             var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
                 onConfigure: loader =>
                 {
                     loader.Field(u => u.Id);
+                    loader.Field(u => u.HeadId);
                     loader.Field(u => u.Name);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -32,11 +32,12 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field("unit")
                         .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .Select((p, u) => new { u.Id, HeadId = p.Id })
                         .Select(u => new Unit { Id = u.Id });
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.Take(1).AsQueryable());
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.SophieGandley, 1).AsQueryable());
 
             void Builder(Query<TestUserContext> query)
             {
@@ -66,8 +67,8 @@ namespace Epam.GraphQL.Tests
                 }");
         }
 
-        [Test(Description = "Fix for https://git.epam.com/epm-ppa/epam-graphql/-/issues/72")]
-        public void TestFromLoaderWithSelectEntity()
+        [Test]
+        public void TestFromLoaderWithSelectEntityAndWhere()
         {
             var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
                 onConfigure: loader =>
@@ -86,7 +87,173 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field("unit")
                         .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
-                        .Select((p, u) => new Unit { Id = u.Id, HeadId = p.ManagerId });
+                        .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id })
+                        .Where(u => u.Id == 1);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.SophieGandley, 1).AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"query {
+                    people {
+                        items {
+                            unit {
+                                id
+                            }
+                        }
+                    }
+                }",
+                @"{
+                    people: {
+                        items: [{
+                            unit: [{
+                                id: 1
+                            }]
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
+        public void TestFromLoaderWithSelectEntityAndFirstOrDefault()
+        {
+            var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.HeadId);
+                    loader.Field(u => u.Name);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.Alpha, 1).AsQueryable());
+
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field("unit")
+                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id })
+                        .FirstOrDefault();
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.SophieGandley, 1).AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"query {
+                    people {
+                        items {
+                            unit {
+                                id
+                            }
+                        }
+                    }
+                }",
+                @"{
+                    people: {
+                        items: [{
+                            unit: {
+                                id: 1
+                            }
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
+        public void TestFromLoaderWithSelectEntityAndSingleOrDefault()
+        {
+            var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.HeadId);
+                    loader.Field(u => u.Name);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.Alpha, 1).AsQueryable());
+
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field("unit")
+                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id })
+                        .SingleOrDefault();
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.SophieGandley, 1).AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"query {
+                    people {
+                        items {
+                            unit {
+                                id
+                            }
+                        }
+                    }
+                }",
+                @"{
+                    people: {
+                        items: [{
+                            unit: {
+                                id: 1
+                            }
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
+        public void TestFromLoaderWithSelectEntityTwoTimes()
+        {
+            var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.HeadId);
+                    loader.Field(u => u.Name);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Repeat(FakeData.Alpha, 1).AsQueryable());
+
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field("unit")
+                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .Select((p, u) => new { u.Id, HeadId = p.Id })
+                        .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id });
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),
@@ -115,99 +282,11 @@ namespace Epam.GraphQL.Tests
                         items: [{
                             unit: [{
                                 id: 1,
-                                headId: 1
+                                headId: 2
                             }]
                         }]
                     }
                 }");
-        }
-
-        [Test(Description = "Test for https://git.epam.com/epm-ppa/epam-graphql/-/issues/73")]
-        public void TestFromLoaderWithSelectAnonymousType()
-        {
-            var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field(u => u.Id);
-                    loader.Field(u => u.Name);
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
-                getBaseQuery: _ => Enumerable.Repeat(FakeData.Alpha, 1).AsQueryable());
-
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field(p => p.Id);
-                    loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
-                        .Select(u => new { u.Id });
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.Take(1).AsQueryable());
-
-            void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Connection(personLoaderType, "people");
-            }
-
-            TestHelpers.TestQuery(
-                Builder,
-                @"query {
-                    people {
-                        items {
-                            unit {
-                                id
-                            }
-                        }
-                    }
-                }",
-                @"{
-                    people: {
-                        items: [{
-                            unit: [{
-                                id: 1
-                            }]
-                        }]
-                    }
-                }",
-                new DataContextMock());
-        }
-
-        [Test]
-        public void TestFromLoaderWithSelectValueType()
-        {
-            var unitLoader = GraphQLTypeBuilder.CreateLoaderType<Unit, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field(u => u.Id);
-                    loader.Field(u => u.Name);
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
-                getBaseQuery: _ => Enumerable.Repeat(FakeData.Alpha, 1).AsQueryable());
-
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field(p => p.Id);
-                    loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
-                        .Select(u => u.Id);
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.Take(1).AsQueryable());
-
-            void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Connection(personLoaderType, "people");
-            }
-
-            TestHelpers.TestQuery(Builder, "query t { people { items { unit } } }", "{ people: { items: [{ unit: [1] }] } }", null, null);
         }
     }
 }

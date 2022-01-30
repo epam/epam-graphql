@@ -6,7 +6,6 @@
 using System;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 
@@ -15,31 +14,22 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     internal class ProxiedAsyncFuncResolver<TEntity, TReturnType> : IResolver<TEntity>
         where TEntity : class
     {
-        private readonly Func<IResolveFieldContext, IDataLoader<TEntity, Proxy<TReturnType>>> _resolver;
-        private readonly Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, Proxy<TReturnType>>> _proxiedResolver;
-
         public ProxiedAsyncFuncResolver(
             Func<IResolveFieldContext, IDataLoader<TEntity, Proxy<TReturnType>>> resolver,
             Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, Proxy<TReturnType>>> proxiedResolver)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _proxiedResolver = proxiedResolver ?? throw new ArgumentNullException(nameof(proxiedResolver));
+            Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            ProxiedResolver = proxiedResolver ?? throw new ArgumentNullException(nameof(proxiedResolver));
         }
 
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return _resolver(context).Then(FuncConstants<Proxy<TReturnType>?>.WeakIdentity);
-        }
+        protected Func<IResolveFieldContext, IDataLoader<TEntity, Proxy<TReturnType>>> Resolver { get; }
 
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return _proxiedResolver(context).Then(FuncConstants<Proxy<TReturnType>?>.WeakIdentity);
-        }
+        protected Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, Proxy<TReturnType>>> ProxiedResolver { get; }
 
         public object Resolve(IResolveFieldContext context)
         {
-            var batchLoader = new Lazy<IDataLoader<TEntity, Proxy<TReturnType>>>(() => context.Bind(_resolver));
-            var proxiedBatchLoader = new Lazy<IDataLoader<Proxy<TEntity>, Proxy<TReturnType>>>(() => context.Bind(_proxiedResolver));
+            var batchLoader = new Lazy<IDataLoader<TEntity, Proxy<TReturnType>>>(() => context.Bind(Resolver));
+            var proxiedBatchLoader = new Lazy<IDataLoader<Proxy<TEntity>, Proxy<TReturnType>>>(() => context.Bind(ProxiedResolver));
 
             return context.Source is Proxy<TEntity> proxy
                 ? proxiedBatchLoader.Value.LoadAsync(proxy)

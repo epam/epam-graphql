@@ -13,18 +13,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class UnionFieldBase<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
         where TEntity : class
     {
-        public UnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+        protected UnionFieldBase(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory)
-            : this(registry, parent, name, unionType, graphTypeFactory, new List<Type>(), new UnionGraphTypeDescriptor<TExecutionContext>())
+            : this(parent, name, unionType, graphTypeFactory, new List<Type>(), new UnionGraphTypeDescriptor<TExecutionContext>())
         {
         }
 
-        public UnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+        protected UnionFieldBase(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -32,7 +30,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : this(
-                registry,
                 parent,
                 name,
                 new List<Type>(unionTypes)
@@ -45,13 +42,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         protected UnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : base(
-                  registry,
                   parent,
                   name)
         {

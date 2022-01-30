@@ -337,6 +337,59 @@ namespace Epam.GraphQL.Tests
                 .Invoke(Arg.Any<IEnumerable<Unit>>());
         }
 
+        [Test(Description = "FromBatch(...)/IEnumerable<int>")]
+        public void BatchFuncFromUnitToUnitAndArrayOfIntTest()
+        {
+            var batchFunc = Substitute.For<Func<IEnumerable<Unit>, IDictionary<Unit, int[]>>>();
+            batchFunc
+                .Invoke(Arg.Any<IEnumerable<Unit>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Unit>>(0).ToDictionary(u => u, u => FakeData.People.Where(p => p.UnitId == u.Id).Select(p => p.Id).ToArray()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field("empIds")
+                        .FromBatch(batchFunc);
+                });
+
+            var mutableBuilder = CreateQueryMutableBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field("empIds")
+                        .FromBatch(batchFunc);
+                });
+
+            const string Query = @"
+                query {
+                    units {
+                        items {
+                            id
+                            empIds
+                        }
+                    }
+                }";
+
+            const string Expected = @"
+                {
+                    units: {
+                        items: [{
+                            id: 1,
+                            empIds: [1,2,3]
+                        }, {
+                            id: 2,
+                            empIds: [4,5,6]
+                        }]
+                    }
+                }";
+
+            TestHelpers.TestQuery(mutableBuilder, Query, Expected);
+            TestHelpers.TestQuery(builder, Query, Expected);
+            batchFunc.Received(2)
+                .Invoke(Arg.Any<IEnumerable<Unit>>());
+        }
+
         [Test(Description = "FromBatch(...)/IEnumerable<int> using key selector/context")]
         public void BatchFuncFromContextAndIntToIntAndEnumerableOfIntUsingKeySelectorTest()
         {

@@ -25,7 +25,7 @@ namespace Epam.GraphQL
         protected internal new IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            var field = Configurator.AddField(new QueryField<TExecutionContext>(Registry, Configurator, name), deprecationReason);
+            var field = Configurator.AddField(new QueryField<TExecutionContext>(Configurator, name), deprecationReason);
             return field;
         }
 
@@ -118,7 +118,6 @@ namespace Epam.GraphQL
             ThrowIfIsNotConfiguring();
             var graphResultType = Configurator.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
             var field = new GroupLoaderField<object, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 Configurator,
                 name,
                 graphResultType,

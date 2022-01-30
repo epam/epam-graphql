@@ -69,16 +69,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)));
         }
 
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return BatchLoader.FromResult<TEntity, object?>(Resolver(context).Select(Transform(context)));
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return BatchLoader.FromResult<Proxy<TEntity>, object?>(Resolver(context).Select(Transform(context)));
-        }
-
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
         {
             return Create(_proxyAccessor, ctx => selector(ctx, _resolver(ctx)), _transform, _sorters);
@@ -105,14 +95,14 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         public IResolver<TEntity> SingleOrDefault()
         {
             return _proxyAccessor == null
-                ? new FuncResolver<TEntity, TReturnType>((ctx, src) => ctx.ExecuteQuery(Resolver, query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)))
+                ? new FuncResolver<TEntity, TReturnType>(ctx => ctx.ExecuteQuery(Resolver, query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)))
                 : new ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)));
         }
 
         public IResolver<TEntity> FirstOrDefault()
         {
             return _proxyAccessor == null
-                ? new FuncResolver<TEntity, TReturnType>((ctx, src) => ctx.ExecuteQuery(Resolver, query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)))
+                ? new FuncResolver<TEntity, TReturnType>(ctx => ctx.ExecuteQuery(Resolver, query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)))
                 : new ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)));
         }
 
@@ -130,7 +120,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             var resolver = Create(null, ctx => selector(ctx, _transform(ctx, _resolver(ctx))), (ctx, query) => query, sorters);
 
             return new FuncResolver<TEntity, Connection<object>>(
-                (ctx, src) =>
+                ctx =>
                 {
                     var resolved = resolver.Resolver(ctx);
                     var selected = connectionResolver(ctx, resolved);
@@ -164,7 +154,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             if (_proxyAccessor.HasHooks)
             {
                 return new FuncResolver<TEntity, object>(
-                    (context, src) =>
+                    context =>
                     {
                         var resolved = resolver.Resolver(context).Select(resolver.Transform(context));
                         var selected = Resolvers.Resolve(context, resolved);
@@ -204,7 +194,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             }
 
             return new FuncResolver<TEntity, Connection<Proxy<TReturnType>>>(
-                (ctx, src) =>
+                ctx =>
                 {
                     var resolved = resolver.Resolver(ctx).Select(resolver.Transform(ctx));
                     var selected = Resolvers.Resolve(ctx, resolved);

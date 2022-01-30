@@ -17,9 +17,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     internal class BatchCompoundResolver<TEntity, TExecutionContext> : IBatchCompoundResolver<TEntity, TExecutionContext>
         where TEntity : class
     {
-        private readonly List<IResolver<TEntity>> _resolvers = new();
+        private readonly List<IBatchResolver<TEntity>> _resolvers = new();
 
-        public void Add(IResolver<TEntity> resolver)
+        public void Add(IBatchResolver<TEntity> resolver)
         {
             _resolvers.Add(resolver);
         }
@@ -28,16 +28,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context) => GetProxiedBatchLoader<object?>(context);
 
-        public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, IEnumerable<object>, TSelectType> selector)
-        {
-            return new AsyncBatchResolver<TEntity, TSelectType>(
-                context => GetBatchLoader<IEnumerable<object>>(context).Then(selector),
-                context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then((e, r) => selector(e.GetOriginal(), r)));
-        }
-
         public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<IEnumerable<object>, TSelectType> selector)
         {
-            return new AsyncBatchResolver<TEntity, TSelectType>(
+            return new BatchResolverBase<TEntity, TSelectType>(
                 context => GetBatchLoader<IEnumerable<object>>(context).Then(selector),
                 context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then(selector));
         }

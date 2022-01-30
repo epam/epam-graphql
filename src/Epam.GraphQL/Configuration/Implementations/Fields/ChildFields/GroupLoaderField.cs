@@ -35,14 +35,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public GroupLoaderField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   condition: null,
@@ -55,7 +53,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private GroupLoaderField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -64,7 +61,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   resolver,
@@ -84,7 +80,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected override GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             return new GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 resolver,
@@ -99,9 +94,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return (context, query) =>
             {
                 var subFields = context.GetGroupConnectionQueriedFields();
-                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
+                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields();
 
-                var sourceType = proxyAccessor.GetConcreteProxyType(subFields.Concat(aggregateQueriedFields));
+                var sourceType = proxyAccessor.GetConcreteProxyType(subFields.Concat(aggregateQueriedFields.Select(field => $"${field}")));
 
                 // ApplyGroupBy
                 // Actual type of lambda returning value is loader.ObjectGraphTypeConfigurator.ExtendedType, not typeof(TChildEntity)
@@ -115,7 +110,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 var groupBy = grouping.ApplyGroupBy(ExpressionHelpers.MakeIdentity(sourceType));
 
                 // .Select(g => new EntityExt { Country = g.Key.Country, Language = g.Key.Language, Count = g.Count(); })
-                var selectKey = groupBy.ApplySelect(proxyAccessor.CreateGroupKeySelectorExpression(subFields, aggregateQueriedFields));
+                var selectKey = groupBy.ApplySelect(proxyAccessor.CreateGroupKeySelectorExpression(subFields, aggregateQueriedFields.Select(field => $"${field}")));
 
                 return (IQueryable<Proxy<TChildEntity>>)selectKey;
             };

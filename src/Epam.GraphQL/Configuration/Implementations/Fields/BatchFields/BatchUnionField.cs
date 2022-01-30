@@ -27,16 +27,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         // TODO Implement unions of more than two batches
         public BatchUnionField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            IResolver<TEntity> firstResolver,
-            IResolver<TEntity> secondResolver,
+            IBatchResolver<TEntity> firstResolver,
+            IBatchResolver<TEntity> secondResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Type firstType,
             IGraphTypeDescriptor<TExecutionContext> secondGraphType,
             Type secondType)
-           : base(registry, parent, name)
+           : base(parent, name)
         {
             _resolver = new BatchCompoundResolver<TEntity, TExecutionContext>();
 

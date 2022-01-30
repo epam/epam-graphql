@@ -20,11 +20,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IPayloadFieldedQueryField<TArgType, TExecutionContext>
     {
         public ArgumentedQueryField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IArguments<TArgType, TExecutionContext> arguments)
-            : base(registry, parent, name, arguments)
+            : base(parent, name, arguments)
         {
         }
 
@@ -147,7 +146,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionQueryField<TArgType, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionQueryField<TArgType, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -173,7 +172,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         private ArgumentedQueryField<TArgType, TArgType2, TExecutionContext> ArgumentImpl<TArgType2>(string argName)
         {
-            var argumentedField = new ArgumentedQueryField<TArgType, TArgType2, TExecutionContext>(Registry, Parent, Name, Arguments.Add<TArgType2>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType, TArgType2, TExecutionContext>(Parent, Name, Arguments.Add<TArgType2>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -181,7 +180,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = new ArgumentedQueryField<TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType, Expression<Func<TEntity1, bool>>, TExecutionContext>(Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -197,11 +196,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IPayloadFieldedQueryField<TArgType1, TArgType2, TExecutionContext>
     {
         public ArgumentedQueryField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IArguments<TArgType1, TArgType2, TExecutionContext> arguments)
-            : base(registry, parent, name, arguments)
+            : base(parent, name, arguments)
         {
         }
 
@@ -300,7 +298,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -350,7 +348,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         private ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TExecutionContext> ArgumentImpl<TArgType3>(string argName)
         {
-            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, Arguments.Add<TArgType3>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TExecutionContext>(Parent, Name, Arguments.Add<TArgType3>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -358,7 +356,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, Expression<Func<TEntity1, bool>>, TExecutionContext>(Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -374,11 +372,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IPayloadFieldedQueryField<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
         public ArgumentedQueryField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext> arguments)
-            : base(registry, parent, name, arguments)
+            : base(parent, name, arguments)
         {
         }
 
@@ -477,7 +474,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -527,7 +524,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         private ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> ArgumentImpl<TArgType4>(string argName)
         {
-            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, Arguments.Add<TArgType4>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Parent, Name, Arguments.Add<TArgType4>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -535,7 +532,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, Expression<Func<TEntity1, bool>>, TExecutionContext>(Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -551,11 +548,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IPayloadFieldedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
         public ArgumentedQueryField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> arguments)
-            : base(registry, parent, name, arguments)
+            : base(parent, name, arguments)
         {
         }
 
@@ -654,7 +650,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 
@@ -704,7 +700,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         private ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> ArgumentImpl<TArgType5>(string argName)
         {
-            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, Arguments.Add<TArgType5>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Parent, Name, Arguments.Add<TArgType5>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -712,7 +708,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity1, TExecutionContext>
             where TEntity1 : class
         {
-            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext>(Registry, Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
+            var argumentedField = new ArgumentedQueryField<TArgType1, TArgType2, TArgType3, TArgType4, Expression<Func<TEntity1, bool>>, TExecutionContext>(Parent, Name, Arguments.AddFilter<TProjection, TEntity1>(argName));
             return ApplyField(argumentedField);
         }
 
@@ -727,11 +723,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
         public ArgumentedQueryField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> arguments)
-            : base(registry, parent, name, arguments)
+            : base(parent, name, arguments)
         {
         }
 
@@ -830,7 +825,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Registry, Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
+            var unionField = new ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build), Arguments);
             return ApplyField(unionField);
         }
 

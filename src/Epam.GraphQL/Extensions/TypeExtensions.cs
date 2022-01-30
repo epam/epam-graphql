@@ -48,11 +48,11 @@ namespace Epam.GraphQL.Extensions
                 [typeof(char)] = "char",
             });
 
-        private static readonly ConcurrentDictionary<(Type Type, bool WithOriginal, ICollection<string> Properties), Type> _instantiatedProxyGenericTypeCache = new(
-            new ValueTupleEqualityComparer<Type, bool, ICollection<string>>(EqualityComparer<Type>.Default, EqualityComparer<bool>.Default, new CollectionEqualityComparer<string>()));
+        private static readonly ConcurrentDictionary<(Type Type, ICollection<string> Properties), Type> _instantiatedProxyGenericTypeCache = new(
+            new ValueTupleEqualityComparer<Type, ICollection<string>>(EqualityComparer<Type>.Default, new CollectionEqualityComparer<string>()));
 
-        private static readonly ConcurrentDictionary<(Type ProxyGenericType, Type EntityType, bool WithOriginal, ICollection<string> Properties), Type> _instantiatedProxyTypeCache = new(
-            new ValueTupleEqualityComparer<Type, Type, bool, ICollection<string>>(EqualityComparer<Type>.Default, EqualityComparer<Type>.Default, EqualityComparer<bool>.Default, new CollectionEqualityComparer<string>()));
+        private static readonly ConcurrentDictionary<(Type ProxyGenericType, Type EntityType, ICollection<string> Properties), Type> _instantiatedProxyTypeCache = new(
+            new ValueTupleEqualityComparer<Type, Type, ICollection<string>>(EqualityComparer<Type>.Default, EqualityComparer<Type>.Default, new CollectionEqualityComparer<string>()));
 
         private static readonly object _proxyTypeCountLock = new();
         private static long _proxyTypeCount;
@@ -140,7 +140,7 @@ namespace Epam.GraphQL.Extensions
             return type.Name;
         }
 
-        public static Type MakeInstantiatedProxyGenericType(this Type proxyGenericType, IEnumerable<string> propertyNames, bool withOriginal)
+        public static Type MakeInstantiatedProxyGenericType(this Type proxyGenericType, IEnumerable<string> propertyNames)
         {
             if (propertyNames.Any(name => string.IsNullOrEmpty(name)))
             {
@@ -159,26 +159,11 @@ namespace Epam.GraphQL.Extensions
                 throw new ArgumentException("Type must be inherited from Proxy<>", nameof(proxyGenericType));
             }
 
-            return _instantiatedProxyGenericTypeCache.GetOrAdd((proxyGenericType, withOriginal, propertyNames.ToList()), key =>
+            return _instantiatedProxyGenericTypeCache.GetOrAdd((proxyGenericType, propertyNames.ToList()), key =>
             {
-                var (proxyGenericType, withOriginal, propertyNames) = key;
+                var (proxyGenericType, propertyNames) = key;
 
                 var tb = ILUtils.DefineType(GenerateInstantiatedProxyGenericTypeName(), proxyGenericType);
-
-                if (withOriginal)
-                {
-                    var baseProperty = tb.GetBaseType().GetProperty("$original");
-                    var backingField = tb.DefineBackingField("$original", baseProperty.PropertyType);
-                    tb.OverrideProperty(backingField, "$original").MakeDebuggerBrowsableCollapsed();
-
-                    var getOriginalMethodInfo = proxyGenericType.BaseType.GetMethod(nameof(Proxy<object>.GetOriginal));
-                    tb.OverrideMethod(
-                        getOriginalMethodInfo,
-                        il => il
-                            .Ldarg(0)
-                            .Ldfld(backingField)
-                            .Ret());
-                }
 
                 var propertyList = new List<PropertyInfo>();
                 foreach (var prop in propertyNames)
@@ -207,11 +192,11 @@ namespace Epam.GraphQL.Extensions
             });
         }
 
-        public static Type MakeInstantiatedProxyType<TEntity>(this Type proxyGenericType, IEnumerable<string> propertyNames, bool withOriginal)
+        public static Type MakeInstantiatedProxyType<TEntity>(this Type proxyGenericType, IEnumerable<string> propertyNames)
         {
-            return _instantiatedProxyTypeCache.GetOrAdd((proxyGenericType, typeof(TEntity), withOriginal, propertyNames.ToList()), key =>
+            return _instantiatedProxyTypeCache.GetOrAdd((proxyGenericType, typeof(TEntity), propertyNames.ToList()), key =>
             {
-                var genericType = key.ProxyGenericType.MakeInstantiatedProxyGenericType(key.Properties, key.WithOriginal);
+                var genericType = key.ProxyGenericType.MakeInstantiatedProxyGenericType(key.Properties);
 
                 return genericType.MakeGenericType(key.EntityType);
             });

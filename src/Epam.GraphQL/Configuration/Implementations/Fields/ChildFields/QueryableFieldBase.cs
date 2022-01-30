@@ -25,7 +25,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected QueryableFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<IResolveFieldContext, IQueryable<TReturnType>> query,
@@ -37,7 +36,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
-                  registry,
                   parent,
                   name,
                   CreateResolver(
@@ -58,7 +56,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected QueryableFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
@@ -68,7 +65,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   resolver,
@@ -171,7 +167,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
         {
             var queryableField = new QueryableField<TEntity, TReturnType1, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 QueryableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),

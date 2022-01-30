@@ -1134,7 +1134,6 @@ namespace Epam.GraphQL.Helpers
     public class Proxy<T>
     {
         public Proxy() { }
-        public virtual T GetOriginal() { }
     }
 }
 namespace Epam.GraphQL.Infrastructure

@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations
     internal class InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
         where TEntity : class
     {
-        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, RelationRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
+        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
             : base(parent, registry, isAuto)
         {
             if (shouldSetNames)
@@ -91,9 +91,9 @@ namespace Epam.GraphQL.Configuration.Implementations
         where TEntity : class
     {
         private TProjection? _projection;
-        private BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
+        private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
-        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, RelationRegistry<TExecutionContext> registry)
+        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry)
             : base(parent, registry, isAuto: false, shouldSetNames: false)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(true);
@@ -126,12 +126,12 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        protected override BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfiguratorForFilters()
+        protected override IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfiguratorForFilters()
         {
             return GetBaseObjectGraphTypeConfigurator((first, second) => first.FilterEquals(second));
         }
 
-        protected BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfigurator(Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> predicate)
+        protected IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfigurator(Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> predicate)
         {
             if (_baseConfigurator == null)
             {

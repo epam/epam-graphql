@@ -10,54 +10,83 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchEnumerableField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, IEnumerable<TReturnType>, TExecutionContext>,
+    internal class BatchEnumerableField<TEntity, TReturnType, TExecutionContext> : BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>
+        where TEntity : class
+    {
+        public BatchEnumerableField(
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc,
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
+            : base(
+                  parent,
+                  name,
+                  FuncConstants<TEntity>.IdentityExpression,
+                  batchFunc,
+                  elementGraphType)
+        {
+        }
+
+        public BatchEnumerableField(
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc,
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
+            : base(
+                  parent,
+                  name,
+                  FuncConstants<TEntity>.IdentityExpression,
+                  batchFunc,
+                  elementGraphType)
+        {
+        }
+    }
+
+    internal class BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> : TypedField<TEntity, IEnumerable<TReturnType>, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, IEnumerable<TReturnType>, TExecutionContext>,
         IFieldSupportsApplySelect<TEntity, IEnumerable<TReturnType>, TExecutionContext>
         where TEntity : class
     {
         public BatchEnumerableField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc,
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : this(
-                  registry,
                   parent,
                   name,
-                  new BatchEnumerableResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
+                  new BatchEnumerableKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
                   elementGraphType)
         {
         }
 
         public BatchEnumerableField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc,
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : this(
-                  registry,
                   parent,
                   name,
-                  new BatchEnumerableTaskResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
+                  new BatchEnumerableTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
                   elementGraphType)
         {
         }
 
         protected BatchEnumerableField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, IEnumerable<TReturnType>> batchResolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : base(
-                  registry,
                   parent,
                   name)
         {
@@ -95,57 +124,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         protected override IFieldResolver GetResolver()
         {
             return FieldResolver;
-        }
-    }
-
-    internal class BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> : BatchEnumerableField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public BatchEnumerableField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TKeyType>> keySelector,
-            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  new BatchEnumerableKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
-                  elementGraphType)
-        {
-        }
-
-        public BatchEnumerableField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TKeyType>> keySelector,
-            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  new BatchEnumerableTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
-                  elementGraphType)
-        {
-        }
-
-        protected BatchEnumerableField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            IBatchResolver<TEntity, IEnumerable<TReturnType>> batchResolver,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
-            : base(
-                  registry,
-                  parent,
-                  name,
-                  batchResolver,
-                  elementGraphType)
-        {
         }
     }
 }

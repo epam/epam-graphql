@@ -44,7 +44,7 @@ namespace Epam.GraphQL.Configuration
 
         void AddMembers<TChildEntity>(string childFieldName, IProxyAccessor<TChildEntity, TExecutionContext> childProxyAccessor, ExpressionFactorizationResult factorizationResult);
 
-        void AddAllMembers(string childFieldName);
+        void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members);
 
         void AddMembers(IEnumerable<LambdaExpression> members);
     }

@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             MutationField<TExecutionContext> mutationField,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory)
-            : base(mutationField.Registry, mutationField.Parent, mutationField.Name, unionType, graphTypeFactory)
+            : base(mutationField.Parent, mutationField.Name, unionType, graphTypeFactory)
         {
             MutationField = mutationField;
         }
@@ -51,7 +51,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : base(
-                mutationField.Registry,
                 mutationField.Parent,
                 mutationField.Name,
                 unionType,

@@ -5,9 +5,7 @@
 
 using System;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.TaskBatcher;
 using GraphQL;
-using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
@@ -23,16 +21,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         {
             _proxyAccessor = proxyAccessor;
             _resolver = resolver;
-        }
-
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return BatchLoader.FromResult<TEntity, object?>(Resolve(context));
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return BatchLoader.FromResult<Proxy<TEntity>, object?>(Resolve(context));
         }
 
         public object Resolve(IResolveFieldContext context)

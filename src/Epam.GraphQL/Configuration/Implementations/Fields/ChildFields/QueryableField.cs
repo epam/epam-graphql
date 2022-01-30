@@ -26,7 +26,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TEntity : class
     {
         public QueryableField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
@@ -35,7 +34,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   query: ctx => query(ctx.GetUserContext<TExecutionContext>()),
@@ -50,7 +48,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         public QueryableField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
@@ -60,7 +57,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   resolver,
@@ -75,7 +71,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
             var connectionField = new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -90,7 +85,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected override QueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
             return new QueryableField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 resolver,

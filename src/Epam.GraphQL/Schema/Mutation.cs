@@ -115,7 +115,7 @@ namespace Epam.GraphQL
         protected internal new IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            var field = Configurator.AddField(new MutationField<TExecutionContext>(this, Registry, Configurator, name), deprecationReason);
+            var field = Configurator.AddField(new MutationField<TExecutionContext>(this, Configurator, name), deprecationReason);
             return field;
         }
 

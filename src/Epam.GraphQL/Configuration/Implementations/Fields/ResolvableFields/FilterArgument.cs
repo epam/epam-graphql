@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         private readonly Type _projectionType;
         private readonly Type _entityType;
 
-        public FilterArgument(RelationRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
+        public FilterArgument(IRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _projectionType = projectionType;

@@ -39,7 +39,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private static MethodInfo? _withSearchMethodInfo;
 
         protected ConnectionLoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -48,7 +47,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   resolver,
@@ -61,7 +59,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected ConnectionLoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>>? condition,
@@ -70,7 +67,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   condition,

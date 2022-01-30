@@ -31,7 +31,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public LoaderField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>>? condition,
@@ -40,7 +39,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   condition,
@@ -52,7 +50,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private LoaderField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -62,7 +59,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
                   parent,
                   name,
                   resolver,
@@ -77,7 +73,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> naturalOrder)
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -91,7 +86,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection()
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -105,7 +99,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected override LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
                 Parent,
                 Name,
                 resolver,
@@ -128,7 +121,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildEntity : class
     {
         public LoaderField(
-            RelationRegistry<TExecutionContext> registry,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -136,9 +128,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Expression<Func<TChildEntity, TEntity>> navigationProperty,
             Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType)
-            : base(registry, parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
+            : base(parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
         {
-            registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
+            parent.Registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
         }
     }
 }

@@ -29,7 +29,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal class RelationRegistry<TExecutionContext> : IServiceProvider, IRegistry
+    internal class RelationRegistry<TExecutionContext> : IServiceProvider, IRegistry<TExecutionContext>
     {
         // TODO It seems like `RelationRegistry` is not good name for this class. Is `ConfigurationRegistry` better choice?
         private static readonly ReadOnlyDictionary<Type, Type> _structTypeMap = new(
@@ -142,6 +142,11 @@ namespace Epam.GraphQL.Configuration
             return methodInfo.InvokeAndHoistBaseException<ObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
         }
 
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> IRegistry<TExecutionContext>.Register<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        {
+            return Register<TEntity>(projectionType, parent);
+        }
+
         public InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> RegisterInput<TProjection, TEntity>(IField<TExecutionContext>? parent)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class
@@ -157,6 +162,11 @@ namespace Epam.GraphQL.Configuration
         {
             var methodInfo = GetType().GetGenericMethod(nameof(RegisterInput), new[] { projectionType, typeof(TEntity) }, new[] { typeof(IField<TExecutionContext>) });
             return methodInfo.InvokeAndHoistBaseException<InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
+        }
+
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> IRegistry<TExecutionContext>.RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        {
+            return RegisterInput<TEntity>(projectionType, parent);
         }
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? GetObjectGraphTypeConfigurator(Type type, Type? loaderType = null)

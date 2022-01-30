@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -18,6 +19,9 @@ namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class ProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TEntity, TExecutionContext>
     {
+        private static MethodInfo? _createGroupSelectorExpressionMethodInfo;
+        private static MethodInfo? _createSelectorExpressionMethodInfo;
+        private readonly IObjectGraphTypeConfigurator<TEntity, TExecutionContext> _owner;
         private readonly HashSet<LambdaExpression> _members = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<LambdaExpression, string> _expressionNames = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<string, FieldDependencies<TExecutionContext>> _conditionMembers = new(StringComparer.Ordinal);
@@ -28,23 +32,19 @@ namespace Epam.GraphQL.Configuration.Implementations
         private Type? _proxyGenericType;
         private Type? _proxyType;
 
-        public ProxyAccessor(IReadOnlyList<IField<TEntity, TExecutionContext>> fields)
+        public ProxyAccessor(IObjectGraphTypeConfigurator<TEntity, TExecutionContext> owner)
         {
-            Fields = fields ?? throw new ArgumentNullException(nameof(fields));
+            _owner = owner;
         }
 
-        public IReadOnlyList<IField<TEntity, TExecutionContext>> Fields { get; }
+        public IReadOnlyList<IField<TEntity, TExecutionContext>> Fields => _owner.Fields;
 
         public Type ProxyGenericType
         {
             get
             {
-                if (_proxyGenericType == null)
-                {
-                    Configure();
-                }
-
-                return _proxyGenericType!;
+                Configure();
+                return _proxyGenericType;
             }
         }
 
@@ -57,7 +57,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                     _proxyType = ProxyGenericType.MakeGenericType(typeof(TEntity));
                 }
 
-                return _proxyType!;
+                return _proxyType;
             }
         }
 
@@ -78,8 +78,6 @@ namespace Epam.GraphQL.Configuration.Implementations
                 var dependendFields = conditionalFields
                     .Select(field => _conditionMembers[field.Name]);
 
-                var dependOnOriginal = dependendFields.Any(dep => dep.DependOnAllMembers);
-
                 var dependencies = dependendFields
                     .SelectMany(dep => dep.DependentOn)
                     .Select(dep => _expressionNames[dep]);
@@ -91,54 +89,87 @@ namespace Epam.GraphQL.Configuration.Implementations
                             .Where(name => !conditionalFieldNames.Contains(name, StringComparer.Ordinal))
                         .Concat(_members.Select(m => _expressionNames[m]))
                         .Concat(dependencies)
-                        .Distinct(),
-                    dependOnOriginal);
+                        .Distinct());
             });
         }
 
+        [MemberNotNull(nameof(_proxyGenericType))]
         public void Configure()
         {
-            if (_proxyGenericType == null)
+            if (_proxyGenericType != null)
             {
-                var fieldTypes = new Dictionary<string, Type>();
+                return;
+            }
 
-                foreach (var calculatedField in Fields)
+            var fieldTypes = new Dictionary<string, Type>();
+            var i = 1;
+
+            foreach (var calculatedField in Fields)
+            {
+                var name = calculatedField.Name;
+                fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
+            }
+
+            foreach (var dep in _conditionMembers)
+            {
+                foreach (var depExpr in dep.Value.DependentOn)
                 {
-                    var name = calculatedField.Name;
-                    fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
+                    AddNewField(dep.Key, depExpr);
                 }
+            }
 
-                var i = 1;
+            foreach (var e in _members)
+            {
+                AddNewField(string.Empty, e);
+            }
 
-                foreach (var dep in _conditionMembers)
+            if (Fields.OfType<IExpressionField<TEntity, TExecutionContext>>().Any(f => f.IsGroupable))
+            {
+                fieldTypes.Add("$count", typeof(int));
+            }
+
+            _proxyGenericType = fieldTypes.MakeProxyType(typeof(TEntity).Name);
+
+            void AddNewField(string fieldPrefix, LambdaExpression depExpr)
+            {
+                if (!_expressionNames.ContainsKey(depExpr))
                 {
-                    foreach (var depExpr in dep.Value.DependentOn)
+                    // Try to look up for existing expression field with the same lambda expression
+                    var existingField = Fields
+                        .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                        .FirstOrDefault(existing => ExpressionEqualityComparer.Instance.Equals(existing.OriginalExpression, depExpr));
+
+                    string? newName = null;
+
+                    if (existingField != null)
                     {
-                        if (!_expressionNames.ContainsKey(depExpr))
+                        // The expression field exists. Use its name
+                        newName = existingField.Name.ToCamelCase();
+                    }
+                    else if (depExpr.IsProperty())
+                    {
+                        // This is the case when expression field doesn't exist, but expression itself is a property,
+                        // so try to use a name of that property.
+                        var propName = depExpr.GetPropertyInfo().Name.ToCamelCase();
+
+                        // Try to lookup for existing non-expression field with the property name
+                        if (!Fields.Any(field => field.Name.ToCamelCase().Equals(propName, StringComparison.Ordinal)))
                         {
-                            var newName = $"<>{dep.Key}${i++}";
+                            // Field with the property name doesn't exist. Use a name of the property
+                            newName = propName;
                             fieldTypes.Add(newName, depExpr.Body.Type);
-                            _expressionNames.Add(depExpr, newName);
                         }
                     }
-                }
 
-                foreach (var e in _members)
-                {
-                    if (!_expressionNames.ContainsKey(e))
+                    if (newName == null)
                     {
-                        var newName = $"<>${i++}";
-                        fieldTypes.Add(newName, e.Body.Type);
-                        _expressionNames.Add(e, newName);
+                        // No match with existing names. Use generic name
+                        newName = $"{fieldPrefix}${i++}";
+                        fieldTypes.Add(newName, depExpr.Body.Type);
                     }
-                }
 
-                if (Fields.OfType<IExpressionField<TEntity, TExecutionContext>>().Any(f => f.IsGroupable))
-                {
-                    fieldTypes.Add("<>$count", typeof(int));
+                    _expressionNames.Add(depExpr, newName);
                 }
-
-                _proxyGenericType = fieldTypes.MakeProxyType(typeof(TEntity).Name);
             }
         }
 
@@ -183,14 +214,17 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             return _createSelectorExpressionCache.GetOrAdd(fieldNames.ToList(), fieldNames =>
             {
-                var proxyType = GetConcreteProxyType(fieldNames);
-                var createGroupingExpressionMethodInfo = GetType().GetGenericMethod(
-                    nameof(CreateSelectorExpression),
-                    new[] { proxyType },
-                    new[] { typeof(IEnumerable<string>) },
-                    BindingFlags.Instance | BindingFlags.NonPublic);
+                _createSelectorExpressionMethodInfo ??= typeof(ProxyAccessor<TEntity, TExecutionContext>)
+                    .GetNonPublicGenericMethod(method => method
+                        .HasName(nameof(CreateSelectorExpression))
+                        .HasOneGenericTypeParameter()
+                        .Parameter<IEnumerable<string>>());
 
-                return createGroupingExpressionMethodInfo.InvokeAndHoistBaseException<Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>>(this, fieldNames);
+                var proxyType = GetConcreteProxyType(fieldNames);
+
+                return _createSelectorExpressionMethodInfo
+                    .MakeGenericMethod(proxyType)
+                    .InvokeAndHoistBaseException<Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>>(this, fieldNames);
             });
         }
 
@@ -223,12 +257,15 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public LambdaExpression CreateGroupSelectorExpression(Type entityType, IEnumerable<string> fieldNames)
         {
-            var createGroupingExpressionMethodInfo = GetType().GetGenericMethod(
-                nameof(CreateGroupSelectorExpression),
-                new[] { entityType },
-                new[] { typeof(IEnumerable<string>) });
+            _createGroupSelectorExpressionMethodInfo ??= typeof(ProxyAccessor<TEntity, TExecutionContext>)
+                .GetPublicGenericMethod(method => method
+                    .HasName(nameof(CreateGroupSelectorExpression))
+                    .HasOneGenericTypeParameter()
+                    .Parameter<IEnumerable<string>>());
 
-            return createGroupingExpressionMethodInfo.InvokeAndHoistBaseException<LambdaExpression>(this, fieldNames);
+            return _createGroupSelectorExpressionMethodInfo
+                .MakeGenericMethod(entityType)
+                .InvokeAndHoistBaseException<LambdaExpression>(this, fieldNames);
         }
 
         public LambdaExpression CreateGroupKeySelectorExpression(IEnumerable<string> subFields, IEnumerable<string> aggregateQueriedFields)
@@ -256,9 +293,9 @@ namespace Epam.GraphQL.Configuration.Implementations
                         .SafeNull()
                         .Select(f =>
                         {
-                            if (f == "<>$count")
+                            if (f == "$count")
                             {
-                                var propInfo = sourceType.GetProperty("<>$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                                var propInfo = sourceType.GetProperty("$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                                 var countMethodInfo = CachedReflectionInfo.ForEnumerable.Count(sourceType);
                                 var methodCallExpr = Expression.Call(null, countMethodInfo, param);
 
@@ -296,6 +333,17 @@ namespace Epam.GraphQL.Configuration.Implementations
             childProxyAccessor.AddMembers(factorizationResult.RightExpressions.SelectMany(ExpressionHelpers.GetMembers));
         }
 
+        public void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members)
+        {
+            if (!_conditionMembers.TryGetValue(childFieldName, out var dependendMembers))
+            {
+                dependendMembers = new FieldDependencies<TExecutionContext>();
+                _conditionMembers.Add(childFieldName, dependendMembers);
+            }
+
+            dependendMembers.AddRange(members);
+        }
+
         public void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member)
         {
             if (!_conditionMembers.TryGetValue(childFieldName, out var dependendMembers))
@@ -315,17 +363,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         public void RemoveMember<TResult>(Expression<Func<TEntity, TResult>> member)
         {
             _members.Remove(member);
-        }
-
-        public void AddAllMembers(string childFieldName)
-        {
-            if (!_conditionMembers.TryGetValue(childFieldName, out var fieldDependencies))
-            {
-                fieldDependencies = new FieldDependencies<TExecutionContext>();
-                _conditionMembers.Add(childFieldName, fieldDependencies);
-            }
-
-            fieldDependencies.DependOnAllMembers = true;
         }
 
         public void AddMembers(IEnumerable<LambdaExpression> members)
@@ -360,28 +397,21 @@ namespace Epam.GraphQL.Configuration.Implementations
             // TODO Refactor it (should we query 'queriedFields'?)
             var queriedFields = Fields.Where(field => fieldNames.SafeNull().Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
 
-            var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
+            var builder = ExpressionHelpers.MakeMemberInit<TType>(typeof(TEntity));
 
             var contextParam = Expression.Parameter(typeof(TExecutionContext));
-            var entityParam = Expression.Parameter(typeof(TEntity));
-
-            var newExpr = Expression.New(ctor);
 
             var properties = ProxyType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)
                 .OrderBy(p => p.Name)
                 .ThenBy(p => p.DeclaringType != ProxyType)
                 .ToList();
 
-            var bindings = queriedFields
-                .OfType<IExpressionField<TEntity, TExecutionContext>>()
-                .Select(f =>
-                {
-                    var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
-                    return Expression.Bind(
-                        properties.First(p => p.Name.Equals(f.Name, StringComparison.OrdinalIgnoreCase)),
-                        expr.Body.ReplaceParameter(expr.Parameters[0], entityParam));
-                })
-                .ToList();
+            foreach (var expressionField in queriedFields.OfType<IExpressionField<TEntity, TExecutionContext>>())
+            {
+                var boundExpr = expressionField.ContextExpression.ReplaceFirstParameter(contextParam);
+                var propertyInfo = properties.First(p => p.Name.Equals(expressionField.Name, StringComparison.OrdinalIgnoreCase));
+                builder.Property(propertyInfo, boundExpr);
+            }
 
             var allMembers = _conditionMembers
                 .Where(kv => queriedFields.Select(field => field.Name).Contains(kv.Key))
@@ -389,33 +419,14 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .Concat(_members)
                 .Distinct<LambdaExpression>(ExpressionEqualityComparer.Instance);
 
-            bindings.AddRange(allMembers.Select(m => Expression.Bind(
-                    ProxyType.GetProperty(_expressionNames[m], BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase),
-                    m.Body.ReplaceParameter(m.Parameters[0], entityParam))));
-
-            var dependOnAllMembers = _conditionMembers
-                .Any(kv => kv.Value.DependOnAllMembers && queriedFields.Select(field => field.Name).Contains(kv.Key));
-
-            if (dependOnAllMembers)
+            foreach (var memberExpression in allMembers)
             {
-                bindings.Add(Expression.Bind(ProxyType.GetProperty("$original"), entityParam));
+                var propertyInfo = ProxyType.GetProperty(_expressionNames[memberExpression], BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                builder.Property(propertyInfo, memberExpression);
             }
 
-            var initExpr = Expression.MemberInit(newExpr, bindings);
-
-            var result = Expression.Lambda<Func<TExecutionContext, TEntity, Proxy<TEntity>>>(initExpr, contextParam, entityParam);
-            return result;
-        }
-
-        private void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members)
-        {
-            if (!_conditionMembers.TryGetValue(childFieldName, out var dependendMembers))
-            {
-                dependendMembers = new FieldDependencies<TExecutionContext>();
-                _conditionMembers.Add(childFieldName, dependendMembers);
-            }
-
-            dependendMembers.AddRange(members);
+            var result = builder.Lambda();
+            return Expression.Lambda<Func<TExecutionContext, TEntity, Proxy<TEntity>>>(result.Body, contextParam, result.Parameters[0]);
         }
     }
 }

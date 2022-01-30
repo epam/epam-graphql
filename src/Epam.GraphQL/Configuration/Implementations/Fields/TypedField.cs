@@ -10,8 +10,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class TypedField<TEntity, TReturnType, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
         where TEntity : class
     {
-        protected TypedField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
-            : base(registry, parent, name)
+        public TypedField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : base(parent, name)
         {
         }
 

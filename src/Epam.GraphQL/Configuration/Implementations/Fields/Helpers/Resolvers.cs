@@ -49,7 +49,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return (context, children) =>
             {
                 var subFields = context.GetGroupConnectionQueriedFields();
-                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
+                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields();
 
                 var sourceType = children.ElementType;
 
@@ -64,10 +64,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 var shouldComputeItems = context.HasItems();
 
                 IQueryable<object> items;
-                if (aggregateQueriedFields.Contains("<>$count"))
+                if (aggregateQueriedFields.Contains("count"))
                 {
                     var param = Expression.Parameter(sourceType);
-                    var member = Expression.Property(param, sourceType.GetProperty("<>$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
+                    var member = Expression.Property(param, sourceType.GetProperty("$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
                     var result = Expression.Lambda(member, param);
 
                     var lambda = ExpressionHelpers.MakeMemberInit<GroupResult<Proxy<TChildEntity>>>(sourceType)
@@ -101,10 +101,28 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             };
         }
 
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func)
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, TReturnType> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
             where TEntity : class
         {
-            return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                (Func<Proxy<TEntity>, TEntity>)proxyAccessor.GetProxyExpression(FuncConstants<TEntity>.IdentityExpression).CastFirstParamTo<Proxy<TEntity>>().Compile());
+
+            return Resolver;
+
+            TReturnType Resolver(IResolveFieldContext ctx)
+            {
+                var context = ctx.GetUserContext<TExecutionContext>();
+                if (ctx.Source is Proxy<TEntity> proxy)
+                {
+                    return func(context, converter.Value(proxy));
+                }
+
+                return func(context, (TEntity)ctx.Source);
+            }
         }
 
         public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(Func<TExecutionContext, TReturnType> func)
