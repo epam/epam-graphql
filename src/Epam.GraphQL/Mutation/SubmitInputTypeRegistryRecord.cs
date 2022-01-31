@@ -21,7 +21,7 @@ namespace Epam.GraphQL.Mutation
             string fieldName,
             Type idType)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _registry = registry;
             ConfiguratorType = configuratorType;
             EntityType = entityType;
             FieldName = fieldName;

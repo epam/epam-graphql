@@ -25,7 +25,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("manager")
-                        .FromLoader<Person>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Association)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Association)
                         .SingleOrDefault();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("manager")
-                        .FromLoader<Person>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Association)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Association)
                         .SingleOrDefault();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -146,7 +146,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("manager")
-                        .FromLoader<Person>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Aggregation)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Aggregation)
                         .SingleOrDefault();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -193,7 +193,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("manager")
-                        .FromLoader<Person>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Aggregation)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, m) => p.ManagerId == m.Id, Enums.RelationType.Aggregation)
                         .SingleOrDefault();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -239,7 +239,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association);
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
                 applySecurityFilter: (_, query) => query.Where(p => p.Id != 1));
@@ -299,7 +299,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association);
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
                 applySecurityFilter: (_, query) => query.Where(p => p.Id != 1));
@@ -358,7 +358,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation);
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
                 applySecurityFilter: (_, query) => query.Where(p => p.Id != 1));
@@ -408,7 +408,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation);
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
                 applySecurityFilter: (_, query) => query.Where(p => p.Id != 1));
@@ -453,7 +453,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association)
                         .AsConnection();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -514,7 +514,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Association)
                         .AsConnection();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -574,7 +574,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation)
                         .AsConnection();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
@@ -625,7 +625,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation)
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (p, s) => p.Id == s.ManagerId, Enums.RelationType.Aggregation)
                         .AsConnection();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),

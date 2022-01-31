@@ -31,17 +31,9 @@ namespace Epam.GraphQL.Extensions
 
         private static long _proxyTypeCacheCount;
 
-        public static Type MakeType(this IDictionary<string, Type>? properties, string? typeName, Type? parent = null)
+        public static Type MakeType(this IDictionary<string, Type> properties, string typeName, Type? parent = null)
         {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
-
-            if (string.IsNullOrEmpty(typeName))
-            {
-                throw new ArgumentNullException(nameof(typeName));
-            }
+            Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
 
             return _typeCache.GetOrAdd((parent, typeName, properties), key =>
             {
@@ -115,15 +107,7 @@ namespace Epam.GraphQL.Extensions
 
         public static Type MakeProxyType(this IDictionary<string, Type> properties, string typeName)
         {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
-
-            if (string.IsNullOrEmpty(typeName))
-            {
-                throw new ArgumentNullException(nameof(typeName));
-            }
+            Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
 
             return _proxyTypeCache.GetOrAdd(properties, properties =>
             {

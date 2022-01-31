@@ -24,7 +24,5 @@ namespace Epam.GraphQL.Mutation
         public IEnumerable<object>? Payload { get; set; }
 
         public TData? Data { get; set; }
-
-        object? IMutationResult.Data { get => Data; set => Data = (TData?)value; }
     }
 }

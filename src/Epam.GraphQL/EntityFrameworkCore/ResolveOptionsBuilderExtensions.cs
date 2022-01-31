@@ -3,7 +3,7 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.EntityFrameworkCore
 {
@@ -11,10 +11,7 @@ namespace Epam.GraphQL.EntityFrameworkCore
     {
         public static ResolveOptionsBuilder DoNotSaveChanges(this ResolveOptionsBuilder optionsBuilder)
         {
-            if (optionsBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(optionsBuilder));
-            }
+            Guards.ThrowIfNull(optionsBuilder, nameof(optionsBuilder));
 
             var extension = optionsBuilder.Options.FindExtension<EFCoreResolveOptionsExtension>();
 
@@ -31,10 +28,7 @@ namespace Epam.GraphQL.EntityFrameworkCore
 
         public static ResolveOptionsBuilder DoNotAddNewEntitiesToDbContext(this ResolveOptionsBuilder optionsBuilder)
         {
-            if (optionsBuilder == null)
-            {
-                throw new ArgumentNullException(nameof(optionsBuilder));
-            }
+            Guards.ThrowIfNull(optionsBuilder, nameof(optionsBuilder));
 
             var extension = optionsBuilder.Options.FindExtension<EFCoreResolveOptionsExtension>();
 

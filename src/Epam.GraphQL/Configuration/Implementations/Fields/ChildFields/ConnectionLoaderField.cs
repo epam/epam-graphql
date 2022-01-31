@@ -14,9 +14,7 @@ using Epam.GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
     internal sealed class ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
-#pragma warning restore CA1501
         ConnectionLoaderFieldBase<
             ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
             TEntity,

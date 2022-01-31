@@ -47,6 +47,11 @@ namespace Epam.GraphQL.Configuration
                 [typeof(Guid)] = typeof(IdGraphType),
             });
 
+        private static MethodInfo? _registerMethodInfo;
+        private static MethodInfo? _registerInputMethodInfo;
+        private static MethodInfo? _registerLoaderMethodInfo;
+        private static MethodInfo? _resolveLoaderMethodInfo;
+
         private readonly Dictionary<(Type LoaderType, Type EntityType), Relations> _relationMap = new();
         private readonly Dictionary<Type, Relations> _relationMapPostponedForSave = new();
         private readonly Dictionary<Type, PropertyInfo> _primaryKeys = new();
@@ -67,12 +72,10 @@ namespace Epam.GraphQL.Configuration
 
         public RelationRegistry(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _serviceProvider = serviceProvider;
         }
 
         public object GetService(Type type) => _serviceProvider.GetService(type);
-
-        public T GetService<T>() => _serviceProvider.GetService<T>();
 
         public void Register<TEntity, TChildEntity>(
             Type loaderType,
@@ -138,7 +141,10 @@ namespace Epam.GraphQL.Configuration
         public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
             where TEntity : class
         {
-            var methodInfo = GetType().GetGenericMethod(nameof(Register), new[] { projectionType, typeof(TEntity) }, new[] { typeof(IField<TExecutionContext>) });
+            _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo<IField<TExecutionContext>, ObjectGraphTypeConfigurator<DummyMutableLoader<TExecutionContext>, object, TExecutionContext>>(
+                Register<DummyMutableLoader<TExecutionContext>, object>);
+
+            var methodInfo = _registerMethodInfo.MakeGenericMethod(projectionType, typeof(TEntity));
             return methodInfo.InvokeAndHoistBaseException<ObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
         }
 
@@ -160,7 +166,10 @@ namespace Epam.GraphQL.Configuration
         public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
             where TEntity : class
         {
-            var methodInfo = GetType().GetGenericMethod(nameof(RegisterInput), new[] { projectionType, typeof(TEntity) }, new[] { typeof(IField<TExecutionContext>) });
+            _registerInputMethodInfo ??= ReflectionHelpers.GetMethodInfo<IField<TExecutionContext>?, InputObjectGraphTypeConfigurator<DummyMutableLoader<TExecutionContext>, object, TExecutionContext>>(
+                RegisterInput<DummyMutableLoader<TExecutionContext>, object>);
+
+            var methodInfo = _registerInputMethodInfo.MakeGenericMethod(projectionType, typeof(TEntity));
             return methodInfo.InvokeAndHoistBaseException<InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
         }
 
@@ -333,11 +342,10 @@ namespace Epam.GraphQL.Configuration
 
         public ProjectionBase<TExecutionContext> ResolveLoader(Type projectionType, Type entityType)
         {
-            var methodInfo = GetType().GetGenericMethod(
-                nameof(ResolveLoader),
-                new[] { projectionType, entityType },
-                Type.EmptyTypes);
+            _resolveLoaderMethodInfo ??= ReflectionHelpers.GetMethodInfo(
+                ResolveLoader<DummyMutableLoader<TExecutionContext>, object>);
 
+            var methodInfo = _resolveLoaderMethodInfo.MakeGenericMethod(projectionType, entityType);
             return methodInfo.InvokeAndHoistBaseException<ProjectionBase<TExecutionContext>>(this);
         }
 
@@ -369,13 +377,7 @@ namespace Epam.GraphQL.Configuration
             var loader = (ProjectionBase<TExecutionContext>)type.CreateInstanceAndHoistBaseException();
             _cache[type] = loader;
 
-            var baseType = TypeHelpers.FindMatchingGenericBaseType(type, typeof(Projection<,>));
-
-            if (baseType == null)
-            {
-                throw new ArgumentException($"Cannot resolve loader of type {type}", nameof(type));
-            }
-
+            var baseType = ReflectionHelpers.FindMatchingGenericBaseType(type, typeof(Projection<,>));
             _projectionEntityTypes.Add(baseType.GenericTypeArguments[0]);
             loader.Registry = this;
             loader.AfterConstruction();
@@ -528,7 +530,7 @@ namespace Epam.GraphQL.Configuration
 
             string? possibleName = null;
 
-            if (TypeHelpers.FindMatchingGenericBaseType(projectionType, typeof(Query<>)) != null || TypeHelpers.FindMatchingGenericBaseType(projectionType, typeof(Mutation<>)) != null)
+            if (ReflectionHelpers.TryFindMatchingGenericBaseType(projectionType, typeof(Query<>), out var _) || ReflectionHelpers.TryFindMatchingGenericBaseType(projectionType, typeof(Mutation<>), out _))
             {
                 possibleName = projectionType.GraphQLTypeName(false);
             }
@@ -901,11 +903,12 @@ namespace Epam.GraphQL.Configuration
             var rightFuncType = typeof(Func<,>).MakeGenericType(typeof(TChildEntity), relationInfo.RightExpression.ReturnType);
             var rightExpressionType = typeof(Expression<>).MakeGenericType(rightFuncType);
 
-            var registerMethodInfo = GetType().GetGenericMethod(
-                nameof(Register),
-                new[] { typeof(TChildEntity), childLoaderType, typeof(TEntity), loaderType, relationInfo.RightExpression.ReturnType, relationInfo.LeftExpression.ReturnType },
-                new[] { rightExpressionType, leftExpressionType, typeof(Expression<Func<TChildEntity, TEntity>>), typeof(Expression<Func<TEntity, TChildEntity>>), typeof(RelationType) },
-                BindingFlags.NonPublic | BindingFlags.Instance);
+            _registerLoaderMethodInfo ??= new Action<Expression<Func<object, object>>, Expression<Func<object, object>>, Expression<Func<object, object>>?, Expression<Func<object, object>>?, RelationType>(Register<object, DummyMutableLoader<TExecutionContext>, object, DummyMutableLoader<TExecutionContext>, object, object>)
+                .GetMethodInfo()
+                .GetGenericMethodDefinition();
+
+            var registerMethodInfo = _registerLoaderMethodInfo.MakeGenericMethod(
+                typeof(TChildEntity), childLoaderType, typeof(TEntity), loaderType, relationInfo.RightExpression.ReturnType, relationInfo.LeftExpression.ReturnType);
 
             registerMethodInfo.InvokeAndHoistBaseException(
                 this,

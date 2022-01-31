@@ -38,8 +38,6 @@ namespace Epam.GraphQL.Extensions
 
         public static TResult Bind<TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
 
-        public static Func<T, TResult> Bind<T, TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, T, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
-
         public static IBatcher GetBatcher(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Batcher;
 
         public static IProfiler GetProfiler(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Profiler;

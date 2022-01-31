@@ -36,7 +36,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public FromIQueryableBuilder(QueryableField<TSourceType, TReturnType, TExecutionContext> fieldType)
             : base(fieldType)
         {
-            _fieldType = fieldType ?? throw new ArgumentNullException(nameof(fieldType));
+            _fieldType = fieldType;
         }
 
         public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
@@ -46,7 +46,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IFromIQueryableBuilder<TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> condition)
         {
-            return new FromIQueryableBuilder<TSourceType, TReturnType, TExecutionContext>((QueryableField<TSourceType, TReturnType, TExecutionContext>)_fieldType.ApplyWhere(condition));
+            return new FromIQueryableBuilder<TSourceType, TReturnType, TExecutionContext>(_fieldType.ApplyWhere(condition));
         }
     }
 }

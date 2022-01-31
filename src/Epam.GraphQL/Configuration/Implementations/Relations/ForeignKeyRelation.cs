@@ -20,8 +20,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
         public ForeignKeyRelation(string propName, Predicate<TPropertyType> isFakePropValue, Func<object, object?> idGetter)
         {
             _propName = propName;
-            _isFakePropValue = isFakePropValue ?? throw new ArgumentNullException(nameof(isFakePropValue));
-            _idGetter = idGetter ?? throw new ArgumentNullException(nameof(idGetter));
+            _isFakePropValue = isFakePropValue;
+            _idGetter = idGetter;
         }
 
         public IDataLoaderResult<bool> CanViewParentAsync(object context, object? entity) => new DataLoaderResult<bool>(true);

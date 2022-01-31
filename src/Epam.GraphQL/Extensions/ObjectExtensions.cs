@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -27,15 +28,8 @@ namespace Epam.GraphQL.Extensions
 
         public static void CopyProperties<T>(this T obj, T value, IEnumerable<PropertyInfo> properties)
         {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            Guards.ThrowIfNull(obj, nameof(obj));
+            Guards.ThrowIfNull(value, nameof(value));
 
             foreach (var propInfo in properties)
             {
@@ -51,16 +45,6 @@ namespace Epam.GraphQL.Extensions
 
         public static object? GetPropertyValue(this object source, PropertyInfo propertyInfo)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (propertyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(propertyInfo));
-            }
-
             // We use reflection to create a delegate to access the property
             // Then cache the delegate
             // This is over 10x faster that just using reflection to get the property value
@@ -77,16 +61,6 @@ namespace Epam.GraphQL.Extensions
 
         public static void SetPropertyValue(this object source, PropertyInfo propertyInfo, object? value)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (propertyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(propertyInfo));
-            }
-
             // We use reflection to create a delegate to access the property
             // Then cache the delegate
             // This is over 10x faster that just using reflection to get the property value

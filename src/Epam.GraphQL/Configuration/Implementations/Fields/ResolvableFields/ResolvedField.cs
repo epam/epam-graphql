@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
@@ -22,7 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             LazyQueryArguments? arguments)
             : base(parent, name)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            _resolver = resolver;
             _graphType = graphType;
             Arguments = arguments;
         }

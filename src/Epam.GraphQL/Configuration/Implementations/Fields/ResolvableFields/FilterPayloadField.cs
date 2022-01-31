@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public FilterPayloadField(IRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
             _projectionType = projectionType;
             _entityType = entityType;
 

@@ -18,12 +18,23 @@ namespace Epam.GraphQL.Tests.Internals
     [TestFixture]
     public class ProxyAccessorTests : BaseTests
     {
+        private IRegistry<TestUserContext> _registry;
+
+        [SetUp]
+        public void Setup()
+        {
+            _registry = Substitute.For<IRegistry<TestUserContext>>();
+
+            _registry.GetGraphQLTypeName<Person>(Arg.Any<bool>(), Arg.Any<IField<TestUserContext>>())
+                .Returns("Test");
+        }
+
         [Test]
         public void ExpressionField()
         {
             var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
                 parent: null,
-                registry: Substitute.For<IRegistry<TestUserContext>>(),
+                registry: _registry,
                 isAuto: false);
 
             configurator.AddField(
@@ -47,7 +58,7 @@ namespace Epam.GraphQL.Tests.Internals
         {
             var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
                 parent: null,
-                registry: Substitute.For<IRegistry<TestUserContext>>(),
+                registry: _registry,
                 isAuto: false);
 
             configurator.AddField(
@@ -78,7 +89,7 @@ namespace Epam.GraphQL.Tests.Internals
         {
             var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
                 parent: null,
-                registry: Substitute.For<IRegistry<TestUserContext>>(),
+                registry: _registry,
                 isAuto: false);
 
             configurator.AddField(
@@ -102,7 +113,7 @@ namespace Epam.GraphQL.Tests.Internals
         {
             var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
                 parent: null,
-                registry: Substitute.For<IRegistry<TestUserContext>>(),
+                registry: _registry,
                 isAuto: false);
 
             configurator.AddField(
@@ -131,7 +142,7 @@ namespace Epam.GraphQL.Tests.Internals
         {
             var configurator = new ObjectGraphTypeConfigurator<Person, TestUserContext>(
                 parent: null,
-                registry: Substitute.For<IRegistry<TestUserContext>>(),
+                registry: _registry,
                 isAuto: false);
 
             configurator.AddField(

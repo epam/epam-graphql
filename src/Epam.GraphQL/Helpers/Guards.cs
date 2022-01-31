@@ -5,6 +5,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 
 namespace Epam.GraphQL.Helpers
 {
@@ -15,6 +16,32 @@ namespace Epam.GraphQL.Helpers
             if (argument is null)
             {
                 throw new ArgumentNullException(paramName);
+            }
+        }
+
+        public static void ThrowIfNullOrEmpty([NotNull] string? argument, string paramName)
+        {
+            ThrowIfNull(argument, paramName);
+
+            if (argument.Length == 0)
+            {
+                throw new ArgumentException("String argument is empty", paramName);
+            }
+        }
+
+        public static void ThrowIfParameterless(LambdaExpression expression, string paramName)
+        {
+            if (expression.Parameters.Count == 0)
+            {
+                throw new ArgumentException("Expression must have one parameter at least.", paramName);
+            }
+        }
+
+        public static void ThrowIfNegative(int? value, string paramName)
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(paramName, $"`{paramName}` is out of range. Must be non-negative or null.");
             }
         }
     }

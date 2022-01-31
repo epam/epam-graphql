@@ -39,8 +39,6 @@ namespace Epam.GraphQL.Builders.Common
     }
     public interface IHasFromLoader<TEntity, TExecutionContext>
     {
-        Epam.GraphQL.Builders.Common.IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TChildEntity>(System.Type childLoaderType, System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition, Epam.GraphQL.Enums.RelationType relationType = 0, System.Linq.Expressions.Expression<System.Func<TChildEntity, TEntity>>? navigationProperty = null, System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
-            where TChildEntity :  class;
         Epam.GraphQL.Builders.Common.IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition, Epam.GraphQL.Enums.RelationType relationType = 0, System.Linq.Expressions.Expression<System.Func<TChildEntity, TEntity>>? navigationProperty = null, System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
@@ -235,7 +233,6 @@ namespace Epam.GraphQL.Builders.Loader
         where TSourceType :  class
     {
         string Name { get; set; }
-        void ConfigureFrom(System.Type loaderType);
         void ConfigureFrom<TProjection>()
             where TProjection : Epam.GraphQL.Loaders.Projection<TSourceType, TExecutionContext>;
         void Field(System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<string>>> expression, string? deprecationReason = null);
@@ -276,8 +273,6 @@ namespace Epam.GraphQL.Builders.Loader
     public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>
         where TEntity :  class
     {
-        Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildEntity>(System.Type childLoader, System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition)
-            where TChildEntity :  class;
         Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
@@ -350,8 +345,6 @@ namespace Epam.GraphQL.Builders.MutableLoader
     }
     public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>
     {
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity>(System.Type parentLoaderType, System.Linq.Expressions.Expression<System.Func<TParentEntity, TReturnType>> parentProperty, System.Linq.Expressions.Expression<System.Func<TEntity, TParentEntity>> navigationProperty, Epam.GraphQL.Enums.RelationType relationType)
-            where TParentEntity :  class;
         Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(System.Linq.Expressions.Expression<System.Func<TParentEntity, TReturnType>> parentProperty, System.Linq.Expressions.Expression<System.Func<TEntity, TParentEntity>> navigationProperty, Epam.GraphQL.Enums.RelationType relationType)
             where TParentEntity :  class
             where TParentEntityLoader : Epam.GraphQL.Loaders.Loader<TParentEntity, TExecutionContext>, Epam.GraphQL.Loaders.IIdentifiableLoader, new ();
@@ -958,7 +951,8 @@ namespace Epam.GraphQL
         protected override void AfterConfigure() { }
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(TExecutionContext context, System.Collections.Generic.IEnumerable<object> entities) { }
         protected Epam.GraphQL.Configuration.IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null) { }
-        protected void SubmitField(System.Type loaderType, string fieldName) { }
+        protected void SubmitField<TLoader>(string fieldName)
+            where TLoader : Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext> { }
         protected void SubmitField<TLoader, TEntity>(string fieldName)
             where TLoader : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext>
             where TEntity :  class { }
@@ -1314,7 +1308,6 @@ namespace Epam.GraphQL.Mutation
 {
     public interface IMutationResult
     {
-        object? Data { get; set; }
         System.Collections.Generic.IEnumerable<object>? Payload { get; set; }
     }
     public static class MutationResult
@@ -1333,7 +1326,6 @@ namespace Epam.GraphQL.Savers
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IInputItem
     {
-        object? Payload { get; }
         System.Collections.Generic.IDictionary<string, object?> Properties { get; }
     }
     [Epam.GraphQL.Infrastructure.InternalApi]

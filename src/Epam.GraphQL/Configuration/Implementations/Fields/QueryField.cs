@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.Loader.Implementations;
@@ -15,7 +14,6 @@ using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
-using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Sorters.Implementations;
 
@@ -25,8 +23,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         FieldBase<object, TExecutionContext>,
         IQueryField<TExecutionContext>
     {
-        private static MethodInfo? _fromLoaderImplMethodInfo;
-
         public QueryField(BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
             : base(parent, name)
         {
@@ -184,16 +180,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(Parent, Name, new PayloadFields<Expression<Func<TEntity, bool>>, TExecutionContext>(Name, Registry, argName, typeof(TProjection), typeof(TEntity)));
             return Parent.ReplaceField(this, argumentedField);
-        }
-
-        private static MethodInfo FromLoader(Type loaderType, Type entityType)
-        {
-            _fromLoaderImplMethodInfo ??= typeof(QueryField<TExecutionContext>).GetNonPublicGenericMethod(
-                method => method
-                    .HasName(nameof(FromLoader))
-                    .HasTwoGenericTypeParameters());
-
-            return _fromLoaderImplMethodInfo.MakeGenericMethod(loaderType, entityType);
         }
     }
 }

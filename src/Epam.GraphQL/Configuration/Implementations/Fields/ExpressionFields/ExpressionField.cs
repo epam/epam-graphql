@@ -31,7 +31,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
             if (name == null && !expression.IsProperty())
             {
-                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider to give a name to field explicitly.");
+                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
             }
 
             _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
@@ -74,12 +74,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public LambdaExpression OriginalExpression => _expression.OriginalExpression;
 
-        protected virtual bool IsSupportFiltering => false;
-
-        protected virtual bool IsSupportSorting => false;
-
-        protected virtual bool IsSupportGrouping => false;
-
         public override object? Resolve(IResolveFieldContext context)
         {
             return _expression.Resolve(context, context.Source);
@@ -97,31 +91,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Sortable()
         {
-            if (!IsSupportSorting)
-            {
-                throw new NotSupportedException($".Sortable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
             Parent.AddSorter(_expression);
         }
 
         public void Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
-            if (!IsSupportSorting)
-            {
-                throw new NotSupportedException($".Sortable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
             Parent.AddSorter(Name, sorter);
         }
 
         public void Groupable()
         {
-            if (!IsSupportGrouping)
-            {
-                throw new NotSupportedException($".Groupable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
             IsGroupable = true;
         }
 
@@ -174,14 +153,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         private static string GenerateName(string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             if (name == null && !expression.IsProperty())
             {
-                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider to give a name to field explicitly.");
+                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
             }
 
             return name ?? expression.NameOf().ToCamelCase();
@@ -201,8 +175,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
         }
 
-        protected override bool IsSupportFiltering => true;
-
         protected TFilterValueType[]? DefaultValues { get; private set; }
 
         protected NullOption? NullValue { get; private set; }
@@ -211,12 +183,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
             if (defaultValues != null && defaultValues.Any(value => value == null))
             {
-                throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider to use .Filterable(NullValues).");
-            }
-
-            if (!IsSupportFiltering)
-            {
-                throw new NotSupportedException($".Filterable() call is not supported for field of type {typeof(TReturnType).Name}.");
+                throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider using .Filterable(NullValues).");
             }
 
             DefaultValues = defaultValues;
@@ -225,11 +192,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Filterable(NullOption nullValue)
         {
-            if (!IsSupportFiltering)
-            {
-                throw new NotSupportedException($".Filterable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
             NullValue = nullValue;
             IsFilterable = true;
         }

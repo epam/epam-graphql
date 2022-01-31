@@ -10,44 +10,11 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchField<TEntity, TReturnType, TExecutionContext> : BatchField<TEntity, TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public BatchField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(
-                parent,
-                name,
-                FuncConstants<TEntity>.IdentityExpression,
-                batchFunc,
-                graphType)
-        {
-        }
-
-        public BatchField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(
-                parent,
-                name,
-                FuncConstants<TEntity>.IdentityExpression,
-                batchFunc,
-                graphType)
-        {
-        }
-    }
-
     internal class BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
         IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>
@@ -92,7 +59,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         {
             _graphType = graphType;
 
-            FieldResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            FieldResolver = resolver;
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();
         }
 

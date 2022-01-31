@@ -15,8 +15,6 @@ namespace Epam.GraphQL.TaskBatcher
 {
     internal class BatchLoader
     {
-        public static IDataLoader<TParameter, TResult> FromResult<TParameter, TResult>(TResult result) => new ResolvedBatchTask<TParameter, TResult>(result);
-
         public static IDataLoader<TParameter, TResult> FromResult<TParameter, TResult>(Func<TParameter, TResult> transform) => new ParameterizedBatchTask<TParameter, TResult>(transform);
 
         public static IDataLoader<TParameter, TResult[]> WhenAll<TParameter, TResult>(params IDataLoader<TParameter, TResult>[] tasks)
@@ -37,7 +35,7 @@ namespace Epam.GraphQL.TaskBatcher
 
             public WhenAllBatchTask(IDataLoader<TParameter, TResult>[] tasks)
             {
-                _batchTasks = tasks ?? throw new ArgumentNullException(nameof(tasks));
+                _batchTasks = tasks;
             }
 
             public IDataLoader<TParameter, T> Combine<T>(Func<TParameter, TResult[], T> continuation)
@@ -59,11 +57,6 @@ namespace Epam.GraphQL.TaskBatcher
 
             public WhenAllDataLoaderResult(TParameter source, IEnumerable<IDataLoader<TParameter, TResult>> tasks)
             {
-                if (tasks == null)
-                {
-                    throw new ArgumentNullException(nameof(tasks));
-                }
-
                 _results = tasks.Select(task => task.LoadAsync(source)).ToArray();
             }
 
@@ -92,7 +85,7 @@ namespace Epam.GraphQL.TaskBatcher
 
             public ParameterizedBatchTask(Func<TParameter, TResult> transform)
             {
-                _transform = transform ?? throw new ArgumentNullException(nameof(transform));
+                _transform = transform;
             }
 
             public IDataLoader<TParameter, T> Combine<T>(Func<TResult, T> continuation)
@@ -107,29 +100,6 @@ namespace Epam.GraphQL.TaskBatcher
 
             public IDataLoaderResult<TResult> LoadAsync(TParameter param) => new DataLoaderResult<TResult>(_transform(param));
         }
-
-        private class ResolvedBatchTask<TParameter, TResult> : IDataLoader<TParameter, TResult>,
-            IBatchLoaderContinuation<TParameter, TResult>
-        {
-            private readonly TResult _result;
-
-            public ResolvedBatchTask(TResult result)
-            {
-                _result = result;
-            }
-
-            public IDataLoader<TParameter, T> Combine<T>(Func<TResult, T> continuation)
-            {
-                return new ResolvedBatchTask<TParameter, T>(continuation(_result));
-            }
-
-            public IDataLoader<TParameter, T> Combine<T>(Func<TParameter, TResult, T> continuation)
-            {
-                return new ParameterizedBatchTask<TParameter, T>(param => continuation(param, _result));
-            }
-
-            public IDataLoaderResult<TResult> LoadAsync(TParameter param) => new DataLoaderResult<TResult>(_result);
-        }
     }
 
     internal class BatchLoader<TId, TItem> : DataLoaderBase<TId, TItem?>, IDataLoader<TId, TItem?>, IBatchLoaderContinuation<TId, TItem?>
@@ -141,18 +111,13 @@ namespace Epam.GraphQL.TaskBatcher
         public BatchLoader(Func<IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> batchLoad, Func<string> stepNameFactory, IProfiler profiler)
             : base()
         {
-            if (batchLoad == null)
-            {
-                throw new ArgumentNullException(nameof(batchLoad));
-            }
-
             _loader = keys =>
             {
                 var ret = batchLoad(keys);
                 return ret.ToDictionary(r => r.Key, r => r.Value);
             };
 
-            _stepNameFactory = stepNameFactory ?? throw new ArgumentNullException(nameof(stepNameFactory));
+            _stepNameFactory = stepNameFactory;
             _profiler = profiler;
         }
 
@@ -197,19 +162,14 @@ namespace Epam.GraphQL.TaskBatcher
         public AsyncBatchLoader(Func<IEnumerable<TId>, IAsyncEnumerable<KeyValuePair<TId, TItem>>> batchLoad, Func<TId, TItem?> defaultFactory, Func<string> stepNameFactory, IProfiler profiler)
             : base()
         {
-            if (batchLoad == null)
-            {
-                throw new ArgumentNullException(nameof(batchLoad));
-            }
-
             _loader = async keys =>
             {
                 var ret = batchLoad(keys);
                 return await ret.ToDictionaryAsync(r => r.Key, r => r.Value, null).ConfigureAwait(false);
             };
 
-            _defaultFactory = defaultFactory ?? throw new ArgumentNullException(nameof(defaultFactory));
-            _stepNameFactory = stepNameFactory ?? throw new ArgumentNullException(nameof(stepNameFactory));
+            _defaultFactory = defaultFactory;
+            _stepNameFactory = stepNameFactory;
             _profiler = profiler;
         }
 
@@ -253,8 +213,8 @@ namespace Epam.GraphQL.TaskBatcher
         public TaskBatchLoader(Func<IEnumerable<TId>, Task<IDictionary<TId, TItem>>> batchLoad, Func<string> stepNameFactory, IProfiler profiler)
             : base()
         {
-            _loader = batchLoad ?? throw new ArgumentNullException(nameof(batchLoad));
-            _stepNameFactory = stepNameFactory ?? throw new ArgumentNullException(nameof(stepNameFactory));
+            _loader = batchLoad;
+            _stepNameFactory = stepNameFactory;
             _profiler = profiler;
         }
 

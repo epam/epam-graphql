@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public LazyQueryArgument(string name, Func<QueryArgument> factory)
         {
             Name = name;
-            Factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            Factory = factory;
         }
 
         public LazyQueryArgument(string name, Type graphType)

@@ -13,7 +13,6 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
-using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
@@ -27,7 +26,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         internal InlineObjectFieldBuilder(RelationRegistry<TExecutionContext> registry, TField fieldType)
             : base(fieldType)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _registry = registry;
         }
 
         public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
@@ -38,23 +37,12 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromLoaderInlineObjectBuilder<EnumerableFieldBase<TEntity, TChildEntity, TExecutionContext>, TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>(field);
         }
 
-        public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildEntity>(Type typeOfChildLoader, Expression<Func<TEntity, TChildEntity, bool>> condition)
-            where TChildEntity : class
-        {
-            var fromLoaderMethodInfo = GetType().GetGenericMethod(
-                nameof(FromLoader),
-                new[] { typeOfChildLoader, typeof(TChildEntity) },
-                new[] { typeof(Expression<Func<TEntity, TChildEntity, bool>>) });
-
-            return (IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity>)fromLoaderMethodInfo.InvokeAndHoistBaseException(this, condition);
-        }
-
         public IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -62,7 +50,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -88,7 +76,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -96,7 +84,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -120,13 +108,13 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
@@ -144,13 +132,13 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
@@ -167,7 +155,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, string>> batchFunc)
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, string>> batchFunc)
@@ -177,7 +165,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<string>>> batchFunc)
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<string>>> batchFunc)
@@ -187,7 +175,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, IDictionary<TEntity, string>> batchFunc)
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, string>> batchFunc)
@@ -197,7 +185,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<string>>> batchFunc)
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<string>>> batchFunc)
@@ -208,7 +196,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType?>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType?>> batchFunc)
@@ -220,7 +208,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType?>>> batchFunc)
@@ -232,7 +220,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, TReturnType?>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType?>> batchFunc)
@@ -244,7 +232,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType?>>> batchFunc)
@@ -258,7 +246,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -266,7 +254,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -292,7 +280,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -300,7 +288,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc, build));
         }
 
         public IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -324,13 +312,13 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
@@ -348,13 +336,13 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
@@ -371,7 +359,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, string>>> batchFunc)
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, string>>> batchFunc)
@@ -381,7 +369,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<string>>>> batchFunc)
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<string>>>> batchFunc)
@@ -391,7 +379,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, string>>> batchFunc)
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, string>>> batchFunc)
@@ -401,7 +389,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<string>>>> batchFunc)
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<string>>>> batchFunc)
@@ -412,7 +400,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType?>>> batchFunc)
@@ -424,7 +412,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType?>>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType?>>>> batchFunc)
@@ -436,7 +424,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectAndReferenceToBuilder<BatchField<TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(_registry, Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType?>>> batchFunc)
@@ -448,7 +436,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType?>>>> batchFunc)
             where TReturnType : struct
         {
-            return new SelectBuilder<BatchEnumerableField<TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
+            return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Field.Parent.FromBatch(Field, batchFunc));
         }
 
         public IHasSelect<IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType?>>>> batchFunc)

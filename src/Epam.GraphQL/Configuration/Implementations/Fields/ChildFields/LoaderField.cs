@@ -112,9 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
     }
 
-#pragma warning disable CA1501
     internal sealed class LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
-#pragma warning restore CA1501
         where TLoader : Loader<TEntity, TExecutionContext>, new()
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TEntity : class
@@ -125,8 +123,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             RelationType relationType,
-            Expression<Func<TChildEntity, TEntity>> navigationProperty,
-            Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty,
+            Expression<Func<TChildEntity, TEntity>>? navigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType)
             : base(parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
         {

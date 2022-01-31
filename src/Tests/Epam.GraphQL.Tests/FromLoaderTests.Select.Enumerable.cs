@@ -31,7 +31,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .Select((p, u) => new { u.Id, HeadId = p.Id })
                         .Select(u => new Unit { Id = u.Id });
                 },
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id })
                         .Where(u => u.Id == 1);
                 },
@@ -141,7 +141,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id })
                         .FirstOrDefault();
                 },
@@ -196,7 +196,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id })
                         .SingleOrDefault();
                 },
@@ -251,7 +251,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .Select((p, u) => new { u.Id, HeadId = p.Id })
                         .Select((p, u) => new Unit { Id = u.Id, HeadId = p.Id });
                 },

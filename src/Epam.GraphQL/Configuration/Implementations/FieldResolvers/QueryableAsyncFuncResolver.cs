@@ -31,6 +31,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         private readonly Lazy<Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IGrouping<Proxy<TEntity>, Proxy<TReturnType>>>>> _proxiedBatchTaskResolver;
         private readonly Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> _transform;
         private readonly Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> _sorters;
+        private readonly Func<IResolveFieldContext, IEnumerable<string>> _getQueriedFields;
 
         public QueryableAsyncFuncResolver(
             string fieldName,
@@ -40,14 +41,36 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
+            : this(
+                  fieldName,
+                  resolver,
+                  condition,
+                  transform,
+                  sorters,
+                  outerProxyAccessor,
+                  innerProxyAccessor,
+                  GetQueriedFields)
         {
-            _fieldName = fieldName ?? throw new ArgumentNullException(nameof(resolver));
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _condition = condition ?? throw new ArgumentNullException(nameof(condition));
-            _transform = transform ?? throw new ArgumentNullException(nameof(transform));
-            _outerProxyAccessor = outerProxyAccessor ?? throw new ArgumentNullException(nameof(outerProxyAccessor));
-            _innerProxyAccessor = innerProxyAccessor ?? throw new ArgumentNullException(nameof(innerProxyAccessor));
+        }
+
+        private QueryableAsyncFuncResolver(
+            string fieldName,
+            Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
+            Expression<Func<TEntity, TReturnType, bool>> condition,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
+            IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
+            IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor,
+            Func<IResolveFieldContext, IEnumerable<string>> getQueriedFields)
+        {
+            _fieldName = fieldName;
+            _resolver = resolver;
+            _condition = condition;
+            _transform = transform;
+            _outerProxyAccessor = outerProxyAccessor;
+            _innerProxyAccessor = innerProxyAccessor;
             _sorters = sorters;
+            _getQueriedFields = getQueriedFields;
 
             _batchTaskResolver = new Lazy<Func<IResolveFieldContext, IDataLoader<TEntity, IGrouping<TEntity, Proxy<TReturnType>>>>>(
                 () => GetBatchTaskResolver<TEntity>(_resolver, _condition, _transform, _sorters, FuncConstants<LambdaExpression>.Identity));
@@ -66,12 +89,10 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         {
             if (context.Source is Proxy<TEntity> proxy)
             {
-                var proxiedBatchLoader = context.Bind(ProxiedResolver);
-                return proxiedBatchLoader.LoadAsync(proxy);
+                return ProxiedResolver(context).LoadAsync(proxy);
             }
 
-            var batchLoader = context.Bind(Resolver);
-            return batchLoader.LoadAsync((TEntity)context.Source);
+            return Resolver(context).LoadAsync((TEntity)context.Source);
         }
 
         public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(
@@ -251,10 +272,15 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public IResolver<TEntity> AsConnection()
         {
-            var resolver = new ConnectionAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(_fieldName, _resolver, _condition, _transform, _sorters, _outerProxyAccessor, _innerProxyAccessor);
+            var resolver = new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(_fieldName, _resolver, _condition, _transform, _sorters, _outerProxyAccessor, _innerProxyAccessor, GetConnectionQueriedFields);
             return new AsyncFuncResolver<TEntity, Connection<Proxy<TReturnType>>>(
                 ctx => resolver._batchTaskResolver.Value(ctx).Then(items => Resolvers.Resolve(ctx, (IOrderedQueryable<Proxy<TReturnType>>)items.SafeNull().AsQueryable())),
                 ctx => resolver._proxiedBatchTaskResolver.Value(ctx).Then(items => Resolvers.Resolve(ctx, (IOrderedQueryable<Proxy<TReturnType>>)items.SafeNull().AsQueryable())));
+
+            static IEnumerable<string> GetConnectionQueriedFields(IResolveFieldContext context)
+            {
+                return context.GetConnectionQueriedFields();
+            }
         }
 
         public IResolver<TEntity> AsGroupConnection(
@@ -264,7 +290,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             throw new NotSupportedException();
         }
 
-        protected virtual IQueryableResolver<TEntity, TReturnType, TExecutionContext> Create(
+        private static IEnumerable<string> GetQueriedFields(IResolveFieldContext context)
+        {
+            return context.GetQueriedFields();
+        }
+
+        private IQueryableResolver<TEntity, TReturnType, TExecutionContext> Create(
             string fieldName,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Expression<Func<TEntity, TReturnType, bool>> condition,
@@ -273,12 +304,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> innerProxyAccessor)
         {
-            return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(fieldName, resolver, condition, transform, sorters, outerProxyAccessor, innerProxyAccessor);
-        }
-
-        protected virtual IEnumerable<string> GetQueriedFields(IResolveFieldContext context)
-        {
-            return context.GetQueriedFields();
+            return new QueryableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext>(fieldName, resolver, condition, transform, sorters, outerProxyAccessor, innerProxyAccessor, _getQueriedFields);
         }
 
         private Func<IResolveFieldContext, IDataLoader<TOuterEntity, IGrouping<TOuterEntity, Proxy<TReturnType>>>> GetBatchTaskResolver<TOuterEntity>(
@@ -330,7 +356,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         private Expression<Func<TReturnType, Proxy<TReturnType>>> Transform(IResolveFieldContext context)
         {
-            var fieldNames = GetQueriedFields(context);
+            var fieldNames = _getQueriedFields(context);
             var lambda = _innerProxyAccessor.CreateSelectorExpression(fieldNames);
 
             var ctx = context.GetUserContext<TExecutionContext>();
@@ -358,12 +384,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TEntity, TExecutionContext> outerProxyAccessor,
             IProxyAccessor<TChildEntity, TExecutionContext> innerProxyAccessor)
         {
-            _fieldName = fieldName ?? throw new ArgumentNullException(nameof(fieldName));
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _condition = condition ?? throw new ArgumentNullException(nameof(condition));
-            _transform = transform ?? throw new ArgumentNullException(nameof(transform));
-            _outerProxyAccessor = outerProxyAccessor ?? throw new ArgumentNullException(nameof(outerProxyAccessor));
-            _innerProxyAccessor = innerProxyAccessor ?? throw new ArgumentNullException(nameof(innerProxyAccessor));
+            _fieldName = fieldName;
+            _resolver = resolver;
+            _condition = condition;
+            _transform = transform;
+            _outerProxyAccessor = outerProxyAccessor;
+            _innerProxyAccessor = innerProxyAccessor;
             _batchTaskResolver = GetBatchTaskResolver<TEntity>(resolver, condition, transform, FuncConstants<LambdaExpression>.Identity);
             _proxiedBatchTaskResolver = GetBatchTaskResolver<Proxy<TEntity>>(resolver, condition, transform, leftExpression => _outerProxyAccessor.GetProxyExpression(leftExpression));
 
@@ -376,12 +402,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public object Resolve(IResolveFieldContext context)
         {
-            var batchLoader = new Lazy<IDataLoader<TEntity, IEnumerable<TReturnType>>>(() => context.Bind(Resolver));
-            var proxiedBatchLoader = new Lazy<IDataLoader<Proxy<TEntity>, IEnumerable<TReturnType>>>(() => context.Bind(ProxiedResolver));
-
             return context.Source is Proxy<TEntity> proxy
-                ? proxiedBatchLoader.Value.LoadAsync(proxy)
-                : batchLoader.Value.LoadAsync((TEntity)context.Source);
+                ? ProxiedResolver(context).LoadAsync(proxy)
+                : Resolver(context).LoadAsync((TEntity)context.Source);
         }
 
         public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)

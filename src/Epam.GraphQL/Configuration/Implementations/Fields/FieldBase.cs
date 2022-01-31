@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         protected FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
         {
             Name = name.ToCamelCase();
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            Parent = parent;
         }
 
         public LazyQueryArguments? Arguments { get; set; }

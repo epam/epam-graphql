@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using GraphQL.Types.Relay.DataObjects;
 
@@ -27,15 +28,8 @@ namespace Epam.GraphQL.Relay
             bool shouldComputeEdges,
             bool shouldComputeItems)
         {
-            if (first < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(first), "`first` is out of range. Must be non-negative or null.");
-            }
-
-            if (last < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(last), "`last` is out of range. Must be non-negative or null.");
-            }
+            Guards.ThrowIfNegative(first, nameof(first));
+            Guards.ThrowIfNegative(last, nameof(last));
 
             if (first.HasValue && last.HasValue)
             {

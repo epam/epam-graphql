@@ -68,7 +68,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             if (Fields.All(field => field.EditSettings != null && field.EditSettings.IsReadOnly))
             {
-                throw new InvalidOperationException($"Type `{typeof(TEntity).HumanizedName()}` should have one writable field at least. Consider to call Editable() or EditableIf(...) during fields' configuration one time at least or to inherit loader from {typeof(Loader<,>).HumanizedName()}, not from {typeof(MutableLoader<,,>).HumanizedName()}");
+                throw new InvalidOperationException($"Type `{typeof(TEntity).HumanizedName()}` should have one writable field at least. Consider calling Editable() or EditableIf(...) during fields' configuration one time at least --or-- consider inheriting loader from {typeof(Loader<,>).HumanizedName()}, not from {typeof(MutableLoader<,,>).HumanizedName()}");
             }
 
             var duplicateName = Fields

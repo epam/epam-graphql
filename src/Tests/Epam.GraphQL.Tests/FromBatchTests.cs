@@ -1864,7 +1864,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -1883,7 +1883,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -1990,7 +1990,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2009,7 +2009,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2116,7 +2116,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2135,7 +2135,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2186,7 +2186,7 @@ namespace Epam.GraphQL.Tests
                 onConfigure: loader =>
                 {
                     loader.Field("branches")
-                        .FromLoader<Branch>(branchLoader, (u, b) => u.BranchId == b.Id);
+                        .FromLoader<Unit, Branch, TestUserContext>(branchLoader, (u, b) => u.BranchId == b.Id);
                 },
                 getBaseQuery: _ => FakeData.Units.AsQueryable(),
                 applyNaturalOrderBy: query => query.OrderBy(p => p.Id),
@@ -2197,7 +2197,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id);
                     loader.Field("subordinate")
                         .FromBatch(childrenBatchFunc, build => build.ConfigureFrom(loader.GetType()));
                 },

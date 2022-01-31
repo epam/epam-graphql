@@ -63,7 +63,7 @@ namespace Epam.GraphQL.Tests.Connection
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => p.UnitId == u.Id);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => p.UnitId == u.Id);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
@@ -203,7 +203,7 @@ namespace Epam.GraphQL.Tests.Connection
                 {
                     loader.Field(p => p.Id);
                     loader.Field("people")
-                        .FromLoader<Person>(personLoaderType, (u, p) => u.Id == p.UnitId)
+                        .FromLoader<Unit, Person, TestUserContext>(personLoaderType, (u, p) => u.Id == p.UnitId)
                         .AsConnection(query => query.OrderByDescending(p => p.Id));
                 },
                 getBaseQuery: _ => FakeData.Units.AsQueryable());

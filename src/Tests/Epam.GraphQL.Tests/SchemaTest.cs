@@ -224,8 +224,8 @@ namespace Epam.GraphQL.Tests
             TestHelpers.TestQueryError(
                 query => query
                     .Connection<object>("test"),
-                typeof(ArgumentException),
-                "Cannot find the corresponding base type for loader: System.Object",
+                typeof(InvalidOperationException),
+                "Cannot find the corresponding generic base type `Loader<,>` for type `object`.",
                 string.Empty);
         }
 
@@ -269,7 +269,7 @@ namespace Epam.GraphQL.Tests
             TestHelpers.TestQueryError(
                 Builder,
                 typeof(InvalidOperationException),
-                "Expression (p => (2 * p.Id)), provided for field is not a property. Consider to give a name to field explicitly.",
+                "Expression (p => (2 * p.Id)), provided for field is not a property. Consider giving a name to the field explicitly.",
                 string.Empty);
         }
 
@@ -333,8 +333,8 @@ namespace Epam.GraphQL.Tests
 
             TestHelpers.TestQueryError(
                 Builder,
-                typeof(ArgumentException),
-                "Cannot find the corresponding base type for filter: System.Object",
+                typeof(InvalidOperationException),
+                "Cannot find the corresponding generic base type `Filter<,,>` for type `object`.",
                 string.Empty);
         }
 
@@ -667,7 +667,7 @@ namespace Epam.GraphQL.Tests
                 onConfigure: loader =>
                 {
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .FirstOrDefault();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),

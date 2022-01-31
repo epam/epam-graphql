@@ -12,7 +12,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Security;
 using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Extensions
@@ -124,12 +123,13 @@ namespace Epam.GraphQL.Extensions
 
             if (type.IsGenericTypeDefinition)
             {
-                if (type.GenericTypeArguments.Length <= 1)
+                var typeInfo = type.GetTypeInfo();
+                if (typeInfo.GenericTypeParameters.Length <= 1)
                 {
                     return $"{typeName}<>";
                 }
 
-                return $"{typeName}<{string.Join(string.Empty, Enumerable.Repeat(",", type.GenericTypeArguments.Length - 1))}>";
+                return $"{typeName}<{string.Join(string.Empty, Enumerable.Repeat(",", typeInfo.GenericTypeParameters.Length - 1))}>";
             }
 
             if (type.IsGenericType)
@@ -202,65 +202,6 @@ namespace Epam.GraphQL.Extensions
             });
         }
 
-        public static MethodInfo GetPublicGenericMethod(
-            this Type type,
-            string name,
-            Type[] genericTypes,
-            Type[] parameterTypes) => GetGenericMethod(type, name, genericTypes, parameterTypes);
-
-        public static MethodInfo GetPublicGenericMethod(
-            this Type type,
-            Action<GenericMethodParameters> configure)
-            => GetGenericMethod(type, configure, BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
-
-        public static MethodInfo GetNonPublicGenericMethod(
-            this Type type,
-            string name,
-            Type[] genericTypes,
-            Type[] parameterTypes) => GetGenericMethod(type, name, genericTypes, parameterTypes, BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-
-        public static MethodInfo GetNonPublicGenericMethod(
-            this Type type,
-            Action<GenericMethodParameters> configure)
-            => GetGenericMethod(type, configure, BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
-
-        public static MethodInfo GetGenericMethod(
-            this Type type,
-            string name,
-            Type[] genericTypes,
-            Type[] parameterTypes,
-            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
-        {
-            var methods = type.GetMethods(bindingFlags);
-            foreach (var genericMethod in methods.Where(m =>
-                m.Name == name && m.IsGenericMethodDefinition && m.GetGenericArguments().Length == genericTypes.Length))
-            {
-                try
-                {
-                    var method = genericMethod.MakeGenericMethod(genericTypes);
-                    var methodParameterTypes = method.GetParameters().Select(p => p.ParameterType);
-
-                    if (methodParameterTypes.SequenceEqual(parameterTypes, new SimpleTypeComparer()))
-                    {
-                        return method;
-                    }
-                }
-                catch (ArgumentException ex)
-                {
-                    // TODO Try to come up with a better check for proper candidate
-                    if (ex.InnerException is not VerificationException)
-                    {
-                        throw;
-                    }
-
-                    // Do nothing if VerificationException occurs. Try to discover another candidate
-                }
-            }
-
-            throw new ArgumentException(
-                $"Type `{type.Name}` does not have a generic method `{name}` with {genericTypes.Length} type parameter(s) that can be called with parameters of type(s) [{string.Join<Type>(", ", parameterTypes)}]");
-        }
-
         public static bool IsEnumerableType(this Type type)
         {
             return type.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IEnumerable)) ||
@@ -290,14 +231,6 @@ namespace Epam.GraphQL.Extensions
                 throw;
             }
         }
-
-        public static object GetDefault(this Type type)
-        {
-            var method = typeof(TypeExtensions).GetGenericMethod(nameof(GetDefault), new[] { type }, Type.EmptyTypes);
-            return method.Invoke(null, null);
-        }
-
-        public static T GetDefault<T>() => default!;
 
         public static bool IsAnonymousType(this Type type)
         {
@@ -388,134 +321,6 @@ namespace Epam.GraphQL.Extensions
 
             // Now create a more weakly typed delegate which will call the strongly typed one
             return (object target) => func((TTarget)target);
-        }
-
-        private static MethodInfo GetGenericMethod(Type type, Action<GenericMethodParameters> configure, BindingFlags bindingFlags)
-        {
-            var parameters = new GenericMethodParameters();
-            configure(parameters);
-
-            var methodInfo = type.GetMethods(bindingFlags)
-                .SingleOrDefault(parameters);
-
-            if (methodInfo != null)
-            {
-                return methodInfo;
-            }
-
-            return type
-                .GetTypeInfo()
-                .ImplementedInterfaces
-                .SelectMany(intf => intf.GetMethods(bindingFlags))
-                .Single(parameters);
-        }
-
-        public class GenericMethodParameters
-        {
-            private readonly List<ParameterInfo> _parameters = new();
-            private string? _methodName;
-            private int? _genericTypeArgumentCount;
-
-            public static implicit operator Func<MethodInfo, bool>(GenericMethodParameters parameters)
-            {
-                return parameters.Match;
-            }
-
-            public GenericMethodParameters HasName(string methodName)
-            {
-                _methodName = methodName;
-                return this;
-            }
-
-            public GenericMethodParameters HasOneGenericTypeParameter()
-            {
-                _genericTypeArgumentCount = 1;
-                return this;
-            }
-
-            public GenericMethodParameters HasTwoGenericTypeParameters()
-            {
-                _genericTypeArgumentCount = 2;
-                return this;
-            }
-
-            public GenericMethodParameters Parameter<T>()
-            {
-                _parameters.Add(new ParameterInfo<T>(_parameters.Count));
-                return this;
-            }
-
-            public GenericMethodParameters GenericTypeParameter(int position)
-            {
-                _parameters.Add(new GenericTypeParameterInfo(_parameters.Count, position));
-                return this;
-            }
-
-            private bool Match(MethodInfo methodInfo)
-            {
-                Guards.ThrowIfNull(_methodName, "methodName");
-                Guards.ThrowIfNull(_genericTypeArgumentCount, "methodName");
-
-                return methodInfo.IsGenericMethodDefinition
-                    && methodInfo.Name.Equals(_methodName, StringComparison.OrdinalIgnoreCase)
-                    && methodInfo.GetGenericArguments().Length == _genericTypeArgumentCount.Value
-                    && _parameters.All(param => param.Match(methodInfo));
-            }
-
-            private abstract class ParameterInfo
-            {
-                public abstract bool Match(MethodInfo methodInfo);
-            }
-
-            private class GenericTypeParameterInfo : ParameterInfo
-            {
-                private readonly int _position;
-                private readonly int _index;
-
-                public GenericTypeParameterInfo(int index, int position)
-                {
-                    _position = position;
-                    _index = index;
-                }
-
-                public override bool Match(MethodInfo methodInfo)
-                {
-                    var param = methodInfo.GetParameters()[_index];
-                    return param.ParameterType.IsGenericType && param.ParameterType.GenericParameterPosition == _position;
-                }
-            }
-
-            private class ParameterInfo<T> : ParameterInfo
-            {
-                private readonly int _index;
-
-                public ParameterInfo(int index)
-                {
-                    _index = index;
-                }
-
-                public override bool Match(MethodInfo methodInfo)
-                {
-                    var param = methodInfo.GetParameters()[_index];
-                    return param.ParameterType == typeof(T);
-                }
-            }
-        }
-
-        private class SimpleTypeComparer : IEqualityComparer<Type>
-        {
-            public bool Equals(Type x, Type y)
-            {
-                return x.Assembly == y.Assembly &&
-                       x.Namespace == y.Namespace &&
-                       x.Name == y.Name
-                       && x.GetGenericArguments().SequenceEqual(y.GetGenericArguments(), new SimpleTypeComparer());
-            }
-
-            public int GetHashCode(Type obj)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

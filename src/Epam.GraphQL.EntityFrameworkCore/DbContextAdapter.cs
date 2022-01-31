@@ -19,7 +19,7 @@ namespace Epam.GraphQL.EntityFrameworkCore
 
         public DbContextAdapter(DbContext dbContext)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _dbContext = dbContext;
         }
 
         private static MethodInfo AsNoTracking => _asNoTracking ??= new Func<IQueryable<object>, IQueryable<object>>(EntityFrameworkQueryableExtensions.AsNoTracking).GetMethodInfo().GetGenericMethodDefinition();

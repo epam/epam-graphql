@@ -52,12 +52,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             UnionGraphType = unionGraphType;
             UnionTypes = unionTypes;
-            UnionGraphType.Name = parent.GetGraphQLTypeName(TypeHelpers.GetTheBestCommonBaseType(unionTypes), null, this);
+            UnionGraphType.Name = parent.GetGraphQLTypeName(ReflectionHelpers.GetTheBestCommonBaseType(unionTypes), null, this);
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => UnionGraphType;
 
-        public override Type FieldType => TypeHelpers.GetTheBestCommonBaseType(UnionTypes);
+        public override Type FieldType => ReflectionHelpers.GetTheBestCommonBaseType(UnionTypes);
 
         public UnionGraphTypeDescriptor<TExecutionContext> UnionGraphType { get; }
 

@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     {
         public FuncResolver(Func<IResolveFieldContext, TReturnType> resolver)
         {
-            Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            Resolver = resolver;
         }
 
         protected Func<IResolveFieldContext, TReturnType> Resolver { get; }

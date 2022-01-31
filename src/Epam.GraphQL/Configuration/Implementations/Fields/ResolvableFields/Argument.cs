@@ -12,7 +12,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
     {
         public Argument(string name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
         }
 
         public string Name { get; }

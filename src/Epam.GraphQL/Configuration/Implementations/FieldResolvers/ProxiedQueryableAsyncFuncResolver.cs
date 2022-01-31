@@ -38,13 +38,13 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             IProxyAccessor<TChildEntity, TExecutionContext> innerProxyAccessor,
             IProxyAccessor<TReturnType, TExecutionContext> returnTypeProxyAccessor)
         {
-            _fieldName = fieldName ?? throw new ArgumentNullException(nameof(fieldName));
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _condition = condition ?? throw new ArgumentNullException(nameof(condition));
-            _transform = transform ?? throw new ArgumentNullException(nameof(transform));
-            _outerProxyAccessor = outerProxyAccessor ?? throw new ArgumentNullException(nameof(outerProxyAccessor));
-            _innerProxyAccessor = innerProxyAccessor ?? throw new ArgumentNullException(nameof(innerProxyAccessor));
-            _returnTypeProxyAccessor = returnTypeProxyAccessor ?? throw new ArgumentNullException(nameof(returnTypeProxyAccessor));
+            _fieldName = fieldName;
+            _resolver = resolver;
+            _condition = condition;
+            _transform = transform;
+            _outerProxyAccessor = outerProxyAccessor;
+            _innerProxyAccessor = innerProxyAccessor;
+            _returnTypeProxyAccessor = returnTypeProxyAccessor;
             _batchTaskResolver = GetBatchTaskResolver<TEntity>(resolver, condition, transform, FuncConstants<LambdaExpression>.Identity);
             _proxiedBatchTaskResolver = GetBatchTaskResolver<Proxy<TEntity>>(resolver, condition, transform, leftExpression => _outerProxyAccessor.GetProxyExpression(leftExpression));
 
@@ -57,12 +57,9 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public object Resolve(IResolveFieldContext context)
         {
-            var batchLoader = new Lazy<IDataLoader<TEntity, IEnumerable<Proxy<TReturnType>>>>(() => context.Bind(Resolver));
-            var proxiedBatchLoader = new Lazy<IDataLoader<Proxy<TEntity>, IEnumerable<Proxy<TReturnType>>>>(() => context.Bind(ProxiedResolver));
-
             return context.Source is Proxy<TEntity> proxy
-                ? proxiedBatchLoader.Value.LoadAsync(proxy)
-                : batchLoader.Value.LoadAsync((TEntity)context.Source);
+                ? ProxiedResolver(context).LoadAsync(proxy)
+                : Resolver(context).LoadAsync((TEntity)context.Source);
         }
 
         public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)

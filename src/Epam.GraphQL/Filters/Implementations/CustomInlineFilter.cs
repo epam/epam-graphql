@@ -17,19 +17,14 @@ namespace Epam.GraphQL.Filters.Implementations
 
         public CustomInlineFilter(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
         {
-            if (filterPredicateFactory == null)
-            {
-                throw new ArgumentNullException(nameof(filterPredicateFactory));
-            }
-
-            FieldName = name?.ToCamelCase() ?? throw new ArgumentNullException(nameof(name));
+            FieldName = name.ToCamelCase();
             _filterPredicateFactory = (context, value) => filterPredicateFactory(value);
         }
 
         public CustomInlineFilter(string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
         {
-            FieldName = name?.ToCamelCase() ?? throw new ArgumentNullException(nameof(name));
-            _filterPredicateFactory = filterPredicateFactory ?? throw new ArgumentNullException(nameof(filterPredicateFactory));
+            FieldName = name.ToCamelCase();
+            _filterPredicateFactory = filterPredicateFactory;
         }
 
         public Type FieldType => typeof(TValueType);

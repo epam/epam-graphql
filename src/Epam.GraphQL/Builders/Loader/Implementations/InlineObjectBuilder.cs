@@ -13,7 +13,6 @@ using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
-using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
@@ -29,7 +28,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public InlineObjectBuilder(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TSourceType, TExecutionContext>>? build, bool isInputType)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _registry = registry;
             _objectGraphTypeConfigurator = isInputType
                 ? new InputObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, registry, build == null)
                 : new ObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, registry, build == null);
@@ -135,12 +134,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public void ConfigureFrom<TProjection>()
             where TProjection : Projection<TSourceType, TExecutionContext>
         {
-            ConfigureFrom(typeof(TProjection));
-        }
-
-        public void ConfigureFrom(Type projectionType)
-        {
-            _childProjectionType = projectionType ?? throw new ArgumentNullException(nameof(projectionType));
+            _childProjectionType = typeof(TProjection);
         }
 
         public (IGraphType? GraphType, Type? Type) Resolve()
@@ -152,13 +146,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
             if (_childProjectionType != null)
             {
-                var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(_childProjectionType, typeof(ProjectionBase<,>));
-
-                if (baseLoaderType == null)
-                {
-                    throw new ArgumentException($"Cannot find the corresponding base type for projection: {_childProjectionType.HumanizedName()}");
-                }
-
+                var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(_childProjectionType, typeof(ProjectionBase<,>));
                 var childEntityType = baseLoaderType.GetGenericArguments().First();
                 var graphType = _registry.GetEntityGraphType(_childProjectionType, childEntityType);
                 return (null, graphType);
@@ -185,13 +173,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
             if (_childProjectionType != null)
             {
-                var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(_childProjectionType, typeof(ProjectionBase<,>));
-
-                if (baseLoaderType == null)
-                {
-                    throw new ArgumentException($"Cannot find the corresponding base type for projection: {_childProjectionType.HumanizedName()}");
-                }
-
+                var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(_childProjectionType, typeof(ProjectionBase<,>));
                 var childEntityType = baseLoaderType.GetGenericArguments().First();
                 var loader = _registry.ResolveLoader(_childProjectionType, childEntityType);
 

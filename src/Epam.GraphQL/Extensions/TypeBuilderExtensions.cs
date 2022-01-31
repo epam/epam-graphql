@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -23,8 +24,9 @@ namespace Epam.GraphQL.Extensions
         private static readonly ConcurrentDictionary<Type, MethodInfo> _equalityComparerEqualsMethods = new();
         private static readonly ConcurrentDictionary<Type, MethodInfo> _hashCodeAddMethodsInfo = new();
 
-        private static readonly MethodInfo _stringFormat = typeof(string).GetMethod(nameof(string.Format), BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(object[]) }, null);
-        private static readonly MethodInfo _hashCodeToHashCodeMethodInfo = typeof(HashCode).GetMethod(nameof(HashCode.ToHashCode), BindingFlags.Public | BindingFlags.Instance);
+        private static readonly MethodInfo _stringFormat = ReflectionHelpers.GetMethodInfo<string, object[], string>(string.Format);
+        private static readonly MethodInfo _hashCodeToHashCodeMethodInfo = ReflectionHelpers.GetMethodInfo(default(HashCode).ToHashCode);
+        private static MethodInfo? _hashCodeAddMethodInfo;
 
         public static FieldBuilder DefineBackingField(this TypeBuilder tb, string propertyName, Type propertyType)
         {
@@ -324,11 +326,11 @@ namespace Epam.GraphQL.Extensions
                 var comparer = typeof(EqualityComparer<>).MakeGenericType(property.PropertyType);
                 var getMethodInfo = property.GetGetMethod();
 
-                var addMethod = _hashCodeAddMethodsInfo.GetOrAdd(property.PropertyType, type => typeof(HashCode).GetGenericMethod(
-                    nameof(HashCode.Add),
-                    new[] { property.PropertyType },
-                    new[] { property.PropertyType },
-                    BindingFlags.Public | BindingFlags.Instance));
+                var addMethod = _hashCodeAddMethodsInfo.GetOrAdd(property.PropertyType, type =>
+                {
+                    _hashCodeAddMethodInfo ??= ReflectionHelpers.GetMethodInfo<object>(default(HashCode).Add<object>);
+                    return _hashCodeAddMethodInfo.MakeGenericMethod(property.PropertyType);
+                });
 
                 il
                     .Ldloca(0)

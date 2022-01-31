@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public ListGraphTypeDescriptor(IGraphTypeDescriptor<TExecutionContext> elementDescriptor)
         {
-            _elementDescriptor = elementDescriptor ?? throw new ArgumentNullException(nameof(elementDescriptor));
+            _elementDescriptor = elementDescriptor;
             _graphType = new Lazy<IGraphType?>(() => elementDescriptor.GraphType != null ? new ListGraphType(elementDescriptor.GraphType) : null);
             _type = new Lazy<Type?>(() => elementDescriptor.Type != null ? typeof(ListGraphType<>).MakeGenericType(elementDescriptor.Type) : null);
         }

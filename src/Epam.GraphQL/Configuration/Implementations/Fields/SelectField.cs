@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using GraphQL;
@@ -25,7 +24,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : base(parent, name)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            _resolver = resolver;
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();
             _graphType = graphType;
         }

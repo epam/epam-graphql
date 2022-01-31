@@ -42,7 +42,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             _resolver.Add(firstResolver);
             _resolver.Add(secondResolver);
 
-            _fieldType = TypeHelpers.GetTheBestCommonBaseType(firstType, secondType);
+            _fieldType = ReflectionHelpers.GetTheBestCommonBaseType(firstType, secondType);
             _unionGraphType.Add(firstGraphType);
             _unionGraphType.Add(secondGraphType);
             _unionGraphType.Name = parent.GetGraphQLTypeName(_fieldType, null, this);

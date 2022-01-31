@@ -21,8 +21,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public SubmitField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
             : base(parent, name)
         {
-            _graphType = returnGraphType ?? throw new ArgumentNullException(nameof(returnGraphType));
-            _resolve = resolve ?? throw new ArgumentNullException(nameof(resolve));
+            _graphType = returnGraphType;
+            _resolve = resolve;
             _fieldType = fieldType;
 
             Arguments = new LazyQueryArguments
