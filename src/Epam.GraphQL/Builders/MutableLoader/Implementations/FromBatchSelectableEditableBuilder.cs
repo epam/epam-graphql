@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         internal FromBatchSelectableEditableBuilder(RelationRegistry<TExecutionContext> registry, TField field)
             : base(registry, ((IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>)field).EditSettings)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
+            Field = field;
         }
 
         protected TField Field { get; set; }

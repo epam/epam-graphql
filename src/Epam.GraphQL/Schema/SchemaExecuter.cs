@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Metadata;
@@ -29,7 +30,8 @@ namespace Epam.GraphQL
     {
         protected SchemaExecuter(SchemaOptions options)
         {
-            Options = options ?? throw new ArgumentNullException(nameof(options));
+            Guards.ThrowIfNull(options, nameof(options));
+            Options = options;
 
             var coreOptionsExtension = Options.FindExtension<CoreSchemaOptionsExtension<TExecutionContext>>();
             var schemaServiceProvider = new SchemaServiceProvider<TExecutionContext>();
@@ -54,10 +56,7 @@ namespace Epam.GraphQL
 
         public async Task<ExecutionResult> ExecuteAsync(SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions)
         {
-            if (schemaExecutionOptions == null)
-            {
-                throw new ArgumentNullException(nameof(schemaExecutionOptions));
-            }
+            Guards.ThrowIfNull(schemaExecutionOptions, nameof(schemaExecutionOptions));
 
             var executionOptions = schemaExecutionOptions.ToExecutionOptions(this);
             var profiler = ((GraphQLContext)executionOptions.UserContext["ctx"]).Profiler;
@@ -111,10 +110,7 @@ namespace Epam.GraphQL
         private protected SchemaExecuter(SchemaOptions options, Action<RelationRegistry<TExecutionContext>, Schema> beforeSchemaInitialize)
             : base(options)
         {
-            if (beforeSchemaInitialize == null)
-            {
-                throw new ArgumentNullException(nameof(beforeSchemaInitialize));
-            }
+            Guards.ThrowIfNull(beforeSchemaInitialize, nameof(beforeSchemaInitialize));
 
             Registry.ResolveLoader<TQuery, object>();
 

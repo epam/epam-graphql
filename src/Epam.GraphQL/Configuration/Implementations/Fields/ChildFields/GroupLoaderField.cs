@@ -19,9 +19,7 @@ using GraphQL;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
     internal sealed class GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
-#pragma warning restore CA1501
         ConnectionLoaderFieldBase<
             GroupLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
             TEntity,

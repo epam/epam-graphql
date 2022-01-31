@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         internal SelectAndReferenceToBuilder(RelationRegistry<TExecutionContext> registry, TField field)
             : base(field)
         {
-            Registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            Registry = registry;
         }
 
         protected RelationRegistry<TExecutionContext> Registry { get; }

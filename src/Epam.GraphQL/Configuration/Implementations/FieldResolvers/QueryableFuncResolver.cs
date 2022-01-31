@@ -25,17 +25,34 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         private readonly IProxyAccessor<TReturnType, TExecutionContext>? _proxyAccessor;
         private readonly Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> _transform;
         private readonly Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> _sorters;
+        private readonly Func<IResolveFieldContext, IEnumerable<string>> _getQueriedFields;
 
         public QueryableFuncResolver(
             IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
             Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
+            : this(
+                  proxyAccessor,
+                  resolver,
+                  transform,
+                  sorters,
+                  GetQueriedFields)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _transform = transform ?? throw new ArgumentNullException(nameof(transform));
+        }
+
+        private QueryableFuncResolver(
+            IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
+            Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
+            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
+            Func<IResolveFieldContext, IEnumerable<string>> getQueriedFields)
+        {
+            _resolver = resolver;
+            _transform = transform;
             _sorters = sorters;
             _proxyAccessor = proxyAccessor;
+            _getQueriedFields = getQueriedFields;
         }
 
         private Func<IResolveFieldContext, IQueryable<TReturnType>> Resolver => ctx =>
@@ -149,7 +166,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 throw new NotSupportedException();
             }
 
-            var resolver = new ConnectionFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, _resolver, _transform, _sorters);
+            var resolver = new QueryableFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, _resolver, _transform, _sorters, GetConnectionQueriedFields);
 
             if (_proxyAccessor.HasHooks)
             {
@@ -201,6 +218,11 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
                     return selected;
                 });
+
+            static IEnumerable<string> GetConnectionQueriedFields(IResolveFieldContext context)
+            {
+                return context.GetConnectionQueriedFields();
+            }
         }
 
         protected virtual QueryableFuncResolver<TEntity, TAnotherReturnType, TExecutionContext> Create<TAnotherReturnType>(
@@ -209,10 +231,10 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>> transform,
             Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
-            return new QueryableFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(proxyAccessor, resolver, transform, sorters);
+            return new QueryableFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(proxyAccessor, resolver, transform, sorters, _getQueriedFields);
         }
 
-        protected virtual IEnumerable<string> GetQueriedFields(IResolveFieldContext context)
+        private static IEnumerable<string> GetQueriedFields(IResolveFieldContext context)
         {
             return context.GetQueriedFields();
         }
@@ -224,7 +246,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 throw new NotSupportedException();
             }
 
-            var fieldNames = GetQueriedFields(context);
+            var fieldNames = _getQueriedFields(context);
             var lambda = _proxyAccessor.CreateSelectorExpression(fieldNames);
 
             var ctx = context.GetUserContext<TExecutionContext>();

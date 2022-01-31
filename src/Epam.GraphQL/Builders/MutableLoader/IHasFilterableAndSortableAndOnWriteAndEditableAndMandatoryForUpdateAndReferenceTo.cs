@@ -16,8 +16,5 @@ namespace Epam.GraphQL.Builders.MutableLoader
         IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(Expression<Func<TParentEntity, TReturnType>> parentProperty, Expression<Func<TEntity, TParentEntity>> navigationProperty, RelationType relationType)
             where TParentEntity : class
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new();
-
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity>(Type parentLoaderType, Expression<Func<TParentEntity, TReturnType>> parentProperty, Expression<Func<TEntity, TParentEntity>> navigationProperty, RelationType relationType)
-            where TParentEntity : class;
     }
 }

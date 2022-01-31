@@ -40,17 +40,9 @@ namespace Epam.GraphQL
         protected internal IConnectionField Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {typeof(TChildLoader)}");
-            }
-
-            _connectionMethodInfo ??= typeof(Query<TExecutionContext>).GetNonPublicGenericMethod(method => method
-                .HasName(nameof(Connection))
-                .HasTwoGenericTypeParameters()
-                .Parameter<string>()
-                .Parameter<string?>());
+            var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
+            _connectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
+                Connection<DummyMutableLoader<TExecutionContext>, object>);
 
             var field = _connectionMethodInfo
                 .MakeGenericMethod(typeof(TChildLoader), baseLoaderType.GenericTypeArguments[0])
@@ -77,18 +69,9 @@ namespace Epam.GraphQL
         protected internal IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
-
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {typeof(TChildLoader)}");
-            }
-
-            _groupConnectionMethodInfo ??= typeof(Query<TExecutionContext>).GetNonPublicGenericMethod(method => method
-                .HasName(nameof(GroupConnection))
-                .HasTwoGenericTypeParameters()
-                .Parameter<string>()
-                .Parameter<string?>());
+            var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
+            _groupConnectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
+                GroupConnection<DummyMutableLoader<TExecutionContext>, object>);
 
             var field = _groupConnectionMethodInfo
                 .MakeGenericMethod(typeof(TChildLoader), baseLoaderType.GenericTypeArguments[0])

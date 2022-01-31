@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
@@ -36,8 +35,8 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         internal FieldBuilder(RelationRegistry<TExecutionContext> registry, Type loaderType, ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> field)
             : base(field)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
-            _loaderType = loaderType ?? throw new ArgumentNullException(nameof(loaderType));
+            _registry = registry;
+            _loaderType = loaderType;
         }
 
         public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(
@@ -47,15 +46,8 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             where TParentEntity : class
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
-            if (property == null)
-            {
-                throw new ArgumentNullException(nameof(property));
-            }
-
-            if (navigationProperty == null)
-            {
-                throw new ArgumentNullException(nameof(navigationProperty));
-            }
+            Guards.ThrowIfNull(property, nameof(property));
+            Guards.ThrowIfNull(navigationProperty, nameof(navigationProperty));
 
             var parentParam = Expression.Parameter(typeof(TParentEntity));
             var childParam = Expression.Parameter(typeof(TEntity));
@@ -69,35 +61,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             _registry.Register(_loaderType, typeof(TParentEntityLoader), condition, null, navigationProperty, relationType);
 
             return this;
-        }
-
-        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity>(Type parentLoaderType, Expression<Func<TParentEntity, TReturnType>> property, Expression<Func<TEntity, TParentEntity>> navigationProperty, RelationType relationType)
-            where TParentEntity : class
-        {
-            if (parentLoaderType == null)
-            {
-                throw new ArgumentNullException(nameof(parentLoaderType));
-            }
-
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(parentLoaderType, typeof(Loader<,>));
-
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {parentLoaderType}");
-            }
-
-            var parentEntityType = baseLoaderType.GetGenericArguments().First();
-
-            if (parentEntityType != typeof(TParentEntity))
-            {
-                throw new ArgumentException($"Loader type `{parentLoaderType}` does not correspond to entity type: {typeof(TParentEntity)}");
-            }
-
-            var foreignKeyMethodInfo = GetType().GetGenericMethod(
-                nameof(ReferencesTo),
-                new[] { parentEntityType, parentLoaderType },
-                new[] { typeof(Expression<Func<TParentEntity, TReturnType>>), typeof(Expression<Func<TEntity, TParentEntity>>), typeof(RelationType) });
-            return (FieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext>)foreignKeyMethodInfo.InvokeAndHoistBaseException(this, property, navigationProperty, relationType);
         }
 
         public IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> MandatoryForUpdate()

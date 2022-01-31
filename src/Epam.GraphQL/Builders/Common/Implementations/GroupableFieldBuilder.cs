@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
 
 namespace Epam.GraphQL.Builders.Common.Implementations
@@ -13,7 +12,7 @@ namespace Epam.GraphQL.Builders.Common.Implementations
     {
         internal GroupableFieldBuilder(ExpressionField<TEntity, TReturnType, TExecutionContext> field)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
+            Field = field;
         }
 
         private protected ExpressionField<TEntity, TReturnType, TExecutionContext> Field { get; }

@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Epam.GraphQL.Helpers;
 using GraphQL.Validation;
 
 namespace Epam.GraphQL
@@ -17,10 +18,7 @@ namespace Epam.GraphQL
         public SchemaExecutionOptionsBuilder<TExecutionContext> UseValidationRules(IEnumerable<IValidationRule> validationRules) =>
             With(options =>
             {
-                if (validationRules == null)
-                {
-                    throw new ArgumentNullException(nameof(validationRules));
-                }
+                Guards.ThrowIfNull(validationRules, nameof(validationRules));
 
                 options.ValidationRules = options.ValidationRules == null
                     ? validationRules

@@ -84,11 +84,25 @@ namespace Epam.GraphQL
             return result;
         }
 
+        internal void SubmitField(Type loaderType, string fieldName)
+        {
+            Guards.ThrowIfNull(loaderType, nameof(loaderType));
+
+            var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(loaderType, typeof(MutableLoader<,,>));
+            SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
+        }
+
+        protected internal void SubmitField<TLoader>(string fieldName)
+            where TLoader : IMutableLoader<TExecutionContext>
+        {
+            SubmitField(typeof(TLoader), fieldName);
+        }
+
         protected internal void SubmitField<TLoader, TEntity>(string fieldName)
             where TLoader : Projection<TEntity, TExecutionContext>, IMutableLoader<TExecutionContext>
             where TEntity : class
         {
-            SubmitField(typeof(TLoader), fieldName);
+            SubmitField<TLoader>(fieldName);
         }
 
         protected internal void SubmitField<TLoader, TEntity, TId>(string fieldName)
@@ -97,19 +111,6 @@ namespace Epam.GraphQL
             where TId : IEquatable<TId>
         {
             SubmitInputTypeRegistry.Register<TLoader, TEntity, TId>(GetType(), fieldName);
-        }
-
-        protected internal void SubmitField(Type loaderType, string fieldName)
-        {
-            Guards.ThrowIfNull(loaderType, nameof(loaderType));
-
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(loaderType, typeof(MutableLoader<,,>));
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {loaderType}");
-            }
-
-            SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
         }
 
         protected internal new IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null)

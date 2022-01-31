@@ -388,7 +388,7 @@ namespace Epam.GraphQL.Tests.Mutation
                     builder.Field(p => p.FullName);
                     builder.Field(p => p.UnitId).ReferencesTo(unitLoader, u => u.Id, p => p.Unit, RelationType.Aggregation);
                     builder.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>());
 
@@ -471,7 +471,7 @@ namespace Epam.GraphQL.Tests.Mutation
                     builder.Field(p => p.Id);
                     builder.Field(p => p.Name);
                     builder.Field("people")
-                        .FromLoader<Person>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Aggregation, p => p.Unit);
+                        .FromLoader<Unit, Person, TestUserContext>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Aggregation, p => p.Unit);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Unit>());
 
@@ -482,7 +482,7 @@ namespace Epam.GraphQL.Tests.Mutation
                     builder.Field(p => p.FullName);
                     builder.Field(p => p.UnitId).ReferencesTo(unitLoader, u => u.Id, p => p.Unit, RelationType.Aggregation);
                     builder.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>());
 
@@ -954,7 +954,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                     builder.Field(p => p.ManagerId);
                     builder.Field("subordinates")
-                        .FromLoader<Person>(builder.GetType(), (manager, subordinate) => manager.Id == subordinate.ManagerId, RelationType.Association, subordinate => subordinate.Manager);
+                        .FromLoader<Person, Person, TestUserContext>(builder.GetType(), (manager, subordinate) => manager.Id == subordinate.ManagerId, RelationType.Association, subordinate => subordinate.Manager);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>());
 
@@ -1028,7 +1028,7 @@ namespace Epam.GraphQL.Tests.Mutation
                     builder.Field(p => p.Id);
                     builder.Field(p => p.Name);
                     builder.Field("people")
-                        .FromLoader<Person>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Association, p => p.Unit);
+                        .FromLoader<Unit, Person, TestUserContext>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Association, p => p.Unit);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Unit>());
 
@@ -1106,7 +1106,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 {
                     builder.Field(p => p.Id);
                     builder.Field("settings")
-                        .FromLoader<PersonSettings>(personSettingsLoader, (p, s) => p.Id == s.Id, navigationProperty: s => s.Person);
+                        .FromLoader<Person, PersonSettings, TestUserContext>(personSettingsLoader, (p, s) => p.Id == s.Id, navigationProperty: s => s.Person);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>());
 
@@ -1538,7 +1538,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 {
                     builder.Field(p => p.Id);
                     builder.Field(p => p.Name).Editable();
-                    builder.Field("details").FromLoader<HasGuidIdDetails>(childLoader, (parent, child) => parent.Id == child.ParentId, RelationType.Aggregation, child => child.Parent);
+                    builder.Field("details").FromLoader<HasGuidId, HasGuidIdDetails, TestUserContext>(childLoader, (parent, child) => parent.Id == child.ParentId, RelationType.Aggregation, child => child.Parent);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<HasGuidId>(),
                 isFakeId: IsFakeGuid);
@@ -1610,7 +1610,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 {
                     builder.Field(p => p.Id);
                     builder.Field(p => p.Name).Editable();
-                    builder.Field("details").FromLoader<HasGuidIdDetails>(childLoader, (parent, child) => parent.Id == child.ParentId, RelationType.Aggregation, child => child.Parent);
+                    builder.Field("details").FromLoader<HasGuidId, HasGuidIdDetails, TestUserContext>(childLoader, (parent, child) => parent.Id == child.ParentId, RelationType.Aggregation, child => child.Parent);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<HasGuidId>(),
                 isFakeId: IsFakeGuid);

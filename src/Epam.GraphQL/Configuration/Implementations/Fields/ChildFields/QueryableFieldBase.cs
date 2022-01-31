@@ -20,7 +20,7 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal abstract class QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>
+    internal abstract class QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TThis, TEntity, TReturnType, TExecutionContext>
         where TEntity : class
         where TThis : QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
@@ -153,12 +153,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public TThisIntf Where(Expression<Func<TReturnType, bool>> predicate)
         {
-            return (TThis)ApplyWhere(predicate);
+            return ApplyWhere(predicate);
         }
 
         protected abstract TThis ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver);
 
-        protected override EnumerableFieldBase<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
+        protected override TThis CreateWhere(Expression<Func<TReturnType, bool>> predicate)
         {
             var queryableField = ReplaceResolver(QueryableFieldResolverBase.Where(predicate));
             return queryableField;

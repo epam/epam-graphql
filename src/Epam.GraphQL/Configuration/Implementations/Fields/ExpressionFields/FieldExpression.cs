@@ -24,18 +24,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public FieldExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TEntity, TReturnType>> expression)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            Guards.ThrowIfNullOrEmpty(name, nameof(name));
 
-            _originalExpression = expression ?? throw new ArgumentNullException(nameof(expression));
+            _originalExpression = expression;
             ContextedExpression = Expression.Lambda<Func<TExecutionContext, TEntity, TReturnType>>(
                 _originalExpression.Body,
                 Expression.Parameter(typeof(TExecutionContext)),
                 _originalExpression.Parameters[0]);
 
-            _field = field ?? throw new ArgumentNullException(nameof(field));
+            _field = field;
             Name = name;
         }
 
@@ -66,10 +63,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                 return (TReturnType?)func(proxy);
             }
 
-            if (_resolver == null)
-            {
-                _resolver = _originalExpression.Compile();
-            }
+            _resolver ??= _originalExpression.Compile();
 
             return _resolver((TEntity)source);
         }
@@ -85,16 +79,5 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         }
 
         LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => _originalExpression;
-
-        public bool Equals(ISorter<TExecutionContext> other)
-        {
-            if (other is FieldExpression<TEntity, TReturnType, TExecutionContext> fieldExpression)
-            {
-                return Name.Equals(fieldExpression.Name, StringComparison.Ordinal)
-                    && ExpressionEqualityComparer.Instance.Equals(_originalExpression, fieldExpression._originalExpression);
-            }
-
-            return false;
-        }
     }
 }

@@ -13,6 +13,7 @@ using Epam.GraphQL.Builders.MutableLoader.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Savers;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
@@ -124,10 +125,7 @@ namespace Epam.GraphQL.Loaders
             TEntity entity,
             bool isNew)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+            Guards.ThrowIfNull(context, nameof(context));
 
             if (!await CanViewAsync((GraphQLContext<TExecutionContext>)context, entity).GetResultAsync().ConfigureAwait(false))
             {

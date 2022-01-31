@@ -17,8 +17,8 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType>> resolver,
             Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType>> proxiedResolver)
         {
-            Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            ProxiedResolver = proxiedResolver ?? throw new ArgumentNullException(nameof(proxiedResolver));
+            Resolver = resolver;
+            ProxiedResolver = proxiedResolver;
         }
 
         protected Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType>> Resolver { get; }

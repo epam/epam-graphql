@@ -24,12 +24,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
         }
 
-        protected override bool IsSupportFiltering => true;
-
-        protected override bool IsSupportSorting => true;
-
-        protected override bool IsSupportGrouping => true;
-
         public override IInlineFilter<TExecutionContext> OnCreateInlineFilter()
         {
             return new NullableInlineFilter<TEntity, TReturnType, TExecutionContext>(this, DefaultValues, NullValue);

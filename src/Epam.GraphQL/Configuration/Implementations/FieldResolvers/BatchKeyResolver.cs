@@ -51,11 +51,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TReturnType>> batchFunc,
             IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
         {
-            if (proxyAccessor == null)
-            {
-                throw new ArgumentNullException(nameof(proxyAccessor));
-            }
-
             var compiledProxyKeySelector = new Lazy<Func<Proxy<TEntity>, TKey>>(() =>
             {
                 var proxyKeySelector = (Expression<Func<Proxy<TEntity>, TKey>>)proxyAccessor.GetProxyExpression(keySelector).CastFirstParamTo<Proxy<TEntity>>();

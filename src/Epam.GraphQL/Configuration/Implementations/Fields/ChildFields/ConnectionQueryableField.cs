@@ -14,7 +14,6 @@ using Epam.GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
     internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> :
         QueryableFieldBase<
             ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>,
@@ -24,7 +23,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TExecutionContext>,
         IConnectionField<TReturnType, TExecutionContext>,
         IVoid
-#pragma warning restore CA1501
         where TEntity : class
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;

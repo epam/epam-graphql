@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             TArguments arguments)
             : base(parent, name, unionType, typeResolver)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 
@@ -36,7 +36,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             TArguments arguments)
             : base(parent, name, unionType, typeResolver, unionTypes, unionGraphType)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 

@@ -214,14 +214,10 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             return _createSelectorExpressionCache.GetOrAdd(fieldNames.ToList(), fieldNames =>
             {
-                _createSelectorExpressionMethodInfo ??= typeof(ProxyAccessor<TEntity, TExecutionContext>)
-                    .GetNonPublicGenericMethod(method => method
-                        .HasName(nameof(CreateSelectorExpression))
-                        .HasOneGenericTypeParameter()
-                        .Parameter<IEnumerable<string>>());
+                _createSelectorExpressionMethodInfo ??= ReflectionHelpers.GetMethodInfo<IEnumerable<string>, LambdaExpression>(
+                    CreateSelectorExpression<Proxy<TEntity>>);
 
                 var proxyType = GetConcreteProxyType(fieldNames);
-
                 return _createSelectorExpressionMethodInfo
                     .MakeGenericMethod(proxyType)
                     .InvokeAndHoistBaseException<Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>>(this, fieldNames);
@@ -257,11 +253,8 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public LambdaExpression CreateGroupSelectorExpression(Type entityType, IEnumerable<string> fieldNames)
         {
-            _createGroupSelectorExpressionMethodInfo ??= typeof(ProxyAccessor<TEntity, TExecutionContext>)
-                .GetPublicGenericMethod(method => method
-                    .HasName(nameof(CreateGroupSelectorExpression))
-                    .HasOneGenericTypeParameter()
-                    .Parameter<IEnumerable<string>>());
+            _createGroupSelectorExpressionMethodInfo ??= ReflectionHelpers.GetMethodInfo<IEnumerable<string>, LambdaExpression>(
+                CreateGroupSelectorExpression<Proxy<TEntity>>);
 
             return _createGroupSelectorExpressionMethodInfo
                 .MakeGenericMethod(entityType)

@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.EntityFrameworkCore;
@@ -22,6 +23,8 @@ namespace Epam.GraphQL.Savers
 {
     internal static class DbContextSaver
     {
+        private static MethodInfo? _performManualMutationAndGetResultMethodInfo;
+
         public static ResolveOptions DefaultOptions { get; } = new ResolveOptions();
 
         public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext>(IRegistry<TExecutionContext> registry, IEnumerable<object> entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
@@ -92,10 +95,10 @@ namespace Epam.GraphQL.Savers
 
         public static Task<object> PerformManualMutationAndGetResult<TExecutionContext>(RelationRegistry<TExecutionContext> registry, IMutationResult mutationResult, Mutation<TExecutionContext> mutation, IResolveFieldContext context, Type dataType, ResolveOptions options)
         {
-            var methodInfo = typeof(DbContextSaver).GetGenericMethod(
-                nameof(PerformManualMutationAndGetResult),
-                new[] { typeof(TExecutionContext), dataType },
-                new[] { typeof(RelationRegistry<TExecutionContext>), typeof(MutationResult<>).MakeGenericType(dataType), typeof(Mutation<TExecutionContext>), typeof(IResolveFieldContext), typeof(ResolveOptions) });
+            _performManualMutationAndGetResultMethodInfo = ReflectionHelpers.GetMethodInfo<IRegistry<TExecutionContext>, MutationResult<object>, Mutation<TExecutionContext>, IResolveFieldContext, ResolveOptions, Task<object>>(
+                PerformManualMutationAndGetResult<TExecutionContext, object>);
+
+            var methodInfo = _performManualMutationAndGetResultMethodInfo.MakeGenericMethod(typeof(TExecutionContext), dataType);
             return (Task<object>)methodInfo.InvokeAndHoistBaseException(null, registry, mutationResult, mutation, context, options);
         }
 
@@ -234,10 +237,10 @@ namespace Epam.GraphQL.Savers
 
         public DbContextSaver(RelationRegistry<TExecutionContext> registry, Mutation<TExecutionContext> mutation, IResolveFieldContext context, IDictionary<string, IEnumerable<IInputItem>> inputItems)
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
-            _inputItems = inputItems ?? throw new ArgumentNullException(nameof(inputItems));
-            _mutation = mutation ?? throw new ArgumentNullException(nameof(mutation));
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            Context = context;
+            _inputItems = inputItems;
+            _mutation = mutation;
+            _registry = registry;
             _submitInputTypeRegistry = registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>();
 
             foreach (var kv in inputItems)

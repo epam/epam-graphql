@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public HasEnumerableMethodsAndSelect(EnumerableFieldBase<TSourceType, TReturnType, TExecutionContext> fieldType)
         {
-            _fieldType = fieldType ?? throw new ArgumentNullException(nameof(fieldType));
+            _fieldType = fieldType;
         }
 
         public void SingleOrDefault(Expression<Func<TReturnType, bool>>? predicate)

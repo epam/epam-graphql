@@ -9,7 +9,7 @@ using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class EnumerableField<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>
+    internal class EnumerableField<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<EnumerableField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
         public EnumerableField(
@@ -25,7 +25,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
         }
 
-        protected override EnumerableFieldBase<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
+        protected override EnumerableField<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = new EnumerableField<TEntity, TReturnType, TExecutionContext>(
                 Parent,

@@ -19,13 +19,5 @@ namespace Epam.GraphQL.Builders.Common
             Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class;
-
-        IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TChildEntity>(
-            Type childLoaderType,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            RelationType relationType = RelationType.Association,
-            Expression<Func<TChildEntity, TEntity>>? navigationProperty = null,
-            Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
-            where TChildEntity : class;
     }
 }

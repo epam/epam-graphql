@@ -3,12 +3,11 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Linq.Expressions;
 
 namespace Epam.GraphQL.Sorters
 {
-    internal interface ISorter<TExecutionContext> : IEquatable<ISorter<TExecutionContext>>
+    internal interface ISorter<TExecutionContext>
     {
         string Name { get; }
 

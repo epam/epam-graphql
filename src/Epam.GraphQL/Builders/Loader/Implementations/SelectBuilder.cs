@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
     {
         internal SelectBuilder(TField field)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
+            Field = field;
         }
 
         protected TField Field { get; set; }

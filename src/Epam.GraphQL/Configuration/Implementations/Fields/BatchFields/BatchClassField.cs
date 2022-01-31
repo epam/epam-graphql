@@ -9,43 +9,9 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchClassField<TEntity, TReturnType, TExecutionContext> : BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-        where TReturnType : class
-    {
-        public BatchClassField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(
-                  parent,
-                  name,
-                  FuncConstants<TEntity>.IdentityExpression,
-                  batchFunc,
-                  graphType)
-        {
-        }
-
-        public BatchClassField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(
-                  parent,
-                  name,
-                  FuncConstants<TEntity>.IdentityExpression,
-                  batchFunc,
-                  graphType)
-        {
-        }
-    }
-
     internal class BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext> : BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>,
         IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>
         where TEntity : class

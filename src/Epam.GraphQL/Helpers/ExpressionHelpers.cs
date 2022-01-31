@@ -52,11 +52,6 @@ namespace Epam.GraphQL.Helpers
 
         public static IEnumerable<LambdaExpression> GetMembers(LambdaExpression expression)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             return PropertiesVisitor.GetFirstParamMembers(expression);
         }
 
@@ -69,7 +64,7 @@ namespace Epam.GraphQL.Helpers
 
             var keySelectorExpression = ParameterRebinder.ReplaceParameter(keySelector.Body, keySelector.Parameters[0], paramExpression);
 
-            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable<TId>.Contains, idExpression, keySelectorExpression);
+            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable.Contains<TId>(), idExpression, keySelectorExpression);
             return Expression.Lambda<Func<TItem, bool>>(callExpression, paramExpression);
         }
 
@@ -85,7 +80,7 @@ namespace Epam.GraphQL.Helpers
 
             var valueAccessExpression = Expression.Property(keySelectorExpression, CachedReflectionInfo.ForNullable<TId>.Value);
             var hasValueAccessExpression = Expression.Property(keySelectorExpression, CachedReflectionInfo.ForNullable<TId>.HasValue);
-            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable<TId>.Contains, idExpression, valueAccessExpression);
+            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable.Contains<TId>(), idExpression, valueAccessExpression);
             var andExpression = Expression.AndAlso(hasValueAccessExpression, callExpression);
             return Expression.Lambda<Func<TItem, bool>>(andExpression, paramExpression);
         }
@@ -120,11 +115,6 @@ namespace Epam.GraphQL.Helpers
 
         public static ExpressionFactorizationResult Factorize<T1, T2, TResult>(Expression<Func<T1, T2, TResult>> expression)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             return FactorizationVisitor.Factorize(expression);
         }
 

@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
     {
         public ProjectionFieldBuilder(TField field)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
+            Field = field;
         }
 
         protected TField Field { get; }

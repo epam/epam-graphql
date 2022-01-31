@@ -3,8 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedFieldBase<TArguments, TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>
@@ -17,7 +15,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             TArguments arguments)
             : base(parent, name)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 

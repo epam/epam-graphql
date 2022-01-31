@@ -6,6 +6,7 @@
 using System;
 using System.Reflection;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Loaders
 {
@@ -29,7 +30,8 @@ namespace Epam.GraphQL.Loaders
 
         private static MethodInfo Create<TEntity, TExecutionContext>(Type value)
         {
-            return (_create ??= new Func<TExecutionContext, TEntity, object, object, IFieldChange<TEntity, TExecutionContext>>(Create).GetMethodInfo()!.GetGenericMethodDefinition()).MakeGenericMethod(typeof(TEntity), value, typeof(TExecutionContext));
+            return (_create ??= ReflectionHelpers.GetMethodInfo<TExecutionContext, TEntity, object, object, IFieldChange<TEntity, TExecutionContext>>(Create))
+                .MakeGenericMethod(typeof(TEntity), value, typeof(TExecutionContext));
         }
     }
 

@@ -17,9 +17,7 @@ using Epam.GraphQL.Search;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
     internal abstract class ConnectionLoaderFieldBase<TThis, TEntity, TChildLoader, TChildEntity, TExecutionContext> :
-#pragma warning restore CA1501
         LoaderFieldBase<
             TThis,
             IConnectionField<TChildEntity, TExecutionContext>,
@@ -80,19 +78,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public IConnectionField WithFilter<TFilter>()
         {
-            var filterBaseType = TypeHelpers.FindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>));
-
-            if (filterBaseType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for filter: {typeof(TFilter)}");
-            }
-
+            var filterBaseType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>));
             var filterArgument = filterBaseType.GetGenericArguments().Single(type => typeof(Input).IsAssignableFrom(type));
 
-            _withFilterMethodInfo ??= typeof(IConnectionField<TChildEntity, TExecutionContext>).GetPublicGenericMethod(method =>
-                method
-                    .HasName(nameof(IConnectionField<TChildEntity, TExecutionContext>.WithFilter))
-                    .HasTwoGenericTypeParameters());
+            _withFilterMethodInfo ??= ReflectionHelpers.GetMethodInfo(
+                WithFilter<Filter<TChildEntity, Input, TExecutionContext>, Input>);
 
             var withFilter = _withFilterMethodInfo.MakeGenericMethod(typeof(TFilter), filterArgument);
             return withFilter.InvokeAndHoistBaseException<IConnectionField>(this);
@@ -100,17 +90,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         IConnectionField IConnectionField.WithSearch<TSearcher>()
         {
-            var baseType = TypeHelpers.FindMatchingGenericBaseType(typeof(TSearcher), typeof(ISearcher<,>));
+            var baseType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TSearcher), typeof(ISearcher<,>));
 
-            if (baseType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for searcher: {typeof(TSearcher)}");
-            }
-
-            _withSearchMethodInfo ??= typeof(IConnectionField<TChildEntity, TExecutionContext>).GetPublicGenericMethod(method =>
-                method
-                    .HasName(nameof(IConnectionField<TChildEntity, TExecutionContext>.WithSearch))
-                    .HasOneGenericTypeParameter());
+            _withSearchMethodInfo ??= ReflectionHelpers.GetMethodInfo(
+                WithSearch<ISearcher<TChildEntity, TExecutionContext>>);
 
             var withSearcher = _withSearchMethodInfo.MakeGenericMethod(typeof(TSearcher));
             return withSearcher.InvokeAndHoistBaseException<IConnectionField>(this);

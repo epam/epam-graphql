@@ -25,15 +25,8 @@ namespace Epam.GraphQL.Filters.Implementations
         public InlineFilters(IEnumerable<IInlineFilter<TExecutionContext>> filters, string name)
         {
             _name = name;
-            if (filters == null)
-            {
-                throw new ArgumentNullException(nameof(filters));
-            }
-
             _inlineFilters.AddRange(filters);
         }
-
-        public bool IsEmpty => _inlineFilters.Count == 0;
 
         public Type FilterType
         {

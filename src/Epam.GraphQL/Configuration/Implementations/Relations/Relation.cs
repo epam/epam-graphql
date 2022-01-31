@@ -44,10 +44,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             Func<Type, PropertyInfo?> getPrimaryKeyPropertyInfo,
             RelationType relationType)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
-            _property = property ?? throw new ArgumentNullException(nameof(property));
-            _childProperty = childProperty ?? throw new ArgumentNullException(nameof(childProperty));
-            _getPrimaryKeyPropertyInfo = getPrimaryKeyPropertyInfo ?? throw new ArgumentNullException(nameof(getPrimaryKeyPropertyInfo));
+            _registry = registry;
+            _property = property;
+            _childProperty = childProperty;
+            _getPrimaryKeyPropertyInfo = getPrimaryKeyPropertyInfo;
             _navigationProperty = navigationProperty;
             _childNavigationProperty = childNavigationProperty;
             _relationType = relationType;
@@ -126,16 +126,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             {
                 UpdateFakeProperties(p, c, prop);
             }
-        }
-
-        public bool CanViewParent(object context, object entity)
-        {
-            if (entity is TChildEntity e && context is TExecutionContext c)
-            {
-                return CanViewParent(c, e);
-            }
-
-            throw new InvalidOperationException();
         }
 
         public IDataLoaderResult<bool> CanViewParentAsync(object context, object? entity)

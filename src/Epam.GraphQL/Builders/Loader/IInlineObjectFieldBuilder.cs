@@ -16,8 +16,5 @@ namespace Epam.GraphQL.Builders.Loader
         IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class;
-
-        IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildEntity>(Type childLoader, Expression<Func<TEntity, TChildEntity, bool>> condition)
-            where TChildEntity : class;
     }
 }

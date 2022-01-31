@@ -155,16 +155,6 @@ namespace Epam.GraphQL.Extensions
 
         public static Expression ReplaceParameter<TParamType, TReturnType>(this Expression<Func<TParamType, TReturnType>> expression, ParameterExpression parameter)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
             if (!expression.Parameters[0].Type.IsAssignableFrom(parameter.Type))
             {
                 throw new InvalidCastException($"Cannot replace parameter of type {expression.Parameters[0].Type.Name} by parameter of type {parameter.Type.Name}.");
@@ -175,30 +165,12 @@ namespace Epam.GraphQL.Extensions
 
         public static Expression ReplaceParameter(this Expression expression, ParameterExpression parameter, Expression parameterReplacement)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
-            if (parameterReplacement == null)
-            {
-                throw new ArgumentNullException(nameof(parameterReplacement));
-            }
-
             return ExpressionHelpers.ParameterRebinder.ReplaceParameter(expression, parameter, parameterReplacement);
         }
 
         public static LambdaExpression ReplaceFirstParameter(this LambdaExpression expression, Expression parameterReplacement)
         {
-            if (expression.Parameters.Count == 0)
-            {
-                throw new ArgumentException("Expression must have one parameter at least.", nameof(expression));
-            }
+            Guards.ThrowIfParameterless(expression, nameof(expression));
 
             if (!expression.Parameters[0].Type.IsAssignableFrom(parameterReplacement.Type))
             {
@@ -213,11 +185,6 @@ namespace Epam.GraphQL.Extensions
 
         public static Expression<Func<T2, TResult>> BindFirstParameter<T1, T2, TResult>(this Expression<Func<T1, T2, TResult>> expression, T1 value)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             var secondParam = Expression.Parameter(expression.Parameters[1].Type, expression.Parameters[1].Name);
             var body = expression.Body
                 .ReplaceParameter(expression.Parameters[0], Expression.Constant(value, typeof(T1)))
@@ -230,11 +197,6 @@ namespace Epam.GraphQL.Extensions
 
         public static LambdaExpression BindFirstParameter<T>(this LambdaExpression expression, T value)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             var body = expression.Body.ReplaceParameter(expression.Parameters[0], Expression.Constant(value, typeof(T)));
             var result = Expression.Lambda(body, expression.Parameters.Skip(1));
 

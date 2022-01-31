@@ -26,7 +26,7 @@ namespace Epam.GraphQL.TaskBatcher
 
         public Batcher(IProfiler profiler)
         {
-            Profiler = profiler ?? throw new ArgumentNullException(nameof(profiler));
+            Profiler = profiler;
         }
 
         internal IProfiler Profiler { get; }
@@ -72,11 +72,6 @@ namespace Epam.GraphQL.TaskBatcher
             LambdaExpression innerExpression,
             ILoaderHooksExecuter<TTransformedInnerEntity>? hooksExecuter)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             return (IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>>)_queryFactoriesCache.GetOrAdd((context, typeof(TOuterEntity), typeof(TInnerEntity), typeof(TTransformedInnerEntity)), Factory);
 
             IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>> Factory((IResolveFieldContext Context, Type, Type, Type) key)

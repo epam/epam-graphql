@@ -83,7 +83,5 @@ namespace Epam.GraphQL.Builders.Loader
 
         void ConfigureFrom<TProjection>()
             where TProjection : Projection<TSourceType, TExecutionContext>;
-
-        void ConfigureFrom(Type loaderType);
     }
 }

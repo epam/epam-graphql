@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Filters.Implementations
 
         protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TListItemType[]? defaultValues, NullOption? nullValue)
         {
-            _field = field ?? throw new ArgumentNullException(nameof(field));
+            _field = field;
             _defaultValues = defaultValues;
             _nullValue = nullValue;
         }

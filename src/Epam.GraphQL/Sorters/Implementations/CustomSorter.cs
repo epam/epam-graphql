@@ -5,7 +5,6 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Helpers;
 using GraphQL;
 
 namespace Epam.GraphQL.Sorters.Implementations
@@ -16,8 +15,8 @@ namespace Epam.GraphQL.Sorters.Implementations
 
         public CustomSorter(string name, Expression<Func<TEntity, TValueType>> selector)
         {
-            Name = name?.ToCamelCase() ?? throw new ArgumentNullException(nameof(name));
-            _selector = selector ?? throw new ArgumentNullException(nameof(selector));
+            Name = name.ToCamelCase();
+            _selector = selector;
         }
 
         public string Name { get; }
@@ -27,28 +26,5 @@ namespace Epam.GraphQL.Sorters.Implementations
         public LambdaExpression OriginalExpression => _selector;
 
         public LambdaExpression BuildExpression(TExecutionContext context) => _selector;
-
-        public bool Equals(CustomSorter<TEntity, TValueType, TExecutionContext>? other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Name.Equals(other.Name, StringComparison.Ordinal)
-                && ExpressionEqualityComparer.Instance.Equals(_selector, other._selector);
-        }
-
-        public bool Equals(ISorter<TExecutionContext> other) => Equals(other as CustomSorter<TEntity, TValueType, TExecutionContext>);
-
-        public override bool Equals(object obj) => Equals(obj as CustomSorter<TEntity, TValueType, TExecutionContext>);
-
-        public override int GetHashCode()
-        {
-            var hashCode = default(HashCode);
-            hashCode.Add(Name, StringComparer.Ordinal);
-            hashCode.Add(_selector, ExpressionEqualityComparer.Instance);
-            return hashCode.ToHashCode();
-        }
     }
 }

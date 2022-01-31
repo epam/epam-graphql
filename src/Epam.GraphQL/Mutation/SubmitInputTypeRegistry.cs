@@ -6,20 +6,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Mutation
 {
     internal class SubmitInputTypeRegistry<TExecutionContext>
     {
+        private static MethodInfo? _registerMethodInfo;
         private readonly Dictionary<Type, Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>>> _map = new();
         private readonly RelationRegistry<TExecutionContext> _registry;
 
         public SubmitInputTypeRegistry(RelationRegistry<TExecutionContext> registry)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _registry = registry;
         }
 
         public IDictionary<string, Type> GetInputTypeMap(Type mutationType)
@@ -60,7 +63,8 @@ namespace Epam.GraphQL.Mutation
 
         public void Register(Type mutationType, string fieldName, Type loaderType, Type entityType, Type idType)
         {
-            var registerMethodInfo = GetType().GetGenericMethod(nameof(Register), new[] { loaderType, entityType, idType }, new[] { typeof(Type), typeof(string) });
+            _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo<Type, string>(Register<DummyMutableLoader<TExecutionContext>, object, int>);
+            var registerMethodInfo = _registerMethodInfo.MakeGenericMethod(loaderType, entityType, idType);
             registerMethodInfo.InvokeAndHoistBaseException(this, mutationType, fieldName);
         }
 

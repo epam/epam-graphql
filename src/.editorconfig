@@ -142,7 +142,7 @@ dotnet_diagnostic.CA1045.severity = warning
 dotnet_diagnostic.CA1060.severity = warning
 
 # CA1501: Avoid excessive inheritance
-dotnet_diagnostic.CA1501.severity = warning
+dotnet_diagnostic.CA1501.severity = none
 
 # CA1502: Avoid excessive complexity
 dotnet_diagnostic.CA1502.severity = warning

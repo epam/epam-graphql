@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
@@ -20,8 +21,10 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
     {
         internal FromBatchEditableBuilder(RelationRegistry<TExecutionContext> registry, IFieldEditSettings<TSourceType, TReturnType, TExecutionContext>? settings)
         {
-            Registry = registry ?? throw new ArgumentNullException(nameof(registry));
-            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            Guards.ThrowIfNull(settings, nameof(settings));
+
+            Registry = registry;
+            Settings = settings;
         }
 
         protected RelationRegistry<TExecutionContext> Registry { get; }

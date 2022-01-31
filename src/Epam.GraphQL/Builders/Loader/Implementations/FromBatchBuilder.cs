@@ -26,7 +26,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         internal FromBatchBuilder(RelationRegistry<TExecutionContext> registry, TField field)
             : base(registry, field)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
+            Field = field;
         }
 
         protected new TField Field { get; set; }

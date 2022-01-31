@@ -10,44 +10,11 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchEnumerableField<TEntity, TReturnType, TExecutionContext> : BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public BatchEnumerableField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
-            : base(
-                  parent,
-                  name,
-                  FuncConstants<TEntity>.IdentityExpression,
-                  batchFunc,
-                  elementGraphType)
-        {
-        }
-
-        public BatchEnumerableField(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
-            : base(
-                  parent,
-                  name,
-                  FuncConstants<TEntity>.IdentityExpression,
-                  batchFunc,
-                  elementGraphType)
-        {
-        }
-    }
-
     internal class BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> : TypedField<TEntity, IEnumerable<TReturnType>, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, IEnumerable<TReturnType>, TExecutionContext>,
         IFieldSupportsApplySelect<TEntity, IEnumerable<TReturnType>, TExecutionContext>

@@ -23,13 +23,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            Guards.ThrowIfNullOrEmpty(name, nameof(name));
 
-            _expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            _field = field ?? throw new ArgumentNullException(nameof(field));
+            _expression = expression;
+            _field = field;
             Name = name;
         }
 
@@ -60,10 +57,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                 return (TReturnType?)func(proxy);
             }
 
-            if (_resolver == null)
-            {
-                _resolver = _expression.Compile();
-            }
+            _resolver ??= _expression.Compile();
 
             return _resolver(context.GetUserContext<TExecutionContext>(), (TEntity)source);
         }
@@ -76,17 +70,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         object? IFieldResolver.Resolve(IResolveFieldContext context)
         {
             return Resolve(context);
-        }
-
-        public bool Equals(ISorter<TExecutionContext> other)
-        {
-            if (other is FieldContextExpression<TEntity, TReturnType, TExecutionContext> fieldExpression)
-            {
-                return Name.Equals(fieldExpression.Name, StringComparison.Ordinal)
-                    && ExpressionEqualityComparer.Instance.Equals(_expression, fieldExpression._expression);
-            }
-
-            return false;
         }
 
         LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => Expression.Lambda<Func<TEntity, TReturnType>>(
