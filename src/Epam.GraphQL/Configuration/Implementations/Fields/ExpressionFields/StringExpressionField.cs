@@ -10,7 +10,7 @@ using Epam.GraphQL.Filters.Implementations;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
-    internal class StringExpressionField<TEntity, TExecutionContext> : ExpressionField<TEntity, string, string, TExecutionContext>
+    internal class StringExpressionField<TEntity, TExecutionContext> : ExpressionField<TEntity, string, TExecutionContext>
         where TEntity : class
     {
         public StringExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, string>> expression, string? name)
@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
         }
 
-        public override IInlineFilter<TExecutionContext> OnCreateInlineFilter()
+        protected override IInlineFilter<TExecutionContext> OnCreateInlineFilter()
         {
             return new StringInlineFilter<TEntity, TExecutionContext>(this, DefaultValues, NullValue);
         }

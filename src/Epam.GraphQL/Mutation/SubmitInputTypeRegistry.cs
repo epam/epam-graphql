@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Mutation
     internal class SubmitInputTypeRegistry<TExecutionContext>
     {
         private static MethodInfo? _registerMethodInfo;
-        private readonly Dictionary<Type, Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>>> _map = new();
+        private readonly Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>> _map = new();
         private readonly RelationRegistry<TExecutionContext> _registry;
 
         public SubmitInputTypeRegistry(RelationRegistry<TExecutionContext> registry)
@@ -25,30 +25,18 @@ namespace Epam.GraphQL.Mutation
             _registry = registry;
         }
 
-        public IDictionary<string, Type> GetInputTypeMap(Type mutationType)
+        public IDictionary<string, Type> GetInputTypeMap()
         {
-            if (!_map.TryGetValue(mutationType, out Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>> subMap))
-            {
-                subMap = new Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>>();
-                _map[mutationType] = subMap;
-            }
-
-            return subMap.ToDictionary(kv => kv.Key, kv => typeof(List<>).MakeGenericType(kv.Value.EntityType));
+            return _map.ToDictionary(kv => kv.Key, kv => typeof(List<>).MakeGenericType(kv.Value.EntityType));
         }
 
-        public void Register<TLoader, TEntity, TId>(Type mutationType, string fieldName)
-            where TLoader : MutableLoader<TEntity, TId, TExecutionContext>
+        public void Register<TLoader, TEntity, TId>(string fieldName)
+            where TLoader : MutableLoader<TEntity, TId, TExecutionContext>, new()
             where TEntity : class
         {
             var newRecord = SubmitInputTypeRegistryRecord<TExecutionContext>.Create<TLoader, TEntity, TId>(fieldName, _registry);
 
-            if (!_map.TryGetValue(mutationType, out Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>> subMap))
-            {
-                subMap = new Dictionary<string, SubmitInputTypeRegistryRecord<TExecutionContext>>();
-                _map[mutationType] = subMap;
-            }
-
-            if (subMap.TryGetValue(fieldName, out var record))
+            if (_map.TryGetValue(fieldName, out var record))
             {
                 if (!record.Equals(newRecord))
                 {
@@ -57,93 +45,88 @@ namespace Epam.GraphQL.Mutation
             }
             else
             {
-                subMap.Add(fieldName, newRecord);
+                _map.Add(fieldName, newRecord);
             }
         }
 
-        public void Register(Type mutationType, string fieldName, Type loaderType, Type entityType, Type idType)
+        public void Register(string fieldName, Type loaderType, Type entityType, Type idType)
         {
-            _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo<Type, string>(Register<DummyMutableLoader<TExecutionContext>, object, int>);
+            _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo<string>(Register<DummyMutableLoader<TExecutionContext>, object, int>);
             var registerMethodInfo = _registerMethodInfo.MakeGenericMethod(loaderType, entityType, idType);
-            registerMethodInfo.InvokeAndHoistBaseException(this, mutationType, fieldName);
+            registerMethodInfo.InvokeAndHoistBaseException(this, fieldName);
         }
 
-        public void ForEach(Type mutationType, Action<SubmitInputTypeRegistryRecord<TExecutionContext>> action)
+        public void ForEach(Action<SubmitInputTypeRegistryRecord<TExecutionContext>> action)
         {
-            foreach (var record in _map[mutationType])
+            foreach (var record in _map)
             {
                 action(record.Value);
             }
         }
 
-        public Type GetEntityTypeByFieldName(Type mutationType, string fieldName)
+        public Type GetEntityTypeByFieldName(string fieldName)
         {
-            if (_map.TryGetValue(mutationType, out var subMap))
+            if (_map.TryGetValue(fieldName, out var record))
             {
-                if (subMap.TryGetValue(fieldName, out var record))
+                return record.EntityType;
+            }
+
+            throw new ArgumentException("Cannot find item");
+        }
+
+        public Type GetLoaderTypeByFieldName(string fieldName)
+        {
+            if (_map.TryGetValue(fieldName, out var record))
+            {
+                return record.ConfiguratorType;
+            }
+
+            throw new ArgumentException("Cannot find item");
+        }
+
+        public IMutableLoader<TExecutionContext> GetMutableLoaderByFieldName(string fieldName)
+        {
+            if (_map.TryGetValue(fieldName, out var record))
+            {
+                return record.MutableLoader;
+            }
+
+            throw new ArgumentException("Cannot find item");
+        }
+
+        public IMutableLoader<TExecutionContext> GetMutableLoaderByEntityType(Type entityType)
+        {
+            foreach (var kv in _map)
+            {
+                if (kv.Value.EntityType.IsAssignableFrom(entityType))
                 {
-                    return record.EntityType;
+                    return kv.Value.MutableLoader;
                 }
             }
 
             throw new ArgumentException("Cannot find item");
         }
 
-        public Type GetLoaderTypeByFieldName(Type mutationType, string fieldName)
+        public bool IsRegistered<TEntity>()
         {
-            if (_map.TryGetValue(mutationType, out var subMap))
+            foreach (var kv in _map)
             {
-                if (subMap.TryGetValue(fieldName, out var record))
+                if (kv.Value.EntityType.IsAssignableFrom(typeof(TEntity)))
                 {
-                    return record.ConfiguratorType;
-                }
-            }
-
-            throw new ArgumentException("Cannot find item");
-        }
-
-        public Type GetLoaderTypeByEntityType(Type mutationType, Type entityType)
-        {
-            if (_map.TryGetValue(mutationType, out var subMap))
-            {
-                foreach (var kv in subMap)
-                {
-                    if (kv.Value.EntityType.IsAssignableFrom(entityType))
-                    {
-                        return kv.Value.ConfiguratorType;
-                    }
-                }
-            }
-
-            throw new ArgumentException("Cannot find item");
-        }
-
-        public bool IsRegistered(Type mutationType, Type entityType)
-        {
-            if (_map.TryGetValue(mutationType, out var subMap))
-            {
-                foreach (var kv in subMap)
-                {
-                    if (kv.Value.EntityType.IsAssignableFrom(entityType))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 
             return false;
         }
 
-        public string GetFieldNameByEntityType(Type mutationType, Type entityType)
+        public string GetFieldNameByEntityType(Type entityType)
         {
-            if (_map.TryGetValue(mutationType, out var subMap))
+            foreach (var kv in _map)
             {
-                foreach (var kv in subMap)
+                if (kv.Value.EntityType.IsAssignableFrom(entityType))
                 {
-                    if (kv.Value.EntityType.IsAssignableFrom(entityType))
-                    {
-                        return kv.Key;
-                    }
+                    return kv.Key;
                 }
             }
 

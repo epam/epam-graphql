@@ -18,18 +18,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
     internal sealed class QueryableField<TEntity, TReturnType, TExecutionContext> :
         QueryableFieldBase<
             QueryableField<TEntity, TReturnType, TExecutionContext>,
-            QueryableField<TEntity, TReturnType, TExecutionContext>,
+            IQueryableField<TEntity, TReturnType, TExecutionContext>,
             TEntity,
             TReturnType,
             TExecutionContext>,
-        IConnectableField<IVoid, TReturnType>
+        IQueryableField<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
         public QueryableField(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>>? condition,
+            Expression<Func<TEntity, TReturnType, bool>> condition,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
@@ -40,7 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   transform: (ctx, items) => items,
                   condition,
                   elementGraphType,
-                  elementGraphType.Configurator ?? throw new NotSupportedException(),
+                  elementGraphType.Configurator,
                   arguments: null,
                   searcher,
                   naturalSorters)
@@ -70,15 +70,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
+            var naturalSorters = order.GetSorters();
             var connectionField = new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
                 Parent,
                 Name,
                 QueryableFieldResolver,
                 ElementGraphType,
-                ObjectGraphTypeConfigurator ?? throw new NotSupportedException(),
+                ObjectGraphTypeConfigurator,
                 Arguments,
                 Searcher,
-                order.GetSorters());
+                naturalSorters);
             return ApplyField(connectionField);
         }
 

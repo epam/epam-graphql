@@ -9,19 +9,29 @@ using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class EnumerableField<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<EnumerableField<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>
+    internal sealed class EnumerableField<TEntity, TReturnType, TExecutionContext> :
+        EnumerableFieldBase<
+            EnumerableField<TEntity, TReturnType, TExecutionContext>,
+            IEnumerableField<TEntity, TReturnType, TExecutionContext>,
+            IEnumerableResolver<TEntity, TReturnType, TExecutionContext>,
+            TEntity,
+            TReturnType,
+            TExecutionContext>,
+        IEnumerableField<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
         public EnumerableField(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TEntity, TReturnType, TExecutionContext> resolver,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments)
             : base(
                   parent,
                   name,
                   resolver,
-                  elementGraphType)
+                  elementGraphType,
+                  arguments)
         {
         }
 
@@ -31,18 +41,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Parent,
                 Name,
                 EnumerableFieldResolver.Where(predicate),
-                ElementGraphType);
-
-            return enumerableField;
-        }
-
-        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
-        {
-            var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                Parent,
-                Name,
-                EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
-                graphType);
+                ElementGraphType,
+                Arguments);
 
             return enumerableField;
         }

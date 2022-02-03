@@ -11,6 +11,7 @@ using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
+using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
 using GraphQL.Types;
@@ -29,11 +30,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                   parent,
                   GenerateName(name, expression))
         {
-            if (name == null && !expression.IsProperty())
-            {
-                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
-            }
-
             _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
@@ -66,20 +62,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public bool IsGroupable { get; protected set; }
 
-        public PropertyInfo? PropertyInfo => _expression?.PropertyInfo;
-
-        public override bool CanResolve => true;
+        public PropertyInfo? PropertyInfo => _expression.PropertyInfo;
 
         public LambdaExpression ContextExpression => _expression.ContextedExpression;
 
         public LambdaExpression OriginalExpression => _expression.OriginalExpression;
 
-        public override object? Resolve(IResolveFieldContext context)
-        {
-            return _expression.Resolve(context, context.Source);
-        }
+        public override IFieldResolver Resolver => _expression;
 
-        public override void ValidateField()
+        protected TReturnType[]? DefaultValues { get; private set; }
+
+        protected NullOption? NullValue { get; private set; }
+
+        public override void Validate()
         {
             if (string.IsNullOrEmpty(Name))
             {
@@ -87,6 +82,23 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
 
             _expression.ValidateExpression();
+        }
+
+        public void Filterable(TReturnType[]? defaultValues = null)
+        {
+            if (defaultValues != null && defaultValues.Any(value => value == null))
+            {
+                throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider using .Filterable(NullValues).");
+            }
+
+            DefaultValues = defaultValues;
+            IsFilterable = true;
+        }
+
+        public void Filterable(NullOption nullValue)
+        {
+            NullValue = nullValue;
+            IsFilterable = true;
         }
 
         public void Sortable()
@@ -116,17 +128,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public IInlineFilter<TExecutionContext> CreateInlineFilter()
         {
-            if (IsFilterable)
-            {
-                return OnCreateInlineFilter();
-            }
+            Guards.AssertType<TEntity>(!IsFilterable);
 
-            throw new NotSupportedException();
-        }
-
-        public virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter()
-        {
-            throw new NotSupportedException();
+            return OnCreateInlineFilter();
         }
 
         public override int GetHashCode()
@@ -149,51 +153,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             return base.Equals(other);
         }
 
-        protected override IFieldResolver GetResolver() => _expression;
+        protected virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter() => throw new NotSupportedException();
 
         private static string GenerateName(string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
-            if (name == null && !expression.IsProperty())
+            if (name != null)
             {
-                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
+                return name;
             }
 
-            return name ?? expression.NameOf().ToCamelCase();
-        }
-    }
-
-    internal class ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> : ExpressionField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public ExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
-            : base(parent, expression, name)
-        {
-        }
-
-        public ExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string name)
-            : base(parent, expression, name)
-        {
-        }
-
-        protected TFilterValueType[]? DefaultValues { get; private set; }
-
-        protected NullOption? NullValue { get; private set; }
-
-        public void Filterable(TFilterValueType[]? defaultValues = null)
-        {
-            if (defaultValues != null && defaultValues.Any(value => value == null))
+            if (expression.TryGetNameOfProperty(out var propName))
             {
-                throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider using .Filterable(NullValues).");
+                return propName.ToCamelCase();
             }
 
-            DefaultValues = defaultValues;
-            IsFilterable = true;
-        }
-
-        public void Filterable(NullOption nullValue)
-        {
-            NullValue = nullValue;
-            IsFilterable = true;
+            throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
         }
     }
 }

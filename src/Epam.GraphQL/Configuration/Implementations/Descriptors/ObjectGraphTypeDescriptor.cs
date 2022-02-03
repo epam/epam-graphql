@@ -6,6 +6,7 @@
 using System;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -33,10 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public void Validate()
         {
-            if (Type == null && GraphType == null)
-            {
-                throw new InvalidOperationException($"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
-            }
+            Guards.ThrowInvalidOperationIf(Type == null && GraphType == null, $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
         }
 
         private static (IGraphType? GraphType, Type? Type) ResolveType(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, bool isInputField)

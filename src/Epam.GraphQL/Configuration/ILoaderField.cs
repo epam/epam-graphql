@@ -7,11 +7,10 @@ using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Configuration
 {
-    public interface ILoaderField<TEntity, TExecutionContext> :
+    public interface ILoaderField<TParentEntity, TEntity, TExecutionContext> :
+        IInlineLoaderField<ILoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>,
         IConnectableField<IVoid, TEntity>,
-        IConnectableField<IVoid>,
-        ISearchableField<ILoaderField<TEntity, TExecutionContext>, TEntity, TExecutionContext>,
-        IWereableField<ILoaderField<TEntity, TExecutionContext>, TEntity>
+        IConnectableField<IConnectionField>
     {
     }
 }

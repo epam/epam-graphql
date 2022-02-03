@@ -50,7 +50,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         public override void ConfigureGraphType(IComplexGraphType graphType)
         {
             ValidateFields();
-            ProxyAccessor.Configure();
 
             graphType.Name = Name;
 
@@ -89,7 +88,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 throw new InvalidOperationException($"A sorter with the name `{duplicateSorterName}` is already registered.");
             }
 
-            Fields.ForEach(f => f.ValidateField());
+            Fields.ForEach(f => f.Validate());
         }
     }
 
@@ -142,7 +141,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             if (_baseConfigurator == null)
             {
-                var baseProjectionType = Registry.GetPropperBaseProjectionType(typeof(TProjection), typeof(TEntity), predicate);
+                var baseProjectionType = Registry.GetPropperBaseProjectionType<TProjection, TEntity>(predicate);
 
                 if (baseProjectionType != typeof(TProjection))
                 {

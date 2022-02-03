@@ -10,9 +10,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
     internal class ResolvedField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>
         where TEntity : class
     {
-        private readonly IFieldResolver _resolver;
-        private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
-
         public ResolvedField(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
@@ -21,16 +18,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             LazyQueryArguments? arguments)
             : base(parent, name)
         {
-            _resolver = resolver;
-            _graphType = graphType;
+            Resolver = resolver;
+            GraphType = graphType;
             Arguments = arguments;
         }
 
-        public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
+        public override IGraphTypeDescriptor<TExecutionContext> GraphType { get; }
 
-        protected override IFieldResolver GetResolver()
-        {
-            return _resolver;
-        }
+        public override IFieldResolver Resolver { get; }
     }
 }

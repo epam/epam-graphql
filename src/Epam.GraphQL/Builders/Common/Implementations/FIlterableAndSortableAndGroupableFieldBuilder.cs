@@ -9,47 +9,47 @@ using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Builders.Common.Implementations
 {
-    internal class FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext> : SortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>,
-        IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>,
-        IHasFilterableAndSortable<TEntity, TFilterValueType>
+    internal class FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext> : SortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>,
+        IHasFilterableAndSortable<TEntity, TReturnType>
         where TEntity : class
     {
-        internal FilterableAndSortableAndGroupableFieldBuilder(ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> field)
+        internal FilterableAndSortableAndGroupableFieldBuilder(ExpressionField<TEntity, TReturnType, TExecutionContext> field)
             : base(field)
         {
         }
 
         public IHasSortableAndGroupable<TEntity> Filterable()
         {
-            ((ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext>)Field).Filterable();
+            Field.Filterable();
             return this;
         }
 
-        public IHasSortableAndGroupable<TEntity> Filterable(params TFilterValueType[] defaultValues)
+        public IHasSortableAndGroupable<TEntity> Filterable(params TReturnType[] defaultValues)
         {
-            ((ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext>)Field).Filterable(defaultValues);
+            Field.Filterable(defaultValues);
             return this;
         }
 
         public IHasSortableAndGroupable<TEntity> Filterable(NullOption nullValue)
         {
-            ((ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext>)Field).Filterable(nullValue);
+            Field.Filterable(nullValue);
             return this;
         }
 
-        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>.Filterable()
+        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TReturnType, IHasSortable<TEntity, IVoid>>.Filterable()
         {
             Filterable();
             return this;
         }
 
-        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>.Filterable(params TFilterValueType[] defaultValues)
+        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TReturnType, IHasSortable<TEntity, IVoid>>.Filterable(params TReturnType[] defaultValues)
         {
             Filterable(defaultValues);
             return this;
         }
 
-        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TFilterValueType, IHasSortable<TEntity, IVoid>>.Filterable(NullOption nullValue)
+        IHasSortable<TEntity, IVoid> IHasFilterable<TEntity, TReturnType, IHasSortable<TEntity, IVoid>>.Filterable(NullOption nullValue)
         {
             Filterable(nullValue);
             return this;

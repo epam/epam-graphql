@@ -20,12 +20,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
     internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
         LoaderFieldBase<
             LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
-            ILoaderField<TChildEntity, TExecutionContext>,
+            ILoaderField<TEntity, TChildEntity, TExecutionContext>,
             TEntity,
             TChildLoader,
             TChildEntity,
             TExecutionContext>,
-        ILoaderField<TChildEntity, TExecutionContext>
+        ILoaderField<TEntity, TChildEntity, TExecutionContext>
         where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public LoaderField(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
+            Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
@@ -83,7 +83,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        public IVoid AsConnection()
+        public IConnectionField AsConnection()
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 Parent,

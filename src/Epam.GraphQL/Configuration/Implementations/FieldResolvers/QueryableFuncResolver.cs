@@ -12,23 +12,24 @@ using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Relay;
+using Epam.GraphQL.Sorters;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class QueryableFuncResolver<TEntity, TReturnType, TExecutionContext> : IQueryableResolver<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
+    internal class QueryableFuncResolver<TReturnType, TTransformedReturnType, TExecutionContext> : IRootQueryableResolver<TReturnType, TExecutionContext>
     {
         private readonly Func<IResolveFieldContext, IQueryable<TReturnType>> _resolver;
-        private readonly IProxyAccessor<TReturnType, TExecutionContext>? _proxyAccessor;
+        private readonly IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> _proxyAccessor;
         private readonly Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> _transform;
         private readonly Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> _sorters;
         private readonly Func<IResolveFieldContext, IEnumerable<string>> _getQueriedFields;
 
         public QueryableFuncResolver(
-            IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
+            IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
             Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
@@ -42,7 +43,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         }
 
         private QueryableFuncResolver(
-            IProxyAccessor<TReturnType, TExecutionContext>? proxyAccessor,
+            IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> proxyAccessor,
             Func<IResolveFieldContext, IQueryable<TReturnType>> resolver,
             Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> transform,
             Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters,
@@ -70,113 +71,114 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         public object Resolve(IResolveFieldContext context)
         {
-            if (_proxyAccessor == null)
-            {
-                return context.ExecuteQuery(Resolver);
-            }
-
             if (_proxyAccessor.HasHooks)
             {
                 var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
                 return hooksExecuter!
-                    .Execute(FuncConstants<Proxy<TReturnType>>.Identity)
+                    .Execute(FuncConstants<TTransformedReturnType>.Identity)
                     .LoadAsync(context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx))));
             }
 
             return context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)));
         }
 
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
+        public IRootQueryableResolver<TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
         {
             return Create(_proxyAccessor, ctx => selector(ctx, _resolver(ctx)), _transform, _sorters);
         }
 
-        public IQueryableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(
+        public IRootQueryableResolver<TSelectType, TExecutionContext> Select<TSelectType>(
             Expression<Func<TReturnType, TSelectType>> selector,
             IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)
         {
-            return Create(
-                selectTypeProxyAccessor,
+            if (selectTypeProxyAccessor != null)
+            {
+                return Create(
+                    selectTypeProxyAccessor,
+                    ctx => Resolver(ctx).Select(selector),
+                    (ctx, query) => query,
+                    ctx => Enumerable.Empty<(LambdaExpression SortExpression, SortDirection SortDirection)>());
+            }
+
+            return new QueryableFuncResolver<TSelectType, TSelectType, TExecutionContext>(
+                IdentityProxyAccessor<TSelectType, TExecutionContext>.Instance,
                 ctx => Resolver(ctx).Select(selector),
                 (ctx, query) => query,
                 ctx => Enumerable.Empty<(LambdaExpression SortExpression, SortDirection SortDirection)>());
         }
 
-        IEnumerableResolver<TEntity, TSelectType, TExecutionContext> IEnumerableResolver<TEntity, TReturnType, TExecutionContext>.Select<TSelectType>(
-            Expression<Func<TReturnType, TSelectType>> selector,
-            IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor)
+        public IFieldResolver SingleOrDefault()
         {
-            return Select(selector, selectTypeProxyAccessor);
+            return new FuncResolver<TReturnType, TTransformedReturnType, TExecutionContext>(
+                _proxyAccessor,
+                ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)));
         }
 
-        public IResolver<TEntity> SingleOrDefault()
+        public IFieldResolver FirstOrDefault()
         {
-            return _proxyAccessor == null
-                ? new FuncResolver<TEntity, TReturnType>(ctx => ctx.ExecuteQuery(Resolver, query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)))
-                : new ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.SingleOrDefault(), nameof(Queryable.SingleOrDefault)));
+            return new FuncResolver<TReturnType, TTransformedReturnType, TExecutionContext>(
+                _proxyAccessor,
+                ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)));
         }
 
-        public IResolver<TEntity> FirstOrDefault()
-        {
-            return _proxyAccessor == null
-                ? new FuncResolver<TEntity, TReturnType>(ctx => ctx.ExecuteQuery(Resolver, query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)))
-                : new ProxiedFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, ctx => ctx.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)), query => query.FirstOrDefault(), nameof(Queryable.FirstOrDefault)));
-        }
-
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
+        public IRootQueryableResolver<TReturnType, TExecutionContext> Reorder(Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
             return Create(_proxyAccessor, _resolver, _transform, sorters);
         }
 
-        public IResolver<TEntity> AsGroupConnection(
-            Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<Proxy<TReturnType>>> selector,
-            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
+        public IFieldResolver AsGroupConnection(IEnumerable<ISorter<TExecutionContext>> sorters)
         {
-            var connectionResolver = Resolvers.ToGroupConnection<TReturnType, TExecutionContext>();
+            var resolver = new QueryableFuncResolver<IGroupResult<TTransformedReturnType>, IGroupResult<TTransformedReturnType>, TExecutionContext>(
+                IdentityProxyAccessor<IGroupResult<TTransformedReturnType>, TExecutionContext>.Instance,
+                ctx => _proxyAccessor.GroupBy(ctx, _transform(ctx, _resolver(ctx))),
+                (ctx, query) => query,
+                Sort);
 
-            var resolver = Create(null, ctx => selector(ctx, _transform(ctx, _resolver(ctx))), (ctx, query) => query, sorters);
-
-            return new FuncResolver<TEntity, Connection<object>>(
+            return new FuncResolver<Connection<object>, Connection<object>, TExecutionContext>(
+                IdentityProxyAccessor<Connection<object>, TExecutionContext>.Instance,
                 ctx =>
                 {
                     var resolved = resolver.Resolver(ctx);
-                    var selected = connectionResolver(ctx, resolved);
+                    var selected = Resolvers.Resolve(
+                         ctx,
+                         (IQueryable<object>)resolved);
 
                     return selected;
                 });
+
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> Sort(IResolveFieldContext context)
+            {
+                // Apply sort
+                var result = _proxyAccessor.GetGroupSort(
+                    context,
+                    sorters);
+
+                return result;
+            }
         }
 
-        public IQueryableResolver<TEntity, TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate)
+        public IRootQueryableResolver<TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate)
         {
             return Create(_proxyAccessor, ctx => _resolver(ctx).Where(predicate), _transform, _sorters);
         }
 
-        IEnumerableResolver<TEntity, TReturnType, TExecutionContext> IEnumerableResolver<TEntity, TReturnType, TExecutionContext>.Where(Expression<Func<TReturnType, bool>> predicate)
+        public IFieldResolver AsConnection()
         {
-            return Where(predicate);
-        }
-
-        public IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector)
-            => throw new NotSupportedException();
-
-        public IResolver<TEntity> AsConnection()
-        {
-            if (_proxyAccessor == null)
-            {
-                throw new NotSupportedException();
-            }
-
-            var resolver = new QueryableFuncResolver<TEntity, TReturnType, TExecutionContext>(_proxyAccessor, _resolver, _transform, _sorters, GetConnectionQueriedFields);
+            var resolver = new QueryableFuncResolver<TReturnType, TTransformedReturnType, TExecutionContext>(_proxyAccessor, _resolver, _transform, _sorters, GetConnectionQueriedFields);
 
             if (_proxyAccessor.HasHooks)
             {
-                return new FuncResolver<TEntity, object>(
+                return new FuncResolver<
+                    Connection<IDataLoaderResult<IEnumerable<TTransformedReturnType>>, IDataLoaderResult<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>[]>>,
+                    Connection<IDataLoaderResult<IEnumerable<TTransformedReturnType>>, IDataLoaderResult<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>[]>>,
+                    TExecutionContext>(
+                    IdentityProxyAccessor<Connection<IDataLoaderResult<IEnumerable<TTransformedReturnType>>, IDataLoaderResult<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>[]>>, TExecutionContext>.Instance,
                     context =>
                     {
                         var resolved = resolver.Resolver(context).Select(resolver.Transform(context));
                         var selected = Resolvers.Resolve(context, resolved);
 
-                        var connection = new Connection<IDataLoaderResult<IEnumerable<Proxy<TReturnType>>>, IDataLoaderResult<global::GraphQL.Types.Relay.DataObjects.Edge<Proxy<TReturnType>>[]>>
+                        var connection = new Connection<IDataLoaderResult<IEnumerable<TTransformedReturnType>>, IDataLoaderResult<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>[]>>
                         {
                             PageInfo = selected.PageInfo,
                             TotalCount = selected.TotalCount,
@@ -186,7 +188,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                         {
                             var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
                             connection.Edges = hooksExecuter!
-                                .Execute<global::GraphQL.Types.Relay.DataObjects.Edge<Proxy<TReturnType>>>(edge => edge.Node)
+                                .Execute<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>>(edge => edge.Node)
                                 .LoadAsync(selected.Edges);
 
                             if (selected.Items != null)
@@ -201,7 +203,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                         {
                             var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
                             connection.Items = hooksExecuter!
-                                .Execute(FuncConstants<Proxy<TReturnType>>.Identity)
+                                .Execute(FuncConstants<TTransformedReturnType>.Identity)
                                 .LoadAsync(selected.Items)
                                 .Then(items => items.AsEnumerable());
                         }
@@ -210,7 +212,8 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                     });
             }
 
-            return new FuncResolver<TEntity, Connection<Proxy<TReturnType>>>(
+            return new FuncResolver<Connection<TTransformedReturnType>, Connection<TTransformedReturnType>, TExecutionContext>(
+                IdentityProxyAccessor<Connection<TTransformedReturnType>, TExecutionContext>.Instance,
                 ctx =>
                 {
                     var resolved = resolver.Resolver(ctx).Select(resolver.Transform(ctx));
@@ -225,27 +228,22 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             }
         }
 
-        protected virtual QueryableFuncResolver<TEntity, TAnotherReturnType, TExecutionContext> Create<TAnotherReturnType>(
-            IProxyAccessor<TAnotherReturnType, TExecutionContext>? proxyAccessor,
-            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>> resolver,
-            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>> transform,
-            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
-        {
-            return new QueryableFuncResolver<TEntity, TAnotherReturnType, TExecutionContext>(proxyAccessor, resolver, transform, sorters, _getQueriedFields);
-        }
-
         private static IEnumerable<string> GetQueriedFields(IResolveFieldContext context)
         {
             return context.GetQueriedFields();
         }
 
-        private Expression<Func<TReturnType, Proxy<TReturnType>>> Transform(IResolveFieldContext context)
+        private QueryableFuncResolver<TAnotherReturnType, TAnotherTransformedReturnType, TExecutionContext> Create<TAnotherReturnType, TAnotherTransformedReturnType>(
+            IProxyAccessor<TAnotherReturnType, TAnotherTransformedReturnType, TExecutionContext> proxyAccessor,
+            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>> resolver,
+            Func<IResolveFieldContext, IQueryable<TAnotherReturnType>, IQueryable<TAnotherReturnType>> transform,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>> sorters)
         {
-            if (_proxyAccessor == null)
-            {
-                throw new NotSupportedException();
-            }
+            return new QueryableFuncResolver<TAnotherReturnType, TAnotherTransformedReturnType, TExecutionContext>(proxyAccessor, resolver, transform, sorters, _getQueriedFields);
+        }
 
+        private Expression<Func<TReturnType, TTransformedReturnType>> Transform(IResolveFieldContext context)
+        {
             var fieldNames = _getQueriedFields(context);
             var lambda = _proxyAccessor.CreateSelectorExpression(fieldNames);
 

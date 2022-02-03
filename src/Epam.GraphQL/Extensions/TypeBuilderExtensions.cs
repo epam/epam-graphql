@@ -428,10 +428,7 @@ namespace Epam.GraphQL.Extensions
         {
             var baseType = typeBuilder.BaseType;
 
-            if (baseType == null)
-            {
-                throw new ArgumentException("TypeBuilder must have non-null BaseType", nameof(typeBuilder));
-            }
+            Guards.ThrowInvalidOperationIf(baseType == null, "TypeBuilder must have non-null BaseType");
 
             if (baseType.IsGenericType && !baseType.IsGenericTypeDefinition)
             {

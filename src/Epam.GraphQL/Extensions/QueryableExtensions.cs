@@ -71,10 +71,7 @@ namespace Epam.GraphQL.Extensions
                     : orderedQuery.ApplyThenBy(sorter.SortExpression, sorter.SortDirection);
             }
 
-            if (orderedQuery == null)
-            {
-                throw new ArgumentException("The list of sorters must contain one element at least.", nameof(sorters));
-            }
+            Guards.ThrowArgumentExceptionIf(orderedQuery == null, "The list of sorters must contain one element at least.", nameof(sorters));
 
             return orderedQuery;
         }

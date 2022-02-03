@@ -55,7 +55,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
 
             ValidateFields();
-            ProxyAccessor.Configure();
 
             inputGraphType.Name = Name;
             foreach (var field in Fields.Where(f => f.EditSettings != null && !f.EditSettings.IsReadOnly))
@@ -82,7 +81,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 throw new InvalidOperationException($"A field with the name `{duplicateName}` is already registered.");
             }
 
-            Fields.ForEach(f => f.ValidateField());
+            Fields.ForEach(f => f.Validate());
         }
     }
 
@@ -135,7 +134,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         {
             if (_baseConfigurator == null)
             {
-                var baseProjectionType = Registry.GetPropperBaseProjectionType(typeof(TProjection), typeof(TEntity), predicate);
+                var baseProjectionType = Registry.GetPropperBaseProjectionType<TProjection, TEntity>(predicate);
 
                 if (baseProjectionType != typeof(TProjection))
                 {

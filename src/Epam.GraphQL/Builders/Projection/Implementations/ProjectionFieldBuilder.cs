@@ -9,7 +9,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Builders.Loader.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 
@@ -27,11 +26,21 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
 
         protected TField Field { get; }
 
-        public IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class => FromIQueryableBuilder.Create(Field, query, condition, build);
+            where TReturnType : class
+        {
+            return Field.Parent.FromIQueryableClass(Field, query, condition, build);
+        }
+
+        public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query,
+            Expression<Func<TEntity, TReturnType, bool>> condition)
+        {
+            return Field.Parent.FromIQueryable(Field, query, condition);
+        }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)
         {

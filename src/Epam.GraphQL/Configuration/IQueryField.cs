@@ -13,12 +13,15 @@ namespace Epam.GraphQL.Configuration
 {
     public interface IQueryField<TExecutionContext> : IUnionableRootField<TExecutionContext>
     {
-        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query);
+
+        IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
             where TReturnType : class;
 
-        ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+        IRootLoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class;
 

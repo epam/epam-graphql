@@ -13,15 +13,18 @@ namespace Epam.GraphQL.Mutation
     internal class SubmitInputTypeRegistryRecord<TExecutionContext>
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
+        private readonly Lazy<IMutableLoader<TExecutionContext>> _mutableLoader;
 
         private SubmitInputTypeRegistryRecord(
             RelationRegistry<TExecutionContext> registry,
+            Lazy<IMutableLoader<TExecutionContext>> mutableLoaderFactory,
             Type configuratorType,
             Type entityType,
             string fieldName,
             Type idType)
         {
             _registry = registry;
+            _mutableLoader = mutableLoaderFactory;
             ConfiguratorType = configuratorType;
             EntityType = entityType;
             FieldName = fieldName;
@@ -54,12 +57,15 @@ namespace Epam.GraphQL.Mutation
             }
         }
 
+        public IMutableLoader<TExecutionContext> MutableLoader => _mutableLoader.Value;
+
         public static SubmitInputTypeRegistryRecord<TExecutionContext> Create<TConfigurator, TEntity, TId>(string fieldName, RelationRegistry<TExecutionContext> registry)
-            where TConfigurator : MutableLoader<TEntity, TId, TExecutionContext>
+            where TConfigurator : MutableLoader<TEntity, TId, TExecutionContext>, new()
             where TEntity : class
         {
             return new SubmitInputTypeRegistryRecord<TExecutionContext>(
                 registry: registry,
+                mutableLoaderFactory: new Lazy<IMutableLoader<TExecutionContext>>(() => registry.ResolveLoader<TConfigurator, TEntity>()),
                 configuratorType: typeof(TConfigurator),
                 entityType: typeof(TEntity),
                 fieldName: fieldName,

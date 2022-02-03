@@ -136,31 +136,31 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
-        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>>? build)
-            where TLastElementType2 : class
+        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+            where TLastElementType : class
         {
-            var unionField = new UnionField<TEntity, TExecutionContext>(Parent, Name, typeof(TLastElementType2), UnionField.CreateTypeResolver<TEntity, TLastElementType2, TExecutionContext>(build), UnionTypes, UnionGraphType);
-            return ApplyField(unionField);
+            return And(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            var unionField = new UnionField<TEntity, TExecutionContext>(Parent, Name, typeof(TLastElementType), UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build), UnionTypes, UnionGraphType);
+            return ApplyField(unionField);
         }
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And(build);
         }
     }
 }

@@ -4,6 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 using GraphQL.Types.Relay;
@@ -60,10 +62,11 @@ namespace Epam.GraphQL.Types
                 "the \"cursor\" field on the edge to enable efficient pagination, this shortcut cannot be used, " +
                 "and the full \"{ edges { node } } \" version should be used instead.";
 
-        public ConnectionGraphType(IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
+        public ConnectionGraphType(IGraphTypeDescriptor<TReturnType, TExecutionContext> graphType)
         {
             // TODO Type name should be the same as an entity type name (e.g. for two loaders for the same entity and field set)
-            var typeName = configurator.Name;
+            var typeName = graphType.Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
+            var itemType = graphType.Configurator?.GenerateGraphType() ?? graphType.Type;
 
             Name = $"{typeName}Connection";
             Description = $"A connection from an object to a list of objects of type `{typeName}`.";
@@ -82,14 +85,17 @@ namespace Epam.GraphQL.Types
                 .Description("Information to aid in pagination.");
 
             Field(
-                typeof(ListGraphType<>).MakeGenericType(configurator.GenerateGraphType()),
+                typeof(ListGraphType<>).MakeGenericType(itemType),
                 "items",
                 ItemsDescription);
 
-            Field(
-                typeof(ListGraphType<>).MakeGenericType(typeof(EdgeGraphType<>).MakeGenericType(configurator.GenerateGraphType())),
-                "edges",
-                "Information to aid in pagination.");
+            AddField(
+                new FieldType
+                {
+                    Name = "edges",
+                    Description = "Information to aid in pagination.",
+                    ResolvedType = new ListGraphType(new EdgeGraphType<TReturnType, TExecutionContext>(graphType)),
+                });
         }
     }
 }

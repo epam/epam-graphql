@@ -59,7 +59,7 @@ namespace Epam.GraphQL.Tests.Loader
                 applyNaturalOrderBy: query => query.OrderBy(p => p.Id),
                 applyNaturalThenBy: query => query.ThenBy(p => p.Id));
 
-            _loader = (Loader<Person, TestUserContext>)_registry.ResolveLoader<Person>(loaderType);
+            _loader = (Loader<Person, TestUserContext>)_registry.ResolveLoader<Person, TestUserContext>(loaderType);
         }
 
         [Test]

@@ -196,28 +196,28 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType2>(Action<IInlineObjectBuilder<TLastElementType2, TExecutionContext>>? build)
             where TLastElementType2 : class
         {
-            var unionField = new UnionMutationField<TExecutionContext>(MutationField, typeof(TLastElementType2), UnionMutationField.CreateTypeResolver(build), UnionTypes, UnionGraphType);
-            return ApplyField(unionField);
+            return And(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            var unionField = new UnionMutationField<TExecutionContext>(MutationField, typeof(TLastElementType), UnionMutationField.CreateTypeResolver(build), UnionTypes, UnionGraphType);
+            return ApplyField(unionField);
         }
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And(build);
         }
     }
 }

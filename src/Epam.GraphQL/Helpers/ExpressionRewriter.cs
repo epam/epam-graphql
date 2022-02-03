@@ -111,10 +111,7 @@ namespace Epam.GraphQL.Helpers
                 if (newExpression != null && newExpression.Members != null)
                 {
                     var indexOfMember = newExpression.Members.IndexOf(node.Member);
-                    if (indexOfMember >= 0)
-                    {
-                        return newExpression.Arguments[indexOfMember];
-                    }
+                    return newExpression.Arguments[indexOfMember];
                 }
 
                 return base.VisitMember(node);

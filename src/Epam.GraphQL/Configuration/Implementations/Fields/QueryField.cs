@@ -9,7 +9,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Builders.Loader.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
@@ -28,23 +27,46 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
         }
 
-        public IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        public IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query)
+        {
+            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
+            var result = new RootQueryableField<TReturnType, TExecutionContext>(
+                Parent,
+                Name,
+                query,
+                graphType,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
+            return Parent.ReplaceField(this, result);
+        }
+
+        public IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
             where TReturnType : class
         {
-            return new FromIQueryableBuilder<object, TReturnType, TExecutionContext>(Parent.FromIQueryableClass(this, query, null, configure));
+            var graphType = Parent.GetGraphQLTypeDescriptor(this, configure);
+            var result = new RootQueryableField<TReturnType, TExecutionContext>(
+                Parent,
+                Name,
+                query,
+                graphType,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
+            return Parent.ReplaceField(this, result);
         }
 
-        public ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+        public IRootLoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
             var graphResultType = Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            return Parent.ReplaceField(this, new LoaderField<object, TChildLoader, TChildEntity, TExecutionContext>(
+            return Parent.ReplaceField(this, new RootLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
                 Parent,
                 Name,
-                condition: null,
                 graphResultType,
                 arguments: null,
                 searcher: null,
@@ -130,28 +152,28 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = UnionQueryField.Create(Parent, Name, build);
-            return Parent.ReplaceField(this, unionField);
+            return And(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            var unionField = UnionQueryField.Create(Parent, Name, build);
+            return Parent.ReplaceField(this, unionField);
         }
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And(build);
         }
 
         public IArgumentedQueryField<TArgType, TExecutionContext> Argument<TArgType>(string argName)

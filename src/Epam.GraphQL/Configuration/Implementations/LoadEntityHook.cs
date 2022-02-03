@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             _batchFunc = batchFunc;
             _resolver = resolver;
             _proxyAccessor.AddMember(keyExpression);
-            _proxyKeyGetter = new Lazy<Func<Proxy<TEntity>, TKey>>(() => ((Expression<Func<Proxy<TEntity>, TKey>>)_proxyAccessor.GetProxyExpression(_keyExpression).CastFirstParamTo<Proxy<TEntity>>()).Compile());
+            _proxyKeyGetter = new Lazy<Func<Proxy<TEntity>, TKey>>(() => _proxyAccessor.Rewrite(_keyExpression).Compile());
         }
 
         private Func<Proxy<TEntity>, TKey> KeyGetter => _proxyKeyGetter.Value;

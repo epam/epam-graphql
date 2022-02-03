@@ -19,27 +19,27 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
-    internal class FieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext> : FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
-        IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
-        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>,
-        IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>,
+    internal class FieldBuilder<TEntity, TReturnType, TExecutionContext> : FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>,
+        IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>,
         IHasSortableAndGroupable<TEntity>
         where TEntity : class
     {
         private readonly Type _loaderType;
         private readonly RelationRegistry<TExecutionContext> _registry;
 
-        internal FieldBuilder(RelationRegistry<TExecutionContext> registry, Type loaderType, ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> field)
+        internal FieldBuilder(RelationRegistry<TExecutionContext> registry, Type loaderType, ExpressionField<TEntity, TReturnType, TExecutionContext> field)
             : base(field)
         {
             _registry = registry;
             _loaderType = loaderType;
         }
 
-        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(
+        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(
             Expression<Func<TParentEntity, TReturnType>> property,
             Expression<Func<TEntity, TParentEntity>> navigationProperty,
             RelationType relationType)
@@ -63,13 +63,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> MandatoryForUpdate()
+        public IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext> MandatoryForUpdate()
         {
             Field.EditSettings?.MandatoryForUpdate();
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> EditableIf(
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> EditableIf(
             Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate,
             Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason)
         {
@@ -77,7 +77,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> BatchedEditableIf<TItem>(
             Func<IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> BatchedEditableIf<TItem>(
             Func<TExecutionContext, IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
@@ -95,30 +95,30 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> Editable()
+        public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> Editable()
         {
             Field.EditSettings?.Editable();
             return this;
         }
 
-        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> Default(Func<TEntity, TReturnType> selector)
+        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> Default(Func<TEntity, TReturnType> selector)
         {
             return Default((_, entity) => selector(entity));
         }
 
-        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> Default(Func<TExecutionContext, TEntity, TReturnType> selector)
+        public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> Default(Func<TExecutionContext, TEntity, TReturnType> selector)
         {
             Field.EditSettings?.Default(selector);
             return this;
         }
 
-        public IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save)
+        public IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save)
         {
             Field.EditSettings?.SetOnWrite(save);
             return this;
         }
 
-        public IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save)
+        public IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save)
         {
             Field.EditSettings?.SetOnWrite(save);
             return this;

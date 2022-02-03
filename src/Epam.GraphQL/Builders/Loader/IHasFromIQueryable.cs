@@ -6,15 +6,20 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using Epam.GraphQL.Configuration;
 
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasFromIQueryable<TEntity, TExecutionContext>
     {
-        IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
             where TReturnType : class;
+
+        IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+            Func<TExecutionContext, IQueryable<TReturnType>> query,
+            Expression<Func<TEntity, TReturnType, bool>> condition);
     }
 }

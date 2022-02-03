@@ -5,20 +5,26 @@
 
 using System;
 using System.Linq.Expressions;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal interface IEnumerableResolver<TEntity, TReturnType, TExecutionContext> : IResolver<TEntity>
+    internal interface IEnumerableResolver<out TThis, TEntity, TReturnType, TExecutionContext> : IFieldResolver
         where TEntity : class
     {
         IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector);
 
         IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TReturnType, TSelectType>> selector, IProxyAccessor<TSelectType, TExecutionContext>? selectTypeProxyAccessor);
 
-        IEnumerableResolver<TEntity, TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate);
+        TThis Where(Expression<Func<TReturnType, bool>> predicate);
 
-        IResolver<TEntity> SingleOrDefault();
+        IFieldResolver SingleOrDefault();
 
-        IResolver<TEntity> FirstOrDefault();
+        IFieldResolver FirstOrDefault();
+    }
+
+    internal interface IEnumerableResolver<TEntity, TReturnType, TExecutionContext> : IEnumerableResolver<IEnumerableResolver<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>
+        where TEntity : class
+    {
     }
 }

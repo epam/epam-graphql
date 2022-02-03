@@ -31,21 +31,18 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
     }
 
-    internal class LoaderHooksExecuter<T, TReturnType, TExecutionContext> : ILoaderHooksExecuter<Tuple<Proxy<T>, TReturnType>>
+    internal class LoaderHooksExecuter<T, TTransformed, TReturnType, TExecutionContext> : ILoaderHooksExecuter<Tuple<TTransformed, TReturnType>>
     {
-        private readonly ILoaderHooksExecuter<Proxy<T>>? _executer;
+        private readonly ILoaderHooksExecuter<TTransformed>? _executer;
 
-        public LoaderHooksExecuter(IResolveFieldContext context, IProxyAccessor<T, TExecutionContext> proxyAccessor)
+        public LoaderHooksExecuter(IResolveFieldContext context, IProxyAccessor<T, TTransformed, TExecutionContext> proxyAccessor)
         {
             _executer = proxyAccessor.CreateHooksExecuter(context);
         }
 
-        public IDataLoader<TKey, TKey> Execute<TKey>(Func<TKey, Tuple<Proxy<T>, TReturnType>> key)
+        public IDataLoader<TKey, TKey> Execute<TKey>(Func<TKey, Tuple<TTransformed, TReturnType>> key)
         {
-            if (_executer == null)
-            {
-                throw new NotSupportedException();
-            }
+            Guards.ThrowNotSupportedIf(_executer == null);
 
             return _executer.Execute<TKey>(item => key(item).Item1);
         }

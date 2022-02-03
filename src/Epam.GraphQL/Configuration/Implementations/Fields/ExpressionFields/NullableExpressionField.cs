@@ -10,7 +10,7 @@ using Epam.GraphQL.Filters.Implementations;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
-    internal class NullableExpressionField<TEntity, TReturnType, TExecutionContext> : ExpressionField<TEntity, TReturnType?, TReturnType, TExecutionContext>
+    internal class NullableExpressionField<TEntity, TReturnType, TExecutionContext> : ExpressionField<TEntity, TReturnType?, TExecutionContext>
         where TReturnType : struct
         where TEntity : class
     {
@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
         }
 
-        public override IInlineFilter<TExecutionContext> OnCreateInlineFilter()
+        protected override IInlineFilter<TExecutionContext> OnCreateInlineFilter()
         {
             return new NullableInlineFilter<TEntity, TReturnType, TExecutionContext>(this, DefaultValues, NullValue);
         }

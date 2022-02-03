@@ -1040,6 +1040,38 @@ namespace Epam.GraphQL.Tests.Connection
                 }");
         }
 
+        [Test]
+        public void TestGroupConnectionQueryWithCountOnlyForInt()
+        {
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("id")
+                    .FromIQueryable(_ => FakeData.People.Select(p => p.ManagerId).AsQueryable())
+                    .AsGroupConnection();
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        id {
+                            items {
+                                count
+                            }
+                            totalCount
+                        }
+                    }",
+                @"{
+                    id: {
+                        items: [{
+                            count: 6
+                        }],
+                        totalCount: 1
+                    }
+                }");
+        }
+
         /// <summary>
         /// Test for https://github.com/epam/epam-graphql/issues/7.
         /// </summary>

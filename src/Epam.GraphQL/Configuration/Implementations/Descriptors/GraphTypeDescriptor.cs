@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Helpers;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -53,16 +54,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public void Validate()
         {
-            if (Type == null && GraphType == null)
-            {
-                throw new InvalidOperationException($"Type cannot be coerced effectively to a GraphQL type");
-            }
+            Guards.ThrowInvalidOperationIf(Type == null && GraphType == null, $"Type cannot be coerced effectively to a GraphQL type");
         }
     }
 
     internal class GraphTypeDescriptor<TReturnType, TExecutionContext> : GraphTypeDescriptor<TExecutionContext>, IGraphTypeDescriptor<TReturnType, TExecutionContext>
     {
-        public GraphTypeDescriptor(Type type, Func<IGraphType> graphTypeFactory, IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
+        public GraphTypeDescriptor(Type type, Func<IGraphType> graphTypeFactory, IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator)
             : base(type, graphTypeFactory, configurator)
         {
         }

@@ -3,12 +3,12 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using GraphQL.Resolvers;
-
-namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
+namespace Epam.GraphQL.Relay
 {
-    internal interface IResolver<TEntity> : IFieldResolver
-        where TEntity : class
+    internal interface IGroupResult<out T>
     {
+        public T? Item { get; }
+
+        public int Count { get; }
     }
 }

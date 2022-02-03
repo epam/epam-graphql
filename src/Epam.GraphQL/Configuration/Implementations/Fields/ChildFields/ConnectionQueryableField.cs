@@ -11,10 +11,11 @@ using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> :
+    internal sealed class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> :
         QueryableFieldBase<
             ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>,
             IConnectionField<TReturnType, TExecutionContext>,
@@ -32,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
+            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator,
             LazyQueryArguments? arguments,
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
@@ -48,7 +49,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             _graphType = new GraphTypeDescriptor<TReturnType, TExecutionContext>(
                 type: typeof(ConnectionGraphType<TReturnType, TExecutionContext>),
-                graphTypeFactory: () => new ConnectionGraphType<TReturnType, TExecutionContext>(configurator),
+                graphTypeFactory: () => new ConnectionGraphType<TReturnType, TExecutionContext>(elementGraphType),
                 configurator);
 
             Argument<string>(
@@ -70,7 +71,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        public override IResolver<TEntity> FieldResolver => QueryableFieldResolver.AsConnection();
+        public override IFieldResolver Resolver => QueryableFieldResolver.AsConnection();
 
         protected override ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
@@ -79,10 +80,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Name,
                 resolver,
                 ElementGraphType,
-                ObjectGraphTypeConfigurator!,
+                ObjectGraphTypeConfigurator,
                 Arguments,
                 Searcher,
-                NaturalSorters!);
+                NaturalSorters);
         }
     }
 }

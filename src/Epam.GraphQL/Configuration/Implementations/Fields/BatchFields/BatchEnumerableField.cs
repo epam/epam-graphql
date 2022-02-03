@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
@@ -64,18 +63,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => ElementGraphType.MakeListDescriptor();
 
-        public override bool CanResolve => FieldResolver != null;
-
-        public virtual IResolver<TEntity> FieldResolver => BatchFieldResolver;
+        public override IFieldResolver Resolver => BatchFieldResolver;
 
         protected IGraphTypeDescriptor<TReturnType, TExecutionContext> ElementGraphType { get; }
 
         protected IBatchResolver<TEntity, IEnumerable<TReturnType>> BatchFieldResolver { get; set; }
-
-        public override object Resolve(IResolveFieldContext context)
-        {
-            return FieldResolver.Resolve(context);
-        }
 
         public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(Func<IEnumerable<TReturnType>, T> selector)
         {
@@ -86,11 +78,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             where T : class
         {
             return Parent.ApplySelect(this, BatchFieldResolver.Select(selector), build);
-        }
-
-        protected override IFieldResolver GetResolver()
-        {
-            return FieldResolver;
         }
     }
 }

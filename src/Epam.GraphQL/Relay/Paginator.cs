@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 
 namespace Epam.GraphQL.Relay
@@ -44,10 +45,7 @@ namespace Epam.GraphQL.Relay
         {
             if (index.HasValue)
             {
-                if (_shouldTake)
-                {
-                    throw new InvalidOperationException("Cannot perform skip after take.");
-                }
+                Guards.ThrowInvalidOperationIf(_shouldTake, "Cannot perform skip after take.");
 
                 _skipCount += index.Value + 1;
                 _shouldSkip = true;

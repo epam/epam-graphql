@@ -19,17 +19,17 @@ namespace Epam.GraphQL.Filters.Implementations
         where TEntity : class
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
-        private readonly TListItemType[]? _defaultValues;
+        private readonly TReturnType[]? _defaultValues;
         private readonly NullOption? _nullValue;
 
-        protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TListItemType[]? defaultValues, NullOption? nullValue)
+        protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TReturnType[]? defaultValues, NullOption? nullValue)
         {
             _field = field;
             _defaultValues = defaultValues;
             _nullValue = nullValue;
         }
 
-        public Type FieldType => _field.FieldType ?? throw new NotSupportedException();
+        public Type FieldType => _field.FieldType;
 
         public string FieldName => _field.Name;
 
@@ -87,12 +87,12 @@ namespace Epam.GraphQL.Filters.Implementations
                 {
                     if (inFilter.In != null && inFilter.In.Any())
                     {
-                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.In));
+                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.In.Cast<TReturnType>()));
                     }
 
                     if (inFilter.Nin != null && inFilter.Nin.Any())
                     {
-                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.Nin).Not());
+                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.Nin.Cast<TReturnType>()).Not());
                     }
                 }
 
@@ -146,7 +146,7 @@ namespace Epam.GraphQL.Filters.Implementations
             return result;
         }
 
-        protected abstract Expression<Func<TEntity, bool>> BuildContainsAsExpression(TExecutionContext context, IEnumerable<TListItemType> list);
+        protected abstract Expression<Func<TEntity, bool>> BuildContainsAsExpression(TExecutionContext context, IEnumerable<TReturnType> list);
 
         protected abstract Expression<Func<TEntity, bool>> BuildIsNullExpression(TExecutionContext context, bool isNull);
 

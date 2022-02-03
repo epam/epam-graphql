@@ -5,7 +5,6 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
@@ -27,7 +26,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         protected RelationRegistry<TExecutionContext> Registry { get; }
 
-        public IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(
+        public ILoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             RelationType relationType = RelationType.Association,
             Expression<Func<TChildEntity, TEntity>>? navigationProperty = null,
@@ -44,7 +43,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 reverseNavigationProperty,
                 descriptor);
 
-            return new FromLoaderBuilder<TLoader, TEntity, TChildLoader, TChildEntity, TExecutionContext>(loaderField);
+            return loaderField;
         }
     }
 }

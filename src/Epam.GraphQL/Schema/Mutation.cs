@@ -89,7 +89,7 @@ namespace Epam.GraphQL
             Guards.ThrowIfNull(loaderType, nameof(loaderType));
 
             var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(loaderType, typeof(MutableLoader<,,>));
-            SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
+            SubmitInputTypeRegistry.Register(fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
         }
 
         protected internal void SubmitField<TLoader>(string fieldName)
@@ -106,11 +106,11 @@ namespace Epam.GraphQL
         }
 
         protected internal void SubmitField<TLoader, TEntity, TId>(string fieldName)
-            where TLoader : MutableLoader<TEntity, TId, TExecutionContext>
+            where TLoader : MutableLoader<TEntity, TId, TExecutionContext>, new()
             where TEntity : class
             where TId : IEquatable<TId>
         {
-            SubmitInputTypeRegistry.Register<TLoader, TEntity, TId>(GetType(), fieldName);
+            SubmitInputTypeRegistry.Register<TLoader, TEntity, TId>(fieldName);
         }
 
         protected internal new IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null)
@@ -122,7 +122,7 @@ namespace Epam.GraphQL
 
         protected override void AfterConfigure()
         {
-            var inputTypeMap = SubmitInputTypeRegistry.GetInputTypeMap(GetType());
+            var inputTypeMap = SubmitInputTypeRegistry.GetInputTypeMap();
             if (inputTypeMap.Any())
             {
                 _submitOutputType = inputTypeMap
@@ -132,9 +132,9 @@ namespace Epam.GraphQL
 
                 SubmitField(
                     SubmitName,
-                    GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<,>).MakeGenericType(GetType(), typeof(TExecutionContext))),
+                    GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<TExecutionContext>)),
                     PayloadName,
-                    typeof(SubmitInputGraphType<,>).MakeGenericType(GetType(), typeof(TExecutionContext)),
+                    typeof(SubmitInputGraphType<TExecutionContext>),
                     PerformResolve,
                     _submitOutputType);
             }
@@ -145,7 +145,13 @@ namespace Epam.GraphQL
             return Task.FromResult(Enumerable.Empty<object>());
         }
 
-        private void SubmitField(string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
+        private void SubmitField(
+            string name,
+            IGraphTypeDescriptor<TExecutionContext> returnGraphType,
+            string argName,
+            Type argGraphType,
+            Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
+            Type fieldType)
         {
             ThrowIfIsNotConfiguring();
             Configurator.AddSubmitField(name, returnGraphType, argName, argGraphType, resolve, fieldType);
@@ -157,8 +163,8 @@ namespace Epam.GraphQL
 
             foreach (var kv in payload)
             {
-                var entityType = SubmitInputTypeRegistry.GetEntityTypeByFieldName(GetType(), kv.Key);
-                var loaderType = SubmitInputTypeRegistry.GetLoaderTypeByFieldName(GetType(), kv.Key);
+                var entityType = SubmitInputTypeRegistry.GetEntityTypeByFieldName(kv.Key);
+                var loaderType = SubmitInputTypeRegistry.GetLoaderTypeByFieldName(kv.Key);
                 var graphType = (IGraphType)Registry.GetRequiredService(Registry.GetInputEntityGraphType(loaderType, entityType));
 
                 inputItems.Add(

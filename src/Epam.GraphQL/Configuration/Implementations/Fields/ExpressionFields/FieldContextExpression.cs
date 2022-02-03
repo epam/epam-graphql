@@ -47,10 +47,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             ExpressionValidator.Validate(_expression);
         }
 
-        public TReturnType? Resolve(IResolveFieldContext context, object source)
+        public TReturnType? Resolve(IResolveFieldContext context)
         {
             // TODO Check for input field (!_field.IsInputField && ...)
-            if (source is Proxy<TEntity> proxy)
+            if (context.Source is Proxy<TEntity> proxy)
             {
                 var name = _field.Name;
                 var func = proxy.GetType().GetPropertyDelegate(name);
@@ -59,12 +59,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
             _resolver ??= _expression.Compile();
 
-            return _resolver(context.GetUserContext<TExecutionContext>(), (TEntity)source);
-        }
-
-        public TReturnType? Resolve(IResolveFieldContext context)
-        {
-            return Resolve(context, context.Source);
+            return _resolver(context.GetUserContext<TExecutionContext>(), (TEntity)context.Source);
         }
 
         object? IFieldResolver.Resolve(IResolveFieldContext context)

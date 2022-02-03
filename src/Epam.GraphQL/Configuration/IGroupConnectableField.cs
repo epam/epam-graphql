@@ -3,15 +3,10 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Configuration;
-
-namespace Epam.GraphQL.Builders.Common
+namespace Epam.GraphQL.Configuration
 {
-    public interface IFromLoaderBuilder<TEntity, TChildEntity, TResult, TExecutionContext> :
-        IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>,
-        IConnectableField<IConnectionField, TResult>
-        where TChildEntity : class
+    public interface IGroupConnectableField<out TThis, TEntity>
     {
-        IConnectionField AsConnection();
+        TThis AsGroupConnection();
     }
 }

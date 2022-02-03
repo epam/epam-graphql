@@ -57,10 +57,7 @@ namespace Epam.GraphQL.Helpers
 
         public static Type GetTheBestCommonBaseType(params Type[] types)
         {
-            if (types.Length == 0)
-            {
-                throw new ArgumentException("You must pass one parameter at least.");
-            }
+            Guards.ThrowArgumentExceptionIf(types.Length == 0, "You must pass one parameter at least.", nameof(types));
 
             if (types.Length == 1)
             {
@@ -91,11 +88,6 @@ namespace Epam.GraphQL.Helpers
         }
 
         public static MethodInfo GetMethodInfo<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> method)
-        {
-            return GetMethodInfoImpl(method);
-        }
-
-        public static MethodInfo GetMethodInfo<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> method)
         {
             return GetMethodInfoImpl(method);
         }

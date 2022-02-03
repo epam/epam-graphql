@@ -5,6 +5,7 @@
 
 using System;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
@@ -38,10 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public void Validate()
         {
-            if (Type == null)
-            {
-                throw new InvalidOperationException($"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
-            }
+            Guards.ThrowInvalidOperationIf(Type == null, $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
         }
     }
 }

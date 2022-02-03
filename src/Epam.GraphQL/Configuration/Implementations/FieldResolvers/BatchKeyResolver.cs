@@ -53,7 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         {
             var compiledProxyKeySelector = new Lazy<Func<Proxy<TEntity>, TKey>>(() =>
             {
-                var proxyKeySelector = (Expression<Func<Proxy<TEntity>, TKey>>)proxyAccessor.GetProxyExpression(keySelector).CastFirstParamTo<Proxy<TEntity>>();
+                var proxyKeySelector = proxyAccessor.Rewrite(keySelector);
                 return proxyKeySelector.Compile();
             });
 

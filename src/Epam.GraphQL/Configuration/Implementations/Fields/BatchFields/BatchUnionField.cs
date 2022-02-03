@@ -60,6 +60,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _unionGraphType.MakeListDescriptor();
 
+        public override IFieldResolver Resolver => _resolver;
+
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
@@ -159,11 +161,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
             return ApplySelect(selector, build);
-        }
-
-        protected override IFieldResolver GetResolver()
-        {
-            return _resolver;
         }
     }
 }
