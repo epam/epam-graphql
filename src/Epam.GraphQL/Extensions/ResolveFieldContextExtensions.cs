@@ -131,6 +131,25 @@ namespace Epam.GraphQL.Extensions
             return items.GetSubFieldsNames(context.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Fragments, f => true)).Distinct();
         }
 
+        public static bool HasGroupConnectionItemField(this IResolveFieldContext context)
+        {
+            if (context.SubFields.TryGetValue("items", out var items))
+            {
+                items = GetSubField(context, items, "item");
+            }
+
+            if (context.SubFields.TryGetValue("edges", out var edges))
+            {
+                edges = GetSubField(context, edges, "node");
+                if (edges != null)
+                {
+                    edges = GetSubField(context, edges, "item");
+                }
+            }
+
+            return items != null || edges != null;
+        }
+
         public static IEnumerable<string> GetGroupConnectionAggregateQueriedFields(this IResolveFieldContext context)
         {
             context.SubFields.TryGetValue("items", out var items);

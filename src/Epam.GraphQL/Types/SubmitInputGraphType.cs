@@ -8,14 +8,13 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
 {
-    internal class SubmitInputGraphType<TMutation, TExecutionContext> : InputObjectGraphType<object>
-        where TMutation : Mutation<TExecutionContext>
+    internal class SubmitInputGraphType<TExecutionContext> : InputObjectGraphType<object>
     {
         public SubmitInputGraphType(SubmitInputTypeRegistry<TExecutionContext> registry)
         {
             // TODO Type name should be taken from registry?
             Name = "SubmitInputType";
-            registry.ForEach(typeof(TMutation), record => Field(record.InputType, record.FieldName));
+            registry.ForEach(record => Field(record.InputType, record.FieldName));
         }
     }
 }

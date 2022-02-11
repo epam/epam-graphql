@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
@@ -59,7 +58,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         {
             _graphType = graphType;
 
-            FieldResolver = resolver;
+            BatchFieldResolver = resolver;
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();
         }
 
@@ -78,18 +77,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             }
         }
 
-        public override bool CanResolve => FieldResolver != null;
+        public override IFieldResolver Resolver => BatchFieldResolver;
 
-        protected IBatchResolver<TEntity, TReturnType> FieldResolver { get; }
-
-        public override object Resolve(IResolveFieldContext context)
-        {
-            return FieldResolver.Resolve(context);
-        }
+        protected IBatchResolver<TEntity, TReturnType> BatchFieldResolver { get; }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector)
         {
-            return Parent.ApplySelect<TReturnType1>(this, FieldResolver.Select(selector));
+            return Parent.ApplySelect<TReturnType1>(this, BatchFieldResolver.Select(selector));
         }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
@@ -112,11 +106,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
             return ApplySelect(selector, build);
-        }
-
-        protected override IFieldResolver GetResolver()
-        {
-            return FieldResolver;
         }
     }
 }

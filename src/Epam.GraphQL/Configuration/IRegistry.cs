@@ -33,8 +33,6 @@ namespace Epam.GraphQL.Configuration
             where TLoader : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class;
 
-        IMutableLoader<TExecutionContext> ResolveLoader(Type type);
-
         IFilter<TEntity, TExecutionContext> ResolveFilter<TEntity>(Type loaderFilterType);
 
         ISearcher<TEntity, TExecutionContext> ResolveSearcher<TSearcher, TEntity>()
@@ -92,17 +90,17 @@ namespace Epam.GraphQL.Configuration
             where TEntity : class;
 
         Type GetEntityGraphType<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class;
 
         Type GetInputEntityGraphType<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class;
 
-        Type GetPropperBaseProjectionType(
-            Type projectionType,
-            Type entityType,
-            Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> equalPredicate);
+        Type GetPropperBaseProjectionType<TProjection, TEntity>(
+            Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> equalPredicate)
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
+            where TEntity : class;
 
         IObjectGraphTypeConfigurator<TExecutionContext>? GetObjectGraphTypeConfigurator(Type type, Type? loaderType = null);
     }

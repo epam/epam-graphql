@@ -12,40 +12,42 @@ using Epam.GraphQL.Builders.MutableLoader;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 
 namespace Epam.GraphQL.Tests
 {
     public static class TestExtensions
     {
-        public static ILoaderField<TChildEntity, TExecutionContext> Field<TChildEntity, TExecutionContext>(this Query<TExecutionContext> query, string name, Type loaderType)
+        public static IRootLoaderField<TChildEntity, TExecutionContext> Field<TChildEntity, TExecutionContext>(this Query<TExecutionContext> query, string name, Type loaderType)
         {
             var methodInfo = typeof(Query<TExecutionContext>).GetNonPublicGenericMethod(
                 nameof(Query<TExecutionContext>.Field),
                 new[] { loaderType, typeof(TChildEntity) },
                 new[] { typeof(string), typeof(string) });
 
-            return methodInfo.InvokeAndHoistBaseException<ILoaderField<TChildEntity, TExecutionContext>>(query, name, null);
+            return methodInfo.InvokeAndHoistBaseException<IRootLoaderField<TChildEntity, TExecutionContext>>(query, name, null);
         }
 
-        public static ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildEntity, TExecutionContext>(this IQueryField<TExecutionContext> builder, Type loaderType)
+        public static IRootLoaderField<TChildEntity, TExecutionContext> FromLoader<TChildEntity, TExecutionContext>(this IQueryField<TExecutionContext> builder, Type loaderType)
         {
             var methodInfo = typeof(IQueryField<TExecutionContext>).GetPublicGenericMethod(
                 nameof(IQueryField<TExecutionContext>.FromLoader),
                 new[] { loaderType, typeof(TChildEntity) },
                 Type.EmptyTypes);
 
-            return methodInfo.InvokeAndHoistBaseException<ILoaderField<TChildEntity, TExecutionContext>>(builder);
+            return methodInfo.InvokeAndHoistBaseException<IRootLoaderField<TChildEntity, TExecutionContext>>(builder);
         }
 
-        public static void WithSearch<TThis, TChildEntity, TExecutionContext>(this ISearchableField<TThis, TChildEntity, TExecutionContext> field, Type searcherType)
+        public static TThis WithSearch<TThis, TChildEntity, TExecutionContext>(this ISearchableField<TThis, TChildEntity, TExecutionContext> field, Type searcherType)
         {
             var methodInfo = typeof(ISearchableField<TThis, TChildEntity, TExecutionContext>).GetPublicGenericMethod(
                 nameof(ISearchableField<TThis, TChildEntity, TExecutionContext>.WithSearch),
                 new[] { searcherType },
                 Type.EmptyTypes);
 
-            methodInfo.InvokeAndHoistBaseException(field);
+            return methodInfo.InvokeAndHoistBaseException<TThis>(field);
         }
 
         public static IConnectionField WithFilter(this IConnectionField field, Type filterType)
@@ -298,7 +300,7 @@ namespace Epam.GraphQL.Tests
             return methodInfo.InvokeAndHoistBaseException<IUnionableRootField<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>>(field, argName);
         }
 
-        public static IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TEntity, TChildEntity, TExecutionContext>(
+        public static ILoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TEntity, TChildEntity, TExecutionContext>(
             this IHasFromLoader<TEntity, TExecutionContext> builder,
             Type childLoaderType,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -313,7 +315,7 @@ namespace Epam.GraphQL.Tests
                 new[] { childLoaderType, typeof(TChildEntity) },
                 new[] { typeof(Expression<Func<TEntity, TChildEntity, bool>>), typeof(RelationType), typeof(Expression<Func<TChildEntity, TEntity>>), typeof(Expression<Func<TEntity, TChildEntity>>) });
 
-            return methodInfo.InvokeAndHoistBaseException<IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext>>(
+            return methodInfo.InvokeAndHoistBaseException<ILoaderField<TEntity, TChildEntity, TExecutionContext>>(
                 builder,
                 condition,
                 relationType,
@@ -321,7 +323,7 @@ namespace Epam.GraphQL.Tests
                 reverseNavigationProperty);
         }
 
-        public static IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TEntity, TChildEntity, TExecutionContext>(
+        public static IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TEntity, TChildEntity, TExecutionContext>(
             this IInlineObjectFieldBuilder<TEntity, TExecutionContext> builder,
             Type childLoaderType,
             Expression<Func<TEntity, TChildEntity, bool>> condition)
@@ -333,7 +335,7 @@ namespace Epam.GraphQL.Tests
                 new[] { childLoaderType, typeof(TChildEntity) },
                 new[] { typeof(Expression<Func<TEntity, TChildEntity, bool>>) });
 
-            return methodInfo.InvokeAndHoistBaseException<IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity>>(
+            return methodInfo.InvokeAndHoistBaseException<IInlineLoaderField<TEntity, TChildEntity, TExecutionContext>>(
                 builder,
                 condition);
         }
@@ -351,19 +353,30 @@ namespace Epam.GraphQL.Tests
             methodInfo.InvokeAndHoistBaseException(builder);
         }
 
-        public static IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TEntity, TReturnType, TFilterValueType, TExecutionContext>(
-            this IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> builder,
+        public static IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> ReferencesTo<TParentEntity, TEntity, TReturnType, TExecutionContext>(
+            this IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> builder,
             Type parentLoaderType,
             Expression<Func<TParentEntity, TReturnType>> parentProperty,
             Expression<Func<TEntity, TParentEntity>> navigationProperty,
             RelationType relationType)
             where TParentEntity : class
         {
-            var foreignKeyMethodInfo = typeof(IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext>).GetPublicGenericMethod(
+            var foreignKeyMethodInfo = typeof(IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext>).GetPublicGenericMethod(
                 nameof(ReferencesTo),
                 new[] { typeof(TParentEntity), parentLoaderType },
                 new[] { typeof(Expression<Func<TParentEntity, TReturnType>>), typeof(Expression<Func<TEntity, TParentEntity>>), typeof(RelationType) });
-            return (IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext>)foreignKeyMethodInfo.InvokeAndHoistBaseException(builder, parentProperty, navigationProperty, relationType);
+            return (IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>)foreignKeyMethodInfo.InvokeAndHoistBaseException(builder, parentProperty, navigationProperty, relationType);
+        }
+
+        internal static ProjectionBase<TEntity, TExecutionContext> ResolveLoader<TEntity, TExecutionContext>(
+            this RelationRegistry<TExecutionContext> registry,
+            Type loaderType)
+            where TEntity : class
+        {
+            var registryResolveLoaderMethodInfo = ReflectionHelpers.GetMethodInfo(registry.ResolveLoader<DummyMutableLoader<TExecutionContext>, object>)
+                .MakeGenericMethod(loaderType, typeof(TEntity));
+
+            return registryResolveLoaderMethodInfo.InvokeAndHoistBaseException<ProjectionBase<TEntity, TExecutionContext>>(registry);
         }
     }
 }

@@ -3,13 +3,14 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq.Expressions;
+using GraphQL.Resolvers;
 
-namespace Epam.GraphQL.Configuration
+namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    public interface IWereableField<out TThis, TEntity>
+    internal interface IRootEnumerableResolver<TReturnType, TExecutionContext> : IFieldResolver
     {
-        TThis Where(Expression<Func<TEntity, bool>> predicate);
+        IFieldResolver SingleOrDefault();
+
+        IFieldResolver FirstOrDefault();
     }
 }

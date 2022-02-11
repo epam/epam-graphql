@@ -142,22 +142,16 @@ namespace Epam.GraphQL.Extensions
 
         public static Type MakeInstantiatedProxyGenericType(this Type proxyGenericType, IEnumerable<string> propertyNames)
         {
-            if (propertyNames.Any(name => string.IsNullOrEmpty(name)))
-            {
-                throw new ArgumentException("Property names must not contain null or empty strings.", nameof(propertyNames));
-            }
+            Guards.ThrowArgumentExceptionIf(propertyNames.Any(name => string.IsNullOrEmpty(name)), "Property names must not contain null or empty strings.", nameof(propertyNames));
 
             var invalidPropNames = propertyNames.Where(name => proxyGenericType.GetProperty(name) == null);
 
-            if (invalidPropNames.Any())
-            {
-                throw new ArgumentException($"Cannot find a properties ({string.Join(", ", invalidPropNames)})  on type {proxyGenericType}.", nameof(propertyNames));
-            }
+            Guards.ThrowArgumentExceptionIf(invalidPropNames.Any(), $"Cannot find a properties ({string.Join(", ", invalidPropNames)})  on type {proxyGenericType}.", nameof(propertyNames));
 
-            if (proxyGenericType.BaseType.Name != typeof(Proxy<>).Name || proxyGenericType.BaseType.Assembly != typeof(Proxy<>).Assembly)
-            {
-                throw new ArgumentException("Type must be inherited from Proxy<>", nameof(proxyGenericType));
-            }
+            Guards.ThrowArgumentExceptionIf(
+                proxyGenericType.BaseType.Name != typeof(Proxy<>).Name || proxyGenericType.BaseType.Assembly != typeof(Proxy<>).Assembly,
+                "Type must be inherited from Proxy<>",
+                nameof(proxyGenericType));
 
             return _instantiatedProxyGenericTypeCache.GetOrAdd((proxyGenericType, propertyNames.ToList()), key =>
             {
@@ -182,11 +176,8 @@ namespace Epam.GraphQL.Extensions
 
                 var objectType = tb.CreateTypeInfo();
 
-                if (objectType == null)
-                {
-                    // According to its signature, tb.CreateTypeInfo() can return null
-                    throw new NotSupportedException();
-                }
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
 
                 return objectType;
             });
@@ -302,10 +293,7 @@ namespace Epam.GraphQL.Extensions
                 .ThenBy(p => p.DeclaringType != target)
                 .FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-            if (property == null)
-            {
-                throw new InvalidOperationException($"Expected to find property {name} on {target.HumanizedName()} but it does not exist.");
-            }
+            Guards.ThrowInvalidOperationIf(property == null, $"Expected to find property {name} on {target.HumanizedName()} but it does not exist.");
 
             // Use reflection to call the method to generate our delegate
             MethodInfo constructedHelper = _delegateHelperMethod.MakeGenericMethod(

@@ -4,23 +4,37 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Helpers;
 using GraphQL;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class FuncResolver<TEntity, TReturnType> : IResolver<TEntity>
-        where TEntity : class
+    internal class FuncResolver<TReturnType, TTransformedReturnType, TExecutionContext> : IFieldResolver
     {
-        public FuncResolver(Func<IResolveFieldContext, TReturnType> resolver)
-        {
-            Resolver = resolver;
-        }
+        private readonly IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> _proxyAccessor;
+        private readonly Func<IResolveFieldContext, TTransformedReturnType> _resolver;
 
-        protected Func<IResolveFieldContext, TReturnType> Resolver { get; }
+        public FuncResolver(
+            IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> proxyAccessor,
+            Func<IResolveFieldContext, TTransformedReturnType> resolver)
+        {
+            _proxyAccessor = proxyAccessor;
+            _resolver = resolver;
+        }
 
         public object? Resolve(IResolveFieldContext context)
         {
-            return Resolver(context);
+            var executer = _proxyAccessor.CreateHooksExecuter(context);
+
+            if (executer != null)
+            {
+                return executer
+                    .Execute(FuncConstants<TTransformedReturnType>.Identity)
+                    .LoadAsync(_resolver(context));
+            }
+
+            return _resolver(context);
         }
     }
 }

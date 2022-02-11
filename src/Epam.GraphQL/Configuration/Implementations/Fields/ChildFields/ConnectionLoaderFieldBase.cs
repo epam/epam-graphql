@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -48,26 +47,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                   parent,
                   name,
                   resolver,
-                  elementGraphType,
-                  arguments,
-                  searcher,
-                  naturalSorters)
-        {
-            Initialize();
-        }
-
-        protected ConnectionLoaderFieldBase(
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments? arguments,
-            ISearcher<TChildEntity, TExecutionContext>? searcher,
-            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
-            : base(
-                  parent,
-                  name,
-                  condition,
                   elementGraphType,
                   arguments,
                   searcher,

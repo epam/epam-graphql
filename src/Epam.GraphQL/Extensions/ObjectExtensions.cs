@@ -33,10 +33,7 @@ namespace Epam.GraphQL.Extensions
 
             foreach (var propInfo in properties)
             {
-                if (!propInfo.CanRead || !propInfo.CanWrite)
-                {
-                    throw new ArgumentException($"Cannot read or write property {propInfo.Name}.");
-                }
+                Guards.ThrowInvalidOperationIf(!propInfo.CanRead || !propInfo.CanWrite, $"Cannot read or write property {propInfo.Name}.");
 
                 var val = value.GetPropertyValue(propInfo);
                 obj.SetPropertyValue(propInfo, val);

@@ -8,14 +8,13 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
 {
-    internal class SubmitOutputGraphType<TMutation, TExecutionContext> : ObjectGraphType<object>
-        where TMutation : Mutation<TExecutionContext>
+    internal class SubmitOutputGraphType<TExecutionContext> : ObjectGraphType<object>
     {
         public SubmitOutputGraphType(SubmitInputTypeRegistry<TExecutionContext> registry)
         {
             // TODO Type name should be taken from registry?
             Name = "SubmitOutputType";
-            registry.ForEach(typeof(TMutation), record => Field(record.OutputType, record.FieldName));
+            registry.ForEach(record => Field(record.OutputType, record.FieldName));
         }
     }
 }

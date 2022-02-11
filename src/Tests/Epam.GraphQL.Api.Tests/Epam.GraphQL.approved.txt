@@ -13,17 +13,6 @@ namespace Epam.GraphQL.Adapters
 }
 namespace Epam.GraphQL.Builders.Common
 {
-    public interface IFromLoaderBuilder<TEntity, TChildEntity, TResult, TExecutionContext> : Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult>, Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TResult>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Configuration.IConnectionField, TResult>
-        where TChildEntity :  class
-    {
-        Epam.GraphQL.Configuration.IConnectionField AsConnection();
-    }
-    public interface IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult> : Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TResult>
-    {
-        Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, T> Select<T>(System.Linq.Expressions.Expression<System.Func<TResult, T>> selector);
-        Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, T> Select<T>(System.Linq.Expressions.Expression<System.Func<TEntity, TResult, T>> selector);
-        Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TResult> Where(System.Linq.Expressions.Expression<System.Func<TResult, bool>> predicate);
-    }
     public interface IHasEnumerableMethods<TSourceType>
     {
         void FirstOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
@@ -39,7 +28,7 @@ namespace Epam.GraphQL.Builders.Common
     }
     public interface IHasFromLoader<TEntity, TExecutionContext>
     {
-        Epam.GraphQL.Builders.Common.IFromLoaderBuilder<TEntity, TChildEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition, Epam.GraphQL.Enums.RelationType relationType = 0, System.Linq.Expressions.Expression<System.Func<TChildEntity, TEntity>>? navigationProperty = null, System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
+        Epam.GraphQL.Configuration.ILoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition, Epam.GraphQL.Enums.RelationType relationType = 0, System.Linq.Expressions.Expression<System.Func<TChildEntity, TEntity>>? navigationProperty = null, System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
     }
@@ -64,10 +53,6 @@ namespace Epam.GraphQL.Builders.Common.Implementations
 }
 namespace Epam.GraphQL.Builders.Loader
 {
-    public interface IFromIQueryableBuilder<TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TReturnType>, Epam.GraphQL.Builders.Loader.IHasEnumerableMethodsAndSelect<TReturnType, TExecutionContext>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TReturnType>
-    {
-        Epam.GraphQL.Builders.Loader.IFromIQueryableBuilder<TReturnType, TExecutionContext> Where(System.Linq.Expressions.Expression<System.Func<TReturnType, bool>> predicate);
-    }
     public interface IHasEnumerableMethodsAndSelect<TSourceType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasEnumerableMethods<TSourceType>
     {
         Epam.GraphQL.Builders.Loader.IHasEnumerableMethodsAndSelect<string, TExecutionContext> Select(System.Linq.Expressions.Expression<System.Func<TSourceType, string>> selector);
@@ -196,7 +181,8 @@ namespace Epam.GraphQL.Builders.Loader
     }
     public interface IHasFromIQueryable<TEntity, TExecutionContext>
     {
-        Epam.GraphQL.Builders.Loader.IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
+        Epam.GraphQL.Configuration.IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition);
+        Epam.GraphQL.Configuration.IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
             where TReturnType :  class;
     }
     public interface IHasSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasSelect<TReturnType, TExecutionContext>
@@ -235,37 +221,13 @@ namespace Epam.GraphQL.Builders.Loader
         string Name { get; set; }
         void ConfigureFrom<TProjection>()
             where TProjection : Epam.GraphQL.Loaders.Projection<TSourceType, TExecutionContext>;
-        void Field(System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<string>>> expression, string? deprecationReason = null);
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, string> Field(System.Linq.Expressions.Expression<System.Func<TSourceType, string>> expression, string? deprecationReason = null);
         Epam.GraphQL.Builders.Loader.IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null);
-        void Field(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<string>>> expression, string? deprecationReason = null);
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, string> Field(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, string>> expression, string? deprecationReason = null);
-        void Field(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, System.Collections.Generic.IEnumerable<string>>> expression, string? deprecationReason = null);
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, string> Field(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, string>> expression, string? deprecationReason = null);
-        void Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        void Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        void Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        void Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        void Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        void Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, System.Collections.Generic.IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct;
+        Epam.GraphQL.Helpers.IVoid Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Helpers.IVoid Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Helpers.IVoid Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Builders.Common.IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null);
         void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TSourceType, T>> expression, System.Action<TExecutionContext, T> action);
         void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Collections.Generic.IDictionary<TKey, T>> fetch, System.Action<TExecutionContext, T> action);
         void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKey, T>>> fetch, System.Action<TExecutionContext, T> action);
@@ -273,7 +235,7 @@ namespace Epam.GraphQL.Builders.Loader
     public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>
         where TEntity :  class
     {
-        Epam.GraphQL.Builders.Common.IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition)
+        Epam.GraphQL.Configuration.IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
     }
@@ -338,32 +300,32 @@ namespace Epam.GraphQL.Builders.MutableLoader
         void Editable();
         void EditableIf(System.Func<Epam.GraphQL.Loaders.IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason = null);
     }
-    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TFilterValueType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TReturnType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>
     {
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> Default(System.Func<TEntity, TReturnType> selector);
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> Default(System.Func<TExecutionContext, TEntity, TReturnType> selector);
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> Default(System.Func<TEntity, TReturnType> selector);
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> Default(System.Func<TExecutionContext, TEntity, TReturnType> selector);
     }
-    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TReturnType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>
     {
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(System.Linq.Expressions.Expression<System.Func<TParentEntity, TReturnType>> parentProperty, System.Linq.Expressions.Expression<System.Func<TEntity, TParentEntity>> navigationProperty, Epam.GraphQL.Enums.RelationType relationType)
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(System.Linq.Expressions.Expression<System.Func<TParentEntity, TReturnType>> parentProperty, System.Linq.Expressions.Expression<System.Func<TEntity, TParentEntity>> navigationProperty, Epam.GraphQL.Enums.RelationType relationType)
             where TParentEntity :  class
             where TParentEntityLoader : Epam.GraphQL.Loaders.Loader<TParentEntity, TExecutionContext>, Epam.GraphQL.Loaders.IIdentifiableLoader, new ();
     }
-    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TReturnType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>
     {
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> MandatoryForUpdate();
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext> MandatoryForUpdate();
     }
-    public interface IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TReturnType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>, Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>
     {
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(System.Func<System.Collections.Generic.IEnumerable<TEntity>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TEntity, TItem>>> batchFunc, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null);
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TEntity>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TEntity, TItem>>> batchFunc, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null);
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> Editable();
-        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> EditableIf(System.Func<Epam.GraphQL.Loaders.IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason = null);
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> BatchedEditableIf<TItem>(System.Func<System.Collections.Generic.IEnumerable<TEntity>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TEntity, TItem>>> batchFunc, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null);
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> BatchedEditableIf<TItem>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TEntity>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TEntity, TItem>>> batchFunc, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null);
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> Editable();
+        Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> EditableIf(System.Func<Epam.GraphQL.Loaders.IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate, System.Func<Epam.GraphQL.Loaders.IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason = null);
     }
-    public interface IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TFilterValueType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>
+    public interface IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>, Epam.GraphQL.Builders.Common.IHasFilterable<TEntity, TReturnType, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>>, Epam.GraphQL.Builders.Common.IHasGroupable, Epam.GraphQL.Builders.Common.IHasSortableAndGroupable<TEntity>, Epam.GraphQL.Builders.Common.IHasSortable<TEntity, Epam.GraphQL.Builders.Common.IHasGroupable>
     {
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(System.Action<TExecutionContext, TEntity, TReturnType> save);
-        Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(System.Func<TExecutionContext, TEntity, TReturnType, System.Threading.Tasks.Task> save);
+        Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> OnWrite(System.Action<TExecutionContext, TEntity, TReturnType> save);
+        Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> OnWrite(System.Func<TExecutionContext, TEntity, TReturnType, System.Threading.Tasks.Task> save);
     }
     public interface IHasFromBatch<TEntity, TExecutionContext>
         where TEntity :  class
@@ -571,13 +533,29 @@ namespace Epam.GraphQL.Configuration
             where TSearcher : Epam.GraphQL.Search.ISearcher;
     }
     public interface IConnectionField<TEntity, TExecutionContext> : Epam.GraphQL.Configuration.ILegacyFilterableField<Epam.GraphQL.Configuration.IConnectionField<TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IConnectionField<TEntity, TExecutionContext>, TEntity, TExecutionContext> { }
+    public interface IEnumerableField<TEntity, TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IEnumerableField<Epam.GraphQL.Configuration.IEnumerableField<TEntity, TSourceType, TExecutionContext>, TEntity, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IEnumerableField<TEntity, TSourceType, TExecutionContext>, TSourceType> { }
+    public interface IEnumerableField<out TThis, TEntity, TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IWhereableField<TThis, TSourceType>
+    {
+        Epam.GraphQL.Helpers.IVoid FirstOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
+        Epam.GraphQL.Configuration.IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> selector);
+        Epam.GraphQL.Configuration.IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TSourceType, TReturnType>> selector);
+        Epam.GraphQL.Configuration.IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> selector, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
+            where TReturnType :  class;
+        Epam.GraphQL.Helpers.IVoid SingleOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
+    }
+    public interface IGroupConnectableField<out TThis, TEntity>
+    {
+        TThis AsGroupConnection();
+    }
+    public interface IInlineLoaderField<TParentEntity, TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IEnumerableField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IInlineLoaderField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TEntity> { }
+    public interface IInlineLoaderField<out TThis, TParentEntity, TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IEnumerableField<TThis, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<TThis, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<TThis, TEntity> { }
     public interface ILegacyFilterableField<out TThis, TEntity, TExecutionContext>
     {
         TThis WithFilter<TLoaderFilter, TFilter>()
             where TLoaderFilter : Epam.GraphQL.Filters.Filter<TEntity, TFilter, TExecutionContext>
             where TFilter : Epam.GraphQL.Loaders.Input;
     }
-    public interface ILoaderField<TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TEntity>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.ILoaderField<TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWereableField<Epam.GraphQL.Configuration.ILoaderField<TEntity, TExecutionContext>, TEntity> { }
+    public interface ILoaderField<TParentEntity, TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Configuration.IConnectionField>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TEntity>, Epam.GraphQL.Configuration.IEnumerableField<Epam.GraphQL.Configuration.ILoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IInlineLoaderField<Epam.GraphQL.Configuration.ILoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.ILoaderField<TParentEntity, TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.ILoaderField<TParentEntity, TEntity, TExecutionContext>, TEntity> { }
     public interface IMutationField<TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableRootField<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableRootField<TExecutionContext>
     {
         Epam.GraphQL.Configuration.IArgumentedMutationField<TArgType, TExecutionContext> Argument<TArgType>(string argName);
@@ -663,13 +641,15 @@ namespace Epam.GraphQL.Configuration
         Epam.GraphQL.Configuration.IPayloadFieldedQueryField<System.Linq.Expressions.Expression<System.Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
             where TProjection : Epam.GraphQL.Loaders.Projection<TEntity1, TExecutionContext>
             where TEntity1 :  class;
-        Epam.GraphQL.Builders.Loader.IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
+        Epam.GraphQL.Configuration.IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query);
+        Epam.GraphQL.Configuration.IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
             where TReturnType :  class;
-        Epam.GraphQL.Configuration.ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+        Epam.GraphQL.Configuration.IRootLoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
         Epam.GraphQL.Configuration.IPayloadFieldedQueryField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
     }
+    public interface IQueryableField<TEntity, TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TSourceType>, Epam.GraphQL.Configuration.IEnumerableField<Epam.GraphQL.Configuration.IQueryableField<TEntity, TSourceType, TExecutionContext>, TEntity, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IQueryableField<TEntity, TSourceType, TExecutionContext>, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IQueryableField<TEntity, TSourceType, TExecutionContext>, TSourceType> { }
     public interface IResolvableField<TEntity, TExecutionContext>
         where TEntity :  class
     {
@@ -831,6 +811,17 @@ namespace Epam.GraphQL.Configuration
         void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
+    public interface IRootEnumerableField<TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IRootEnumerableField<Epam.GraphQL.Configuration.IRootEnumerableField<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IRootEnumerableField<TSourceType, TExecutionContext>, TSourceType> { }
+    public interface IRootEnumerableField<out TThis, TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IWhereableField<TThis, TSourceType>
+    {
+        Epam.GraphQL.Helpers.IVoid FirstOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
+        Epam.GraphQL.Configuration.IRootEnumerableField<TReturnType, TExecutionContext> Select<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> selector);
+        Epam.GraphQL.Configuration.IRootEnumerableField<TReturnType, TExecutionContext> Select<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> selector, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
+            where TReturnType :  class;
+        Epam.GraphQL.Helpers.IVoid SingleOrDefault(System.Linq.Expressions.Expression<System.Func<TSourceType, bool>>? predicate = null);
+    }
+    public interface IRootLoaderField<TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid>, Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TEntity>, Epam.GraphQL.Configuration.IGroupConnectableField<Epam.GraphQL.Helpers.IVoid, TEntity>, Epam.GraphQL.Configuration.IRootEnumerableField<Epam.GraphQL.Configuration.IRootLoaderField<TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IRootLoaderField<TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IRootLoaderField<TEntity, TExecutionContext>, TEntity> { }
+    public interface IRootQueryableField<TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IConnectableField<Epam.GraphQL.Helpers.IVoid, TSourceType>, Epam.GraphQL.Configuration.IGroupConnectableField<Epam.GraphQL.Helpers.IVoid, TSourceType>, Epam.GraphQL.Configuration.IRootEnumerableField<Epam.GraphQL.Configuration.IRootQueryableField<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IRootQueryableField<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IRootQueryableField<TSourceType, TExecutionContext>, TSourceType> { }
     public interface ISearchableField<out TThis, TEntity, TExecutionContext>
     {
         TThis WithSearch<TSearcher>()
@@ -859,7 +850,7 @@ namespace Epam.GraphQL.Configuration
     public interface IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext>, TExecutionContext> { }
     public interface IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>, TExecutionContext> { }
     public interface IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>, TExecutionContext> { }
-    public interface IWereableField<out TThis, TEntity>
+    public interface IWhereableField<out TThis, TEntity>
     {
         TThis Where(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate);
     }
@@ -957,7 +948,7 @@ namespace Epam.GraphQL
             where TLoader : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext>
             where TEntity :  class { }
         protected void SubmitField<TLoader, TEntity, TId>(string fieldName)
-            where TLoader : Epam.GraphQL.Loaders.MutableLoader<TEntity, TId, TExecutionContext>
+            where TLoader : Epam.GraphQL.Loaders.MutableLoader<TEntity, TId, TExecutionContext>, new ()
             where TEntity :  class
             where TId : System.IEquatable<TId> { }
     }
@@ -970,7 +961,7 @@ namespace Epam.GraphQL
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class { }
         protected Epam.GraphQL.Configuration.IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Configuration.ILoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
+        protected Epam.GraphQL.Configuration.IRootLoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
             where TLoader : Epam.GraphQL.Loaders.Loader<TEntity, TExecutionContext>, new ()
             where TEntity :  class { }
         protected Epam.GraphQL.Configuration.IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
@@ -1185,9 +1176,8 @@ namespace Epam.GraphQL.Loaders
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IMutableLoader<TExecutionContext> : Epam.GraphQL.Loaders.IIdentifiableLoader
     {
-        System.Type EntityType { get; }
-        Epam.GraphQL.Savers.ISaveResult<TExecutionContext> CreateSaveResultFromValues(System.Type mutationType, string fieldName, System.Collections.Generic.IEnumerable<Epam.GraphQL.Savers.IInputItem> values);
-        Epam.GraphQL.Savers.ISaveResult<TExecutionContext> CreateSaveResultFromValues(System.Type mutationType, string fieldName, System.Collections.Generic.IEnumerable<object> values);
+        Epam.GraphQL.Savers.ISaveResult<TExecutionContext> CreateSaveResultFromValues(string fieldName, System.Collections.Generic.IEnumerable<Epam.GraphQL.Savers.IInputItem> values);
+        Epam.GraphQL.Savers.ISaveResult<TExecutionContext> CreateSaveResultFromValues(string fieldName, System.Collections.Generic.IEnumerable<object> values);
         bool IsFakeId(object? id);
         System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<Epam.GraphQL.Savers.ISaveResult<TExecutionContext>>> MutateAsync(GraphQL.IResolveFieldContext context, Epam.GraphQL.Savers.ISaveResult<TExecutionContext> previousSaveResult);
         System.Threading.Tasks.Task ReloadAsync(GraphQL.IResolveFieldContext context, Epam.GraphQL.Savers.ISaveResult<TExecutionContext> saveResult, System.Collections.Generic.IEnumerable<string> fieldNames);
@@ -1223,29 +1213,16 @@ namespace Epam.GraphQL.Loaders
         where TEntity :  class
     {
         protected MutableLoader() { }
-        public System.Type EntityType { get; }
         protected virtual void BeforeCreate(TExecutionContext context, TEntity entity) { }
         protected virtual void BeforeUpdate(TExecutionContext context, TEntity entity) { }
         protected virtual System.Threading.Tasks.Task<bool> CanSaveAsync(Epam.GraphQL.IExecutionContextAccessor<TExecutionContext> context, TEntity entity, bool isNew) { }
         [System.Obsolete("Consider using CanSaveAsync with the first argument of type IExecutionContextAcce" +
             "ssor<TExecutionContext>).")]
         protected virtual System.Threading.Tasks.Task<bool> CanSaveAsync(Epam.GraphQL.IUserContextAccessor<TExecutionContext> context, TEntity entity, bool isNew) { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, string, string, TExecutionContext> Field(System.Linq.Expressions.Expression<System.Func<TEntity, string>> expression, string? deprecationReason = null) { }
         protected Epam.GraphQL.Builders.MutableLoader.IMutableLoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, string, string, TExecutionContext> Field(string name, System.Linq.Expressions.Expression<System.Func<TEntity, string>> expression, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, string, string, TExecutionContext> Field(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, string>> expression, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType?, TReturnType, TExecutionContext> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType?, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType?, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
+        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.MutableLoader.IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null) { }
         public abstract bool IsFakeId(TId id);
     }
     public abstract class ProjectionBase<TExecutionContext> : System.IEquatable<Epam.GraphQL.Loaders.ProjectionBase<TExecutionContext>>
@@ -1269,21 +1246,9 @@ namespace Epam.GraphQL.Loaders
         where TEntity :  class
     {
         protected Projection() { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, string> Field(System.Linq.Expressions.Expression<System.Func<TEntity, string>> expression, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, string> Field(string name, System.Linq.Expressions.Expression<System.Func<TEntity, string>> expression, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, string> Field(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, string>> expression, string? deprecationReason = null) { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
-        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType :  struct { }
+        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType>> expression, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Builders.Common.IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null) { }
         protected void Filter<TValueType>(string name, System.Func<TValueType, System.Linq.Expressions.Expression<System.Func<TEntity, bool>>> filterPredicateFactory) { }
         protected void Filter<TValueType>(string name, System.Func<TExecutionContext, TValueType, System.Linq.Expressions.Expression<System.Func<TEntity, bool>>> filterPredicateFactory) { }
         protected void Sorter<TValueType>(string name, System.Linq.Expressions.Expression<System.Func<TEntity, TValueType>> selector) { }
@@ -1344,7 +1309,6 @@ namespace Epam.GraphQL.Savers
         System.Type EntityType { get; }
         string FieldName { get; }
         Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext> Loader { get; }
-        System.Type MutationType { get; }
         System.Collections.Generic.IList<Epam.GraphQL.Savers.ISaveResultItem> PendingItems { get; }
         System.Collections.Generic.IList<Epam.GraphQL.Savers.ISaveResultItem> PostponedItems { get; }
         System.Collections.Generic.IList<Epam.GraphQL.Savers.ISaveResultItem> ProcessedItems { get; }

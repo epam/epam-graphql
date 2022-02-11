@@ -7,10 +7,11 @@ using System;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal interface IBatchResolver<TEntity> : IResolver<TEntity>
+    internal interface IBatchResolver<TEntity> : IFieldResolver
         where TEntity : class
     {
         IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context);

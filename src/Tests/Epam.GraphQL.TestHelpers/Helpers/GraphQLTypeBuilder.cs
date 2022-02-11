@@ -343,7 +343,6 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         public static Type CreateSearcherType<TEntity, TExecutionContext>(Func<IQueryable<TEntity>, TExecutionContext, string, IQueryable<TEntity>> all)
-            where TEntity : class
         {
             return CreateSearcherTypeBuilder($"{nameof(Person)}Searcher", typeof(Searcher<TEntity, TExecutionContext>), all);
         }
@@ -665,7 +664,6 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         private static Type CreateSearcherTypeBuilder<TEntity, TExecutionContext>(string typeName, Type baseType, Func<IQueryable<TEntity>, TExecutionContext, string, IQueryable<TEntity>> all, Action<TypeBuilder> afterBuild = null)
-            where TEntity : class
         {
             var typeBuilder = GetTypeBuilder(typeName, baseType);
 

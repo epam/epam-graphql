@@ -13,13 +13,13 @@ namespace Epam.GraphQL.Configuration
 {
     internal interface IObjectGraphTypeConfigurator<TExecutionContext>
     {
+        IField<TExecutionContext>? Parent { get; }
+
         string Name { get; }
 
         bool HasInlineFilters { get; }
 
         IReadOnlyList<ISorter<TExecutionContext>> Sorters { get; }
-
-        IProxyAccessor<TExecutionContext> ProxyAccessor { get; }
 
         void Configure();
 
@@ -38,7 +38,7 @@ namespace Epam.GraphQL.Configuration
     {
         IReadOnlyList<IField<TEntity, TExecutionContext>> Fields { get; }
 
-        new IProxyAccessor<TEntity, TExecutionContext> ProxyAccessor { get; }
+        IProxyAccessor<TEntity, TExecutionContext> ProxyAccessor { get; }
 
         new IInlineFilters<TEntity, TExecutionContext> CreateInlineFilters();
     }

@@ -132,6 +132,7 @@ namespace Epam.GraphQL
 
         private protected static void BeforeSchemaInitialize(RelationRegistry<TExecutionContext> registry, Schema schema)
         {
+            registry.ResolveLoader<TQuery, object>();
             schema.Query = registry.ResolveObjectGraphTypeWrapper<TQuery, object>();
         }
 
@@ -170,6 +171,8 @@ namespace Epam.GraphQL
 
         private protected static new void BeforeSchemaInitialize(RelationRegistry<TExecutionContext> registry, Schema schema)
         {
+            registry.ResolveLoader<TQuery, object>();
+            registry.ResolveLoader<TMutation, object>();
             schema.Query = registry.ResolveObjectGraphTypeWrapper<TQuery, object>();
             schema.Mutation = registry.ResolveObjectGraphTypeWrapper<TMutation, object>();
         }

@@ -161,28 +161,28 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            var unionField = UnionMutationField.Create(this, build);
-            return Parent.ReplaceField(this, unionField);
+            return And(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            var unionField = UnionMutationField.Create(this, build);
+            return Parent.ReplaceField(this, unionField);
         }
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
             where TLastElementType : class
         {
-            return AsUnionOf(build);
+            return And(build);
         }
 
         public IArgumentedMutationField<TArgType, TExecutionContext> Argument<TArgType>(string argName)

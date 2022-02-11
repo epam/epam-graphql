@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -16,10 +17,7 @@ namespace Epam.GraphQL.Extensions
             var entityType = propertyInfo.ReflectedType;
             var propertyType = propertyInfo.PropertyType;
 
-            if (type != null && !type.IsAssignableFrom(propertyType))
-            {
-                throw new InvalidCastException($"Cannot cast {propertyType} to {type}");
-            }
+            Guards.ThrowInvalidOperationIf(type != null && !type.IsAssignableFrom(propertyType), $"Cannot cast {propertyType} to {type}");
 
             propertyType = type ?? propertyType;
 

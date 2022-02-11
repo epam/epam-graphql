@@ -82,7 +82,7 @@ namespace Epam.GraphQL.TaskBatcher
                     convert = value => value == null ? null : Convert.ChangeType(value, unwrappedParentPropType, CultureInfo.InvariantCulture);
                 }
 
-                if (parentPropType.IsValueType && childPropType.IsNullable() && childPropType.UnwrapIfNullable() == parentPropType)
+                if (parentPropType.IsValueType && childPropType.IsNullable() && childPropType.UnwrapIfNullable() == parentPropType.UnwrapIfNullable())
                 {
                     groupingType = typeof(IGrouping<,>).MakeGenericType(parentPropType, typeof(TChildEntity));
                     get = MakeGetNullable<TEntity, TChildEntity, TTransformedChildEntity, TExecutionContext>(

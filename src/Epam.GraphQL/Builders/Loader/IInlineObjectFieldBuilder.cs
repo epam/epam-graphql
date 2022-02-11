@@ -5,7 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Common;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader
@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Builders.Loader
     public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : IHasFromIQueryable<TEntity, TExecutionContext>, IHasFromBatch<TEntity, TExecutionContext>
         where TEntity : class
     {
-        IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
+        IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class;
     }

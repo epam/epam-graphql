@@ -14,6 +14,7 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Loaders
 {
@@ -69,49 +70,6 @@ namespace Epam.GraphQL.Loaders
 
         private protected bool IsConfiguringInputType { get; set; }
 
-        internal void Configure(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
-        {
-            if (Configurator != null)
-            {
-                return;
-            }
-
-            Configurator = сonfigurator;
-            try
-            {
-                IsConfiguringInputType = false;
-                OnConfigure();
-                AfterConfigure();
-            }
-            finally
-            {
-                Configurator = null;
-            }
-        }
-
-        internal void ConfigureInput(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
-        {
-            if (ShouldConfigureInputType)
-            {
-                if (Configurator != null)
-                {
-                    return;
-                }
-
-                Configurator = сonfigurator;
-                try
-                {
-                    IsConfiguringInputType = true;
-                    OnConfigure();
-                    AfterConfigure();
-                }
-                finally
-                {
-                    Configurator = null;
-                }
-            }
-        }
-
         internal override void Configure() => Configure(ObjectGraphTypeConfigurator);
 
         internal override void ConfigureInput() => ConfigureInput(InputObjectGraphTypeConfigurator);
@@ -141,50 +99,19 @@ namespace Epam.GraphQL.Loaders
         [MemberNotNull(nameof(Configurator))]
         private protected void ThrowIfIsNotConfiguring()
         {
-            if (Configurator == null)
-            {
-                throw new InvalidOperationException($"Calling configuring methods are allowed from {nameof(OnConfigure)} method only.");
-            }
+            Guards.ThrowInvalidOperationIf(Configurator == null, $"Calling configuring methods are allowed from {nameof(OnConfigure)} method only.");
         }
 
-        private protected StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string? name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string? name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddExpressionField(name, expression, deprecationReason);
+            return Configurator.AddField(name, expression, deprecationReason);
         }
 
-        private protected StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddExpressionField(name, expression, deprecationReason);
-        }
-
-        private protected NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string? name, Expression<Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddExpressionField(name, expression, deprecationReason);
-        }
-
-        private protected NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddExpressionField(name, expression, deprecationReason);
-        }
-
-        private protected StringExpressionField<TEntity, TExecutionContext> AddField(string? name, Expression<Func<TEntity, string>> expression, string? deprecationReason = null)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddExpressionField(name, expression, deprecationReason);
-        }
-
-        private protected StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string? deprecationReason = null)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddExpressionField(name, expression, deprecationReason);
+            return Configurator.AddField(name, expression, deprecationReason);
         }
 
         private protected Field<TEntity, TExecutionContext> AddField(string name, string? deprecationReason)
@@ -250,6 +177,49 @@ namespace Epam.GraphQL.Loaders
             {
                 ThrowIfIsNotConfiguring();
                 Configurator.AddOnEntityLoaded(keyExpression, batchFunc, hook);
+            }
+        }
+
+        private void Configure(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
+        {
+            if (Configurator != null)
+            {
+                return;
+            }
+
+            Configurator = сonfigurator;
+            try
+            {
+                IsConfiguringInputType = false;
+                OnConfigure();
+                AfterConfigure();
+            }
+            finally
+            {
+                Configurator = null;
+            }
+        }
+
+        private void ConfigureInput(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
+        {
+            if (ShouldConfigureInputType)
+            {
+                if (Configurator != null)
+                {
+                    return;
+                }
+
+                Configurator = сonfigurator;
+                try
+                {
+                    IsConfiguringInputType = true;
+                    OnConfigure();
+                    AfterConfigure();
+                }
+                finally
+                {
+                    Configurator = null;
+                }
             }
         }
     }

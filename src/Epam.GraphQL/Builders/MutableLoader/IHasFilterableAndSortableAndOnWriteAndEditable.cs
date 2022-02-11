@@ -9,23 +9,23 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.MutableLoader
 {
-    public interface IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> :
-        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext> :
+        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>
     {
-        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> EditableIf(
+        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> EditableIf(
             Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, bool> predicate,
             Func<IFieldChange<TEntity, TReturnType, TExecutionContext>, string>? reason = null);
 
-        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(
+        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> BatchedEditableIf<TItem>(
             Func<IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null);
 
-        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> BatchedEditableIf<TItem>(
+        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> BatchedEditableIf<TItem>(
             Func<TExecutionContext, IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null);
 
-        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> Editable();
+        IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> Editable();
     }
 }

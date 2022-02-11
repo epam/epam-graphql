@@ -19,7 +19,6 @@ namespace Epam.GraphQL.Extensions
     internal static class DictionaryExtensions
     {
         private static readonly Type _proxyType = typeof(Proxy<>);
-        private static readonly Type _proxyTypeGenericParameter = _proxyType.GetTypeInfo().GenericTypeParameters[0];
 
         private static readonly ConcurrentDictionary<(Type? BaseType, string TypeName, ICollection<KeyValuePair<string, Type>> Properties), Type> _typeCache = new(
             new ValueTupleEqualityComparer<Type?, string, ICollection<KeyValuePair<string, Type>>>(EqualityComparer<Type?>.Default, EqualityComparer<string>.Default, new CollectionEqualityComparer<KeyValuePair<string, Type>>()));
@@ -95,11 +94,8 @@ namespace Epam.GraphQL.Extensions
 
                 var objectType = tb.CreateTypeInfo();
 
-                if (objectType == null)
-                {
-                    // According to its signature, tb.CreateTypeInfo() can return null
-                    throw new NotSupportedException();
-                }
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
 
                 return objectType!;
             });
@@ -115,8 +111,6 @@ namespace Epam.GraphQL.Extensions
 
                 var tb = ILUtils.DefineType($"<{typeName}>__Proxy`{_proxyTypeCacheCount}", _proxyType);
 
-                tb.DefineNotImplementedVirtualProperty("$original", _proxyTypeGenericParameter).MakeDebuggerBrowsableNever();
-
                 foreach (var prop in properties)
                 {
                     tb.DefineNotImplementedVirtualProperty(prop.Key, prop.Value).MakeDebuggerBrowsableNever();
@@ -126,11 +120,8 @@ namespace Epam.GraphQL.Extensions
 
                 var objectType = tb.CreateTypeInfo();
 
-                if (objectType == null)
-                {
-                    // According to its signature, tb.CreateTypeInfo() can return null
-                    throw new NotSupportedException();
-                }
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
 
                 return objectType;
             });

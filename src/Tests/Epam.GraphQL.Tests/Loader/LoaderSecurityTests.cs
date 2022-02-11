@@ -102,7 +102,7 @@ namespace Epam.GraphQL.Tests.Loader
                 applyNaturalThenBy: q => q.OrderBy(p => p.Id),
                 applySecurityFilter: (_, q) => filter(q));
 
-            var result = (Loader<Person, TestUserContext>)_registry.ResolveLoader<Person>(loaderType);
+            var result = (Loader<Person, TestUserContext>)_registry.ResolveLoader<Person, TestUserContext>(loaderType);
             return result;
         }
     }

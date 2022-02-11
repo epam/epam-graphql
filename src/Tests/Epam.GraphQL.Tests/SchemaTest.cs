@@ -882,6 +882,57 @@ namespace Epam.GraphQL.Tests
         }
 
         [Test]
+        public void ShouldExposeTheRightTypeForNullableIntConnection()
+        {
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q =>
+            {
+                q.Field("people")
+                    .FromIQueryable(_ => Enumerable.Empty<int?>().AsQueryable())
+                    .AsConnection(query => query.OrderBy(x => x));
+            });
+
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            const string query1 = @"
+                query {
+                    __type(name: ""NullableOfIntConnection"") {
+                        name
+                        fields {
+                            type {
+                                name
+                            }
+                            name
+                        }
+                    }
+                }
+            ";
+
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
+
+            Assert.AreEqual("NullableOfIntConnection", loaderEntityTypeName);
+
+            const string query3 = @"
+                query {
+                    __type(name: ""NullableOfIntEdge"") {
+                        name
+                        fields {
+                            type {
+                                name
+                            }
+                            name
+                        }
+                    }
+                }
+            ";
+
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query3);
+            loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
+
+            Assert.AreEqual("NullableOfIntEdge", loaderEntityTypeName);
+        }
+
+        [Test]
         public void ShouldExposeTheSameTypesForLoaderAndAllItsDescendants()
         {
             var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(

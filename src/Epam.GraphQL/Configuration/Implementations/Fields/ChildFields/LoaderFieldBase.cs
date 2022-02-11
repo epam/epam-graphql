@@ -28,7 +28,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected LoaderFieldBase(
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
+            Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
@@ -91,7 +91,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             TChildLoader loader,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
+            Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,

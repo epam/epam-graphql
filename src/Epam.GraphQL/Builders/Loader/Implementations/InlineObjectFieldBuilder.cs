@@ -7,17 +7,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.BatchFields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class InlineObjectFieldBuilder<TField, TEntity, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>, IInlineObjectFieldBuilder<TEntity, TExecutionContext>
+    internal class InlineObjectFieldBuilder<TField, TEntity, TExecutionContext> :
+        ProjectionFieldBuilder<TField, TEntity, TExecutionContext>,
+        IInlineObjectFieldBuilder<TEntity, TExecutionContext>
         where TEntity : class
         where TField : FieldBase<TEntity, TExecutionContext>, IUnionableField<TEntity, TExecutionContext>
     {
@@ -29,12 +31,21 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             _registry = registry;
         }
 
-        public IFromLoaderInlineObjectBuilder<TEntity, TChildEntity, TChildEntity> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
+        public IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            var field = Field.Parent.FromLoader<TChildLoader, TChildEntity>(Field, condition, Field.Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>());
-            return new FromLoaderInlineObjectBuilder<EnumerableFieldBase<TEntity, TChildEntity, TExecutionContext>, TEntity, TChildLoader, TChildEntity, TChildEntity, TExecutionContext>(field);
+            var graphResultType = Field.Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
+            var result = new InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                Field.Parent,
+                Field.Name,
+                condition,
+                graphResultType,
+                arguments: null,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
+            return Field.Parent.ReplaceField(Field, result);
         }
 
         public IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(

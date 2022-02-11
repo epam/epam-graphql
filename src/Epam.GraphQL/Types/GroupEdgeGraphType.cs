@@ -3,20 +3,14 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Configuration;
-using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
 {
-    internal class GroupEdgeGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
-        where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TChildEntity : class
+    internal class GroupEdgeGraphType<TChildEntity, TExecutionContext> : ObjectGraphType<object>
     {
-        public GroupEdgeGraphType(RelationRegistry<TExecutionContext> registry)
+        public GroupEdgeGraphType(string typeName, IGraphType graphType)
         {
-            var typeName = registry.GetProjectionTypeName<TChildLoader, TChildEntity>(false);
-
             Name = $"{typeName}GroupEdge";
 
             Description = $"An edge in a group connection from an object to another object of type `{typeName}`.";
@@ -25,9 +19,13 @@ namespace Epam.GraphQL.Types
                 .Name("cursor")
                 .Description("A cursor for use in pagination");
 
-            Field<GroupResultGraphType<TChildLoader, TChildEntity, TExecutionContext>>()
-                .Name("node")
-                .Description("The item at the end of the edge");
+            AddField(
+                new FieldType
+                {
+                    Name = "node",
+                    Description = "The item at the end of the edge",
+                    ResolvedType = graphType,
+                });
         }
     }
 }

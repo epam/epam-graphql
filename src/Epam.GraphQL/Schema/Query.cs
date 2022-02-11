@@ -9,11 +9,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
-using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
-using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL
 {
@@ -29,7 +27,7 @@ namespace Epam.GraphQL
             return field;
         }
 
-        protected internal ILoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
+        protected internal IRootLoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
             where TLoader : Loader<TEntity, TExecutionContext>, new()
             where TEntity : class
         {
@@ -98,16 +96,9 @@ namespace Epam.GraphQL
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            ThrowIfIsNotConfiguring();
-            var graphResultType = Configurator.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new GroupLoaderField<object, TChildLoader, TChildEntity, TExecutionContext>(
-                Configurator,
-                name,
-                graphResultType,
-                arguments: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            return Configurator.AddField(field, deprecationReason);
+            return (IConnectionField)Field(name, deprecationReason)
+                .FromLoader<TChildLoader, TChildEntity>()
+                .AsGroupConnection();
         }
     }
 }

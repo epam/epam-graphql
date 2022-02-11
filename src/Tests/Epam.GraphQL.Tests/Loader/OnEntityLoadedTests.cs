@@ -934,6 +934,17 @@ namespace Epam.GraphQL.Tests.Loader
         }
 
         [Test]
+        public void ShouldCallBatchTaskHookForQueryable()
+        {
+            var batchFunc = FuncSubstitute.For<TestUserContext, IEnumerable<int>, Task<IDictionary<int, ShouldCallHookProxy>>>(
+                (context, ids) => Task.FromResult<IDictionary<int, ShouldCallHookProxy>>(ids.ToDictionary(id => id, id => new ShouldCallHookProxy { Id = id })));
+
+            ShouldCallHookForQueryable((builder, hook) => builder.OnEntityLoaded(p => p.Id, batchFunc, hook));
+
+            batchFunc.HasBeenCalledOnce();
+        }
+
+        [Test]
         public void ShouldCallTwoHooksForQueryable()
         {
             var secondHook = ActionSubstitute.For<TestUserContext, ShouldCallHookProxy>();

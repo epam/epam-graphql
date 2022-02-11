@@ -3,21 +3,19 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Configuration;
-using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 using GraphQL.Types.Relay;
 
 namespace Epam.GraphQL.Types
 {
-    internal class GroupConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
-        where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TChildEntity : class
+    internal class GroupConnectionGraphType<TChildEntity, TExecutionContext> : ObjectGraphType<object>
     {
-        public GroupConnectionGraphType(RelationRegistry<TExecutionContext> registry)
+        public GroupConnectionGraphType(IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphType)
         {
             // TODO Type name should be the same as an entity type name (e.g. for two loaders for the same entity and field set)
-            var typeName = registry.GetProjectionTypeName<TChildLoader, TChildEntity>(false);
+            var typeName = graphType.Configurator?.Name ?? typeof(TChildEntity).GraphQLTypeName(false);
 
             Name = $"{typeName}GroupConnection";
 
@@ -34,12 +32,22 @@ namespace Epam.GraphQL.Types
                 .Name("pageInfo")
                 .Description("Information to aid in pagination.");
 
-            Field<ListGraphType<GroupEdgeGraphType<TChildLoader, TChildEntity, TExecutionContext>>>()
-                .Name("edges")
-                .Description("Information to aid in pagination.");
+            var resultGraphType = new GroupResultGraphType<TChildEntity, TExecutionContext>(graphType);
 
-            Field<ListGraphType<GroupResultGraphType<TChildLoader, TChildEntity, TExecutionContext>>>()
-                .Name("items");
+            AddField(
+                new FieldType
+                {
+                    Name = "edges",
+                    Description = "Information to aid in pagination.",
+                    ResolvedType = new ListGraphType(new GroupEdgeGraphType<TChildEntity, TExecutionContext>(typeName, resultGraphType)),
+                });
+
+            AddField(
+                new FieldType
+                {
+                    Name = "items",
+                    ResolvedType = new ListGraphType(resultGraphType),
+                });
         }
     }
 }

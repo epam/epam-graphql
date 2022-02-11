@@ -3,10 +3,8 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.EntityFrameworkCore;
@@ -23,18 +21,21 @@ namespace Epam.GraphQL.Savers
 {
     internal static class DbContextSaver
     {
-        private static MethodInfo? _performManualMutationAndGetResultMethodInfo;
-
         public static ResolveOptions DefaultOptions { get; } = new ResolveOptions();
 
-        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext>(IRegistry<TExecutionContext> registry, IEnumerable<object> entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext>(
+            SubmitInputTypeRegistry<TExecutionContext> submitInputTypeRegistry,
+            IEnumerable<object> entities,
+            Mutation<TExecutionContext> mutation,
+            IResolveFieldContext context,
+            ResolveOptions options)
         {
             var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
             var profiler = executionContext.Profiler;
 
             using (profiler.Step(nameof(PerformManualMutationAndGetResult)))
             {
-                var results = await SaveChangesAndReload(registry, entities, mutation, context, options).ConfigureAwait(false);
+                var results = await SaveChangesAndReload(submitInputTypeRegistry, entities, context, options).ConfigureAwait(false);
 
                 var afterSaveEntities = await mutation.DoAfterSave(
                     context,
@@ -45,9 +46,8 @@ namespace Epam.GraphQL.Savers
 
                 var afterSaveResults = afterSaveEntities.Any()
                     ? await SaveChangesAndReload(
-                        registry,
+                        submitInputTypeRegistry,
                         afterSaveEntities,
-                        mutation,
                         context,
                         DefaultOptions).ConfigureAwait(false)
                     : Enumerable.Empty<ISaveResult<TExecutionContext>>();
@@ -64,14 +64,19 @@ namespace Epam.GraphQL.Savers
             }
         }
 
-        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext, TData>(IRegistry<TExecutionContext> registry, MutationResult<TData> mutationResult, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext, TData>(
+            SubmitInputTypeRegistry<TExecutionContext> submitInputTypeRegistry,
+            MutationResult<TData> mutationResult,
+            Mutation<TExecutionContext> mutation,
+            IResolveFieldContext context,
+            ResolveOptions options)
         {
             var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
             var profiler = executionContext.Profiler;
 
             using (profiler.Step(nameof(PerformManualMutationAndGetResult)))
             {
-                var results = await SaveChangesAndReload(registry, mutationResult.Payload, mutation, context, options).ConfigureAwait(false);
+                var results = await SaveChangesAndReload(submitInputTypeRegistry, mutationResult.Payload, context, options).ConfigureAwait(false);
                 var afterSaveEntities = await mutation.DoAfterSave(
                     context,
                     results
@@ -79,7 +84,7 @@ namespace Epam.GraphQL.Savers
                         .Where(item => item.Payload != null)
                         .Select(item => item.Payload!)).ConfigureAwait(false);
 
-                var afterSaveResults = await SaveChangesAndReload(registry, afterSaveEntities, mutation, context, options).ConfigureAwait(false);
+                var afterSaveResults = await SaveChangesAndReload(submitInputTypeRegistry, afterSaveEntities, context, options).ConfigureAwait(false);
 
                 using (profiler.Step("Prepare output"))
                 {
@@ -93,16 +98,11 @@ namespace Epam.GraphQL.Savers
             }
         }
 
-        public static Task<object> PerformManualMutationAndGetResult<TExecutionContext>(RelationRegistry<TExecutionContext> registry, IMutationResult mutationResult, Mutation<TExecutionContext> mutation, IResolveFieldContext context, Type dataType, ResolveOptions options)
-        {
-            _performManualMutationAndGetResultMethodInfo = ReflectionHelpers.GetMethodInfo<IRegistry<TExecutionContext>, MutationResult<object>, Mutation<TExecutionContext>, IResolveFieldContext, ResolveOptions, Task<object>>(
-                PerformManualMutationAndGetResult<TExecutionContext, object>);
-
-            var methodInfo = _performManualMutationAndGetResultMethodInfo.MakeGenericMethod(typeof(TExecutionContext), dataType);
-            return (Task<object>)methodInfo.InvokeAndHoistBaseException(null, registry, mutationResult, mutation, context, options);
-        }
-
-        public static async Task<IEnumerable<ISaveResult<TExecutionContext>>> SaveChangesAndReload<TExecutionContext>(IRegistry<TExecutionContext> registry, IEnumerable<object>? entities, Mutation<TExecutionContext> mutation, IResolveFieldContext context, ResolveOptions options)
+        public static async Task<IEnumerable<ISaveResult<TExecutionContext>>> SaveChangesAndReload<TExecutionContext>(
+            SubmitInputTypeRegistry<TExecutionContext> submitInputTypeRegistry,
+            IEnumerable<object>? entities,
+            IResolveFieldContext context,
+            ResolveOptions options)
         {
             var dataContext = context.GetDataContext();
             var batcher = context.GetBatcher();
@@ -110,24 +110,21 @@ namespace Epam.GraphQL.Savers
 
             var doNotSaveChanges = options.FindExtension<EFCoreResolveOptionsExtension>()?.DoNotSaveChanges ?? false;
             var doNotAddEntityToDbContext = options.FindExtension<EFCoreResolveOptionsExtension>()?.DoNotAddNewEntitiesToDbContext ?? false;
-            var submitInputTypeRegistry = registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>();
 
             using (profiler.Step(nameof(SaveChangesAndReload)))
             {
                 List<ISaveResult<TExecutionContext>> results = new();
                 using (profiler.Step("Save changes"))
                 {
-                    var mutationType = mutation.GetType();
-
                     var entityGroups = entities
                         .GroupBy(entity => entity.GetType());
 
                     foreach (var group in entityGroups)
                     {
                         var entityType = group.Key;
-                        var fieldName = submitInputTypeRegistry.GetFieldNameByEntityType(mutationType, entityType);
-                        var loader = registry.ResolveLoader(submitInputTypeRegistry.GetLoaderTypeByEntityType(mutationType, entityType));
-                        var saveResult = loader.CreateSaveResultFromValues(mutationType, fieldName, group);
+                        var fieldName = submitInputTypeRegistry.GetFieldNameByEntityType(entityType);
+                        var loader = submitInputTypeRegistry.GetMutableLoaderByEntityType(entityType);
+                        var saveResult = loader.CreateSaveResultFromValues(fieldName, group);
 
                         var newEntities = saveResult.ProcessedItems.Where(r => r.IsNew).Select(r => r.Payload);
                         if (newEntities.Any() && !doNotAddEntityToDbContext)
@@ -199,7 +196,7 @@ namespace Epam.GraphQL.Savers
         {
             var initialDictionary = context.SubFields;
 
-            if (context.ReturnType.GetType().IsGenericType && (context.ReturnType.GetType().GetGenericTypeDefinition() == typeof(MutationResultGraphType<,,>)))
+            if (context.ReturnType.GetType().IsGenericType && (context.ReturnType.GetType().GetGenericTypeDefinition() == typeof(MutationResultGraphType<,>)))
             {
                 if (!initialDictionary.ContainsKey("payload"))
                 {
@@ -235,7 +232,11 @@ namespace Epam.GraphQL.Savers
         private readonly RelationRegistry<TExecutionContext> _registry;
         private readonly SubmitInputTypeRegistry<TExecutionContext> _submitInputTypeRegistry;
 
-        public DbContextSaver(RelationRegistry<TExecutionContext> registry, Mutation<TExecutionContext> mutation, IResolveFieldContext context, IDictionary<string, IEnumerable<IInputItem>> inputItems)
+        public DbContextSaver(
+            RelationRegistry<TExecutionContext> registry,
+            Mutation<TExecutionContext> mutation,
+            IResolveFieldContext context,
+            IDictionary<string, IEnumerable<IInputItem>> inputItems)
         {
             Context = context;
             _inputItems = inputItems;
@@ -247,7 +248,7 @@ namespace Epam.GraphQL.Savers
             {
                 if (inputItems[kv.Key] != null)
                 {
-                    _loaders.Add(kv.Key, registry.ResolveLoader(_submitInputTypeRegistry.GetLoaderTypeByFieldName(mutation.GetType(), kv.Key)));
+                    _loaders.Add(kv.Key, _submitInputTypeRegistry.GetMutableLoaderByFieldName(kv.Key));
                 }
             }
         }
@@ -261,7 +262,7 @@ namespace Epam.GraphQL.Savers
             using (profiler.Step(nameof(SaveEntitiesAsync)))
             {
                 var results = _loaders
-                    .Select(kv => kv.Value.CreateSaveResultFromValues(_mutation.GetType(), kv.Key, _inputItems[kv.Key]));
+                    .Select(kv => kv.Value.CreateSaveResultFromValues(kv.Key, _inputItems[kv.Key]));
 
                 var db = Context.GetDataContext();
                 await db.ExecuteInTransactionAsync(async () =>
@@ -290,9 +291,8 @@ namespace Epam.GraphQL.Savers
                             .Select(item => item.Payload!)).ConfigureAwait(false);
 
                     var afterSaveResults = await DbContextSaver.SaveChangesAndReload(
-                        _registry,
+                        _submitInputTypeRegistry,
                         afterSaveEntities,
-                        _mutation,
                         Context,
                         DbContextSaver.DefaultOptions).ConfigureAwait(false);
 
@@ -373,8 +373,8 @@ namespace Epam.GraphQL.Savers
                     {
                         foreach (var kv in results)
                         {
-                            var childEntityType = _submitInputTypeRegistry.GetEntityTypeByFieldName(_mutation.GetType(), kv.FieldName);
-                            var childLoaderType = _submitInputTypeRegistry.GetLoaderTypeByFieldName(_mutation.GetType(), kv.FieldName);
+                            var childEntityType = _submitInputTypeRegistry.GetEntityTypeByFieldName(kv.FieldName);
+                            var childLoaderType = _submitInputTypeRegistry.GetLoaderTypeByFieldName(kv.FieldName);
                             foreach (var item in kv.PendingItems)
                             {
                                 _registry.UpdateFakePropertyValues(resultItem.Payload, item.Payload, item.Properties, resultItem.Id, childLoaderType, childEntityType);
@@ -397,7 +397,7 @@ namespace Epam.GraphQL.Savers
                     {
                         foreach (var kv in results)
                         {
-                            var childEntityType = _submitInputTypeRegistry.GetEntityTypeByFieldName(_mutation.GetType(), kv.FieldName);
+                            var childEntityType = _submitInputTypeRegistry.GetEntityTypeByFieldName(kv.FieldName);
                             foreach (var item in kv.PendingItems)
                             {
                                 _registry.UpdatePostponedFakePropertyValues(resultItem.Payload, item.Payload, item.Properties, resultItem.Id, childEntityType);

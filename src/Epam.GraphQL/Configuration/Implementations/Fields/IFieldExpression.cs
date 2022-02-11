@@ -6,7 +6,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Sorters;
-using GraphQL;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
@@ -18,8 +17,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         PropertyInfo? PropertyInfo { get; }
 
         LambdaExpression ContextedExpression { get; }
-
-        TReturnType? Resolve(IResolveFieldContext context, object source);
 
         void ValidateExpression();
     }

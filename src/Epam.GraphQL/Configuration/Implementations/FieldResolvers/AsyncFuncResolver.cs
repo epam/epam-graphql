@@ -7,10 +7,11 @@ using System;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class AsyncFuncResolver<TEntity, TReturnType> : IResolver<TEntity>
+    internal class AsyncFuncResolver<TEntity, TReturnType> : IFieldResolver
         where TEntity : class
     {
         public AsyncFuncResolver(

@@ -105,7 +105,7 @@ namespace Epam.GraphQL.Tests.Internals
             var proxyType = proxyAccessor.ProxyGenericType;
 
             var props = proxyType.GetProperties().Select(propInfo => propInfo.Name).OrderBy(name => name);
-            Assert.AreEqual(new[] { "$original", "id" }, props);
+            Assert.AreEqual(new[] { "id" }, props);
         }
 
         [Test]
@@ -134,7 +134,7 @@ namespace Epam.GraphQL.Tests.Internals
             var proxyType = proxyAccessor.ProxyGenericType;
 
             var props = proxyType.GetProperties().Select(propInfo => propInfo.Name).OrderBy(name => name);
-            Assert.AreEqual(new[] { "$original", "id", "unit$1", "unitId" }, props);
+            Assert.AreEqual(new[] { "id", "unit$1", "unitId" }, props);
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace Epam.GraphQL.Tests.Internals
             var proxyType = proxyAccessor.ProxyGenericType;
 
             var props = proxyType.GetProperties().Select(propInfo => propInfo.Name).OrderBy(name => name);
-            Assert.AreEqual(new[] { "$original", "id", "unitId" }, props);
+            Assert.AreEqual(new[] { "id", "unitId" }, props);
         }
     }
 }
