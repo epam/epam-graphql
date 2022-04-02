@@ -748,16 +748,13 @@ namespace Epam.GraphQL.Configuration
                     return graphType;
                 }
 
-                throw new ArgumentOutOfRangeException(
-                    nameof(type),
-                    $"The type: Nullable<{elementType.Name}> cannot be coerced effectively to a GraphQL type");
+                throw new InvalidOperationException($"The type: Nullable<{elementType.HumanizedName()}> cannot be coerced effectively to a GraphQL type.");
             }
 
             if (type.IsValueType)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(type),
-                    $"The type: {type.Name} cannot be coerced effectively to a GraphQL type");
+                throw new InvalidOperationException(
+                    $"The type: {type.HumanizedName()} cannot be coerced effectively to a GraphQL type.");
             }
 
             return generateInputType

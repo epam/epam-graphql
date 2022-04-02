@@ -24,8 +24,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public FieldExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TEntity, TReturnType>> expression)
         {
-            Guards.ThrowIfNullOrEmpty(name, nameof(name));
-
             _originalExpression = expression;
             ContextedExpression = Expression.Lambda<Func<TExecutionContext, TEntity, TReturnType>>(
                 _originalExpression.Body,

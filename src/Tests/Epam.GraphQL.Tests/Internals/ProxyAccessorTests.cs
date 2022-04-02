@@ -8,6 +8,7 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Tests.TestData;
 using NSubstitute;
@@ -39,6 +40,7 @@ namespace Epam.GraphQL.Tests.Internals
 
             configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
@@ -63,12 +65,14 @@ namespace Epam.GraphQL.Tests.Internals
 
             configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
                 null);
             configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     expression: person => person.Id,
                     name: "duplicateId"),
@@ -94,6 +98,7 @@ namespace Epam.GraphQL.Tests.Internals
 
             configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
@@ -118,12 +123,14 @@ namespace Epam.GraphQL.Tests.Internals
 
             configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),
                 null);
             configurator.AddField(
                 new TypedField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     name: "unitId"),
                 null);
@@ -147,6 +154,7 @@ namespace Epam.GraphQL.Tests.Internals
 
             configurator.AddField(
                 new ExpressionField<Person, int, TestUserContext>(
+                    configurationContext: new FieldConfigurationContext(configurator.ConfigurationContext, null, "NoOp"),
                     parent: configurator,
                     expression: person => person.Id,
                     name: null),

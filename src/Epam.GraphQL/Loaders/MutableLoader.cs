@@ -47,7 +47,7 @@ namespace Epam.GraphQL.Loaders
             Expression<Func<TEntity, TReturnType>> expression,
             string? deprecationReason = null)
         {
-            var field = AddField(null, expression, deprecationReason);
+            var field = AddField(expression, deprecationReason);
             return new FieldBuilder<TEntity, TReturnType, TExecutionContext>(Registry, GetType(), field);
         }
 

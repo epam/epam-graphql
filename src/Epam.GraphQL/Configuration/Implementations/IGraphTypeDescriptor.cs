@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations
@@ -16,7 +17,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         IObjectGraphTypeConfigurator<TExecutionContext>? Configurator { get; }
 
-        void Validate();
+        void Validate(FieldConfigurationContext configurationContext);
     }
 
     internal interface IGraphTypeDescriptor<TType, TExecutionContext> : IGraphTypeDescriptor<TExecutionContext>

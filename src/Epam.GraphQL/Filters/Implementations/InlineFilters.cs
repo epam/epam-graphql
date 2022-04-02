@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters.Inputs;
 using Epam.GraphQL.Helpers;
@@ -66,6 +67,20 @@ namespace Epam.GraphQL.Filters.Implementations
             }
 
             return query.Where(resultExpression);
+        }
+
+        public void Validate(IConfigurationContext configurationContext)
+        {
+            var duplicateName = _inlineFilters
+                .GroupBy(filter => filter.FieldName)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .FirstOrDefault();
+
+            if (duplicateName != null)
+            {
+                configurationContext.AddError($"A filter for field with the name `{duplicateName}` is already registered.");
+            }
         }
 
         public override int GetHashCode()

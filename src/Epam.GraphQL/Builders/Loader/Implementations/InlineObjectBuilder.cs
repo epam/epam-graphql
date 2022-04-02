@@ -40,43 +40,76 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
-            var field = _objectGraphTypeConfigurator.AddField(null, expression, deprecationReason);
+            var field = _objectGraphTypeConfigurator.AddField(
+                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(expression),
+                null,
+                expression,
+                deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TExecutionContext>(field);
         }
 
         public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
-            var field = _objectGraphTypeConfigurator.AddField(name, expression, deprecationReason);
+            var field = _objectGraphTypeConfigurator.AddField(
+                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TExecutionContext>(field);
         }
 
         public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason)
         {
-            var field = _objectGraphTypeConfigurator.AddField(name, expression, deprecationReason);
+            var field = _objectGraphTypeConfigurator.AddField(
+                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
             return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TExecutionContext>(field);
         }
 
         public IVoid Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
         {
-            _objectGraphTypeConfigurator.AddField(null, expression, deprecationReason);
+            _objectGraphTypeConfigurator.AddField(
+                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field)).Argument(expression),
+                null,
+                expression,
+                deprecationReason);
             return EmptyBuilder.Instance;
         }
 
         public IVoid Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
         {
-            _objectGraphTypeConfigurator.AddField(name, expression, deprecationReason);
+            _objectGraphTypeConfigurator.AddField(
+                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
             return EmptyBuilder.Instance;
         }
 
         public IVoid Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
         {
-            _objectGraphTypeConfigurator.AddField(name, expression, deprecationReason);
+            _objectGraphTypeConfigurator.AddField(
+                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
             return EmptyBuilder.Instance;
         }
 
         public IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null)
         {
-            var fieldType = _objectGraphTypeConfigurator.AddField(name, deprecationReason);
+            var fieldType = _objectGraphTypeConfigurator.Field(name, deprecationReason);
             return new InlineObjectFieldBuilder<Field<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>(_registry, fieldType);
         }
 

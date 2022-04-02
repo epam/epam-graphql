@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Epam.GraphQL.Diagnostics;
 using GraphQL;
 using GraphQL.Resolvers;
 
@@ -15,6 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         where TEntity : class
     {
         public SubmitField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
@@ -22,7 +24,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Type argGraphType,
             Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
             Type fieldType)
-            : base(parent, name)
+            : base(configurationContext, parent, name)
         {
             GraphType = returnGraphType;
             Resolver = new AsyncFieldResolver<object>(ctx => resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"]));

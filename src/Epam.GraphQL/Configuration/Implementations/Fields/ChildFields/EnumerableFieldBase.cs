@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using GraphQL.Resolvers;
 
@@ -22,12 +23,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : EnumerableFieldBase<TThis, TThisIntf, TResolverIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected EnumerableFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TResolverIntf, TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments)
             : base(
+                  configurationContext,
                   parent,
                   name)
         {
@@ -49,6 +52,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType1>(this);
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(Select)).Argument(selector),
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
@@ -62,6 +66,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType1>(this);
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(Select)).Argument(selector),
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector),
@@ -71,11 +76,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(enumerableField);
         }
 
-        public IEnumerableField<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build = default)
+        public IEnumerableField<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(
+            Expression<Func<TReturnType, TReturnType1>> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build = default)
             where TReturnType1 : class
         {
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build);
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
+                ConfigurationContext.NextOperation<TReturnType1>(nameof(Select))
+                    .Argument(selector)
+                    .OptionalArgument(build),
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
@@ -89,35 +99,49 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             if (predicate != null)
             {
-                var where = ApplyWhere(predicate);
-                return where.SingleOrDefault(null);
+                var where = ApplyWhere(
+                    ConfigurationContext.NextOperation(nameof(SingleOrDefault)).Argument(predicate),
+                    predicate);
+                return Parent.ApplySelect<TReturnType>(where.ConfigurationContext, where, where.EnumerableFieldResolver.SingleOrDefault(), ElementGraphType);
             }
 
-            return Parent.ApplySelect<TReturnType>(this, EnumerableFieldResolver.SingleOrDefault(), ElementGraphType);
+            return Parent.ApplySelect<TReturnType>(
+                ConfigurationContext.NextOperation(nameof(SingleOrDefault)),
+                this,
+                EnumerableFieldResolver.SingleOrDefault(),
+                ElementGraphType);
         }
 
         public IVoid FirstOrDefault(Expression<Func<TReturnType, bool>>? predicate)
         {
             if (predicate != null)
             {
-                var where = ApplyWhere(predicate);
-                return where.FirstOrDefault(null);
+                var where = ApplyWhere(
+                    ConfigurationContext.NextOperation(nameof(FirstOrDefault)).Argument(predicate),
+                    predicate);
+                return Parent.ApplySelect<TReturnType>(where.ConfigurationContext, where, where.EnumerableFieldResolver.FirstOrDefault(), ElementGraphType);
             }
 
-            return Parent.ApplySelect<TReturnType>(this, EnumerableFieldResolver.FirstOrDefault(), ElementGraphType);
+            return Parent.ApplySelect<TReturnType>(
+                ConfigurationContext.NextOperation(nameof(FirstOrDefault)),
+                this,
+                EnumerableFieldResolver.FirstOrDefault(),
+                ElementGraphType);
         }
 
         public TThisIntf Where(Expression<Func<TReturnType, bool>> predicate)
         {
-            return ApplyWhere(predicate);
+            return ApplyWhere(
+                ConfigurationContext.NextOperation(nameof(Where)).Argument(predicate),
+                predicate);
         }
 
-        public TThis ApplyWhere(Expression<Func<TReturnType, bool>> predicate)
+        public TThis ApplyWhere(FieldConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
         {
-            var whereField = CreateWhere(predicate);
+            var whereField = CreateWhere(configurationContext, predicate);
             return ApplyField(whereField);
         }
 
-        protected abstract TThis CreateWhere(Expression<Func<TReturnType, bool>> predicate);
+        protected abstract TThis CreateWhere(FieldConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate);
     }
 }

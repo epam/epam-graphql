@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
@@ -20,12 +21,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         where TEntity : class
     {
         public BatchEnumerableField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : this(
+                  configurationContext,
                   parent,
                   name,
                   new BatchEnumerableKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -34,12 +37,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchEnumerableField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : this(
+                  configurationContext,
                   parent,
                   name,
                   new BatchEnumerableTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -48,11 +53,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         protected BatchEnumerableField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, IEnumerable<TReturnType>> batchResolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
             : base(
+                  configurationContext,
                   parent,
                   name)
         {
@@ -69,15 +76,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         protected IBatchResolver<TEntity, IEnumerable<TReturnType>> BatchFieldResolver { get; set; }
 
-        public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(Func<IEnumerable<TReturnType>, T> selector)
+        public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(
+            FieldConfigurationContext configurationContext,
+            Func<IEnumerable<TReturnType>, T> selector)
         {
-            return Parent.ApplySelect<T>(this, BatchFieldResolver.Select(selector));
+            return Parent.ApplySelect<T>(configurationContext, this, BatchFieldResolver.Select(selector));
         }
 
-        public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(Func<IEnumerable<TReturnType>, T> selector, Action<IInlineObjectBuilder<T, TExecutionContext>>? build)
+        public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(
+            FieldConfigurationContext configurationContext,
+            Func<IEnumerable<TReturnType>, T> selector,
+            Action<IInlineObjectBuilder<T, TExecutionContext>>? build)
             where T : class
         {
-            return Parent.ApplySelect(this, BatchFieldResolver.Select(selector), build);
+            return Parent.ApplySelect(configurationContext, this, BatchFieldResolver.Select(selector), build);
         }
     }
 }

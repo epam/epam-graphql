@@ -102,49 +102,52 @@ namespace Epam.GraphQL.Loaders
             Guards.ThrowInvalidOperationIf(Configurator == null, $"Calling configuring methods are allowed from {nameof(OnConfigure)} method only.");
         }
 
-        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string? name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason)
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? deprecationReason)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddField(
+                Configurator.ConfigurationContext.Operation(nameof(Field)).Argument(expression),
+                null,
+                expression,
+                deprecationReason);
         }
 
-        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason)
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(
+            string name,
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? deprecationReason)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
+            return Configurator.AddField(
+                Configurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
+        }
+
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(
+            string name,
+            Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
+            string? deprecationReason)
+        {
+            ThrowIfIsNotConfiguring();
+            return Configurator.AddField(
+                Configurator.ConfigurationContext.Operation(nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
         }
 
         private protected Field<TEntity, TExecutionContext> AddField(string name, string? deprecationReason)
         {
             ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, deprecationReason);
-        }
-
-        private protected void AddFilter<TValueType>(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-        {
-            ThrowIfIsNotConfiguring();
-            if (!IsConfiguringInputType)
-            {
-                Configurator.AddFilter(name, filterPredicateFactory);
-            }
-        }
-
-        private protected void AddFilter<TValueType>(string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-        {
-            ThrowIfIsNotConfiguring();
-            if (!IsConfiguringInputType)
-            {
-                Configurator.AddFilter(name, filterPredicateFactory);
-            }
-        }
-
-        private protected void AddSorter<TValueType>(string name, Expression<Func<TEntity, TValueType>> selector)
-        {
-            if (!IsConfiguringInputType)
-            {
-                ThrowIfIsNotConfiguring();
-                Configurator.AddSorter(name, selector);
-            }
+            return Configurator.Field(name, deprecationReason);
         }
 
         private protected void AddOnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)

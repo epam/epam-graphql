@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -28,6 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public RootLoaderField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
@@ -35,6 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   elementGraphType,
@@ -45,6 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private RootLoaderField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -54,6 +58,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -68,6 +73,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> naturalOrder)
         {
             var connectionField = new RootConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsConnection)).Argument(naturalOrder),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -81,6 +87,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection()
         {
             var connectionField = new RootConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsConnection)),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -94,6 +101,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsGroupConnection()
         {
             var connectionField = new RootGroupConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsGroupConnection)),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -104,9 +112,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override RootLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
+        protected override RootLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(FieldConfigurationContext configurationContext, IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new RootLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 resolver,

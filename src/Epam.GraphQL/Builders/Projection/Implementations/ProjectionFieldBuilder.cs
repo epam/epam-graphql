@@ -32,14 +32,28 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return Field.Parent.FromIQueryableClass(Field, query, condition, build);
+            return Field.Parent.FromIQueryableClass(
+                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+                    .Argument(query)
+                    .Argument(condition)
+                    .OptionalArgument(build),
+                Field,
+                query,
+                condition,
+                build);
         }
 
         public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition)
         {
-            return Field.Parent.FromIQueryable(Field, query, condition);
+            return Field.Parent.FromIQueryable(
+                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+                    .Argument(query)
+                    .Argument(condition),
+                Field,
+                query,
+                condition);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)

@@ -566,13 +566,13 @@ namespace Epam.GraphQL.Configuration
             where TProjection : Epam.GraphQL.Loaders.Projection<TEntity1, TExecutionContext>
             where TEntity1 :  class;
         Epam.GraphQL.Configuration.IPayloadFieldedMutationField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
     }
     public interface IPayloadFieldedMutationField<TArgType, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableMutationFieldMixin<TArgType, TExecutionContext>, Epam.GraphQL.Configuration.IResolvableRootField<TArgType, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableRootField<TArgType, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableRootField<TArgType, TExecutionContext>
@@ -668,147 +668,147 @@ namespace Epam.GraphQL.Configuration
     }
     public interface IResolvableMutationFieldMixin<TArgType, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
     }
     public interface IResolvableMutationFieldMixin<TArgType1, TArgType2, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
     }
     public interface IResolvableMutationFieldMixin<TArgType1, TArgType2, TArgType3, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
     }
     public interface IResolvableMutationFieldMixin<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
     }
     public interface IResolvableMutationFieldMixin<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Epam.GraphQL.Mutation.MutationResult<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<Epam.GraphQL.Mutation.MutationResult<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder>? optionsBuilder = null);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build, System.Action<Epam.GraphQL.ResolveOptionsBuilder> optionsBuilder)
             where TReturnType :  class;
     }
     public interface IResolvableRootField<TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TReturnType> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TReturnType> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
     public interface IResolvableRootField<out TArgType, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, TReturnType> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, TReturnType> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
     public interface IResolvableRootField<out TArgType1, out TArgType2, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
     public interface IResolvableRootField<out TArgType1, out TArgType2, out TArgType3, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
     public interface IResolvableRootField<out TArgType1, out TArgType2, out TArgType3, out TArgType4, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
     public interface IResolvableRootField<out TArgType1, out TArgType2, out TArgType3, out TArgType4, out TArgType5, TExecutionContext>
     {
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<TReturnType>> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve);
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<TReturnType>> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve);
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
-        void Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        Epam.GraphQL.Helpers.IVoid Resolve<TReturnType>(System.Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType :  class;
     }
     public interface IRootEnumerableField<TSourceType, TExecutionContext> : Epam.GraphQL.Configuration.IRootEnumerableField<Epam.GraphQL.Configuration.IRootEnumerableField<TSourceType, TExecutionContext>, TSourceType, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IRootEnumerableField<TSourceType, TExecutionContext>, TSourceType> { }
@@ -853,6 +853,15 @@ namespace Epam.GraphQL.Configuration
     public interface IWhereableField<out TThis, TEntity>
     {
         TThis Where(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate);
+    }
+}
+namespace Epam.GraphQL.Diagnostics
+{
+    public class ConfigurationException : System.Exception
+    {
+        public ConfigurationException() { }
+        public ConfigurationException(string message) { }
+        public ConfigurationException(string message, System.Exception innerException) { }
     }
 }
 namespace Epam.GraphQL.EntityFrameworkCore

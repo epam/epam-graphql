@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
@@ -267,7 +268,7 @@ namespace Epam.GraphQL.Tests.Filtration
         }
 
         [Test]
-        public void ShouldThrowIfCustomFilterHasTheSameNameWithFilterableFieldTest()
+        public void ThrowIfCustomFilterHasTheSameNameWithFilterableFieldTest()
         {
             var builder = CreateQueryBuilder(
                 loader =>
@@ -281,24 +282,21 @@ namespace Epam.GraphQL.Tests.Filtration
                 loader =>
                 {
                     loader.Field(p => p.Id);
-                    loader.Field(p => p.FullName);
-                    loader.Field(p => p.FullName).Filterable();
+                    loader.Field(p => p.FullName).Editable().Filterable();
                     loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
                 });
 
-            const string Query = @"
-                query {
-                    people(filter:{
-                        fullName: ""v""
-                    }) {
-                        items {
-                            id
-                        }
-                    }
-                }";
+            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nA filter for field with the name `fullName` is already registered."), () =>
+            {
+                var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
+                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+            });
 
-            TestHelpers.TestQueryError(builder, typeof(InvalidOperationException), "A field with the name `fullName` is already registered.", Query);
-            TestHelpers.TestQueryError(mutableBuilder, typeof(InvalidOperationException), "A field with the name `fullName` is already registered.", Query);
+            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nA filter for field with the name `fullName` is already registered."), () =>
+            {
+                var queryType = GraphQLTypeBuilder.CreateQueryType(mutableBuilder);
+                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+            });
         }
 
         private Action<Query<TestUserContext>> CreateQueryBuilder(Action<Loader<Person, TestUserContext>> personLoaderBuilder, Action<Query<TestUserContext>> configure = null)

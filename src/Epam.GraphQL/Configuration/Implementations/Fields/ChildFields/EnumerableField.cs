@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
@@ -21,12 +22,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TEntity : class
     {
         public EnumerableField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -35,9 +38,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
         }
 
-        protected override EnumerableField<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
+        protected override EnumerableField<TEntity, TReturnType, TExecutionContext> CreateWhere(
+            FieldConfigurationContext configurationContext,
+            Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = new EnumerableField<TEntity, TReturnType, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Where(predicate),

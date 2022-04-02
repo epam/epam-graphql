@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
@@ -31,6 +32,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public LoaderField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -39,6 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   condition,
@@ -50,6 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private LoaderField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -59,6 +63,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -73,6 +78,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> naturalOrder)
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsConnection)).Argument(naturalOrder),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -86,6 +92,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IConnectionField AsConnection()
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsConnection)),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -96,9 +103,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        protected override LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
+            FieldConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 resolver,
@@ -119,6 +129,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildEntity : class
     {
         public LoaderField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -126,7 +137,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Expression<Func<TChildEntity, TEntity>>? navigationProperty,
             Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType)
-            : base(parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
+            : base(configurationContext, parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
         {
             parent.Registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
         }

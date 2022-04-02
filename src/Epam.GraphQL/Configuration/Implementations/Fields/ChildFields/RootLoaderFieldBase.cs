@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
@@ -24,6 +25,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : RootLoaderFieldBase<TThis, TThisIntf, TChildLoader, TChildEntity, TExecutionContext>, TThisIntf
     {
         protected RootLoaderFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
@@ -31,6 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
+                  configurationContext,
                   parent,
                   name,
                   parent.Registry.ResolveLoader<TChildLoader, TChildEntity>(),
@@ -42,6 +45,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected RootLoaderFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -50,6 +54,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -62,6 +67,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected RootLoaderFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -71,6 +77,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -84,6 +91,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private RootLoaderFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             TChildLoader loader,
@@ -92,6 +100,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   query: context => loader.DoGetBaseQuery(context.GetUserContext<TExecutionContext>()),

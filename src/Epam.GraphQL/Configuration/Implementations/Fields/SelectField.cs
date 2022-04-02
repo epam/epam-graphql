@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using GraphQL.Resolvers;
 
@@ -17,11 +18,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public SelectField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IFieldResolver resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(parent, name)
+            : base(configurationContext, parent, name)
         {
             Resolver = resolver;
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();

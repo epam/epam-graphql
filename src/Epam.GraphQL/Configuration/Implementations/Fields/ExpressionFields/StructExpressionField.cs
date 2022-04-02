@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Filters.Implementations;
 
@@ -14,13 +15,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         where TReturnType : struct
         where TEntity : class
     {
-        public StructExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
-            : base(parent, expression, name)
+        public StructExpressionField(
+            FieldConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? name)
+            : base(configurationContext, parent, expression, name)
         {
         }
 
-        public StructExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string name)
-            : base(parent, expression, name)
+        public StructExpressionField(
+            FieldConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
+            string name)
+            : base(configurationContext, parent, expression, name)
         {
         }
 

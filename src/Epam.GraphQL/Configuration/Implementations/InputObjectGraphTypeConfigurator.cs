@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
@@ -17,12 +18,20 @@ namespace Epam.GraphQL.Configuration.Implementations
         where TEntity : class
     {
         public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
-            : base(parent, registry, isAuto)
+            : base(new ConfigurationContextBase(), parent, registry, isAuto)
         {
             if (shouldSetNames)
             {
                 Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(true) : Registry.GetGraphQLTypeName<TEntity>(true, parent);
             }
+        }
+
+        protected InputObjectGraphTypeConfigurator(
+            ConfigurationContextBase configurationContext,
+            IField<TExecutionContext>? parent,
+            IRegistry<TExecutionContext> registry)
+            : base(configurationContext, parent, registry, isAuto: false)
+        {
         }
 
         public override string GetGraphQLTypeName(Type entityType, Type? projectionType, IField<TExecutionContext> field)
@@ -63,25 +72,14 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        private protected override void ValidateFields()
+        private protected override void DoValidateFields()
         {
+            base.DoValidateFields();
+
             if (Fields.All(field => field.EditSettings != null && field.EditSettings.IsReadOnly))
             {
-                throw new InvalidOperationException($"Type `{typeof(TEntity).HumanizedName()}` should have one writable field at least. Consider calling Editable() or EditableIf(...) during fields' configuration one time at least --or-- consider inheriting loader from {typeof(Loader<,>).HumanizedName()}, not from {typeof(MutableLoader<,,>).HumanizedName()}");
+                throw new InvalidOperationException($"{(IsAuto ? $"Type `{typeof(TEntity).HumanizedName()}`" : "OnConfigure() method")} must have one writable field at least. Consider calling Editable() or EditableIf(...) during fields' configuration one time at least --or-- consider inheriting loader from {typeof(Loader<,>).HumanizedName()}, not from {typeof(MutableLoader<,,>).HumanizedName()}");
             }
-
-            var duplicateName = Fields
-                .GroupBy(field => field.Name)
-                .Where(group => group.Count() > 1)
-                .Select(group => group.Key)
-                .FirstOrDefault();
-
-            if (duplicateName != null)
-            {
-                throw new InvalidOperationException($"A field with the name `{duplicateName}` is already registered.");
-            }
-
-            Fields.ForEach(f => f.Validate());
         }
     }
 
@@ -93,7 +91,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
         public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry)
-            : base(parent, registry, isAuto: false, shouldSetNames: false)
+            : base(new ConfigurationContext<TProjection, TEntity, TExecutionContext>(), parent, registry)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(true);
         }
@@ -153,11 +151,11 @@ namespace Epam.GraphQL.Configuration.Implementations
             Registry.SetGraphQLTypeName<TProjection, TEntity>(oldName, newName);
         }
 
-        private protected override void ValidateFields()
+        private protected override void DoValidateFields()
         {
             if (!typeof(Mutation<TExecutionContext>).IsAssignableFrom(typeof(TProjection)))
             {
-                base.ValidateFields();
+                base.DoValidateFields();
             }
         }
 

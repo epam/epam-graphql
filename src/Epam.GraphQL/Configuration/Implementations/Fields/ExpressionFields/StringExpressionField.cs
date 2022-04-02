@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Filters.Implementations;
 
@@ -13,13 +14,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     internal class StringExpressionField<TEntity, TExecutionContext> : ExpressionField<TEntity, string, TExecutionContext>
         where TEntity : class
     {
-        public StringExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, string>> expression, string? name)
-            : base(parent, expression, name)
+        public StringExpressionField(
+            FieldConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TEntity, string>> expression,
+            string? name)
+            : base(configurationContext, parent, expression, name)
         {
         }
 
-        public StringExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TExecutionContext, TEntity, string>> expression, string name)
-            : base(parent, expression, name)
+        public StringExpressionField(
+            FieldConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TExecutionContext, TEntity, string>> expression,
+            string name)
+            : base(configurationContext, parent, expression, name)
         {
         }
 

@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
@@ -15,18 +16,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         where TEntity : class
     {
         protected ArgumentedUnionFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             TArguments arguments)
-            : base(parent, name, unionType, typeResolver)
+            : base(configurationContext, parent, name, unionType, typeResolver)
         {
             Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 
         protected ArgumentedUnionFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -34,7 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             TArguments arguments)
-            : base(parent, name, unionType, typeResolver, unionTypes, unionGraphType)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType)
         {
             Arguments = arguments;
             Arguments.ApplyTo(this);

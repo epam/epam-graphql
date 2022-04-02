@@ -23,8 +23,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
         {
-            Guards.ThrowIfNullOrEmpty(name, nameof(name));
-
             _expression = expression;
             _field = field;
             Name = name;

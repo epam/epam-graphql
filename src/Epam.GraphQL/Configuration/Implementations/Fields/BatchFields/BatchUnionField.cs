@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using GraphQL.Resolvers;
 
@@ -27,6 +28,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         // TODO Implement unions of more than two batches
         public BatchUnionField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity> firstResolver,
@@ -35,7 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Type firstType,
             IGraphTypeDescriptor<TExecutionContext> secondGraphType,
             Type secondType)
-           : base(parent, name)
+           : base(configurationContext, parent, name)
         {
             _resolver = new BatchCompoundResolver<TEntity, TExecutionContext>();
 
@@ -63,6 +65,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         public override IFieldResolver Resolver => _resolver;
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            FieldConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
@@ -72,6 +75,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            FieldConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
@@ -81,6 +85,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            FieldConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
@@ -91,6 +96,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            FieldConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
@@ -101,6 +107,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            FieldConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
@@ -110,6 +117,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            FieldConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
@@ -119,6 +127,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            FieldConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
@@ -129,6 +138,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            FieldConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
@@ -138,29 +148,35 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             throw new NotImplementedException();
         }
 
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<IEnumerable<object>, TReturnType1> selector)
+        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            FieldConfigurationContext configurationContext,
+            Func<IEnumerable<object>, TReturnType1> selector)
         {
-            return Parent.ApplySelect<TReturnType1>(this, _resolver.Select(selector));
+            return Parent.ApplySelect<TReturnType1>(configurationContext, this, _resolver.Select(selector));
         }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            FieldConfigurationContext configurationContext,
             Func<IEnumerable<object>, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
-            return Parent.ApplySelect(this, _resolver.Select(selector), build);
-        }
-
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(Func<IEnumerable<object>, TReturnType1> selector)
-        {
-            return ApplySelect(selector);
+            return Parent.ApplySelect(configurationContext, this, _resolver.Select(selector), build);
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(
+            FieldConfigurationContext configurationContext,
+            Func<IEnumerable<object>, TReturnType1> selector)
+        {
+            return ApplySelect(configurationContext, selector);
+        }
+
+        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(
+            FieldConfigurationContext configurationContext,
             Func<IEnumerable<object>, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            return ApplySelect(selector, build);
+            return ApplySelect(configurationContext, selector, build);
         }
     }
 }

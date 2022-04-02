@@ -39,11 +39,18 @@ namespace Epam.GraphQL.Helpers
 
         private readonly StringBuilder _builder = new();
         private readonly List<ParameterExpression> _namelessParameters = new();
+        private readonly Stack<MethodCallExpression> _calls = new();
+        private readonly bool _noIndent;
         private int _indent;
 
-        public static string Print(Expression expression)
+        private ExpressionPrinter(bool noIndent)
         {
-            var visitor = new ExpressionPrinter();
+            _noIndent = noIndent;
+        }
+
+        public static string Print(Expression expression, bool noIndent = false)
+        {
+            var visitor = new ExpressionPrinter(noIndent);
             visitor.Visit(expression);
             return visitor._builder.ToString();
         }
@@ -99,7 +106,7 @@ namespace Epam.GraphQL.Helpers
             }
             else
             {
-                return Visit(binaryExpression);
+                Append(binaryExpression.ToString());
             }
 
             return binaryExpression;
@@ -107,19 +114,43 @@ namespace Epam.GraphQL.Helpers
 
         protected override Expression VisitMethodCall(MethodCallExpression methodCallExpression)
         {
-            if (methodCallExpression.Object != null)
-            {
-                Visit(methodCallExpression.Object);
-            }
+            var thisArg = methodCallExpression.Object;
 
             var isExtension = methodCallExpression.Method.IsExtensionMethod();
             var args = (isExtension ? methodCallExpression.Arguments.Skip(1) : methodCallExpression.Arguments).ToArray();
 
             if (isExtension)
             {
-                Visit(methodCallExpression.Arguments[0]);
-                Indent();
-                AppendLine();
+                thisArg = methodCallExpression.Arguments[0];
+            }
+
+            var shouldIndent = false;
+
+            if (thisArg != null)
+            {
+                if ((_calls.TryPeek(out var storedMethodCall) && storedMethodCall == methodCallExpression)
+                    || thisArg is MethodCallExpression)
+                {
+                    shouldIndent = true;
+
+                    if (thisArg is MethodCallExpression previousMethodCall)
+                    {
+                        _calls.Push(previousMethodCall);
+                    }
+                }
+
+                Visit(thisArg);
+
+                if (shouldIndent)
+                {
+                    Indent();
+                    AppendLine();
+
+                    if (thisArg is MethodCallExpression)
+                    {
+                        _calls.Pop();
+                    }
+                }
             }
 
             Append(".");
@@ -137,7 +168,7 @@ namespace Epam.GraphQL.Helpers
 
             Append(")");
 
-            if (isExtension)
+            if (shouldIndent)
             {
                 Unindent();
             }
@@ -383,18 +414,28 @@ namespace Epam.GraphQL.Helpers
 
         private void AppendLine()
         {
-            _builder.AppendLine();
+            if (!_noIndent)
+            {
+                _builder.AppendLine();
+            }
+
             _builder.Append(' ', _indent * 4);
         }
 
         private void Indent()
         {
-            _indent += 1;
+            if (!_noIndent)
+            {
+                _indent += 1;
+            }
         }
 
         private void Unindent()
         {
-            _indent -= 1;
+            if (!_noIndent)
+            {
+                _indent -= 1;
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
@@ -26,6 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public RootGroupConnectionLoaderField(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -34,6 +36,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -53,9 +56,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        protected override RootGroupConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
+        protected override RootGroupConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
+            FieldConfigurationContext configurationContext,
+            IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
         {
             return new RootGroupConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 resolver,

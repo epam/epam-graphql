@@ -36,6 +36,11 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             var descriptor = Field.Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
             var loaderField = Field.Parent.FromLoader<TLoader, TChildLoader, TChildEntity>(
+                Field.ConfigurationContext.NextOperation<TChildLoader, TChildEntity>(nameof(FromLoader))
+                    .Argument(condition)
+                    .Argument(relationType.ToString())
+                    .OptionalArgument(navigationProperty)
+                    .OptionalArgument(reverseNavigationProperty),
                 Field,
                 condition,
                 relationType,

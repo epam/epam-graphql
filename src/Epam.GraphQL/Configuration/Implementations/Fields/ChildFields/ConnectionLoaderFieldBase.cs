@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Helpers;
@@ -36,6 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private static MethodInfo? _withSearchMethodInfo;
 
         protected ConnectionLoaderFieldBase(
+            FieldConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -44,6 +46,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -57,7 +60,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public IConnectionField WithFilter<TFilter>()
         {
-            var filterBaseType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>));
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>), out var filterBaseType))
+            {
+                var msg = ConfigurationContext.NextOperation<TFilter>(nameof(WithFilter))
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Filter<,,>).HumanizedName()}` for type `{typeof(TFilter).HumanizedName()}`.");
+                throw new ConfigurationException(msg);
+            }
+
             var filterArgument = filterBaseType.GetGenericArguments().Single(type => typeof(Input).IsAssignableFrom(type));
 
             _withFilterMethodInfo ??= ReflectionHelpers.GetMethodInfo(

@@ -6,7 +6,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
@@ -20,15 +21,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
         where TEntity : class
     {
-        protected FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+        protected FieldBase(FieldConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
         {
+            ConfigurationContext = configurationContext;
             Name = name.ToCamelCase();
             Parent = parent;
         }
 
         public LazyQueryArguments? Arguments { get; set; }
 
-        public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => throw new NotImplementedException();
+        public FieldConfigurationContext ConfigurationContext { get; }
+
+        public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => GraphTypeDescriptor<TExecutionContext>.NullInstance;
 
         public string Name { get; set; }
 
@@ -49,10 +53,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay => $"{GetType().GetGenericTypeDefinition().Name}({FieldType.Name} {typeof(TEntity).Name}.{Name})";
 
+        public override string ToString()
+        {
+            return ConfigurationContext.ToString();
+        }
+
         public virtual FieldType AsFieldType()
         {
-            GraphType.Validate();
-
             var fieldType = new FieldType
             {
                 Type = GraphType.Type,
@@ -122,10 +129,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public virtual void Validate()
         {
-            Guards.ThrowInvalidOperationIf(string.IsNullOrEmpty(Name), "Field name cannot be null or empty.");
+            ConfigurationContext.AddErrorIf(string.IsNullOrEmpty(Name), "Field name cannot be null or empty.");
 
             // Force resolver; FieldBase throws exception if Resolver field is not overriden.
-            _ = Resolver;
+            try
+            {
+                _ = Resolver;
+            }
+            catch (InvalidOperationException e)
+            {
+                ConfigurationContext.AddError(e.Message);
+            }
+
+            GraphType.Validate(ConfigurationContext);
         }
 
         public TField ApplyField<TField>(TField field)

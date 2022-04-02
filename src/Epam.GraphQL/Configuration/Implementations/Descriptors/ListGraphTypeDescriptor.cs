@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -27,9 +28,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public IObjectGraphTypeConfigurator<TExecutionContext> Configurator => throw new NotImplementedException();
 
-        public void Validate()
+        public void Validate(FieldConfigurationContext configurationContext)
         {
-            _elementDescriptor.Validate();
+            _elementDescriptor.Validate(configurationContext);
         }
     }
 }

@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Filters
 {
@@ -13,6 +14,8 @@ namespace Epam.GraphQL.Filters
         Type FilterType { get; }
 
         LambdaExpression BuildExpression(TExecutionContext executionContext, object? filter);
+
+        void Validate(IConfigurationContext configurationContext);
     }
 
     internal interface IInlineFilters<TEntity, TExecutionContext> : IInlineFilters<TExecutionContext>, IFilter<TEntity, TExecutionContext>

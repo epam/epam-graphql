@@ -7,7 +7,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
@@ -17,12 +17,20 @@ namespace Epam.GraphQL.Configuration.Implementations
         where TEntity : class
     {
         public ObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
-            : base(parent, registry, isAuto)
+            : base(new ConfigurationContextBase(), parent, registry, isAuto)
         {
             if (shouldSetNames)
             {
                 Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(false) : Registry.GetGraphQLTypeName<TEntity>(false, Parent);
             }
+        }
+
+        protected ObjectGraphTypeConfigurator(
+            ConfigurationContextBase configurationContext,
+            IField<TExecutionContext>? parent,
+            IRegistry<TExecutionContext> registry)
+            : base(configurationContext, parent, registry, isAuto: false)
+        {
         }
 
         public override string GetGraphQLTypeName(Type entityType, Type? projectionType, IField<TExecutionContext> field)
@@ -59,23 +67,9 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        private protected override void ValidateFields()
+        private protected override void DoValidateFields()
         {
-            if (!Fields.Any())
-            {
-                throw new InvalidOperationException($"Type `{typeof(TEntity).HumanizedName()}` should have one readable field at least.");
-            }
-
-            var duplicateName = Fields
-                .GroupBy(field => field.Name)
-                .Where(group => group.Count() > 1)
-                .Select(group => group.Key)
-                .FirstOrDefault();
-
-            if (duplicateName != null)
-            {
-                throw new InvalidOperationException($"A field with the name `{duplicateName}` is already registered.");
-            }
+            base.DoValidateFields();
 
             var duplicateSorterName = Sorters
                 .GroupBy(sorter => sorter.Name)
@@ -87,8 +81,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             {
                 throw new InvalidOperationException($"A sorter with the name `{duplicateSorterName}` is already registered.");
             }
-
-            Fields.ForEach(f => f.Validate());
         }
     }
 
@@ -100,7 +92,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
         public ObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry)
-            : base(parent, registry, isAuto: false, shouldSetNames: false)
+            : base(new ConfigurationContext<TProjection, TEntity, TExecutionContext>(), parent, registry)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(false);
         }
@@ -160,11 +152,11 @@ namespace Epam.GraphQL.Configuration.Implementations
             Registry.SetGraphQLTypeName<TProjection, TEntity>(oldName, newName);
         }
 
-        private protected override void ValidateFields()
+        private protected override void DoValidateFields()
         {
             if (!typeof(Mutation<TExecutionContext>).IsAssignableFrom(typeof(TProjection)))
             {
-                base.ValidateFields();
+                base.DoValidateFields();
             }
         }
 
