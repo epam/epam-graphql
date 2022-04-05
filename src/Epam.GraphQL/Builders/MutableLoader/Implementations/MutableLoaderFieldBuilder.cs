@@ -513,7 +513,8 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
                 Field.Parent.FromBatch(
                     Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
-                        .Argument(batchFunc),
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
                     Field,
                     keySelector,
                     batchFunc,
@@ -531,7 +532,8 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
                 Field.Parent.FromBatch(
                     Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
-                        .Argument(batchFunc),
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
                     Field,
                     keySelector,
                     batchFunc,

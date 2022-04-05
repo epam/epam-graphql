@@ -5,7 +5,6 @@
 
 using System;
 using System.Linq;
-using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
@@ -265,38 +264,6 @@ namespace Epam.GraphQL.Tests.Filtration
 
             TestHelpers.TestQuery(builder, Query, Expected);
             TestHelpers.TestQuery(mutableBuilder, Query, Expected);
-        }
-
-        [Test]
-        public void ThrowIfCustomFilterHasTheSameNameWithFilterableFieldTest()
-        {
-            var builder = CreateQueryBuilder(
-                loader =>
-                {
-                    loader.Field(p => p.Id);
-                    loader.Field(p => p.FullName).Filterable();
-                    loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
-                });
-
-            var mutableBuilder = CreateQueryMutableBuilder(
-                loader =>
-                {
-                    loader.Field(p => p.Id);
-                    loader.Field(p => p.FullName).Editable().Filterable();
-                    loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
-                });
-
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nA filter for field with the name `fullName` is already registered."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
-
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nA filter for field with the name `fullName` is already registered."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType(mutableBuilder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
         }
 
         private Action<Query<TestUserContext>> CreateQueryBuilder(Action<Loader<Person, TestUserContext>> personLoaderBuilder, Action<Query<TestUserContext>> configure = null)

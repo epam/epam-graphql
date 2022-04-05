@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Loaders
             ThrowIfIsNotConfiguring();
             if (!IsConfiguringInputType)
             {
-                Configurator.AddFilter(name, filterPredicateFactory);
+                Configurator.Filter(name, filterPredicateFactory);
             }
         }
 
@@ -36,7 +36,7 @@ namespace Epam.GraphQL.Loaders
             ThrowIfIsNotConfiguring();
             if (!IsConfiguringInputType)
             {
-                Configurator.AddFilter(name, filterPredicateFactory);
+                Configurator.Filter(name, filterPredicateFactory);
             }
         }
 
@@ -45,7 +45,7 @@ namespace Epam.GraphQL.Loaders
             if (!IsConfiguringInputType)
             {
                 ThrowIfIsNotConfiguring();
-                Configurator.AddSorter(name, selector);
+                Configurator.Sorter(name, selector);
             }
         }
     }

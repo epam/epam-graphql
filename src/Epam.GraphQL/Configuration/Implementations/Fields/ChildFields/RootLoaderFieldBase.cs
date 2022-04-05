@@ -25,7 +25,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : RootLoaderFieldBase<TThis, TThisIntf, TChildLoader, TChildEntity, TExecutionContext>, TThisIntf
     {
         protected RootLoaderFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
@@ -45,7 +45,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected RootLoaderFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -67,7 +67,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected RootLoaderFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -91,7 +91,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private RootLoaderFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             TChildLoader loader,

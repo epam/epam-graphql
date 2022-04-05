@@ -76,8 +76,8 @@ namespace Epam.GraphQL.Loaders
 
         internal override void AfterConstruction()
         {
-            ObjectGraphTypeConfigurator = Registry.Register<TEntity>(GetType(), null);
-            InputObjectGraphTypeConfigurator = Registry.RegisterInput<TEntity>(GetType(), null);
+            ObjectGraphTypeConfigurator = Registry.Register<TEntity>(GetType());
+            InputObjectGraphTypeConfigurator = Registry.RegisterInput<TEntity>(GetType());
         }
 
         internal override IObjectGraphTypeConfigurator<TExecutionContext> GetObjectGraphTypeConfigurator()
@@ -195,6 +195,7 @@ namespace Epam.GraphQL.Loaders
             {
                 IsConfiguringInputType = false;
                 OnConfigure();
+                Configurator.ValidateFields();
                 AfterConfigure();
             }
             finally
@@ -217,6 +218,7 @@ namespace Epam.GraphQL.Loaders
                 {
                     IsConfiguringInputType = true;
                     OnConfigure();
+                    Configurator.ValidateFields();
                     AfterConfigure();
                 }
                 finally

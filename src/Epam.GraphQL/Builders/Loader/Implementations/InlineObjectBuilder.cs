@@ -13,6 +13,7 @@ using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
@@ -26,14 +27,29 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         private readonly BaseObjectGraphTypeConfigurator<TSourceType, TExecutionContext> _objectGraphTypeConfigurator;
         private Type? _childProjectionType;
 
-        public InlineObjectBuilder(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TSourceType, TExecutionContext>>? build, bool isInputType)
+        public InlineObjectBuilder(
+            IField<TExecutionContext> parent,
+            RelationRegistry<TExecutionContext> registry,
+            Action<IInlineObjectBuilder<TSourceType, TExecutionContext>>? build,
+            IConfigurationContext configurationContext,
+            bool isInputType)
         {
             _registry = registry;
-            _objectGraphTypeConfigurator = isInputType
-                ? new InputObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, registry, build == null)
-                : new ObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, registry, build == null);
 
-            build?.Invoke(this);
+            if (build == null)
+            {
+                _objectGraphTypeConfigurator = isInputType
+                    ? _registry.RegisterInputAutoObjectGraphType<TSourceType>(configurationContext.New())
+                    : _registry.RegisterAutoObjectGraphType<TSourceType>(configurationContext.New());
+            }
+            else
+            {
+                _objectGraphTypeConfigurator = isInputType
+                    ? new InputObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, configurationContext.New(), registry, isAuto: false)
+                    : new ObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, configurationContext.New(), registry, isAuto: false);
+
+                build(this);
+            }
         }
 
         public string Name { get => _objectGraphTypeConfigurator.Name; set => _objectGraphTypeConfigurator.Name = value; }
@@ -121,11 +137,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public (IGraphType? GraphType, Type? Type) Resolve()
         {
-            if (_childProjectionType != null && _objectGraphTypeConfigurator.Fields.Any())
-            {
-                throw new NotSupportedException($"You must use either {nameof(Field)} or {nameof(ConfigureFrom)} calls, not both at the same time.");
-            }
-
             if (_childProjectionType != null)
             {
                 var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(_childProjectionType, typeof(ProjectionBase<,>));
@@ -146,13 +157,21 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return (resolvedType, null);
         }
 
-        public IObjectGraphTypeConfigurator<TSourceType, TExecutionContext> ResolveConfigurator()
+        public void Validate(IConfigurationContext configurationContext)
         {
             if (_childProjectionType != null && _objectGraphTypeConfigurator.Fields.Any())
             {
-                throw new NotSupportedException($"You must use either {nameof(Field)} or {nameof(ConfigureFrom)} calls, not both at the same time.");
+                configurationContext.AddError($"You must use either {nameof(Field)} or {nameof(ConfigureFrom)} calls, not both at the same time.");
             }
 
+            if (_childProjectionType == null)
+            {
+                _objectGraphTypeConfigurator.ValidateFields();
+            }
+        }
+
+        public IObjectGraphTypeConfigurator<TSourceType, TExecutionContext> ResolveConfigurator()
+        {
             if (_childProjectionType != null)
             {
                 var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(_childProjectionType, typeof(ProjectionBase<,>));

@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         where TEntity : class
     {
         public NullableExpressionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TEntity, TReturnType?>> expression,
             string? name)
@@ -25,7 +25,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         }
 
         public NullableExpressionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression,
             string name)

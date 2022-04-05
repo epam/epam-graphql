@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TEntity : class
     {
         public EnumerableField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TEntity, TReturnType, TExecutionContext> resolver,
@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected override EnumerableField<TEntity, TReturnType, TExecutionContext> CreateWhere(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = new EnumerableField<TEntity, TReturnType, TExecutionContext>(

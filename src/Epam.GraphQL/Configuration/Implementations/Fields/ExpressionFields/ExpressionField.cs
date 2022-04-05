@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
 
         public ExpressionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TEntity, TReturnType>> expression,
             string? name)
@@ -41,7 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         }
 
         public ExpressionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
             string name)
@@ -93,7 +93,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
             catch (InvalidOperationException e)
             {
-                ConfigurationContext.AddError(e.Message);
+                ConfigurationContext.AddError(e.Message, ConfigurationContext);
             }
 
             base.Validate();
@@ -101,6 +101,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Filterable(TReturnType[]? defaultValues = null)
         {
+            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Filterable))
+                .OptionalArgument(defaultValues);
+
             if (defaultValues != null && defaultValues.Any(value => value == null))
             {
                 throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider using .Filterable(NullValues).");
@@ -118,12 +121,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Sortable()
         {
-            Parent.AddSorter(_expression);
+            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Sortable));
+
+            Parent.Sorter(_expression);
         }
 
         public void Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
-            Parent.AddSorter(Name, sorter);
+            Parent.Sorter(Name, sorter);
         }
 
         public void Groupable()
@@ -170,7 +175,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter() => throw new NotSupportedException();
 
-        private static string GenerateName(FieldConfigurationContext configurationContext, string? name, Expression<Func<TEntity, TReturnType>> expression)
+        private static string GenerateName(MethodCallConfigurationContext configurationContext, string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
             if (name != null)
             {
@@ -182,7 +187,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                 return propName.ToCamelCase();
             }
 
-            configurationContext.AddError($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
+            configurationContext.AddError($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.", configurationContext);
 
             return string.Empty;
         }

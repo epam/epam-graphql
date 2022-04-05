@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 using GraphQL;
 
 namespace Epam.GraphQL.Sorters.Implementations
@@ -13,11 +14,14 @@ namespace Epam.GraphQL.Sorters.Implementations
     {
         private readonly Expression<Func<TEntity, TValueType>> _selector;
 
-        public CustomSorter(string name, Expression<Func<TEntity, TValueType>> selector)
+        public CustomSorter(MethodCallConfigurationContext configurationContext, string name, Expression<Func<TEntity, TValueType>> selector)
         {
+            ConfigurationContext = configurationContext;
             Name = name.ToCamelCase();
             _selector = selector;
         }
+
+        public MethodCallConfigurationContext ConfigurationContext { get; }
 
         public string Name { get; }
 

@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal static class UnionField
     {
         public static UnionField<TEntity, TExecutionContext> Create<TEntity, TLastElementType, TExecutionContext>(
-            FieldConfigurationContext configurationContext,
+            MethodCallArgumentConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
@@ -25,18 +25,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TLastElementType : class
         {
             return new UnionField<TEntity, TExecutionContext>(
-                configurationContext,
+                configurationContext.Parent,
                 parent,
                 name,
                 typeof(TLastElementType),
-                CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build));
+                CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build, configurationContext));
         }
 
-        public static Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+        public static Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(
+            Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build,
+            MethodCallArgumentConfigurationContext configurationContext)
             where TEntity : class
             where TLastElementType : class
         {
-            return field => field.Parent.GetGraphQLTypeDescriptor(field, build);
+            return field => field.Parent.GetGraphQLTypeDescriptor(field, build, configurationContext);
         }
     }
 
@@ -46,7 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         where TEntity : class
     {
         public UnionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -56,7 +58,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         private UnionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -95,10 +97,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
+            // TODO Argument build is not used there
             Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .OptionalArgument(build),
+                    .OptionalArgument(build)
+                    .Parent,
                 this,
                 GraphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
@@ -110,7 +114,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .OptionalArgument(build),
+                    .OptionalArgument(build)
+                    .Parent,
                 this,
                 GraphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
@@ -143,7 +148,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .OptionalArgument(build),
+                    .OptionalArgument(build)
+                    .Parent,
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
@@ -156,7 +162,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .OptionalArgument(build),
+                    .OptionalArgument(build)
+                    .Parent,
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
@@ -171,12 +178,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableField<TEntity, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new UnionField<TEntity, TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 typeof(TLastElementType),
-                UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build),
+                UnionField.CreateTypeResolver<TEntity, TLastElementType, TExecutionContext>(build, configurationContext),
                 UnionTypes,
                 UnionGraphType);
             return ApplyField(unionField);

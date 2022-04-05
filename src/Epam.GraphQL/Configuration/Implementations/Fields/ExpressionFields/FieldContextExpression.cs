@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Sorters;
@@ -39,6 +40,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         public PropertyInfo? PropertyInfo => null;
 
         public string Name { get; }
+
+        public MethodCallConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         public void ValidateExpression()
         {

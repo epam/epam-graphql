@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq;
+using System.Text;
 using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
@@ -19,48 +20,89 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void ThrowOnQueryEmptyConfig()
         {
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nOnConfigure() method must have a declaration of one field at least."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query =>
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "OnConfigure() method must have a declaration of one field at least.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "}")),
+                () =>
                 {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query =>
+                    {
+                    });
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
                 });
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
         }
 
         [Test]
         public void ThrowOnQueryFieldWithoutResolver()
         {
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: Field(\"test\")\r\nField `test` must have resolver."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
-                    .Field("test"));
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "Field `test` must have resolver.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"test\"); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
+                        .Field("test"));
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
         public void ThrowOnNullQueryFieldName()
         {
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: Field(null).Resolve<int>(_ => ...)\r\nField name cannot be null or empty."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
-                    .Field(null)
-                    .Resolve(_ => 0));
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "Field name cannot be null or empty.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(null)",
+                        "        .Resolve<int>(_ => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
+                        .Field(null)
+                        .Resolve(_ => 0));
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
         public void ThrowOnEmptyQueryFieldName()
         {
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: Field(\"\").Resolve<int>(_ => ...)\r\nField name cannot be null or empty."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
-                    .Field(string.Empty)
-                    .Resolve(_ => 0));
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "Field name cannot be null or empty.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"\")",
+                        "        .Resolve<int>(_ => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
+                        .Field(string.Empty)
+                        .Resolve(_ => 0));
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -74,11 +116,25 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Resolve(_ => 0);
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nA field with the name `test` is already registered."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "A field with the name `test` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"test\")",
+                        "        .Resolve<int>(_ => ...); // <-----",
+                        string.Empty,
+                        "    Field(\"test\")",
+                        "        .Resolve<int>(_ => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -89,11 +145,21 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 query.Connection<object>("test");
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: Connection<object>(\"test\")\r\nCannot find the corresponding generic base type `Loader<,>` for type `object`."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "Cannot find the corresponding generic base type `Loader<,>` for type `object`.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Connection<object>(\"test\"); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -104,11 +170,21 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 query.GroupConnection<object>("test");
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: GroupConnection<object>(\"test\")\r\nCannot find the corresponding generic base type `Loader<,>` for type `object`."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "Cannot find the corresponding generic base type `Loader<,>` for type `object`.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    GroupConnection<object>(\"test\"); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -126,11 +202,21 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Connection(personLoaderType, "people");
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nField: Field(\"test\")\r\nField `test` must have resolver."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "Field `test` must have resolver.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"test\"); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -148,11 +234,21 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Connection(personLoaderType, "people");
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nField: Field(p => 2 * p.Id)\r\nExpression (p => (2 * p.Id)), provided for field is not a property. Consider giving a name to the field explicitly."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "Expression (p => (2 * p.Id)), provided for field is not a property. Consider giving a name to the field explicitly.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => 2 * p.Id); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -165,11 +261,22 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Resolve(_ => ("abc", "abc"));
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: Field(\"people\").Resolve<ValueTuple<string, string>>(_ => ...)\r\nThe type: ValueTuple<string, string> cannot be coerced effectively to a GraphQL type."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "The type: ValueTuple<string, string> cannot be coerced effectively to a GraphQL type.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"people\")",
+                        "        .Resolve<ValueTuple<string, string>>(_ => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -187,11 +294,23 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Connection(personLoaderType, "people");
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during PersonLoader.OnConfigure() call.\r\nField: Field(\"instance\", p => ConfigurationErrorTests.GetPersonName(p))\r\nClient projection (value(Epam.GraphQL.Tests.Diagnostics.ConfigurationErrorTests).GetPersonName(p)) contains a call of instance method 'GetPersonName' of type 'ConfigurationErrorTests'. This could potentially cause memory leak. Consider making the method static so that it does not capture constant in the instance."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "Client projection (value(Epam.GraphQL.Tests.Diagnostics.ConfigurationErrorTests).GetPersonName(p)) contains a call of instance method 'GetPersonName' of type 'ConfigurationErrorTests'. This could potentially cause memory leak. Consider making the method static so that it does not capture constant in the instance.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(",
+                        "        \"instance\",",
+                        "        p => ConfigurationErrorTests.GetPersonName(p)); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test]
@@ -210,11 +329,24 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .WithFilter<object>();
             }
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Error during Query.OnConfigure() call.\r\nField: Field(\"people\").FromLoader<PersonLoader, Person>().AsConnection().WithFilter<object>()\r\nCannot find the corresponding generic base type `Filter<,,>` for type `object`."), () =>
-            {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during Query.OnConfigure() call.",
+                        "Cannot find the corresponding generic base type `Filter<,,>` for type `object`.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"people\")",
+                        "        .FromLoader<PersonLoader, Person>()",
+                        "        .AsConnection()",
+                        "        .WithFilter<object>(); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
         }
 
         [Test(Description = "ApplySecurityFilter() based on another query")]
@@ -257,12 +389,295 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 getBaseQuery: _ => FakeData.People.AsQueryable(),
                 applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
 
-            Assert.Throws(Is.TypeOf<ConfigurationException>().And.Message.EqualTo("Type `Empty` must have a declaration of one field at least."), () =>
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "Type `Empty` must have a declaration of one field at least.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"error\")",
+                        "        .FromBatch<Empty>(people => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
+                        .Connection(personLoaderType, "people"));
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+        }
+
+        [Test]
+        public void ThrowIfFromBatchConfigureContainsDuplicates()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field("error")
+                        .FromBatch(
+                            people => people.ToDictionary(p => p, p => new Empty()),
+                            builder =>
+                            {
+                                builder.Field("test", x => 1);
+                                builder.Field("test", x => 1);
+                            });
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A field with the name `test` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"error\")",
+                        "        .FromBatch<Empty>(",
+                        "            people => ...,",
+                        "            builder =>",
+                        "            {",
+                        "                Field(",
+                        "                    \"test\",",
+                        "                    x => 1); // <-----",
+                        string.Empty,
+                        "                Field(",
+                        "                    \"test\",",
+                        "                    x => 1); // <-----",
+                        "            });",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
+                        .Connection(personLoaderType, "people"));
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+        }
+
+        [Test]
+        public void ThrowIfCustomFilterHasTheSameNameWithFilterableFieldTest()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field(p => p.FullName).Filterable();
+                    loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A filter for field with the name `fullName` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => p.Id);",
+                        string.Empty,
+                        "    Field(p => p.FullName)",
+                        "        .Filterable(); // <-----",
+                        string.Empty,
+                        "    Filter<string>(",
+                        "        \"fullName\",",
+                        "        name => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            var personMutableLoaderType = GraphQLTypeBuilder.CreateMutableLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field(p => p.FullName).Editable().Filterable();
+                    loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A filter for field with the name `fullName` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => p.Id);",
+                        string.Empty,
+                        "    Field(p => p.FullName)",
+                        "        .Editable()",
+                        "        .Filterable(); // <-----",
+                        string.Empty,
+                        "    Filter<string>(",
+                        "        \"fullName\",",
+                        "        name => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(MutableBuilder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            void Builder(Query<TestUserContext> query)
             {
-                var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(query => query
-                    .Connection(personLoaderType, "people"));
-                ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-            });
+                query
+                    .Connection(personLoaderType, "people");
+            }
+
+            void MutableBuilder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personMutableLoaderType, "people");
+            }
+        }
+
+        [Test]
+        public void ThrowIfCustomSorterHasTheSameNameWithSortableFieldTest()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field(p => p.FullName).Sortable();
+                    loader.Sorter("fullName", p => p.FullName);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A sorter with the name `fullName` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => p.Id);",
+                        string.Empty,
+                        "    Field(p => p.FullName)",
+                        "        .Sortable(); // <-----",
+                        string.Empty,
+                        "    Sorter(",
+                        "        \"fullName\",",
+                        "        p => p.FullName); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            var personMutableLoaderType = GraphQLTypeBuilder.CreateMutableLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field(p => p.FullName).Editable().Sortable();
+                    loader.Sorter("fullName", p => p.FullName);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A sorter with the name `fullName` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => p.Id);",
+                        string.Empty,
+                        "    Field(p => p.FullName)",
+                        "        .Editable()",
+                        "        .Sortable(); // <-----",
+                        string.Empty,
+                        "    Sorter(",
+                        "        \"fullName\",",
+                        "        p => p.FullName); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(MutableBuilder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoaderType, "people");
+            }
+
+            void MutableBuilder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personMutableLoaderType, "people");
+            }
+        }
+
+        [Test]
+        public void ThrowIfFromBatchSourceTypeContainsIndexedFieldOnly()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field("error")
+                        .FromBatch(people => people.ToDictionary(p => p, p => new WithIndexedProperty()), null);
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "Type `WithIndexedProperty` must have a declaration of one field at least.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(\"error\")",
+                        "        .FromBatch<WithIndexedProperty>(people => ...); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoaderType, "people");
+            }
+        }
+
+        private static string ConcatLines(params string[] lines)
+        {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.AppendLine();
+                }
+
+                sb.Append(lines[i]);
+            }
+
+            return sb.ToString();
         }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -271,6 +686,13 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
         public class Empty
         {
+        }
+
+        public class WithIndexedProperty
+        {
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
+            public int this[int index] => throw new NotImplementedException();
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
         }
     }
 }

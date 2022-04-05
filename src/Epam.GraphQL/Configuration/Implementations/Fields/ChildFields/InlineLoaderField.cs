@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public InlineLoaderField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -48,7 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private InlineLoaderField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -71,7 +71,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected override InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(

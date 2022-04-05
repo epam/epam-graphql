@@ -5,8 +5,8 @@
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal interface IPrinter
+    internal interface IPrinter<T>
     {
-        string Print();
+        string Print(T value);
     }
 }

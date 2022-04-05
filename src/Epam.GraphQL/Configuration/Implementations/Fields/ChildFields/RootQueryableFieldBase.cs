@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : RootQueryableFieldBase<TThis, TThisIntf, TReturnType, TExecutionContext>, TThisIntf
     {
         protected RootQueryableFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Func<IResolveFieldContext, IQueryable<TReturnType>> query,
@@ -56,7 +56,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected RootQueryableFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver,
@@ -124,7 +124,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             ConfigurationContext.AddErrorIf(HasFilter, "Cannot apply filter twice.");
 
-            Registry.RegisterInputAutoObjectGraphType<TFilter>();
+            Registry.RegisterInputAutoObjectGraphType<TFilter>(ConfigurationContext.New());
             var loaderFilterType = typeof(TLoaderFilter);
             var filter = Registry.ResolveFilter<TReturnType>(loaderFilterType);
 
@@ -159,9 +159,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(enumerableField);
         }
 
-        protected abstract TThis ReplaceResolver(FieldConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver);
+        protected abstract TThis ReplaceResolver(MethodCallConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver);
 
-        protected override TThis CreateWhere(FieldConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
+        protected override TThis CreateWhere(MethodCallConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
         {
             var queryableField = ReplaceResolver(
                 configurationContext,
@@ -170,7 +170,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected override RootEnumerableFieldBase<TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             Expression<Func<TReturnType, TReturnType1>> selector,
             IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
         {

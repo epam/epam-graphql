@@ -17,17 +17,14 @@ namespace Epam.GraphQL.Configuration.Implementations
     internal class InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
         where TEntity : class
     {
-        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
-            : base(new ConfigurationContextBase(), parent, registry, isAuto)
+        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IObjectConfigurationContext context, IRegistry<TExecutionContext> registry, bool isAuto)
+            : base(context, parent, registry, isAuto)
         {
-            if (shouldSetNames)
-            {
-                Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(true) : Registry.GetGraphQLTypeName<TEntity>(true, parent);
-            }
+            Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(true) : Registry.GetGraphQLTypeName<TEntity>(true, parent);
         }
 
         protected InputObjectGraphTypeConfigurator(
-            ConfigurationContextBase configurationContext,
+            ObjectConfigurationContextBase configurationContext,
             IField<TExecutionContext>? parent,
             IRegistry<TExecutionContext> registry)
             : base(configurationContext, parent, registry, isAuto: false)
@@ -39,19 +36,17 @@ namespace Epam.GraphQL.Configuration.Implementations
             return Registry.GetGraphQLTypeName(entityType, null, true, field);
         }
 
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChildConfigurationContext configurationContext)
         {
-            return Registry.GetInputGraphTypeDescriptor(parent, build);
+            return Registry.GetInputGraphTypeDescriptor(parent, build, configurationContext);
         }
 
         public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent)
         {
             return Registry.GetInputGraphTypeDescriptor<TReturnType>(parent);
-        }
-
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TProjection, TReturnType>()
-        {
-            return Registry.GetInputGraphTypeDescriptor<TProjection, TReturnType>();
         }
 
         public override Type GenerateGraphType() => Registry.GenerateInputGraphType(typeof(TEntity));
@@ -62,8 +57,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             {
                 throw new InvalidOperationException();
             }
-
-            ValidateFields();
 
             inputGraphType.Name = Name;
             foreach (var field in Fields.Where(f => f.EditSettings != null && !f.EditSettings.IsReadOnly))
@@ -90,8 +83,8 @@ namespace Epam.GraphQL.Configuration.Implementations
         private TProjection? _projection;
         private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
-        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IRegistry<TExecutionContext> registry)
-            : base(new ConfigurationContext<TProjection, TEntity, TExecutionContext>(), parent, registry)
+        public InputObjectGraphTypeConfigurator(IRegistry<TExecutionContext> registry)
+            : base(new ObjectConfigurationContext<TProjection>(), parent: null, registry)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(true);
         }
@@ -136,7 +129,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
                 if (baseProjectionType != typeof(TProjection))
                 {
-                    _baseConfigurator = Registry.RegisterInput<TEntity>(baseProjectionType, null);
+                    _baseConfigurator = Registry.RegisterInput<TEntity>(baseProjectionType);
                     _baseConfigurator.Configure();
 
                     return _baseConfigurator;

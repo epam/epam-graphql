@@ -21,7 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
         where TEntity : class
     {
-        protected FieldBase(FieldConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+        protected FieldBase(MethodCallConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
         {
             ConfigurationContext = configurationContext;
             Name = name.ToCamelCase();
@@ -30,7 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public LazyQueryArguments? Arguments { get; set; }
 
-        public FieldConfigurationContext ConfigurationContext { get; }
+        public MethodCallConfigurationContext ConfigurationContext { get; set; }
 
         public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => GraphTypeDescriptor<TExecutionContext>.NullInstance;
 
@@ -129,7 +129,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public virtual void Validate()
         {
-            ConfigurationContext.AddErrorIf(string.IsNullOrEmpty(Name), "Field name cannot be null or empty.");
+            ConfigurationContext.AddErrorIf(string.IsNullOrEmpty(Name), "Field name cannot be null or empty.", ConfigurationContext);
 
             // Force resolver; FieldBase throws exception if Resolver field is not overriden.
             try
@@ -138,7 +138,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
             catch (InvalidOperationException e)
             {
-                ConfigurationContext.AddError(e.Message);
+                ConfigurationContext.AddError(e.Message, ConfigurationContext);
             }
 
             GraphType.Validate(ConfigurationContext);

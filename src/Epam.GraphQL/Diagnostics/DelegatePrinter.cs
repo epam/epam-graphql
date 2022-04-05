@@ -7,21 +7,15 @@ using System;
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal class DelegatePrinter<TDelegate> : IPrinter
-        where TDelegate : Delegate
+    internal class DelegatePrinter : IPrinter<Delegate?>
     {
-        private readonly TDelegate? _delegate;
+        public static DelegatePrinter Instance { get; } = new DelegatePrinter();
 
-        public DelegatePrinter(TDelegate? func)
+        public string Print(Delegate? value)
         {
-            _delegate = func;
-        }
-
-        public string Print()
-        {
-            return _delegate == null
+            return value == null
                 ? "null"
-                : _delegate.Method.Print();
+                : value.Method.Print();
         }
     }
 }

@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using Epam.GraphQL.Diagnostics;
 using GraphQL.Types;
 
@@ -26,11 +27,22 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public Type? Type => _type.Value;
 
-        public IObjectGraphTypeConfigurator<TExecutionContext> Configurator => throw new NotImplementedException();
+        public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => _elementDescriptor.Configurator;
 
-        public void Validate(FieldConfigurationContext configurationContext)
+        public void Validate(MethodCallConfigurationContext configurationContext)
         {
             _elementDescriptor.Validate(configurationContext);
         }
+    }
+
+    internal class ListGraphTypeDescriptor<TReturnType, TEnumerable, TExecutionContext> : ListGraphTypeDescriptor<TExecutionContext>, IGraphTypeDescriptor<TEnumerable, TExecutionContext>
+        where TEnumerable : IEnumerable<TReturnType>
+    {
+        public ListGraphTypeDescriptor(IGraphTypeDescriptor<TReturnType, TExecutionContext> elementDescriptor)
+            : base(elementDescriptor)
+        {
+        }
+
+        IObjectGraphTypeConfigurator<TEnumerable, TExecutionContext>? IGraphTypeDescriptor<TEnumerable, TExecutionContext>.Configurator => throw new NotImplementedException();
     }
 }

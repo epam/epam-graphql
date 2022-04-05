@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq;
+using System.Text;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
@@ -25,7 +26,11 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Field("people")
                     .FromIQueryable(_ => FakeData.People.AsQueryable());
 
-                Assert.AreEqual("Field(\"people\").FromIQueryable<Person>(_ => ...)", field.ToString());
+                Assert.AreEqual(
+                    ConcatLines(
+                        "Field(\"people\")",
+                        "    .FromIQueryable<Person>(_ => ...)"),
+                    field.ToString());
             }
         }
 
@@ -40,7 +45,16 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Field("people")
                     .FromIQueryable(_ => FakeData.People.AsQueryable(), configure => configure.Field(p => p.Id));
 
-                Assert.AreEqual("Field(\"people\").FromIQueryable<Person>(_ => ..., configure => ...)", field.ToString());
+                Assert.AreEqual(
+                    ConcatLines(
+                        "Field(\"people\")",
+                        "    .FromIQueryable<Person>(",
+                        "        _ => ...,",
+                        "        configure =>",
+                        "        {",
+                        "            Field(p => p.Id);",
+                        "        })"),
+                    field.ToString());
             }
         }
 
@@ -56,7 +70,12 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .FromIQueryable(_ => FakeData.People.AsQueryable())
                     .AsConnection(query => query.OrderBy(person => person.Id));
 
-                Assert.AreEqual("Field(\"people\").FromIQueryable<Person>(_ => ...).AsConnection(query => query.OrderBy(person => person.Id))", field.ToString());
+                Assert.AreEqual(
+                    ConcatLines(
+                        "Field(\"people\")",
+                        "    .FromIQueryable<Person>(_ => ...)",
+                        "    .AsConnection(query => query.OrderBy(person => person.Id))"),
+                    field.ToString());
             }
         }
 
@@ -72,7 +91,12 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .FromIQueryable(_ => FakeData.People.AsQueryable())
                     .AsGroupConnection();
 
-                Assert.AreEqual("Field(\"people\").FromIQueryable<Person>(_ => ...).AsGroupConnection()", field.ToString());
+                Assert.AreEqual(
+                    ConcatLines(
+                        "Field(\"people\")",
+                        "    .FromIQueryable<Person>(_ => ...)",
+                        "    .AsGroupConnection()"),
+                    field.ToString());
             }
         }
 
@@ -87,7 +111,11 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Field("people")
                     .Resolve(_ => 100500);
 
-                Assert.AreEqual("Field(\"people\").Resolve<int>(_ => ...)", field.ToString());
+                Assert.AreEqual(
+                    ConcatLines(
+                        "Field(\"people\")",
+                        "    .Resolve<int>(_ => ...)"),
+                    field.ToString());
             }
         }
 
@@ -103,7 +131,12 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument<string>("arg1")
                     .Resolve((_, arg1) => 100500);
 
-                Assert.AreEqual("Field(\"people\").Argument<string>(\"arg1\").Resolve<int>((_, arg1) => ...)", field.ToString());
+                Assert.AreEqual(
+                    ConcatLines(
+                        "Field(\"people\")",
+                        "    .Argument<string>(\"arg1\")",
+                        "    .Resolve<int>((_, arg1) => ...)"),
+                    field.ToString());
             }
         }
 
@@ -111,6 +144,27 @@ namespace Epam.GraphQL.Tests.Diagnostics
         {
             var queryType = GraphQLTypeBuilder.CreateQueryType(queryBuilder);
             return ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+        }
+
+        private static string ConcatLines(params string[] lines)
+        {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.AppendLine();
+                }
+
+                sb.Append(lines[i]);
+            }
+
+            return sb.ToString();
+        }
+
+        public class Empty
+        {
         }
     }
 }

@@ -19,18 +19,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal static class UnionMutationField
     {
         public static UnionMutationField<TExecutionContext> Create<TLastElementType, TExecutionContext>(
-            FieldConfigurationContext configurationContext,
+            MethodCallArgumentConfigurationContext configurationContext,
             MutationField<TExecutionContext> mutationField,
             Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
-            return new UnionMutationField<TExecutionContext>(configurationContext, mutationField, typeof(TLastElementType), CreateTypeResolver(build));
+            return new UnionMutationField<TExecutionContext>(configurationContext.Parent, mutationField, typeof(TLastElementType), CreateTypeResolver(build, configurationContext));
         }
 
-        public static Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> CreateTypeResolver<TLastElementType, TExecutionContext>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
+        public static Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> CreateTypeResolver<TLastElementType, TExecutionContext>(
+            Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build,
+            MethodCallArgumentConfigurationContext configurationContext)
             where TLastElementType : class
         {
-            return field => field.Parent.GetGraphQLTypeDescriptor(field, build);
+            return field => field.Parent.GetGraphQLTypeDescriptor(field, build, configurationContext);
         }
     }
 
@@ -39,7 +41,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         IUnionableRootField<TExecutionContext>
     {
         public UnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             MutationField<TExecutionContext> mutationField,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory)
@@ -49,7 +51,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         private UnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             MutationField<TExecutionContext> mutationField,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory,
@@ -218,11 +220,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new UnionMutationField<TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 MutationField,
                 typeof(TLastElementType),
-                UnionMutationField.CreateTypeResolver(build),
+                UnionMutationField.CreateTypeResolver(build, configurationContext),
                 UnionTypes,
                 UnionGraphType);
             return ApplyField(unionField);

@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IUnionableRootField<TArgType, TExecutionContext>
     {
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -30,7 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -65,11 +65,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public IVoid Resolve<TReturnType>(Func<TExecutionContext, TArgType, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
             where TReturnType : class
         {
+            // TODO Argument build is not used
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(GraphType, ConvertFieldResolver(resolve));
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -82,7 +84,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -115,7 +118,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -128,7 +132,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -143,12 +148,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public IUnionableRootField<TArgType, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new ArgumentedUnionMutationField<TArgType, TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 typeof(TLastElementType),
-                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build),
+                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
                 UnionTypes,
                 UnionGraphType,
                 Arguments);
@@ -180,7 +189,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IUnionableRootField<TArgType1, TArgType2, TExecutionContext>
     {
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -191,7 +200,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -230,7 +239,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -243,7 +253,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -276,7 +287,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -289,7 +301,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -304,12 +317,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public IUnionableRootField<TArgType1, TArgType2, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 typeof(TLastElementType),
-                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build),
+                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
                 UnionTypes,
                 UnionGraphType,
                 Arguments);
@@ -341,7 +358,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext>
     {
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -354,7 +371,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -391,7 +408,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -404,7 +422,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -437,7 +456,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -450,7 +470,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -465,12 +486,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 typeof(TLastElementType),
-                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build),
+                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
                 UnionTypes,
                 UnionGraphType,
                 Arguments);
@@ -502,7 +527,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>
     {
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -515,7 +540,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -552,7 +577,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -565,7 +591,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -598,7 +625,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -611,7 +639,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -626,12 +655,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 typeof(TLastElementType),
-                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build),
+                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
                 UnionTypes,
                 UnionGraphType,
                 Arguments);
@@ -663,7 +696,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>
     {
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -676,7 +709,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public ArgumentedUnionMutationField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -713,7 +746,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -726,7 +760,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -759,7 +794,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -772,7 +808,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             return Parent.ApplyResolvedField<TReturnType>(
                 ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve))
                     .Argument(resolve)
-                    .Argument(build),
+                    .Argument(build)
+                    .Parent,
                 this,
                 graphType,
                 resolver);
@@ -787,12 +824,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TLastElementType : class
         {
+            var configurationContext = ConfigurationContext
+                .NextOperation<TLastElementType>(nameof(And))
+                .OptionalArgument(build);
+
             var unionField = new ArgumentedUnionMutationField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext>(
-                ConfigurationContext.NextOperation<TLastElementType>(nameof(And)).OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 typeof(TLastElementType),
-                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build),
+                UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
                 UnionTypes,
                 UnionGraphType,
                 Arguments);

@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : EnumerableFieldBase<TThis, TThisIntf, TResolverIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected EnumerableFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TResolverIntf, TEntity, TReturnType, TExecutionContext> resolver,
@@ -81,11 +81,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build = default)
             where TReturnType1 : class
         {
-            var graphType = Parent.GetGraphQLTypeDescriptor(this, build);
+            var configurationContext = ConfigurationContext.NextOperation<TReturnType1>(nameof(Select))
+                .Argument(selector)
+                .OptionalArgument(build);
+
+            var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
+
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                ConfigurationContext.NextOperation<TReturnType1>(nameof(Select))
-                    .Argument(selector)
-                    .OptionalArgument(build),
+                configurationContext.Parent,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
@@ -136,12 +139,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 predicate);
         }
 
-        public TThis ApplyWhere(FieldConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
+        public TThis ApplyWhere(MethodCallConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
         {
             var whereField = CreateWhere(configurationContext, predicate);
             return ApplyField(whereField);
         }
 
-        protected abstract TThis CreateWhere(FieldConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate);
+        protected abstract TThis CreateWhere(MethodCallConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate);
     }
 }

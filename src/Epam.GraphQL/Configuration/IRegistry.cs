@@ -7,6 +7,7 @@ using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Loaders;
@@ -26,7 +27,7 @@ namespace Epam.GraphQL.Configuration
 
         Func<TExecutionContext, TArgType, TResultType> WrapFuncByUnusedContext<TArgType, TResultType>(Func<TArgType, TResultType> func);
 
-        InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>()
+        InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext)
             where TEntity : class;
 
         TLoader ResolveLoader<TLoader, TEntity>()
@@ -38,10 +39,10 @@ namespace Epam.GraphQL.Configuration
         ISearcher<TEntity, TExecutionContext> ResolveSearcher<TSearcher, TEntity>()
             where TSearcher : ISearcher<TEntity, TExecutionContext>;
 
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType)
             where TEntity : class;
 
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType)
             where TEntity : class;
 
         void Register<TEntity, TChildEntity>(
@@ -71,7 +72,10 @@ namespace Epam.GraphQL.Configuration
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class;
 
-        IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChildConfigurationContext configurationContext)
             where TReturnType : class;
 
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
@@ -82,12 +86,11 @@ namespace Epam.GraphQL.Configuration
 
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
 
-        IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChildConfigurationContext configurationContext)
             where TReturnType : class;
-
-        IGraphTypeDescriptor<TEntity, TExecutionContext> GetInputGraphTypeDescriptor<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
 
         Type GetEntityGraphType<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()

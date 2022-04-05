@@ -8,20 +8,15 @@ using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal class LambdaExpressionPrinter : IPrinter
+    internal class LambdaExpressionPrinter : IPrinter<LambdaExpression?>
     {
-        private readonly LambdaExpression? _expression;
+        public static LambdaExpressionPrinter Instance { get; } = new LambdaExpressionPrinter();
 
-        public LambdaExpressionPrinter(LambdaExpression? expression)
+        public string Print(LambdaExpression? value)
         {
-            _expression = expression;
-        }
-
-        public string Print()
-        {
-            return _expression == null
+            return value == null
                 ? "null"
-                : ExpressionPrinter.Print(_expression, noIndent: true);
+                : ExpressionPrinter.Print(value, noIndent: true);
         }
     }
 }

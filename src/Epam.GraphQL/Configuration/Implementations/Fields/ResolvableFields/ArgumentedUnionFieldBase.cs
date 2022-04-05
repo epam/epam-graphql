@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         where TEntity : class
     {
         protected ArgumentedUnionFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -29,7 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         protected ArgumentedUnionFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,

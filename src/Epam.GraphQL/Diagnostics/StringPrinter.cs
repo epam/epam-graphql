@@ -5,18 +5,13 @@
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal class StringPrinter : IPrinter
+    internal class StringPrinter : IPrinter<string?>
     {
-        private readonly string? _value;
+        public static StringPrinter Instance { get; } = new StringPrinter();
 
-        public StringPrinter(string? value)
+        public string Print(string? value)
         {
-            _value = value;
-        }
-
-        public string Print()
-        {
-            return _value != null ? $"\"{_value}\"" : "null";
+            return value != null ? $"\"{value}\"" : "null";
         }
     }
 }

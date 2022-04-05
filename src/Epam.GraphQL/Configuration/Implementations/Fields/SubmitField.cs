@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         where TEntity : class
     {
         public SubmitField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,

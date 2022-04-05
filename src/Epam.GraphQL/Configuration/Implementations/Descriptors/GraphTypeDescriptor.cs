@@ -54,16 +54,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => _configurator.Value;
 
-        public void Validate(FieldConfigurationContext configurationContext)
+        public void Validate(MethodCallConfigurationContext configurationContext)
         {
             try
             {
                 var hasErrors = Type == null && GraphType == null;
-                configurationContext.AddErrorIf(hasErrors, $"Type cannot be coerced effectively to a GraphQL type");
+                configurationContext.AddErrorIf(hasErrors, $"Type cannot be coerced effectively to a GraphQL type", configurationContext);
             }
             catch (InvalidOperationException e)
             {
-                configurationContext.AddError(e.Message);
+                configurationContext.AddError(e.Message, configurationContext);
             }
         }
     }
@@ -76,7 +76,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
         }
 
         public GraphTypeDescriptor(RelationRegistry<TExecutionContext> registry, bool isInput)
-            : base(() => registry.GenerateGraphType<TReturnType>(isInput), () => null, () => registry.GetObjectGraphTypeConfigurator(typeof(TReturnType), null))
+            : base(
+                  () => registry.GenerateGraphType<TReturnType>(isInput),
+                  () => null,
+                  () => registry.GetObjectGraphTypeConfigurator(typeof(TReturnType), null))
         {
         }
 

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters.Inputs;
@@ -36,6 +37,8 @@ namespace Epam.GraphQL.Filters.Implementations
         public Type FilterType => FieldType.IsSupportComparisons()
             ? typeof(ComparisonsFilter<TItemType, TListItemType>)
             : typeof(InFilter<TItemType, TListItemType>);
+
+        public MethodCallConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {

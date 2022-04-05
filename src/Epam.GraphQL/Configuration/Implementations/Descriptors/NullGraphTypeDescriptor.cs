@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => throw new NotImplementedException();
 
-        public void Validate(FieldConfigurationContext configurationContext)
+        public void Validate(MethodCallConfigurationContext configurationContext)
         {
             // Do nothing
         }

@@ -35,7 +35,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TChildEntity : class
         {
-            var graphResultType = Field.Parent.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
+            var graphResultType = _registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             var result = new InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 Field.ConfigurationContext.NextOperation<TChildLoader, TChildEntity>(nameof(FromLoader)).Argument(condition),
                 Field.Parent,

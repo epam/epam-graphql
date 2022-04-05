@@ -3,18 +3,21 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
+using System.Collections.Generic;
+using System.Text;
+
 namespace Epam.GraphQL.Diagnostics
 {
     internal interface IConfigurationContext
     {
-        void AddError(string message);
+        IConfigurationContext? Parent { get; }
 
-        string GetError(string message);
+        bool Contains(IConfigurationContext item);
 
-        void ThrowErrors();
+        void Append(StringBuilder stringBuilder, IEnumerable<IConfigurationContext> choosenItems, int indent);
 
-        FieldConfigurationContext Operation(string operation);
+        void Clear();
 
-        FieldConfigurationContext Operation<T>(string operation);
+        IObjectConfigurationContext New();
     }
 }

@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 
@@ -15,14 +16,14 @@ namespace Epam.GraphQL.Filters.Implementations
     {
         private readonly Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> _filterPredicateFactory;
 
-        public CustomInlineFilter(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+        public CustomInlineFilter(MethodCallConfigurationContext configurationContext, string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+            : this(configurationContext, name, (context, value) => filterPredicateFactory(value))
         {
-            FieldName = name.ToCamelCase();
-            _filterPredicateFactory = (context, value) => filterPredicateFactory(value);
         }
 
-        public CustomInlineFilter(string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+        public CustomInlineFilter(MethodCallConfigurationContext configurationContext, string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
         {
+            ConfigurationContext = configurationContext;
             FieldName = name.ToCamelCase();
             _filterPredicateFactory = filterPredicateFactory;
         }
@@ -32,6 +33,8 @@ namespace Epam.GraphQL.Filters.Implementations
         public string FieldName { get; }
 
         public Type FilterType => typeof(TValueType);
+
+        public MethodCallConfigurationContext ConfigurationContext { get; }
 
         LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {

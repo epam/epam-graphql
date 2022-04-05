@@ -30,7 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public RootGroupConnectionQueryableField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver,
@@ -77,7 +77,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public override IFieldResolver Resolver => QueryableFieldResolver.AsGroupConnection(Enumerable.Empty<ISorter<TExecutionContext>>());
 
         protected override RootGroupConnectionQueryableField<TReturnType, TExecutionContext> ReplaceResolver(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
         {
             return new RootGroupConnectionQueryableField<TReturnType, TExecutionContext>(

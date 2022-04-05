@@ -51,9 +51,13 @@ namespace Epam.GraphQL
 
             if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
             {
-                var msg = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(Connection))
-                    .Argument(name)
-                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.");
+                // TODO Make Dummy IConnectionField implementation
+                var configurationContext = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(Connection))
+                    .Argument(name);
+
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+
                 throw new ConfigurationException(msg);
             }
 
@@ -89,9 +93,10 @@ namespace Epam.GraphQL
 
             if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
             {
-                var msg = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(GroupConnection))
-                    .Argument(name)
-                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.");
+                var configurationContext = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(GroupConnection))
+                    .Argument(name);
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
                 throw new ConfigurationException(msg);
             }
 

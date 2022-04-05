@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
+using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {
@@ -32,15 +34,24 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return Field.Parent.FromIQueryableClass(
-                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
-                    .Argument(query)
-                    .Argument(condition)
-                    .OptionalArgument(build),
-                Field,
+            var configurationContext = Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+                .Argument(query)
+                .Argument(condition)
+                .OptionalArgument(build);
+
+            var graphType = Field.Parent.GetGraphQLTypeDescriptor(Field, build, configurationContext);
+
+            var result = new QueryableField<TEntity, TReturnType, TExecutionContext>(
+                configurationContext.Parent,
+                Field.Parent,
+                Field.Name,
                 query,
                 condition,
-                build);
+                graphType,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
+            return Field.Parent.ReplaceField(Field, result);
         }
 
         public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(

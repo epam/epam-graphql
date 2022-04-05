@@ -15,7 +15,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         where TEntity : class
     {
         public StringExpressionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TEntity, string>> expression,
             string? name)
@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         }
 
         public StringExpressionField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TExecutionContext, TEntity, string>> expression,
             string name)

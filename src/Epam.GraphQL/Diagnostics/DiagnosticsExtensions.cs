@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Epam.GraphQL.Diagnostics
 {
@@ -21,16 +22,7 @@ namespace Epam.GraphQL.Diagnostics
 
             if (IsAnonymous(methodBase.Name))
             {
-                var parameterNames = methodBase.GetParameters().Select(param => param.Name).ToArray();
-
-                var parameters = parameterNames.Length switch
-                {
-                    0 => "()",
-                    1 => $"{parameterNames[0]}",
-                    _ => $"({string.Join(", ", parameterNames)})",
-                };
-
-                return $"{parameters} => ...";
+                return $"{methodBase.PrintArguments()} => ...";
             }
 
             return methodBase.Name;
@@ -57,6 +49,61 @@ namespace Epam.GraphQL.Diagnostics
                 localName = null;
                 return false;
             }
+        }
+
+        public static string PrintArguments(this MethodBase methodBase)
+        {
+            var parameterNames = methodBase.GetParameters().Select(param => param.Name).ToArray();
+
+            var parameters = parameterNames.Length switch
+            {
+                0 => "()",
+                1 => $"{parameterNames[0]}",
+                _ => $"({string.Join(", ", parameterNames)})",
+            };
+
+            return parameters;
+        }
+
+        public static string ToString(this IConfigurationContext context, int indent, params IConfigurationContext[] choosenItems)
+        {
+            var sb = new StringBuilder();
+            context.Append(sb, choosenItems, indent);
+
+            return sb.ToString();
+        }
+
+        public static void AddError(this IConfigurationContext context, string message, params IConfigurationContext[] invalidItems)
+        {
+            GetRoot(context).AddError(message, invalidItems);
+        }
+
+        public static void AddErrorIf(this IConfigurationContext context, bool condition, string message, params IConfigurationContext[] invalidItems)
+        {
+            if (condition)
+            {
+                context.AddError(message, invalidItems);
+            }
+        }
+
+        public static string GetError(this IConfigurationContext context, string message, params IConfigurationContext[] invalidItems)
+        {
+            return GetRoot(context).GetError(message, invalidItems);
+        }
+
+        public static void ThrowErrors(this IConfigurationContext context)
+        {
+            GetRoot(context).ThrowErrors();
+        }
+
+        public static IRootConfigurationContext GetRoot(this IConfigurationContext context)
+        {
+            if (context.Parent == null)
+            {
+                return (IRootConfigurationContext)context;
+            }
+
+            return GetRoot(context.Parent);
         }
     }
 }

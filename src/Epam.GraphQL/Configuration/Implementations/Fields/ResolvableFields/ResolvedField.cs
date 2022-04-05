@@ -13,7 +13,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         where TEntity : class
     {
         public ResolvedField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TExecutionContext> graphType,

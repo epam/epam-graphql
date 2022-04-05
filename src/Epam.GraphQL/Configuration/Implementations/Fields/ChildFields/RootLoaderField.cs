@@ -29,7 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public RootLoaderField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
@@ -48,7 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private RootLoaderField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -112,7 +112,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override RootLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(FieldConfigurationContext configurationContext, IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
+        protected override RootLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(MethodCallConfigurationContext configurationContext, IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new RootLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
                 configurationContext,

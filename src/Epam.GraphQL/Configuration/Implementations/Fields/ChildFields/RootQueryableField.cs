@@ -26,7 +26,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IRootQueryableField<TReturnType, TExecutionContext>
     {
         public RootQueryableField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
@@ -48,7 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         public RootQueryableField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver,
@@ -100,9 +100,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override RootQueryableField<TReturnType, TExecutionContext> ReplaceResolver(FieldConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
+        protected override RootQueryableField<TReturnType, TExecutionContext> ReplaceResolver(MethodCallConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
         {
-            return new RootQueryableField<TReturnType, TExecutionContext>(
+            var queryableField = new RootQueryableField<TReturnType, TExecutionContext>(
                 configurationContext,
                 Parent,
                 Name,
@@ -112,6 +112,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Arguments,
                 Searcher,
                 NaturalSorters);
+
+            return queryableField;
         }
     }
 }

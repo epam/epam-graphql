@@ -15,7 +15,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         where TEntity : class
     {
         protected UnionFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -25,7 +25,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         protected UnionFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -46,7 +46,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         protected UnionFieldBase(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             List<Type> unionTypes,

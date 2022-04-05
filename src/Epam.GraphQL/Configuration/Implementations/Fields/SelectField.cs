@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public SelectField(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IFieldResolver resolver,

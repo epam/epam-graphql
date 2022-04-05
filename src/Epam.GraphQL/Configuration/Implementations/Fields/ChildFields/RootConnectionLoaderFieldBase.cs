@@ -35,7 +35,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private static MethodInfo? _withSearchMethodInfo;
 
         protected RootConnectionLoaderFieldBase(
-            FieldConfigurationContext fieldConfigurator,
+            MethodCallConfigurationContext fieldConfigurator,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -60,8 +60,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>), out var filterBaseType))
             {
-                var msg = ConfigurationContext.NextOperation<TFilter>(nameof(WithFilter))
-                    .GetError($"Cannot find the corresponding generic base type `{typeof(Filter<,,>).HumanizedName()}` for type `{typeof(TFilter).HumanizedName()}`.");
+                var configurationContext = ConfigurationContext.NextOperation<TFilter>(nameof(WithFilter));
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Filter<,,>).HumanizedName()}` for type `{typeof(TFilter).HumanizedName()}`.", configurationContext);
                 throw new ConfigurationException(msg);
             }
 

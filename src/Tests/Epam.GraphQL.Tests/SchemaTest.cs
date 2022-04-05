@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
@@ -152,28 +151,6 @@ namespace Epam.GraphQL.Tests
 
             Assert.AreEqual(expectedErrorsCount, actualErrorsCount);
             Assert.AreEqual(GraphiqlRequest, actualQuery);
-        }
-
-        [Test]
-        public void ShouldNotExposeIndexedFieldFromBatch()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field("error")
-                        .FromBatch(people => people.ToDictionary(p => p, p => new WithIndexedProperty()), null);
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable(),
-                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
-
-            TestHelpers.TestQueryError(
-                query => query
-                    .Connection(personLoaderType, "people"),
-                typeof(ConfigurationException),
-                "Type `WithIndexedProperty` must have a declaration of one field at least.",
-                string.Empty);
         }
 
         [Test]
@@ -1774,13 +1751,6 @@ namespace Epam.GraphQL.Tests
         public class WithId
         {
             public int Id { get; set; }
-        }
-
-        public class WithIndexedProperty
-        {
-#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-            public int this[int index] => throw new NotImplementedException();
-#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
         }
 
         public class PersonFilter : Input

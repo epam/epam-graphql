@@ -37,16 +37,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         IObjectGraphTypeConfigurator<TExecutionContext> IGraphTypeDescriptor<TExecutionContext>.Configurator => Configurator;
 
-        public void Validate(FieldConfigurationContext configurationContext)
+        public void Validate(MethodCallConfigurationContext configurationContext)
         {
             try
             {
                 var hasErrors = Type == null;
-                configurationContext.AddErrorIf(hasErrors, $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
+                configurationContext.AddErrorIf(hasErrors, $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type", configurationContext);
             }
             catch (InvalidOperationException e)
             {
-                configurationContext.AddError(e.Message);
+                configurationContext.AddError(e.Message, configurationContext);
             }
         }
     }

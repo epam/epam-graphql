@@ -13,11 +13,11 @@ namespace Epam.GraphQL.Configuration.Implementations
         where TEntity : class
     {
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
-            FieldConfigurationContext configurationContext,
+            MethodCallConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector);
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
-            FieldConfigurationContext configurationContext,
+            MethodCallArgumentConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class;
