@@ -194,33 +194,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             });
         }
 
-        public Expression<Func<TExecutionContext, TEntity, TType>> CreateGroupSelectorExpression<TType>(IEnumerable<string> fieldNames)
-        {
-            var unorderedFields = Fields
-                .OfType<IExpressionField<TEntity, TExecutionContext>>()
-                .Where(field => field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
-            var orderedFields = fieldNames.Select(f => unorderedFields.First(u => u.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
-
-            var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
-
-            var contextParam = Expression.Parameter(typeof(TExecutionContext));
-            var entiyParam = Expression.Parameter(typeof(TEntity));
-
-            var newExpr = Expression.New(ctor);
-            var initExpr = Expression.MemberInit(
-                newExpr,
-                orderedFields
-                    .Select(f =>
-                    {
-                        var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
-                        return Expression.Bind(
-                            typeof(TType).GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase),
-                            expr.Body.ReplaceParameter(expr.Parameters[0], entiyParam));
-                    }));
-
-            return Expression.Lambda<Func<TExecutionContext, TEntity, TType>>(initExpr, contextParam, entiyParam);
-        }
-
         public IQueryable<IGroupResult<Proxy<TEntity>>> GroupBy(IResolveFieldContext context, IQueryable<TEntity> query)
         {
             var subFields = context.GetGroupConnectionQueriedFields();
@@ -231,18 +204,15 @@ namespace Epam.GraphQL.Configuration.Implementations
             // ApplyGroupBy
             // Actual type of lambda returning value is loader.ObjectGraphTypeConfigurator.ExtendedType, not typeof(TChildEntity)
             // entity => new EntityExt { Country = entity.Country, Language = entity.Language }
-            var lambda = CreateGroupSelectorExpression(sourceType, subFields).BindFirstParameter(context.GetUserContext<TExecutionContext>());
+            var keyExpression = CreateGroupSelectorExpression(sourceType, subFields).BindFirstParameter(context.GetUserContext<TExecutionContext>());
 
-            // .Select(entity => new { Country = entity.Country, Language = entity.Language })
-            var grouping = query.ApplySelect(lambda);
+            // (entity, rows) => new { Item = entity, Count = rows.Count() }
+            var resultExpression = CreateGroupKeySelectorExpression(sourceType, context, subFields, aggregateQueriedFields);
 
-            // .GroupBy(g => g)
-            var groupBy = grouping.ApplyGroupBy(ExpressionHelpers.MakeIdentity(sourceType));
+            // .GroupBy(entity => new { Country = entity.Country, Language = entity.Language }, (entity, rows) => new { Item = entity, Count = rows.Count() })
+            var groupBy = query.ApplyGroupBy(keyExpression, resultExpression);
 
-            // .Select(g => new EntityExt { Country = g.Key.Country, Language = g.Key.Language, Count = g.Count(); })
-            var selectKey = groupBy.ApplySelect(CreateGroupKeySelectorExpression(context, subFields, aggregateQueriedFields));
-
-            return (IQueryable<IGroupResult<Proxy<TEntity>>>)selectKey;
+            return (IQueryable<IGroupResult<Proxy<TEntity>>>)groupBy;
         }
 
         public IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetGroupSort(
@@ -449,7 +419,35 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .InvokeAndHoistBaseException<LambdaExpression>(this, fieldNames);
         }
 
+        private Expression<Func<TExecutionContext, TEntity, TType>> CreateGroupSelectorExpression<TType>(IEnumerable<string> fieldNames)
+        {
+            var unorderedFields = Fields
+                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .Where(field => field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var orderedFields = fieldNames.Select(f => unorderedFields.First(u => u.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
+
+            var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
+
+            var contextParam = Expression.Parameter(typeof(TExecutionContext));
+            var entiyParam = Expression.Parameter(typeof(TEntity));
+
+            var newExpr = Expression.New(ctor);
+            var initExpr = Expression.MemberInit(
+                newExpr,
+                orderedFields
+                    .Select(f =>
+                    {
+                        var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
+                        return Expression.Bind(
+                            typeof(TType).GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase),
+                            expr.Body.ReplaceParameter(expr.Parameters[0], entiyParam));
+                    }));
+
+            return Expression.Lambda<Func<TExecutionContext, TEntity, TType>>(initExpr, contextParam, entiyParam);
+        }
+
         private LambdaExpression CreateGroupKeySelectorExpression(
+            Type keyType,
             IResolveFieldContext context,
             IEnumerable<string> subFields,
             IEnumerable<string> aggregateQueriedFields)
@@ -459,21 +457,8 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .Where(field => field.IsGroupable && subFields.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var sourceType = GetConcreteProxyType(subFields);
 
-            var groupingType = typeof(IGrouping<,>).MakeGenericType(sourceType, sourceType);
-            var param = Expression.Parameter(groupingType);
-            var entityExpr = Expression.Property(param, groupingType.GetProperty("Key"));
-
-            // TODO use ExpressionHelpers.MakeMemberInit
-            var ctor = sourceType.GetConstructors().Single(c => c.GetParameters().Length == 0);
-            var newExpr = Expression.New(ctor);
-            var initExpr = Expression.MemberInit(
-                newExpr,
-                fields
-                    .Select(f =>
-                    {
-                        var propInfo = sourceType.GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                        return Expression.Bind(propInfo, Expression.Property(entityExpr, propInfo));
-                    }));
+            var keyParam = Expression.Parameter(keyType);
+            var enumerableParam = Expression.Parameter(typeof(IEnumerable<TEntity>));
 
             var groupResultType = typeof(GroupResult<>).MakeGenericType(sourceType);
             var groupResultCtor = groupResultType.GetConstructors().Single(c => c.GetParameters().Length == 0);
@@ -483,13 +468,13 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             if (subFields.Any())
             {
-                bindings.Add(Expression.Bind(groupResultType.GetProperty(nameof(GroupResult<object>.Item)), initExpr));
+                bindings.Add(Expression.Bind(groupResultType.GetProperty(nameof(GroupResult<object>.Item)), keyParam));
             }
 
             if (aggregateQueriedFields.Contains("count"))
             {
-                var countMethodInfo = CachedReflectionInfo.ForEnumerable.Count(sourceType);
-                var methodCallExpr = Expression.Call(null, countMethodInfo, param);
+                var countMethodInfo = CachedReflectionInfo.ForEnumerable.Count(typeof(TEntity));
+                var methodCallExpr = Expression.Call(null, countMethodInfo, enumerableParam);
                 bindings.Add(Expression.Bind(groupResultType.GetProperty(nameof(GroupResult<object>.Count)), methodCallExpr));
             }
 
@@ -497,7 +482,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             var groupResultInit = Expression.MemberInit(groupResultNew, bindings);
 
-            var result = Expression.Lambda(groupResultInit, param);
+            var result = Expression.Lambda(groupResultInit, keyParam, enumerableParam);
             return result;
         }
     }

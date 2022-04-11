@@ -91,11 +91,12 @@ namespace Epam.GraphQL.Extensions
                 : CachedReflectionInfo.ForQueryable.ThenByDescending(sourceType, resultType).InvokeAndHoistBaseException<IOrderedQueryable<TChildEntity>>(null, query, expression);
         }
 
-        public static IQueryable ApplyGroupBy(this IQueryable query, LambdaExpression expression)
+        public static IQueryable ApplyGroupBy(this IQueryable query, LambdaExpression keyExpression, LambdaExpression resultExpression)
         {
             var sourceType = query.ElementType;
-            var resultType = expression.GetResultType();
-            return CachedReflectionInfo.ForQueryable.GroupBy(sourceType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, expression);
+            var keyType = keyExpression.GetResultType();
+            var resultType = resultExpression.GetResultType();
+            return CachedReflectionInfo.ForQueryable.GroupBy(sourceType, keyType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, keyExpression, resultExpression);
         }
 
         public static IQueryable ApplySelect(this IQueryable query, LambdaExpression expression)
