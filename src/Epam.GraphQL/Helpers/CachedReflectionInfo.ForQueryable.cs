@@ -43,10 +43,10 @@ namespace Epam.GraphQL.Helpers
 
             public static MethodInfo GenericThenByDescendingWithComparer => _thenByDescendingWithComparer ??= ReflectionHelpers.GetMethodInfo<IOrderedQueryable<object>, Expression<Func<object, object>>, IComparer<object>, IOrderedQueryable<object>>(Queryable.ThenByDescending);
 
-            public static MethodInfo GroupBy(Type source, Type key)
+            public static MethodInfo GroupBy(Type source, Type key, Type result)
             {
-                return (_groupBy ??= ReflectionHelpers.GetMethodInfo<IQueryable<object>, Expression<Func<object, object>>, IQueryable<IGrouping<object, object>>>(Queryable.GroupBy))
-                    .MakeGenericMethod(source, key);
+                return (_groupBy ??= ReflectionHelpers.GetMethodInfo<IQueryable<object>, Expression<Func<object, object>>, Expression<Func<object, IEnumerable<object>, object>>, IQueryable<object>>(Queryable.GroupBy))
+                    .MakeGenericMethod(source, key, result);
             }
 
             public static MethodInfo OrderBy(Type source, Type key)

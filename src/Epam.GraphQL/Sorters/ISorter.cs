@@ -16,8 +16,8 @@ namespace Epam.GraphQL.Sorters
 
         LambdaExpression OriginalExpression { get; }
 
-        LambdaExpression BuildExpression(TExecutionContext context);
-
         MethodCallConfigurationContext ConfigurationContext { get; }
+
+        LambdaExpression BuildExpression(TExecutionContext context);
     }
 }
