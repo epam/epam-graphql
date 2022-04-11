@@ -4,8 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
-using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
@@ -37,9 +37,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         IObjectGraphTypeConfigurator<TExecutionContext> IGraphTypeDescriptor<TExecutionContext>.Configurator => Configurator;
 
-        public void Validate()
+        public void Validate(MethodCallConfigurationContext configurationContext)
         {
-            Guards.ThrowInvalidOperationIf(Type == null, $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
+            try
+            {
+                var hasErrors = Type == null;
+                configurationContext.AddErrorIf(hasErrors, $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type", configurationContext);
+            }
+            catch (InvalidOperationException e)
+            {
+                configurationContext.AddError(e.Message, configurationContext);
+            }
         }
     }
 }

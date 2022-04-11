@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -21,6 +22,8 @@ namespace Epam.GraphQL.Configuration
         Type FieldType { get; }
 
         IFieldResolver Resolver { get; }
+
+        MethodCallConfigurationContext ConfigurationContext { get; }
 
         FieldType AsFieldType();
 

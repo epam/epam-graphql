@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 
@@ -26,6 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public InlineLoaderField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -34,6 +36,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   condition,
@@ -45,6 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private InlineLoaderField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -54,6 +58,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -65,9 +70,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
         }
 
-        protected override InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        protected override InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
+            MethodCallConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 resolver,

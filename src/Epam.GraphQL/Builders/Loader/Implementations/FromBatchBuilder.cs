@@ -36,7 +36,12 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
-            var newField = Field.ApplyBatchUnion(batchFunc, build);
+            var newField = Field.ApplyBatchUnion(
+                Field.ConfigurationContext.NextOperation<TAnotherReturnType>(nameof(AndFromBatch))
+                    .Argument(batchFunc)
+                    .OptionalArgument(build),
+                batchFunc,
+                build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
 
@@ -45,7 +50,12 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
-            var newField = Field.ApplyBatchUnion(batchFunc, build);
+            var newField = Field.ApplyBatchUnion(
+                Field.ConfigurationContext.NextOperation<TAnotherReturnType>(nameof(AndFromBatch))
+                    .Argument(batchFunc)
+                    .OptionalArgument(build),
+                batchFunc,
+                build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
 
@@ -55,7 +65,14 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
-            var newField = Field.ApplyBatchUnion(keySelector, batchFunc, build);
+            var newField = Field.ApplyBatchUnion(
+                Field.ConfigurationContext.NextOperation<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
+                    .Argument(keySelector)
+                    .Argument(batchFunc)
+                    .OptionalArgument(build),
+                keySelector,
+                batchFunc,
+                build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
 
@@ -65,7 +82,14 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
             where TAnotherReturnType : class
         {
-            var newField = Field.ApplyBatchUnion(keySelector, batchFunc, build);
+            var newField = Field.ApplyBatchUnion(
+                Field.ConfigurationContext.NextOperation<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
+                    .Argument(keySelector)
+                    .Argument(batchFunc)
+                    .OptionalArgument(build),
+                keySelector,
+                batchFunc,
+                build);
             return new FromBatchBuilder<BatchUnionField<TSourceType, TExecutionContext>, TSourceType, IEnumerable<object>, TExecutionContext>(Registry, newField);
         }
     }

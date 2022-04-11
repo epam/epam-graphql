@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Helpers;
@@ -33,6 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected QueryableFieldBase(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<IResolveFieldContext, IQueryable<TReturnType>> query,
@@ -44,6 +46,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
+                  configurationContext,
                   parent,
                   name,
                   CreateResolver(
@@ -64,6 +67,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected QueryableFieldBase(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
@@ -73,6 +77,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -130,12 +135,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             Guards.ThrowInvalidOperationIf(HasFilter, "Cannot apply filter twice.");
 
-            Registry.RegisterInputAutoObjectGraphType<TFilter>();
+            Registry.RegisterInputAutoObjectGraphType<TFilter>(ConfigurationContext.New());
             var loaderFilterType = typeof(TLoaderFilter);
             var filter = Registry.ResolveFilter<TReturnType>(loaderFilterType);
 
             Argument("filter", filter.FilterType);
-            return ApplyField(ReplaceResolver(QueryableFieldResolverBase.Select(GetFilteredQuery(filter))));
+            var field = ReplaceResolver(
+                ConfigurationContext.NextOperation<TLoaderFilter, TFilter>(nameof(WithFilter)),
+                QueryableFieldResolverBase.Select(GetFilteredQuery(filter)));
+
+            return ApplyField(field);
         }
 
         public TThisIntf WithSearch<TSearcher>()
@@ -145,16 +154,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
             Searcher = Registry.ResolveSearcher<TSearcher, TReturnType>();
             Argument("search", typeof(string));
-            return ApplyField(ReplaceResolver(QueryableFieldResolverBase.Select(GetSearchQuery(Searcher))));
+            var field = ReplaceResolver(
+                ConfigurationContext.NextOperation<TSearcher>(nameof(WithSearch)),
+                QueryableFieldResolverBase.Select(GetSearchQuery(Searcher)));
+
+            return ApplyField(field);
         }
 
-        protected override TThis CreateWhere(Expression<Func<TReturnType, bool>> predicate)
+        protected override TThis CreateWhere(MethodCallConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
         {
-            var queryableField = ReplaceResolver(QueryableFieldResolverBase.Where(predicate));
+            var queryableField = ReplaceResolver(configurationContext, QueryableFieldResolverBase.Where(predicate));
             return queryableField;
         }
 
-        protected abstract TThis ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver);
+        protected abstract TThis ReplaceResolver(MethodCallConfigurationContext configurationContext, IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver);
 
         private static IQueryableResolver<TEntity, TReturnType, TExecutionContext> CreateResolver(
             string fieldName,

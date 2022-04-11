@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
@@ -29,6 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public ConnectionQueryableField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
@@ -38,6 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -73,9 +76,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IFieldResolver Resolver => QueryableFieldResolver.AsConnection();
 
-        protected override ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
+        protected override ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(
+            MethodCallConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
             return new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 resolver,

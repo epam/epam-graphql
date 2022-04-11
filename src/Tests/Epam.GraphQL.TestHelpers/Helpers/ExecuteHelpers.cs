@@ -42,6 +42,30 @@ namespace Epam.GraphQL.Tests.Helpers
             return (Dictionary<string, object>)ToObject(JToken.Parse(json));
         }
 
+        public static ISchemaExecuter<TExecutionContext> CreateSchemaExecuter<TExecutionContext>(
+            Type queryType,
+            Action<SchemaOptionsBuilder<TExecutionContext>> configure)
+        {
+            var createSchemaExecuterMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
+                nameof(CreateSchemaExecuter),
+                new[] { queryType, typeof(TExecutionContext) },
+                new[] { typeof(Action<SchemaOptionsBuilder<TExecutionContext>>) });
+
+            return createSchemaExecuterMethodInfo.InvokeAndHoistBaseException<ISchemaExecuter<TExecutionContext>>(null, configure);
+        }
+
+        private static ISchemaExecuter<TQuery, TExecutionContext> CreateSchemaExecuter<TQuery, TExecutionContext>(
+            Action<SchemaOptionsBuilder<TExecutionContext>> configure)
+            where TQuery : Query<TExecutionContext>, new()
+        {
+            var services = new ServiceCollection();
+            services.AddEpamGraphQLSchema<TQuery, TExecutionContext>(configure);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var schemaExecuter = serviceProvider.GetRequiredService<ISchemaExecuter<TQuery, TExecutionContext>>();
+            return schemaExecuter;
+        }
+
         private static ExecutionResult ExecuteQuery<TQuery, TMutation, TExecutionContext>(Action<SchemaOptionsBuilder<TExecutionContext>> configure, Action<SchemaExecutionOptionsBuilder<TExecutionContext>> configureExecutionOptions)
             where TQuery : Query<TExecutionContext>, new()
             where TMutation : Mutation<TExecutionContext>, new()

@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Helpers;
@@ -25,17 +26,27 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
 
-        public ExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string? name)
+        public ExpressionField(
+            MethodCallConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? name)
             : base(
+                  configurationContext,
                   parent,
-                  GenerateName(name, expression))
+                  GenerateName(configurationContext, name, expression))
         {
             _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
 
-        public ExpressionField(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string name)
+        public ExpressionField(
+            MethodCallConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
+            string name)
             : base(
+                  configurationContext,
                   parent,
                   name)
         {
@@ -76,16 +87,23 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public override void Validate()
         {
-            if (string.IsNullOrEmpty(Name))
+            try
             {
-                throw new InvalidOperationException("Field name cannot be null or empty.");
+                _expression.ValidateExpression();
+            }
+            catch (InvalidOperationException e)
+            {
+                ConfigurationContext.AddError(e.Message, ConfigurationContext);
             }
 
-            _expression.ValidateExpression();
+            base.Validate();
         }
 
         public void Filterable(TReturnType[]? defaultValues = null)
         {
+            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Filterable))
+                .OptionalArgument(defaultValues);
+
             if (defaultValues != null && defaultValues.Any(value => value == null))
             {
                 throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider using .Filterable(NullValues).");
@@ -103,12 +121,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Sortable()
         {
-            Parent.AddSorter(_expression);
+            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Sortable));
+
+            Parent.Sorter(_expression);
         }
 
         public void Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
-            Parent.AddSorter(Name, sorter);
+            Parent.Sorter(Name, sorter);
         }
 
         public void Groupable()
@@ -155,7 +175,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter() => throw new NotSupportedException();
 
-        private static string GenerateName(string? name, Expression<Func<TEntity, TReturnType>> expression)
+        private static string GenerateName(MethodCallConfigurationContext configurationContext, string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
             if (name != null)
             {
@@ -167,7 +187,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                 return propName.ToCamelCase();
             }
 
-            throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.");
+            configurationContext.AddError($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.", configurationContext);
+
+            return string.Empty;
         }
     }
 }

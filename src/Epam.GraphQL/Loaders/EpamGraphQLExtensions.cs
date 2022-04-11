@@ -10,7 +10,7 @@ using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Helpers;
 
-namespace Epam.GraphQL
+namespace Epam.GraphQL.Loaders
 {
     public static class EpamGraphQLExtensions
     {

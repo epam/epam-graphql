@@ -31,7 +31,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -39,7 +47,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -48,7 +64,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -57,7 +83,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
@@ -65,7 +101,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -73,7 +117,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -82,7 +134,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -91,143 +153,321 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, string>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, string>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, IDictionary<TEntity, string>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, string>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<string>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<string>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<string>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<string>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType?>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType?>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, TReturnType?>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType?>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
@@ -235,7 +475,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -243,7 +491,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -252,7 +508,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -261,7 +527,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
@@ -269,7 +545,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(
@@ -277,7 +561,15 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -286,7 +578,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(
@@ -295,143 +597,320 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc, build));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc)
+                        .OptionalArgument(build),
+                    Field,
+                    keySelector,
+                    batchFunc,
+                    build));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry, Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, string>>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, string>>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, string>>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, string, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, string>>> batchFunc)
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<string>>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<string>>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<string>>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<string>, TExecutionContext> FromBatch<TKeyType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<string>>>> batchFunc)
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType?, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType?>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchSelectableEditableBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType?>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType?>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TReturnType>(Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType?>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                        .Argument(batchFunc),
+                    Field,
+                    batchFunc));
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, IEnumerable<TReturnType?>, TExecutionContext> FromBatch<TKeyType, TReturnType>(Expression<Func<TEntity, TKeyType>> keySelector, Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType?>>>> batchFunc)
             where TReturnType : struct
         {
-            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(Registry, Field.Parent.FromBatch(Field, keySelector, batchFunc));
+            return new FromBatchEnumerableEditableBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
+                Registry,
+                Field.Parent.FromBatch(
+                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                        .Argument(keySelector)
+                        .Argument(batchFunc),
+                    Field,
+                    keySelector,
+                    batchFunc));
         }
     }
 }

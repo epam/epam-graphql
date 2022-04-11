@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -51,11 +52,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
             _types.Add(graphType);
         }
 
-        public void Validate()
+        public void Validate(MethodCallConfigurationContext configurationContext)
         {
             foreach (var type in _types)
             {
-                type.Validate();
+                type.Validate(configurationContext);
             }
         }
     }

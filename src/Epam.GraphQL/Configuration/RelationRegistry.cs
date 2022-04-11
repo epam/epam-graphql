@@ -16,6 +16,7 @@ using Epam.GraphQL.Builders.Loader.Implementations;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.Relations;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
@@ -51,6 +52,7 @@ namespace Epam.GraphQL.Configuration
         private static MethodInfo? _registerInputMethodInfo;
         private static MethodInfo? _registerLoaderMethodInfo;
         private static MethodInfo? _resolveLoaderMethodInfo;
+        private static MethodInfo? _getGraphTypeDescriptorMethodInfo;
 
         private readonly Dictionary<(Type LoaderType, Type EntityType), Relations> _relationMap = new();
         private readonly Dictionary<Type, Relations> _relationMapPostponedForSave = new();
@@ -106,7 +108,11 @@ namespace Epam.GraphQL.Configuration
             _loadersToInputObjectGraphTypeConfiguratorsMap[key].ConfigureGraphType(graphType);
         }
 
-        public IInlineGraphTypeResolver<TReturnType, TExecutionContext> Register<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, bool isInputType)
+        public IInlineGraphTypeResolver<TReturnType, TExecutionContext> Register<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IConfigurationContext configurationContext,
+            bool isInputType)
             where TReturnType : class
         {
             Guards.ThrowInvalidOperationIf(
@@ -115,57 +121,57 @@ namespace Epam.GraphQL.Configuration
 
             return (IInlineGraphTypeResolver<TReturnType, TExecutionContext>)_inlineConfiguratorsToResolversMap.GetOrAdd(
                 (typeof(TReturnType), build, parent, isInputType),
-                key => new InlineObjectBuilder<TReturnType, TExecutionContext>(key.Parent, this, (Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>?)key.Builder, key.IsInput));
+                key => new InlineObjectBuilder<TReturnType, TExecutionContext>(key.Parent, this, (Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>?)key.Builder, configurationContext, key.IsInput));
         }
 
-        public ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> Register<TProjection, TEntity>(IField<TExecutionContext>? parent)
+        public ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> Register<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class
         {
             var key = (typeof(TProjection), typeof(TEntity));
             return (ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>)_loadersToObjectGraphTypeConfiguratorsMap.GetOrAdd(
                 key,
-                _ => new ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>(parent, this));
+                _ => new ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>(this));
         }
 
-        public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType)
             where TEntity : class
         {
-            _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo<IField<TExecutionContext>, ObjectGraphTypeConfigurator<DummyMutableLoader<TExecutionContext>, object, TExecutionContext>>(
+            _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo(
                 Register<DummyMutableLoader<TExecutionContext>, object>);
 
             var methodInfo = _registerMethodInfo.MakeGenericMethod(projectionType, typeof(TEntity));
-            return methodInfo.InvokeAndHoistBaseException<ObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
+            return methodInfo.InvokeAndHoistBaseException<ObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this);
         }
 
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> IRegistry<TExecutionContext>.Register<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> IRegistry<TExecutionContext>.Register<TEntity>(Type projectionType)
         {
-            return Register<TEntity>(projectionType, parent);
+            return Register<TEntity>(projectionType);
         }
 
-        public InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> RegisterInput<TProjection, TEntity>(IField<TExecutionContext>? parent)
+        public InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> RegisterInput<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class
         {
             var key = (typeof(TProjection), typeof(TEntity));
             return (InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>)_loadersToInputObjectGraphTypeConfiguratorsMap.GetOrAdd(
                 key,
-                _ => new InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>(parent, this));
+                _ => new InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>(this));
         }
 
-        public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType)
             where TEntity : class
         {
-            _registerInputMethodInfo ??= ReflectionHelpers.GetMethodInfo<IField<TExecutionContext>?, InputObjectGraphTypeConfigurator<DummyMutableLoader<TExecutionContext>, object, TExecutionContext>>(
+            _registerInputMethodInfo ??= ReflectionHelpers.GetMethodInfo(
                 RegisterInput<DummyMutableLoader<TExecutionContext>, object>);
 
             var methodInfo = _registerInputMethodInfo.MakeGenericMethod(projectionType, typeof(TEntity));
-            return methodInfo.InvokeAndHoistBaseException<InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this, parent);
+            return methodInfo.InvokeAndHoistBaseException<InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>>(this);
         }
 
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> IRegistry<TExecutionContext>.RegisterInput<TEntity>(Type projectionType, IField<TExecutionContext>? parent)
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> IRegistry<TExecutionContext>.RegisterInput<TEntity>(Type projectionType)
         {
-            return RegisterInput<TEntity>(projectionType, parent);
+            return RegisterInput<TEntity>(projectionType);
         }
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? GetObjectGraphTypeConfigurator(Type type, Type? loaderType = null)
@@ -186,31 +192,31 @@ namespace Epam.GraphQL.Configuration
         public void ConfigureAutoObjectGraphType<TEntity>(IObjectGraphType graphType)
             where TEntity : class
         {
-            _autoEntityTypesToConfiguratorsMap.GetOrAdd(typeof(TEntity), _ => RegisterAutoObjectGraphType<TEntity>())
+            RegisterAutoObjectGraphType<TEntity>(new ObjectConfigurationContext(null))
                 .ConfigureGraphType(graphType);
         }
 
         public void ConfigureInputAutoObjectGraphType<TEntity>(IInputObjectGraphType graphType)
             where TEntity : class
         {
-            _inputAutoEntityTypesToConfiguratorsMap.GetOrAdd(typeof(TEntity), _ => RegisterInputAutoObjectGraphType<TEntity>())
+            RegisterInputAutoObjectGraphType<TEntity>(new ObjectConfigurationContext(null))
                 .ConfigureGraphType(graphType);
         }
 
-        public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterAutoObjectGraphType<TEntity>()
+        public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext)
             where TEntity : class
         {
             return (ObjectGraphTypeConfigurator<TEntity, TExecutionContext>)_autoEntityTypesToConfiguratorsMap.GetOrAdd(
                 typeof(TEntity),
-                _ => new ObjectGraphTypeConfigurator<TEntity, TExecutionContext>(null, this, true, true));
+                _ => new ObjectGraphTypeConfigurator<TEntity, TExecutionContext>(null, configurationContext, this, isAuto: true));
         }
 
-        public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>()
+        public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext)
             where TEntity : class
         {
             return (InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>)_inputAutoEntityTypesToConfiguratorsMap.GetOrAdd(
                 typeof(TEntity),
-                _ => new InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>(null, this, true, true));
+                _ => new InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>(null, configurationContext, this, isAuto: true));
         }
 
         public void Register<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> idExpression)
@@ -631,34 +637,43 @@ namespace Epam.GraphQL.Configuration
             }
         }
 
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChildConfigurationContext configurationContext)
             where TReturnType : class
         {
-            return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, false);
+            if (build == null)
+            {
+                return GetGraphTypeDescriptor<TReturnType>(parent, configurationContext.Parent, false);
+            }
+
+            return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, configurationContext, false);
         }
 
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChildConfigurationContext configurationContext)
             where TReturnType : class
         {
-            return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, true);
+            if (build == null)
+            {
+                return GetGraphTypeDescriptor<TReturnType>(parent, configurationContext.Parent, true);
+            }
+
+            return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, configurationContext, true);
         }
 
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent) => GetGraphTypeDescriptor<TReturnType>(parent, false);
+        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent) => GetGraphTypeDescriptor<TReturnType>(parent, parent.ConfigurationContext, false);
 
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent) => GetGraphTypeDescriptor<TReturnType>(parent, true);
+        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent) => GetGraphTypeDescriptor<TReturnType>(parent, parent.ConfigurationContext, true);
 
         public IGraphTypeDescriptor<TEntity, TExecutionContext> GetGraphTypeDescriptor<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
             where TEntity : class
         {
             return new EntityGraphTypeDescriptor<TProjection, TEntity, TExecutionContext>(this, false);
-        }
-
-        public IGraphTypeDescriptor<TEntity, TExecutionContext> GetInputGraphTypeDescriptor<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
-        {
-            return new EntityGraphTypeDescriptor<TProjection, TEntity, TExecutionContext>(this, true);
         }
 
         public Type GenerateGraphType(Type type)
@@ -695,14 +710,42 @@ namespace Epam.GraphQL.Configuration
             return GetGraphQLTypePrefix(parentConfigurator.Parent);
         }
 
-        private IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, bool isInput)
+        private IGraphTypeDescriptor<TExecutionContext> GetGraphTypeDescriptor(
+            Type type,
+            IField<TExecutionContext> parent,
+            IConfigurationContext configurationContext,
+            bool isInput)
+        {
+            _getGraphTypeDescriptorMethodInfo ??= ReflectionHelpers.GetMethodInfo<IField<TExecutionContext>, IConfigurationContext, bool, IGraphTypeDescriptor<object, TExecutionContext>>(GetGraphTypeDescriptor<object>);
+
+            return _getGraphTypeDescriptorMethodInfo
+                .MakeGenericMethod(type)
+                .InvokeAndHoistBaseException<IGraphTypeDescriptor<TExecutionContext>>(this, parent, configurationContext, isInput);
+        }
+
+        private IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            IConfigurationContext configurationContext,
+            bool isInput)
         {
             if (parent == null || typeof(TReturnType).IsValueType || typeof(TReturnType) == typeof(string))
             {
                 return new GraphTypeDescriptor<TReturnType, TExecutionContext>(this, isInput);
             }
 
-            return (IGraphTypeDescriptor<TReturnType, TExecutionContext>)typeof(ObjectGraphTypeDescriptor<,>).MakeGenericType(typeof(TReturnType), typeof(TExecutionContext)).CreateInstanceAndHoistBaseException(parent, this, null, isInput);
+            if (typeof(TReturnType) != typeof(string) && typeof(TReturnType).IsEnumerableType())
+            {
+                var elementType = typeof(TReturnType).GetEnumerableElementType();
+                var elementDescriptor = GetGraphTypeDescriptor(elementType, parent, configurationContext, isInput);
+
+                return (IGraphTypeDescriptor<TReturnType, TExecutionContext>)typeof(ListGraphTypeDescriptor<,,>)
+                    .MakeGenericType(elementType, typeof(TReturnType), typeof(TExecutionContext))
+                    .CreateInstanceAndHoistBaseException(elementDescriptor);
+            }
+
+            return (IGraphTypeDescriptor<TReturnType, TExecutionContext>)typeof(ObjectGraphTypeDescriptor<,>)
+                .MakeGenericType(typeof(TReturnType), typeof(TExecutionContext))
+                .CreateInstanceAndHoistBaseException(parent, this, null, configurationContext, isInput);
         }
 
         private bool TryGetGraphValueType(Type type, out Type graphType)
@@ -748,16 +791,13 @@ namespace Epam.GraphQL.Configuration
                     return graphType;
                 }
 
-                throw new ArgumentOutOfRangeException(
-                    nameof(type),
-                    $"The type: Nullable<{elementType.Name}> cannot be coerced effectively to a GraphQL type");
+                throw new InvalidOperationException($"The type: Nullable<{elementType.HumanizedName()}> cannot be coerced effectively to a GraphQL type.");
             }
 
             if (type.IsValueType)
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(type),
-                    $"The type: {type.Name} cannot be coerced effectively to a GraphQL type");
+                throw new InvalidOperationException(
+                    $"The type: {type.HumanizedName()} cannot be coerced effectively to a GraphQL type.");
             }
 
             return generateInputType

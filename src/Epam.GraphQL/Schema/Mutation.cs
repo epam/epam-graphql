@@ -116,7 +116,14 @@ namespace Epam.GraphQL
         protected internal new IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            var field = Configurator.AddField(new MutationField<TExecutionContext>(this, Configurator, name), deprecationReason);
+            var field = Configurator.AddField(
+                new MutationField<TExecutionContext>(
+                    Configurator.ConfigurationContext.Operation(nameof(Field))
+                        .Argument(name),
+                    this,
+                    Configurator,
+                    name),
+                deprecationReason);
             return field;
         }
 
@@ -154,7 +161,13 @@ namespace Epam.GraphQL
             Type fieldType)
         {
             ThrowIfIsNotConfiguring();
-            Configurator.AddSubmitField(name, returnGraphType, argName, argGraphType, resolve, fieldType);
+            Configurator.AddSubmitField(
+                name,
+                returnGraphType,
+                argName,
+                argGraphType,
+                resolve,
+                fieldType);
         }
 
         private async Task<object> PerformResolve(IResolveFieldContext context, Dictionary<string, object> payload)

@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -24,8 +25,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public FieldExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TEntity, TReturnType>> expression)
         {
-            Guards.ThrowIfNullOrEmpty(name, nameof(name));
-
             _originalExpression = expression;
             ContextedExpression = Expression.Lambda<Func<TExecutionContext, TEntity, TReturnType>>(
                 _originalExpression.Body,
@@ -39,6 +38,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         public bool IsReadOnly => !_originalExpression.IsProperty() && !typeof(Input).IsAssignableFrom(typeof(TEntity));
 
         public string Name { get; }
+
+        public MethodCallConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         public PropertyInfo? PropertyInfo => _originalExpression.IsProperty() ? _originalExpression.GetPropertyInfo() : null;
 

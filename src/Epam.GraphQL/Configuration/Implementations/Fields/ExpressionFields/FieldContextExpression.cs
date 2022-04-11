@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Sorters;
@@ -23,8 +24,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
         {
-            Guards.ThrowIfNullOrEmpty(name, nameof(name));
-
             _expression = expression;
             _field = field;
             Name = name;
@@ -41,6 +40,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         public PropertyInfo? PropertyInfo => null;
 
         public string Name { get; }
+
+        public MethodCallConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         public void ValidateExpression()
         {

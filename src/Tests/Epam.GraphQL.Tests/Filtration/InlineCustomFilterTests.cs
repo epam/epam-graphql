@@ -266,41 +266,6 @@ namespace Epam.GraphQL.Tests.Filtration
             TestHelpers.TestQuery(mutableBuilder, Query, Expected);
         }
 
-        [Test]
-        public void ShouldThrowIfCustomFilterHasTheSameNameWithFilterableFieldTest()
-        {
-            var builder = CreateQueryBuilder(
-                loader =>
-                {
-                    loader.Field(p => p.Id);
-                    loader.Field(p => p.FullName).Filterable();
-                    loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
-                });
-
-            var mutableBuilder = CreateQueryMutableBuilder(
-                loader =>
-                {
-                    loader.Field(p => p.Id);
-                    loader.Field(p => p.FullName);
-                    loader.Field(p => p.FullName).Filterable();
-                    loader.Filter<string>("fullName", name => p => p.FullName.Contains(name));
-                });
-
-            const string Query = @"
-                query {
-                    people(filter:{
-                        fullName: ""v""
-                    }) {
-                        items {
-                            id
-                        }
-                    }
-                }";
-
-            TestHelpers.TestQueryError(builder, typeof(InvalidOperationException), "A field with the name `fullName` is already registered.", Query);
-            TestHelpers.TestQueryError(mutableBuilder, typeof(InvalidOperationException), "A field with the name `fullName` is already registered.", Query);
-        }
-
         private Action<Query<TestUserContext>> CreateQueryBuilder(Action<Loader<Person, TestUserContext>> personLoaderBuilder, Action<Query<TestUserContext>> configure = null)
         {
             var personLoader = GraphQLTypeBuilder.CreateLoaderType(

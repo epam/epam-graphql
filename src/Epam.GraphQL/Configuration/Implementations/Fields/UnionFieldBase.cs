@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
@@ -14,15 +15,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         where TEntity : class
     {
         protected UnionFieldBase(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory)
-            : this(parent, name, unionType, graphTypeFactory, new List<Type>(), new UnionGraphTypeDescriptor<TExecutionContext>())
+            : this(configurationContext, parent, name, unionType, graphTypeFactory, new List<Type>(), new UnionGraphTypeDescriptor<TExecutionContext>())
         {
         }
 
         protected UnionFieldBase(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
@@ -30,6 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : this(
+                configurationContext,
                 parent,
                 name,
                 new List<Type>(unionTypes)
@@ -42,11 +46,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         protected UnionFieldBase(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : base(
+                  configurationContext,
                   parent,
                   name)
         {

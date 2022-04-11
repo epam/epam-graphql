@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
+using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {
@@ -32,14 +34,37 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            return Field.Parent.FromIQueryableClass(Field, query, condition, build);
+            var configurationContext = Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+                .Argument(query)
+                .Argument(condition)
+                .OptionalArgument(build);
+
+            var graphType = Field.Parent.GetGraphQLTypeDescriptor(Field, build, configurationContext);
+
+            var result = new QueryableField<TEntity, TReturnType, TExecutionContext>(
+                configurationContext.Parent,
+                Field.Parent,
+                Field.Name,
+                query,
+                condition,
+                graphType,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
+            return Field.Parent.ReplaceField(Field, result);
         }
 
         public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition)
         {
-            return Field.Parent.FromIQueryable(Field, query, condition);
+            return Field.Parent.FromIQueryable(
+                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+                    .Argument(query)
+                    .Argument(condition),
+                Field,
+                query,
+                condition);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)

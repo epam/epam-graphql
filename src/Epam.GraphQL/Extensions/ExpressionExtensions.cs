@@ -176,18 +176,18 @@ namespace Epam.GraphQL.Extensions
                 throw new InvalidCastException($"Cannot replace parameter of type {expression.Parameters[0].Type.Name} by parameter of type {parameter.Type.Name}.");
             }
 
-            return ExpressionHelpers.ParameterRebinder<ParameterExpression>.ReplaceParameter(expression.Body, expression.Parameters[0], parameter);
+            return ExpressionHelpers.ParameterRebinder<ParameterExpression, ParameterExpression>.ReplaceParameter(expression.Body, expression.Parameters[0], parameter);
         }
 
         public static Expression ReplaceParameter(this Expression expression, ParameterExpression parameter, Expression parameterReplacement)
         {
-            return ExpressionHelpers.ParameterRebinder<Expression>.ReplaceParameter(expression, parameter, parameterReplacement);
+            return ExpressionHelpers.ParameterRebinder<ParameterExpression, Expression>.ReplaceParameter(expression, parameter, parameterReplacement);
         }
 
         public static Expression ReplaceParameters<T>(this Expression expression, IReadOnlyDictionary<ParameterExpression, T> paramMap)
             where T : Expression
         {
-            return ExpressionHelpers.ParameterRebinder<T>.ReplaceParameters(paramMap, expression);
+            return ExpressionHelpers.ParameterRebinder<ParameterExpression, T>.ReplaceParameters(paramMap, expression);
         }
 
         public static LambdaExpression ReplaceFirstParameter(this LambdaExpression expression, Expression parameterReplacement)

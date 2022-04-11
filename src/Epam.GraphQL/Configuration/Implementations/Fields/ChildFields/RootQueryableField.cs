@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -25,6 +26,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IRootQueryableField<TReturnType, TExecutionContext>
     {
         public RootQueryableField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
@@ -32,6 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   query: ctx => query(ctx.GetUserContext<TExecutionContext>()),
@@ -45,6 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         public RootQueryableField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver,
@@ -54,6 +58,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -68,6 +73,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
             var connectionField = new RootConnectionQueryableField<TReturnType, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsConnection)).Argument(order),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -82,6 +88,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsGroupConnection()
         {
             var connectionField = new RootGroupConnectionQueryableField<TReturnType, TExecutionContext>(
+                ConfigurationContext.NextOperation(nameof(AsGroupConnection)),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -93,9 +100,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override RootQueryableField<TReturnType, TExecutionContext> ReplaceResolver(IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
+        protected override RootQueryableField<TReturnType, TExecutionContext> ReplaceResolver(MethodCallConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
         {
-            return new RootQueryableField<TReturnType, TExecutionContext>(
+            var queryableField = new RootQueryableField<TReturnType, TExecutionContext>(
+                configurationContext,
                 Parent,
                 Name,
                 resolver,
@@ -104,6 +112,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 Arguments,
                 Searcher,
                 NaturalSorters);
+
+            return queryableField;
         }
     }
 }

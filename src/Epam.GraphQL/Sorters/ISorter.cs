@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Sorters
 {
@@ -16,5 +17,7 @@ namespace Epam.GraphQL.Sorters
         LambdaExpression OriginalExpression { get; }
 
         LambdaExpression BuildExpression(TExecutionContext context);
+
+        MethodCallConfigurationContext ConfigurationContext { get; }
     }
 }

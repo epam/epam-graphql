@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -23,7 +24,15 @@ namespace Epam.GraphQL
         protected internal new IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            var field = Configurator.AddField(new QueryField<TExecutionContext>(Configurator, name), deprecationReason);
+
+            var field = Configurator.AddField(
+                new QueryField<TExecutionContext>(
+                    Configurator.ConfigurationContext.Operation(nameof(Field))
+                        .Argument(name),
+                    Configurator,
+                    name),
+                deprecationReason);
+
             return field;
         }
 
@@ -38,7 +47,20 @@ namespace Epam.GraphQL
         protected internal IConnectionField Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
+            ThrowIfIsNotConfiguring();
+
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
+            {
+                // TODO Make Dummy IConnectionField implementation
+                var configurationContext = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(Connection))
+                    .Argument(name);
+
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+
+                throw new ConfigurationException(msg);
+            }
+
             _connectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
                 Connection<DummyMutableLoader<TExecutionContext>, object>);
 
@@ -67,7 +89,17 @@ namespace Epam.GraphQL
         protected internal IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
+            ThrowIfIsNotConfiguring();
+
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
+            {
+                var configurationContext = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(GroupConnection))
+                    .Argument(name);
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+                throw new ConfigurationException(msg);
+            }
+
             _groupConnectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
                 GroupConnection<DummyMutableLoader<TExecutionContext>, object>);
 

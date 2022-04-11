@@ -642,6 +642,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -712,6 +713,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -783,6 +785,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -855,6 +858,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -930,6 +934,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -1015,6 +1020,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -1102,6 +1108,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1189,6 +1196,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1499,6 +1507,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1621,6 +1630,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1742,6 +1752,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1874,6 +1885,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -2000,6 +2012,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,

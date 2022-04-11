@@ -14,7 +14,7 @@ namespace Epam.GraphQL.Loaders
         where TEntity : class
     {
         protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-           => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>(AddField(null, expression, deprecationReason));
+           => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>(AddField(expression, deprecationReason));
 
         protected internal IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
             => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>(AddField(name, expression, deprecationReason));
@@ -23,12 +23,30 @@ namespace Epam.GraphQL.Loaders
             => new FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>(AddField(name, expression, deprecationReason));
 
         protected internal void Filter<TValueType>(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-            => AddFilter(name, filterPredicateFactory);
+        {
+            ThrowIfIsNotConfiguring();
+            if (!IsConfiguringInputType)
+            {
+                Configurator.Filter(name, filterPredicateFactory);
+            }
+        }
 
         protected internal void Filter<TValueType>(string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-            => AddFilter(name, filterPredicateFactory);
+        {
+            ThrowIfIsNotConfiguring();
+            if (!IsConfiguringInputType)
+            {
+                Configurator.Filter(name, filterPredicateFactory);
+            }
+        }
 
         protected internal void Sorter<TValueType>(string name, Expression<Func<TEntity, TValueType>> selector)
-            => AddSorter(name, selector);
+        {
+            if (!IsConfiguringInputType)
+            {
+                ThrowIfIsNotConfiguring();
+                Configurator.Sorter(name, selector);
+            }
+        }
     }
 }

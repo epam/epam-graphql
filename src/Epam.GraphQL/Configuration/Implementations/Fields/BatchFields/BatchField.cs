@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
@@ -22,12 +23,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public BatchField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
+                configurationContext,
                 parent,
                 name,
                 new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -36,12 +39,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
+                configurationContext,
                 parent,
                 name,
                 new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
@@ -50,11 +55,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         protected BatchField(
+            MethodCallConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, TReturnType> resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(parent, name)
+            : base(configurationContext, parent, name)
         {
             _graphType = graphType;
 
@@ -81,12 +87,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         protected IBatchResolver<TEntity, TReturnType> BatchFieldResolver { get; }
 
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector)
+        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            MethodCallConfigurationContext configurationContext,
+            Func<TReturnType, TReturnType1> selector)
         {
-            return Parent.ApplySelect<TReturnType1>(this, BatchFieldResolver.Select(selector));
+            return Parent.ApplySelect<TReturnType1>(configurationContext, this, BatchFieldResolver.Select(selector));
         }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            MethodCallArgumentConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
@@ -96,16 +105,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
+            MethodCallConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector)
         {
-            return ApplySelect(selector);
+            return ApplySelect(configurationContext, selector);
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
+            MethodCallArgumentConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            return ApplySelect(selector, build);
+            return ApplySelect(configurationContext, selector, build);
         }
     }
 }

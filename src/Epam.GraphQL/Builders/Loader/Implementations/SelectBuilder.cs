@@ -24,24 +24,35 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public void Select<TReturnType1>(Func<TReturnType, TReturnType1> selector)
             where TReturnType1 : struct
         {
-            Field.ApplySelect(selector);
+            Field.ApplySelect(
+                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                selector);
         }
 
         public void Select<TReturnType1>(Func<TReturnType, TReturnType1?> selector)
             where TReturnType1 : struct
         {
-            Field.ApplySelect(selector);
+            Field.ApplySelect(
+                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                selector);
         }
 
         public void Select(Func<TReturnType, string> selector)
         {
-            Field.ApplySelect(selector);
+            Field.ApplySelect(
+                Field.ConfigurationContext.NextOperation(nameof(Select)).Argument(selector),
+                selector);
         }
 
         public void Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
         {
-            Field.ApplySelect(selector, build);
+            Field.ApplySelect(
+                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(Select))
+                    .Argument(selector)
+                    .OptionalArgument(build),
+                selector,
+                build);
         }
     }
 }
