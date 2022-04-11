@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Common;
@@ -366,6 +367,20 @@ namespace Epam.GraphQL.Tests
                 new[] { typeof(TParentEntity), parentLoaderType },
                 new[] { typeof(Expression<Func<TParentEntity, TReturnType>>), typeof(Expression<Func<TEntity, TParentEntity>>), typeof(RelationType) });
             return (IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>)foreignKeyMethodInfo.InvokeAndHoistBaseException(builder, parentProperty, navigationProperty, relationType);
+        }
+
+        public static Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TEntity, TExecutionContext>(
+            this ISchemaExecuter<TExecutionContext> schemaExecuter,
+            Type projectionType,
+            TExecutionContext executionContext,
+            Dictionary<string, object> filterValue)
+        {
+            var methodInfo = typeof(ISchemaExecuter<TExecutionContext>).GetPublicGenericMethod(
+                nameof(ISchemaExecuter<TExecutionContext>.GetExpressionByFilterValue),
+                new[] { projectionType, typeof(TEntity) },
+                new[] { typeof(TExecutionContext), typeof(Dictionary<string, object>) });
+
+            return methodInfo.InvokeAndHoistBaseException<Expression<Func<TEntity, bool>>>(schemaExecuter, executionContext, filterValue);
         }
 
         internal static ProjectionBase<TEntity, TExecutionContext> ResolveLoader<TEntity, TExecutionContext>(

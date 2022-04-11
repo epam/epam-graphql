@@ -4,6 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
@@ -66,6 +68,24 @@ namespace Epam.GraphQL
                 var documentExecuter = new DocumentExecuter();
                 return await documentExecuter.ExecuteAsync(executionOptions).ConfigureAwait(false);
             }
+        }
+
+        public Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object> filterValue)
+            where TProjection : Projection<TEntity, TExecutionContext>, new()
+            where TEntity : class
+        {
+            Guards.ThrowIfNull(filterValue, nameof(filterValue));
+
+            var projection = Registry.ResolveLoader<TProjection, TEntity>();
+            var configurator = projection.ObjectGraphTypeConfigurator;
+
+            if (!configurator.HasInlineFilters)
+            {
+                throw new NotSupportedException();
+            }
+
+            var filters = configurator.CreateInlineFilters();
+            return (Expression<Func<TEntity, bool>>)filters.BuildExpression(executionContext, filterValue.ToObject(filters.FilterType));
         }
 
         private static object StringToSortDirection(object value)

@@ -3,7 +3,11 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Epam.GraphQL.Loaders;
 using GraphQL;
 
 namespace Epam.GraphQL
@@ -19,6 +23,10 @@ namespace Epam.GraphQL
         /// </summary>
         /// <returns> A result of GraphQL query execution. </returns>
         Task<ExecutionResult> ExecuteAsync(SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions);
+
+        Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object> filterValue)
+            where TProjection : Projection<TEntity, TExecutionContext>, new()
+            where TEntity : class;
     }
 
     /// <inheritdoc/>
