@@ -44,7 +44,11 @@ namespace Epam.GraphQL.Diagnostics
 
         protected override string DoGetError(string message)
         {
-            return $"Error during {typeof(TProjection).HumanizedName()}.OnConfigure() call.\r\n{message}";
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"Error during {typeof(TProjection).HumanizedName()}.OnConfigure() call.");
+            stringBuilder.Append(message);
+
+            return stringBuilder.ToString();
         }
     }
 }

@@ -882,29 +882,6 @@ namespace Epam.GraphQL.Enums
 }
 namespace Epam.GraphQL
 {
-    public static class EpamGraphQLExtensions
-    {
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Collections.Generic.IEnumerable<TReturnType>> resolve)
-            where TEntity :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve)
-            where TEntity :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<TReturnType>> resolve)
-            where TEntity :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, TReturnType> resolve)
-            where TEntity :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity :  class
-            where TReturnType :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity :  class
-            where TReturnType :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity :  class
-            where TReturnType :  class { }
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity :  class
-            where TReturnType :  class { }
-    }
     public static class ExecutionResultExtensions
     {
         public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.IDocumentWriter documentWriter) { }
@@ -1145,6 +1122,29 @@ namespace Epam.GraphQL.Infrastructure
 }
 namespace Epam.GraphQL.Loaders
 {
+    public static class EpamGraphQLExtensions
+    {
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Collections.Generic.IEnumerable<TReturnType>> resolve)
+            where TEntity :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve)
+            where TEntity :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<TReturnType>> resolve)
+            where TEntity :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, TReturnType> resolve)
+            where TEntity :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Collections.Generic.IEnumerable<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+            where TEntity :  class
+            where TReturnType :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<TReturnType>>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+            where TEntity :  class
+            where TReturnType :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, System.Threading.Tasks.Task<TReturnType>> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+            where TEntity :  class
+            where TReturnType :  class { }
+        public static void Resolve<TEntity, TReturnType, TExecutionContext>(this Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext> field, System.Func<TEntity, TReturnType> resolve, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+            where TEntity :  class
+            where TReturnType :  class { }
+    }
     public interface IBatchFieldChange<out TEntity, out T, out TBatchReturnType, TExecutionContext> : Epam.GraphQL.Loaders.IFieldChange<TExecutionContext>, Epam.GraphQL.Loaders.IFieldChange<TEntity, TExecutionContext>, Epam.GraphQL.Loaders.IFieldChange<TEntity, T, TExecutionContext>
     {
         TBatchReturnType BatchEntity { get; }

@@ -663,6 +663,92 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
         }
 
+        [Test]
+        public void ThrowIfCustomSorterHasFieldName()
+        {
+            var personLoader = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id).Sortable();
+                    loader.Sorter("id", p => p.Id);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id));
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A sorter with the name `id` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => p.Id)",
+                        "        .Sortable(); // <-----",
+                        string.Empty,
+                        "    Sorter(",
+                        "        \"id\",",
+                        "        p => p.Id); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoader, "people");
+            }
+        }
+
+        [Test]
+        public void ThrowIfCustomSorterRegisteredTwice()
+        {
+            var personLoader = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Sorter("customSorter", p => p.Id);
+                    loader.Sorter("customSorter", p => p.Id);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable(),
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                applyNaturalThenBy: q => q.ThenBy(p => p.Id));
+
+            Assert.Throws(
+                Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
+                    ConcatLines(
+                        "Error during PersonLoader.OnConfigure() call.",
+                        "A sorter with the name `customSorter` is already registered.",
+                        "Details:",
+                        "public override void OnConfigure()",
+                        "{",
+                        "    Field(p => p.Id);",
+                        string.Empty,
+                        "    Sorter(",
+                        "        \"customSorter\",",
+                        "        p => p.Id); // <-----",
+                        string.Empty,
+                        "    Sorter(",
+                        "        \"customSorter\",",
+                        "        p => p.Id); // <-----",
+                        "}")),
+                () =>
+                {
+                    var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+                    ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+                });
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoader, "people");
+            }
+        }
+
         private static string ConcatLines(params string[] lines)
         {
             var sb = new StringBuilder();
