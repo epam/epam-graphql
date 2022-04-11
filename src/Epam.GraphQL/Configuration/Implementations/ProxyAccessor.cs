@@ -426,24 +426,30 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .Where(field => field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var orderedFields = fieldNames.Select(f => unorderedFields.First(u => u.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
 
-            var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
-
             var contextParam = Expression.Parameter(typeof(TExecutionContext));
             var entiyParam = Expression.Parameter(typeof(TEntity));
 
-            var newExpr = Expression.New(ctor);
-            var initExpr = Expression.MemberInit(
-                newExpr,
-                orderedFields
-                    .Select(f =>
-                    {
-                        var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
-                        return Expression.Bind(
-                            typeof(TType).GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase),
-                            expr.Body.ReplaceParameter(expr.Parameters[0], entiyParam));
-                    }));
+            if (orderedFields.Any())
+            {
+                var ctor = typeof(TType).GetConstructors().Single(c => c.GetParameters().Length == 0);
 
-            return Expression.Lambda<Func<TExecutionContext, TEntity, TType>>(initExpr, contextParam, entiyParam);
+                var newExpr = Expression.New(ctor);
+                var initExpr = Expression.MemberInit(
+                    newExpr,
+                    orderedFields
+                        .Select(f =>
+                        {
+                            var expr = f.ContextExpression.ReplaceFirstParameter(contextParam);
+                            return Expression.Bind(
+                                typeof(TType).GetProperty(f.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase),
+                                expr.Body.ReplaceParameter(expr.Parameters[0], entiyParam));
+                        }));
+
+                return Expression.Lambda<Func<TExecutionContext, TEntity, TType>>(initExpr, contextParam, entiyParam);
+            }
+
+            var nullExpression = Expression.Constant(null, typeof(TType));
+            return Expression.Lambda<Func<TExecutionContext, TEntity, TType>>(nullExpression, contextParam, entiyParam);
         }
 
         private LambdaExpression CreateGroupKeySelectorExpression(

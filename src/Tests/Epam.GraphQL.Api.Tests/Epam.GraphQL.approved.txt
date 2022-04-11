@@ -911,6 +911,9 @@ namespace Epam.GraphQL
     public interface ISchemaExecuter<TExecutionContext>
     {
         System.Threading.Tasks.Task<GraphQL.ExecutionResult> ExecuteAsync(Epam.GraphQL.SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions);
+        System.Linq.Expressions.Expression<System.Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, System.Collections.Generic.Dictionary<string, object> filterValue)
+            where TProjection : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, new ()
+            where TEntity :  class;
     }
     public interface ISchemaExecuter<TQuery, TExecutionContext> : Epam.GraphQL.ISchemaExecuter<TExecutionContext>
         where TQuery : Epam.GraphQL.Query<TExecutionContext>, new () { }
@@ -975,6 +978,9 @@ namespace Epam.GraphQL
         protected SchemaExecuter(Epam.GraphQL.SchemaOptions options) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<GraphQL.ExecutionResult> ExecuteAsync(Epam.GraphQL.SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions) { }
+        public System.Linq.Expressions.Expression<System.Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, System.Collections.Generic.Dictionary<string, object> filterValue)
+            where TProjection : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, new ()
+            where TEntity :  class { }
     }
     public class SchemaExecuter<TQuery, TExecutionContext> : Epam.GraphQL.SchemaExecuter<TExecutionContext>, Epam.GraphQL.ISchemaExecuter<TExecutionContext>, Epam.GraphQL.ISchemaExecuter<TQuery, TExecutionContext>
         where TQuery : Epam.GraphQL.Query<TExecutionContext>, new ()
