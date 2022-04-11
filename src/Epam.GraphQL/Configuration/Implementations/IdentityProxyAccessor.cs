@@ -58,30 +58,33 @@ namespace Epam.GraphQL.Configuration.Implementations
                 if (hasItem)
                 {
                     return query
-                        .GroupBy(x => x)
-                        .Select(x => new GroupResult<TEntity>
-                        {
-                            Item = x.Key,
-                            Count = x.Count(),
-                        });
+                        .GroupBy(
+                            x => x,
+                            (key, rows) => new GroupResult<TEntity>
+                            {
+                                Item = key,
+                                Count = rows.Count(),
+                            });
                 }
 
                 return query
-                    .GroupBy(x => 0)
-                    .Select(x => new GroupResult<TEntity>
-                    {
-                        Count = x.Count(),
-                    });
+                    .GroupBy(
+                        x => 0,
+                        (_, rows) => new GroupResult<TEntity>
+                        {
+                            Count = rows.Count(),
+                        });
             }
 
             Guards.AssertField(!hasItem, context);
 
             return query
-                .GroupBy(x => x)
-                .Select(x => new GroupResult<TEntity>
-                {
-                    Item = x.Key,
-                });
+                .GroupBy(
+                    x => x,
+                    (key, _) => new GroupResult<TEntity>
+                    {
+                        Item = key,
+                    });
         }
 
         public void RemoveMember<TResult>(Expression<Func<TEntity, TResult>> member)
