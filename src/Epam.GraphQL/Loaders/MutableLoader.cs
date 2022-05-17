@@ -368,7 +368,7 @@ namespace Epam.GraphQL.Loaders
 
                         if (!canUpdate)
                         {
-                            throw new ExecutionError("Cannot update entity: Unauthorized.");
+                            throw new ExecutionError($"Cannot update entity (type: {typeof(TEntity).HumanizedName()}): Unauthorized.");
                         }
                     }
 
@@ -418,7 +418,7 @@ namespace Epam.GraphQL.Loaders
 
                         if (!canCreate)
                         {
-                            throw new ExecutionError("Cannot create entity: Unauthorized.");
+                            throw new ExecutionError($"Cannot create entity (type: {typeof(TEntity).HumanizedName()}): Unauthorized.");
                         }
                     }
 
