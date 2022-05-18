@@ -166,7 +166,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot create entity: Unauthorized.",
+                "Cannot create entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -213,7 +213,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot update entity: Unauthorized.",
+                "Cannot update entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -377,7 +377,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot create entity: Unauthorized.",
+                "Cannot create entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -427,7 +427,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot update entity: Unauthorized.",
+                "Cannot update entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -594,7 +594,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot create entity: Unauthorized.",
+                "Cannot create entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -645,7 +645,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot update entity: Unauthorized.",
+                "Cannot update entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -687,7 +687,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot create entity: Unauthorized.",
+                "Cannot create entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
@@ -729,7 +729,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 QueryBuilder,
                 MutationBuilder,
                 typeof(ExecutionError),
-                "Cannot update entity: Unauthorized.",
+                "Cannot update entity (type: Person): Unauthorized.",
                 @"mutation {
                     submit(payload: {
                         people: [{
