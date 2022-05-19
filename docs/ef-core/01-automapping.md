@@ -1,11 +1,11 @@
 # Entity Framework Core Usage Basics: Automapping
 
-[DbContext](../02-ef-schema.md#dbcontext) and [models](../02-ef-schema.md#models) models for this example are defined in the [Epam.GraphQL.Samples.Data project](../../samples/Epam.GraphQL.Samples.Data/).
+[DbContext](../00-samples-ef-schema.md#dbcontext) and [models](../00-samples-ef-schema.md#models) models for this example are defined in the [Epam.GraphQL.Samples.Data project](../../samples/Epam.GraphQL.Samples.Data/).
 
 Suppose we have to expose list of departments via GraphQL.
 
 ## Execution Context
-First of all, we have to define an execution context. It is a class, which is accessible during graphql fields resolution process. Usually it contains all stuff that is needed for fields querying/calculation. In our case, we should have an access to [Entity Framework DbContext](../02-ef-schema#dbcontext):
+First of all, we have to define an execution context. It is a class, which is accessible during graphql fields resolution process. Usually it contains all stuff that is needed for fields querying/calculation. In our case, we should have an access to [Entity Framework DbContext](../00-samples-ef-schema.md#dbcontext):
 
 ```csharp
 public class GraphQLExecutionContext
@@ -76,7 +76,7 @@ class Program
 }
 ```
 
-Given [the department table data](../02-ef-schema.md#Department%20Data), the code above produces the following output:
+Given [the department table data](../00-samples-ef-schema.md#Department%20Data), the code above produces the following output:
 
 ```json
 {
