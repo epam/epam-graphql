@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
@@ -20,7 +18,10 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
 {
-    internal class InlineObjectBuilder<TSourceType, TExecutionContext> : IInlineObjectBuilder<TSourceType, TExecutionContext>, IInlineGraphTypeResolver<TSourceType, TExecutionContext>
+    internal class InlineObjectBuilder<TSourceType, TExecutionContext> :
+        IInlineObjectBuilder<TSourceType, TExecutionContext>,
+        IInlineGraphTypeResolver<TSourceType, TExecutionContext>,
+        IVoid
         where TSourceType : class
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
@@ -54,7 +55,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public string Name { get => _objectGraphTypeConfigurator.Name; set => _objectGraphTypeConfigurator.Name = value; }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
+        public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
                 _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
@@ -62,10 +63,10 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 null,
                 expression,
                 deprecationReason);
-            return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TExecutionContext>(field);
+            return field;
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
+        public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
                 _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
@@ -74,10 +75,10 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 name,
                 expression,
                 deprecationReason);
-            return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TExecutionContext>(field);
+            return field;
         }
 
-        public IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason)
+        public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
                 _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
@@ -86,7 +87,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 name,
                 expression,
                 deprecationReason);
-            return new FilterableAndSortableAndGroupableFieldBuilder<TSourceType, TReturnType, TExecutionContext>(field);
+            return field;
         }
 
         public IVoid Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
@@ -96,7 +97,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 null,
                 expression,
                 deprecationReason);
-            return EmptyBuilder.Instance;
+
+            return this;
         }
 
         public IVoid Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
@@ -108,7 +110,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 name,
                 expression,
                 deprecationReason);
-            return EmptyBuilder.Instance;
+
+            return this;
         }
 
         public IVoid Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
@@ -120,7 +123,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
                 name,
                 expression,
                 deprecationReason);
-            return EmptyBuilder.Instance;
+
+            return this;
         }
 
         public IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null)

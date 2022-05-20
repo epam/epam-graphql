@@ -3,15 +3,11 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq.Expressions;
-
-namespace Epam.GraphQL.Builders.Common
+namespace Epam.GraphQL.Configuration
 {
-    public interface IHasSortable<TEntity, TReturnType>
+    public interface IExpressionField<TEntity, TFilterValueType, TExecutionContext> :
+        IFilterableField<ISortableGroupableField<TEntity, TExecutionContext>, TEntity, TFilterValueType>,
+        ISortableGroupableField<TEntity, TExecutionContext>
     {
-        TReturnType Sortable();
-
-        TReturnType Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter);
     }
 }

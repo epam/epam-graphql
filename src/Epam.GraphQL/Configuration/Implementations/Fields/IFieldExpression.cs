@@ -16,6 +16,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         PropertyInfo? PropertyInfo { get; }
 
+        LambdaExpression OriginalExpression { get; }
+
         LambdaExpression ContextedExpression { get; }
 
         void ValidateExpression();

@@ -9,7 +9,7 @@ using Epam.GraphQL.Search;
 namespace Epam.GraphQL.Configuration
 {
     /// <summary>
-    /// <see cref="IConnectionField"/> provides additional methods for filtering and search against data returned from connection.
+    /// Provides additional methods for filtering and search against data returned from connection.
     /// </summary>
     /// <seealso href="https://facebook.github.io/relay/graphql/connections.htm">Relay Connection</seealso>
     public interface IConnectionField
@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Configuration
         /// Allows to use a filter parameter on GraphQL node.
         /// </summary>
         /// <typeparam name="TFilter">Implementation of class inherited from <see cref="Filter{TEntity,TFilter,TExecutionContext}"/>.</typeparam>
-        /// <returns>Builder making possible to use a chunk of method calls.</returns>
+        /// <returns>A new configured field making possible to use a chunk of method calls.</returns>
         /// <seealso cref="WithSearch"/>
         IConnectionField WithFilter<TFilter>();
 
@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration
         /// </summary>
         /// <typeparam name="TSearcher">Implementation of class inherited from <see cref="Searcher{TEntity, TExecutionContext}"/>.</typeparam>
         /// <seealso cref="WithFilter{TLoaderFilter}"/>
-        /// <returns>Builder making possible to use a chunk of method calls.</returns>
+        /// <returns>A new configured field making possible to use a chunk of method calls.</returns>
         IConnectionField WithSearch<TSearcher>()
             where TSearcher : ISearcher;
     }
