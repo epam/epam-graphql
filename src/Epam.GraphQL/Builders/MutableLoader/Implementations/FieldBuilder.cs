@@ -7,9 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Common.Implementations;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
 using Epam.GraphQL.Enums;
@@ -19,24 +18,67 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
-    internal class FieldBuilder<TEntity, TReturnType, TExecutionContext> : FilterableAndSortableAndGroupableFieldBuilder<TEntity, TReturnType, TExecutionContext>,
+    internal class FieldBuilder<TEntity, TReturnType, TExecutionContext> :
         IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext>,
         IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext>,
         IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>,
         IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext>,
         IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>,
-        IHasFilterableAndSortableAndGroupable<TEntity, TReturnType>,
-        IHasSortableAndGroupable<TEntity>
+        IExpressionField<TEntity, TReturnType, TExecutionContext>,
+        ISortableGroupableField<TEntity, TExecutionContext>
         where TEntity : class
     {
         private readonly Type _loaderType;
         private readonly RelationRegistry<TExecutionContext> _registry;
 
         internal FieldBuilder(RelationRegistry<TExecutionContext> registry, Type loaderType, ExpressionField<TEntity, TReturnType, TExecutionContext> field)
-            : base(field)
         {
+            Field = field;
             _registry = registry;
             _loaderType = loaderType;
+        }
+
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> Field { get; }
+
+        public ISortableGroupableField<TEntity, TExecutionContext> Filterable()
+        {
+            Field.Filterable();
+            return this;
+        }
+
+        public ISortableGroupableField<TEntity, TExecutionContext> Filterable(params TReturnType[] defaultValues)
+        {
+            Field.Filterable(defaultValues);
+            return this;
+        }
+
+        public ISortableGroupableField<TEntity, TExecutionContext> Filterable(NullOption nullValue)
+        {
+            Field.Filterable(nullValue);
+            return this;
+        }
+
+        public IGroupableField Sortable()
+        {
+            Field.Sortable();
+            return this;
+        }
+
+        public IGroupableField Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
+        {
+            Field.Sortable(sorter);
+            return this;
+        }
+
+        public IGroupableField Sortable<TValue>(Func<TExecutionContext, Expression<Func<TEntity, TValue>>> sorterFactory)
+        {
+            Field.Sortable(sorterFactory);
+            return this;
+        }
+
+        public void Groupable()
+        {
+            Field.Groupable();
         }
 
         public IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(
@@ -116,13 +158,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save)
+        public IExpressionField<TEntity, TReturnType, TExecutionContext> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save)
         {
             Field.EditSettings?.SetOnWrite(save);
             return this;
         }
 
-        public IHasFilterableAndSortableAndGroupable<TEntity, TReturnType> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save)
+        public IExpressionField<TEntity, TReturnType, TExecutionContext> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save)
         {
             Field.EditSettings?.SetOnWrite(save);
             return this;

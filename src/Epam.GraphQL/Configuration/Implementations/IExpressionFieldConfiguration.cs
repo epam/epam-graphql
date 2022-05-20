@@ -9,7 +9,7 @@ using Epam.GraphQL.Filters;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
-    internal interface IExpressionField<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>
+    internal interface IExpressionFieldConfiguration<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>
     {
         PropertyInfo? PropertyInfo { get; }
 

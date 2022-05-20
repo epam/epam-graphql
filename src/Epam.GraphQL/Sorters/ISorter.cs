@@ -14,8 +14,6 @@ namespace Epam.GraphQL.Sorters
 
         bool IsGroupable { get; }
 
-        LambdaExpression OriginalExpression { get; }
-
         MethodCallConfigurationContext ConfigurationContext { get; }
 
         LambdaExpression BuildExpression(TExecutionContext context);

@@ -104,7 +104,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 {
                     // Try to look up for existing expression field with the same lambda expression
                     var existingField = Fields
-                        .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                        .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                         .FirstOrDefault(existing => ExpressionEqualityComparer.Instance.Equals(existing.OriginalExpression, depExpr));
 
                     string? newName = null;
@@ -164,7 +164,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 return result;
             }
 
-            var fieldName = Fields.OfType<IExpressionField<TEntity, TExecutionContext>>()
+            var fieldName = Fields.OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                 .FirstOrDefault(field => ExpressionEqualityComparer.Instance.Equals(expression, field.OriginalExpression))
                 ?.Name;
 
@@ -243,9 +243,9 @@ namespace Epam.GraphQL.Configuration.Implementations
             var subFields = context.GetGroupConnectionQueriedFields()
                 .Where(name => !sorting.Any(s => string.Equals(s.Field, name, StringComparison.Ordinal)))
                 .Select(name => Fields.FirstOrDefault(field => string.Equals(field.Name, name, StringComparison.Ordinal)))
-                .OfType<IExpressionField<TEntity, TExecutionContext>>();
+                .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>();
 
-            var result = sortFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.Item1.OriginalExpression)), f.Direction))
+            var result = sortFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.Item1.BuildExpression(context.GetUserContext<TExecutionContext>()))), f.Direction))
                 .Concat(subFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.OriginalExpression ?? throw new NotSupportedException())), SortDirection.Asc)));
 
             return result.ToList();
@@ -386,7 +386,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .ThenBy(p => p.DeclaringType != ProxyType)
                 .ToList();
 
-            foreach (var expressionField in queriedFields.OfType<IExpressionField<TEntity, TExecutionContext>>())
+            foreach (var expressionField in queriedFields.OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>())
             {
                 var boundExpr = expressionField.ContextExpression.ReplaceFirstParameter(contextParam);
                 var propertyInfo = properties.First(p => p.Name.Equals(expressionField.Name, StringComparison.OrdinalIgnoreCase));
@@ -422,7 +422,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         private Expression<Func<TExecutionContext, TEntity, TType>> CreateGroupSelectorExpression<TType>(IEnumerable<string> fieldNames)
         {
             var unorderedFields = Fields
-                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                 .Where(field => field.IsGroupable && fieldNames.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var orderedFields = fieldNames.Select(f => unorderedFields.First(u => u.Name.Equals(f, StringComparison.OrdinalIgnoreCase)));
 
@@ -459,7 +459,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             IEnumerable<string> aggregateQueriedFields)
         {
             var fields = Fields
-                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                 .Where(field => field.IsGroupable && subFields.Any(name => field.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
             var sourceType = GetConcreteProxyType(subFields);
 

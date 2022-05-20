@@ -12,13 +12,18 @@ namespace Epam.GraphQL.Sorters.Implementations
 {
     internal class CustomSorter<TEntity, TValueType, TExecutionContext> : ISorter<TExecutionContext>
     {
-        private readonly Expression<Func<TEntity, TValueType>> _selector;
+        private readonly Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> _selectorFactory;
 
         public CustomSorter(MethodCallConfigurationContext configurationContext, string name, Expression<Func<TEntity, TValueType>> selector)
+            : this(configurationContext, name, _ => selector)
+        {
+        }
+
+        public CustomSorter(MethodCallConfigurationContext configurationContext, string name, Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> selectorFactory)
         {
             ConfigurationContext = configurationContext;
             Name = name.ToCamelCase();
-            _selector = selector;
+            _selectorFactory = selectorFactory;
         }
 
         public MethodCallConfigurationContext ConfigurationContext { get; }
@@ -27,8 +32,6 @@ namespace Epam.GraphQL.Sorters.Implementations
 
         public bool IsGroupable => false;
 
-        public LambdaExpression OriginalExpression => _selector;
-
-        public LambdaExpression BuildExpression(TExecutionContext context) => _selector;
+        public LambdaExpression BuildExpression(TExecutionContext context) => _selectorFactory(context);
     }
 }
