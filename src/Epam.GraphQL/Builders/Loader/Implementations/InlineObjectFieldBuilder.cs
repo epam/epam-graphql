@@ -37,7 +37,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             var graphResultType = _registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             var result = new InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Field.ConfigurationContext.NextOperation<TChildLoader, TChildEntity>(nameof(FromLoader)).Argument(condition),
+                Field.ConfigurationContext.Chain<TChildLoader, TChildEntity>(nameof(FromLoader)).Argument(condition),
                 Field.Parent,
                 Field.Name,
                 condition,
@@ -57,7 +57,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -90,7 +90,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -109,7 +109,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -127,7 +127,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -143,7 +143,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -160,7 +160,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -179,7 +179,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -195,7 +195,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -206,7 +206,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -218,7 +218,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -231,7 +231,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -245,7 +245,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -256,7 +256,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -268,7 +268,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -281,7 +281,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -294,7 +294,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -305,7 +305,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -317,7 +317,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -327,7 +327,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -340,7 +340,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -351,7 +351,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -363,7 +363,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -373,7 +373,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -387,7 +387,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -399,7 +399,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -412,7 +412,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -423,7 +423,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -437,7 +437,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -449,7 +449,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -462,7 +462,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -473,7 +473,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -489,7 +489,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -505,7 +505,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -522,7 +522,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -541,7 +541,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -559,7 +559,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -575,7 +575,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc)
                         .OptionalArgument(build),
                     Field,
@@ -592,7 +592,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -611,7 +611,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new FromBatchBuilder<BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc)
                         .OptionalArgument(build),
@@ -627,7 +627,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -638,7 +638,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -650,7 +650,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -663,7 +663,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -677,7 +677,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -688,7 +688,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -700,7 +700,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -713,7 +713,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext>, TEntity, IEnumerable<TReturnType>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -726,7 +726,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -737,7 +737,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -749,7 +749,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -759,7 +759,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -772,7 +772,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -783,7 +783,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, string, TExecutionContext>, TEntity, string, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -795,7 +795,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<string>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -805,7 +805,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, string, TExecutionContext>, TEntity, IEnumerable<string>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, string>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, string>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -819,7 +819,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -831,7 +831,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -844,7 +844,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -855,7 +855,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -869,7 +869,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -881,7 +881,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return new SelectAndReferenceToBuilder<BatchField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, TReturnType?, TExecutionContext>(
                 _registry,
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,
@@ -894,7 +894,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TEntity, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TReturnType>(nameof(FromBatch))
                         .Argument(batchFunc),
                     Field,
                     batchFunc));
@@ -905,7 +905,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             return new SelectBuilder<BatchEnumerableField<TEntity, TKeyType, TReturnType?, TExecutionContext>, TEntity, IEnumerable<TReturnType?>, TExecutionContext>(
                 Field.Parent.FromBatch(
-                    Field.ConfigurationContext.NextOperation<TKeyType, TReturnType>(nameof(FromBatch))
+                    Field.ConfigurationContext.Chain<TKeyType, TReturnType>(nameof(FromBatch))
                         .Argument(keySelector)
                         .Argument(batchFunc),
                     Field,

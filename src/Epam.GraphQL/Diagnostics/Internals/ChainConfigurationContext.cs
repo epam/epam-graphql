@@ -11,18 +11,33 @@ using System.Text;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Extensions;
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
-    internal class MethodCallConfigurationContext : ConfigurationContext, IChildConfigurationContext
+    internal class ChainConfigurationContext : ConfigurationContext,
+        IChainConfigurationContext
     {
-        public MethodCallConfigurationContext(
+        private readonly IChainConfigurationContextOwner _owner;
+
+        public ChainConfigurationContext(
+            IChainConfigurationContextOwner owner,
             ObjectConfigurationContextBase parent,
-            MethodCallConfigurationContext? previous,
+            ChainConfigurationContext? previous,
             string operation)
             : base(parent)
         {
+            _owner = owner;
             Operation = operation;
             Previous = previous;
+        }
+
+        protected ChainConfigurationContext(ChainConfigurationContext toClone, Func<ConfigurationContext, IConfigurationContext> additionalChildFactory)
+            : base(toClone, additionalChildFactory)
+        {
+            _owner = toClone._owner;
+            Operation = toClone.Operation;
+            Previous = toClone.Previous;
+
+            _owner.ConfigurationContext = this;
         }
 
         public new ObjectConfigurationContextBase Parent => (ObjectConfigurationContextBase)base.Parent!;
@@ -31,7 +46,7 @@ namespace Epam.GraphQL.Diagnostics
 
         protected string Operation { get; }
 
-        protected MethodCallConfigurationContext? Previous { get; }
+        protected IChainConfigurationContext? Previous { get; }
 
         public override bool Contains(IConfigurationContext item)
         {
@@ -39,76 +54,74 @@ namespace Epam.GraphQL.Diagnostics
                 || base.Contains(item);
         }
 
-        public MethodCallConfigurationContext NextOperation(string operation)
+        public IChainConfigurationContext Chain(string operation)
         {
-            return Parent.ReplaceChild(this, new MethodCallConfigurationContext(Parent, this, operation));
+            var newContext = new ChainConfigurationContext(_owner, Parent, this, operation);
+
+            Parent.ReplaceChild(this, newContext);
+
+            _owner.ConfigurationContext = newContext;
+
+            return newContext;
         }
 
-        public MethodCallConfigurationContext NextOperation<T>(string operation)
+        public IChainConfigurationContext Chain<T>(string operation)
         {
-            return NextOperation($"{operation}<{typeof(T).HumanizedName()}>");
+            return Chain($"{operation}<{typeof(T).HumanizedName()}>");
         }
 
-        public MethodCallConfigurationContext NextOperation<T1, T2>(string operation)
+        public IChainConfigurationContext Chain<T1, T2>(string operation)
         {
-            return NextOperation($"{operation}<{typeof(T1).HumanizedName()}, {typeof(T2).HumanizedName()}>");
+            return Chain($"{operation}<{typeof(T1).HumanizedName()}, {typeof(T2).HumanizedName()}>");
         }
 
-        public MethodCallConfigurationContext Argument(string arg)
+        public IChainConfigurationContext Argument(string arg)
         {
-            AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: false));
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: false));
             return this;
         }
 
-        public MethodCallConfigurationContext Argument(Delegate arg)
+        public IChainConfigurationContext Argument(Delegate arg)
         {
-            AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: false));
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: false));
             return this;
         }
 
-        public MethodCallConfigurationContext OptionalArgument(Delegate? arg)
+        public IChainConfigurationContext OptionalArgument(Delegate? arg)
         {
-            AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: true));
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: true));
             return this;
         }
 
-        public MethodCallConfigurationContext OptionalArgument<T>(T[]? arg)
+        public IChainConfigurationContext OptionalArgument<T>(T[]? arg)
         {
-            AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: true));
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: true));
             return this;
         }
 
-        public MethodCallArgumentConfigurationContext Argument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg)
+        public IInlinedChainConfigurationContext Argument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> arg)
             where TReturnType : class
         {
-            if (arg == null)
-            {
-                return AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: false));
-            }
-
-            return AddChild(MethodCallArgumentConfigurationContext.Create(this, arg));
+            return new InlinedChainConfigurationContext(this, parent => ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg));
         }
 
-        public MethodCallArgumentConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg)
+        public IInlinedChainConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg)
             where TReturnType : class
         {
-            if (arg == null)
-            {
-                return AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: true));
-            }
-
-            return AddChild(MethodCallArgumentConfigurationContext.Create(this, arg));
+            return new InlinedChainConfigurationContext(this, parent => arg == null
+                ? ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg, optional: true)
+                : ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg));
         }
 
-        public MethodCallConfigurationContext Argument(LambdaExpression arg)
+        public IChainConfigurationContext Argument(LambdaExpression arg)
         {
-            AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: false));
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: false));
             return this;
         }
 
-        public MethodCallConfigurationContext OptionalArgument(LambdaExpression? arg)
+        public IChainConfigurationContext OptionalArgument(LambdaExpression? arg)
         {
-            AddChild(MethodCallArgumentConfigurationContext.Create(this, arg, optional: true));
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: true));
             return this;
         }
 
@@ -133,7 +146,7 @@ namespace Epam.GraphQL.Diagnostics
             }
 
             builder.Append(Operation);
-            var arguments = Children.OfType<MethodCallArgumentConfigurationContext>().ToList();
+            var arguments = Children.OfType<ChainArgumentConfigurationContext>().ToList();
             var lastIndex = arguments.Count - 1;
 
             while (lastIndex >= 0 && arguments[lastIndex].IsDefault)

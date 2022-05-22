@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         protected ObjectGraphTypeConfigurator(
-            ObjectConfigurationContextBase configurationContext,
+            IObjectConfigurationContext configurationContext,
             IField<TExecutionContext>? parent,
             IRegistry<TExecutionContext> registry)
             : base(configurationContext, parent, registry, isAuto: false)
@@ -37,7 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IChildConfigurationContext configurationContext)
+            IInlinedChainConfigurationContext configurationContext)
         {
             return Registry.GetGraphTypeDescriptor(parent, build, configurationContext);
         }
@@ -68,7 +68,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
         public ObjectGraphTypeConfigurator(IRegistry<TExecutionContext> registry)
-            : base(new ObjectConfigurationContext<TProjection>(), parent: null, registry)
+            : base(Diagnostics.ConfigurationContext.Create<TProjection>(), parent: null, registry)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(false);
         }

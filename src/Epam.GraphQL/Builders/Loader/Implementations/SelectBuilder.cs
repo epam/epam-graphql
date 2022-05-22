@@ -25,7 +25,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TReturnType1 : struct
         {
             Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
                 selector);
         }
 
@@ -33,14 +33,14 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TReturnType1 : struct
         {
             Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
                 selector);
         }
 
         public void Select(Func<TReturnType, string> selector)
         {
             Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain(nameof(Select)).Argument(selector),
                 selector);
         }
 
@@ -48,7 +48,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TReturnType1 : class
         {
             Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(Select))
+                Field.ConfigurationContext.Chain<TReturnType>(nameof(Select))
                     .Argument(selector)
                     .OptionalArgument(build),
                 selector,

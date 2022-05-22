@@ -3,20 +3,15 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
-    internal class GenericPrinter<T> : IPrinter<T>
+    internal class StringPrinter : IPrinter<string?>
     {
-        public static GenericPrinter<T> Instance { get; } = new GenericPrinter<T>();
+        public static StringPrinter Instance { get; } = new StringPrinter();
 
-        public string Print(T value)
+        public string Print(string? value)
         {
-            if (value == null)
-            {
-                return "null";
-            }
-
-            return value.ToString();
+            return value != null ? $"\"{value}\"" : "null";
         }
     }
 }

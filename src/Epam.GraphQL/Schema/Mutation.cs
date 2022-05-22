@@ -118,7 +118,7 @@ namespace Epam.GraphQL
             ThrowIfIsNotConfiguring();
             var field = Configurator.AddField(
                 new MutationField<TExecutionContext>(
-                    Configurator.ConfigurationContext.Operation(nameof(Field))
+                    owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
                         .Argument(name),
                     this,
                     Configurator,

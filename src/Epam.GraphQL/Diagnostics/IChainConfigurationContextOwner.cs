@@ -5,8 +5,8 @@
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal interface IPrinter<T>
+    internal interface IChainConfigurationContextOwner
     {
-        string Print(T value);
+        IChainConfigurationContext ConfigurationContext { get; set; }
     }
 }

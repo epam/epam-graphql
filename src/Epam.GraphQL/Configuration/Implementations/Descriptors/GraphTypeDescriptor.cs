@@ -54,7 +54,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => _configurator.Value;
 
-        public void Validate(MethodCallConfigurationContext configurationContext)
+        public void Validate(IChainConfigurationContext configurationContext)
         {
             try
             {

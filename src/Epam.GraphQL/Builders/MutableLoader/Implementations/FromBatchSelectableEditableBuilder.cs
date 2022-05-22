@@ -42,7 +42,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             where TReturnType1 : struct
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
                 selector);
 
             return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select.EditSettings);
@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             where TReturnType1 : struct
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
                 selector);
 
             return new FromBatchEditableBuilder<TSourceType, TReturnType1?, TExecutionContext>(Registry, select.EditSettings);
@@ -61,7 +61,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, string, TExecutionContext> Select(Func<TReturnType, string> selector)
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain(nameof(Select)).Argument(selector),
                 selector);
 
             return new FromBatchEditableBuilder<TSourceType, string, TExecutionContext>(Registry, select.EditSettings);
@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             where TReturnType1 : class
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(Select))
+                Field.ConfigurationContext.Chain<TReturnType>(nameof(Select))
                     .Argument(selector)
                     .OptionalArgument(build),
                 selector,

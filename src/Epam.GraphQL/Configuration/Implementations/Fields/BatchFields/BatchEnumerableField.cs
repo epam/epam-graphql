@@ -21,7 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         where TEntity : class
     {
         public BatchEnumerableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
@@ -37,7 +37,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public BatchEnumerableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
@@ -53,7 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         protected BatchEnumerableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, IEnumerable<TReturnType>> batchResolver,
@@ -77,14 +77,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         protected IBatchResolver<TEntity, IEnumerable<TReturnType>> BatchFieldResolver { get; set; }
 
         public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Func<IEnumerable<TReturnType>, T> selector)
         {
             return Parent.ApplySelect<T>(configurationContext, this, BatchFieldResolver.Select(selector));
         }
 
         public IFieldSupportsEditSettings<TEntity, T, TExecutionContext> ApplySelect<T>(
-            MethodCallArgumentConfigurationContext configurationContext,
+            IInlinedChainConfigurationContext configurationContext,
             Func<IEnumerable<TReturnType>, T> selector,
             Action<IInlineObjectBuilder<T, TExecutionContext>>? build)
             where T : class

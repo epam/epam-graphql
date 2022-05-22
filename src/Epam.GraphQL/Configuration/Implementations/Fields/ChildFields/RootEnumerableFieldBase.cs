@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IFieldSupportsEditSettings<object, IEnumerable<TReturnType>, TExecutionContext>
     {
         protected RootEnumerableFieldBase(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootEnumerableResolver<TReturnType, TExecutionContext> resolver,
@@ -50,7 +50,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
             var enumerableField = CreateSelect(
                 ConfigurationContext
-                    .NextOperation(nameof(Select))
+                    .Chain(nameof(Select))
                     .Argument(selector),
                 selector,
                 graphType);
@@ -63,13 +63,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             where TReturnType1 : class
         {
             var configurationContext = ConfigurationContext
-                .NextOperation(nameof(Select))
+                .Chain(nameof(Select))
                 .Argument(selector)
                 .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
 
-            var enumerableField = CreateSelect(configurationContext.Parent, selector, graphType);
+            var enumerableField = CreateSelect(configurationContext, selector, graphType);
             return ApplyField(enumerableField);
         }
 
@@ -79,14 +79,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             {
                 var where = ApplyField(
                     CreateWhereImpl(
-                        ConfigurationContext.NextOperation(nameof(SingleOrDefault)).Argument(predicate),
+                        ConfigurationContext.Chain(nameof(SingleOrDefault)).Argument(predicate),
                         predicate));
 
                 return Parent.ApplySelect<TReturnType>(where.ConfigurationContext, where, where.EnumerableFieldResolver.SingleOrDefault(), ElementGraphType);
             }
 
             return Parent.ApplySelect<TReturnType>(
-                ConfigurationContext.NextOperation(nameof(SingleOrDefault)),
+                ConfigurationContext.Chain(nameof(SingleOrDefault)),
                 this,
                 EnumerableFieldResolver.SingleOrDefault(),
                 ElementGraphType);
@@ -98,14 +98,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             {
                 var where = ApplyField(
                     CreateWhereImpl(
-                        ConfigurationContext.NextOperation(nameof(FirstOrDefault)).Argument(predicate),
+                        ConfigurationContext.Chain(nameof(FirstOrDefault)).Argument(predicate),
                         predicate));
 
                 return Parent.ApplySelect<TReturnType>(where.ConfigurationContext, where, where.EnumerableFieldResolver.FirstOrDefault(), ElementGraphType);
             }
 
             return Parent.ApplySelect<TReturnType>(
-                ConfigurationContext.NextOperation(nameof(FirstOrDefault)),
+                ConfigurationContext.Chain(nameof(FirstOrDefault)),
                 this,
                 EnumerableFieldResolver.FirstOrDefault(),
                 ElementGraphType);
@@ -114,18 +114,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IRootEnumerableField<TReturnType, TExecutionContext> Where(Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = CreateWhereImpl(
-                ConfigurationContext.NextOperation(nameof(Where)).Argument(predicate),
+                ConfigurationContext.Chain(nameof(Where)).Argument(predicate),
                 predicate);
             return ApplyField(enumerableField);
         }
 
         protected abstract RootEnumerableFieldBase<TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Expression<Func<TReturnType, TReturnType1>> selector,
             IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType);
 
         protected abstract RootEnumerableFieldBase<TReturnType, TExecutionContext> CreateWhereImpl(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Expression<Func<TReturnType, bool>> predicate);
     }
 
@@ -133,7 +133,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : RootEnumerableFieldBase<TThis, TReturnType, TExecutionContext>
     {
         protected RootEnumerableFieldBase(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootEnumerableResolver<TReturnType, TExecutionContext> resolver,
@@ -148,11 +148,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected abstract TThis CreateWhere(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Expression<Func<TReturnType, bool>> predicate);
 
         protected override RootEnumerableFieldBase<TReturnType, TExecutionContext> CreateWhereImpl(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Expression<Func<TReturnType, bool>> predicate)
         {
             return CreateWhere(configurationContext, predicate);

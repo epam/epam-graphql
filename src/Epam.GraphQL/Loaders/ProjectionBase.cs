@@ -108,7 +108,7 @@ namespace Epam.GraphQL.Loaders
         {
             ThrowIfIsNotConfiguring();
             return Configurator.AddField(
-                Configurator.ConfigurationContext.Operation(nameof(Field)).Argument(expression),
+                owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field)).Argument(expression),
                 null,
                 expression,
                 deprecationReason);
@@ -121,7 +121,7 @@ namespace Epam.GraphQL.Loaders
         {
             ThrowIfIsNotConfiguring();
             return Configurator.AddField(
-                Configurator.ConfigurationContext.Operation(nameof(Field))
+                owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(name)
                     .Argument(expression),
                 name,
@@ -136,7 +136,7 @@ namespace Epam.GraphQL.Loaders
         {
             ThrowIfIsNotConfiguring();
             return Configurator.AddField(
-                Configurator.ConfigurationContext.Operation(nameof(Field))
+                owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(name)
                     .Argument(expression),
                 name,

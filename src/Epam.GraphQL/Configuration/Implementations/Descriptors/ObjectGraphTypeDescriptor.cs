@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
             IField<TExecutionContext> parent,
             RelationRegistry<TExecutionContext> registry,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             bool isInput)
         {
             _resolver = registry.Register(parent, build, configurationContext, isInput);
@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         IObjectGraphTypeConfigurator<TExecutionContext> IGraphTypeDescriptor<TExecutionContext>.Configurator => Configurator;
 
-        public void Validate(MethodCallConfigurationContext configurationContext)
+        public void Validate(IChainConfigurationContext configurationContext)
         {
             _resolver.Validate(configurationContext);
 

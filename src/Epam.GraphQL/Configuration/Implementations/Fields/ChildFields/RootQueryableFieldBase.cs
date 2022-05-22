@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TThis : RootQueryableFieldBase<TThis, TThisIntf, TReturnType, TExecutionContext>, TThisIntf
     {
         protected RootQueryableFieldBase(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Func<IResolveFieldContext, IQueryable<TReturnType>> query,
@@ -56,7 +56,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected RootQueryableFieldBase(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver,
@@ -131,7 +131,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Argument("filter", filter.FilterType);
 
             var field = ReplaceResolver(
-                ConfigurationContext.NextOperation<TLoaderFilter, TFilter>(nameof(WithFilter)),
+                ConfigurationContext.Chain<TLoaderFilter, TFilter>(nameof(WithFilter)),
                 QueryableFieldResolverBase.Select(GetFilteredQuery(filter)));
 
             return ApplyField(field);
@@ -145,7 +145,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Searcher = Registry.ResolveSearcher<TSearcher, TReturnType>();
             Argument("search", typeof(string));
             var field = ReplaceResolver(
-                ConfigurationContext.NextOperation<TSearcher>(nameof(WithSearch)),
+                ConfigurationContext.Chain<TSearcher>(nameof(WithSearch)),
                 QueryableFieldResolverBase.Select(GetSearchQuery(Searcher)));
 
             return ApplyField(field);
@@ -154,14 +154,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public new TThisIntf Where(Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = CreateWhere(
-                ConfigurationContext.NextOperation(nameof(Where)).Argument(predicate),
+                ConfigurationContext.Chain(nameof(Where)).Argument(predicate),
                 predicate);
             return ApplyField(enumerableField);
         }
 
-        protected abstract TThis ReplaceResolver(MethodCallConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver);
+        protected abstract TThis ReplaceResolver(IChainConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver);
 
-        protected override TThis CreateWhere(MethodCallConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
+        protected override TThis CreateWhere(IChainConfigurationContext configurationContext, Expression<Func<TReturnType, bool>> predicate)
         {
             var queryableField = ReplaceResolver(
                 configurationContext,
@@ -170,7 +170,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected override RootEnumerableFieldBase<TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Expression<Func<TReturnType, TReturnType1>> selector,
             IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
         {

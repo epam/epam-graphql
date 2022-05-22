@@ -10,12 +10,14 @@ using NUnit.Framework;
 namespace Epam.GraphQL.Tests.Diagnostics
 {
     [TestFixture]
-    public class ObjectConfigurationContextTests
+    public class ObjectConfigurationContextTests : IChainConfigurationContextOwner
     {
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; }
+
         [Test]
         public void Empty()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
             Assert.AreEqual(
                 ConcatLines(
@@ -28,9 +30,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void OneMethod()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            context.Operation("Method");
+            context.Chain(this, "Method");
 
             Assert.AreEqual(
                 ConcatLines(
@@ -44,10 +46,10 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void MethodChain()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            context.Operation("Method")
-                .NextOperation("Second");
+            context.Chain(this, "Method")
+                .Chain("Second");
 
             Assert.AreEqual(
                 ConcatLines(
@@ -62,9 +64,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void MarkMethod()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            var method = context.Operation("Method");
+            var method = context.Chain(this, "Method");
 
             Assert.AreEqual(
                 ConcatLines(
@@ -78,10 +80,10 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void MarkFirstMethodInChain()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            var method = context.Operation("Method");
-            method.NextOperation("Second");
+            var method = context.Chain(this, "Method");
+            method.Chain("Second");
 
             Assert.AreEqual(
                 ConcatLines(
@@ -96,13 +98,13 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void MarkTwoMethodChains()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            var method1 = context.Operation("First")
-                .NextOperation("Next");
+            var method1 = context.Chain(this, "First")
+                .Chain("Next");
 
-            var method2 = context.Operation("Second")
-                .NextOperation("Next");
+            var method2 = context.Chain(this, "Second")
+                .Chain("Next");
 
             Assert.AreEqual(
                 ConcatLines(
@@ -120,13 +122,13 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void ShouldPrintPreviousAndNextAroundMarkedMethod()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            context.Operation("Previous");
+            context.Chain(this, "Previous");
 
-            var method = context.Operation("Method");
+            var method = context.Chain(this, "Method");
 
-            context.Operation("Next");
+            context.Chain(this, "Next");
 
             Assert.AreEqual(
                 ConcatLines(
@@ -144,15 +146,15 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void ShouldPrintPreviousAndNextAroundMarkedMethodButNotOthers()
         {
-            var context = new ObjectConfigurationContext<object>();
+            var context = ConfigurationContext.Create<object>();
 
-            context.Operation("First");
-            context.Operation("Previous");
+            context.Chain(this, "First");
+            context.Chain(this, "Previous");
 
-            var method = context.Operation("Method");
+            var method = context.Chain(this, "Method");
 
-            context.Operation("Next");
-            context.Operation("Last");
+            context.Chain(this, "Next");
+            context.Chain(this, "Last");
 
             Assert.AreEqual(
                 ConcatLines(

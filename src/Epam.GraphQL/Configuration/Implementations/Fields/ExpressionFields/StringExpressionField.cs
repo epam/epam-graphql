@@ -15,20 +15,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         where TEntity : class
     {
         public StringExpressionField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TEntity, string>> expression,
             string? name)
-            : base(configurationContext, parent, expression, name)
+            : base(configurationContextFactory, parent, expression, name)
         {
         }
 
         public StringExpressionField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TExecutionContext, TEntity, string>> expression,
             string name)
-            : base(configurationContext, parent, expression, name)
+            : base(configurationContextFactory, parent, expression, name)
         {
         }
 

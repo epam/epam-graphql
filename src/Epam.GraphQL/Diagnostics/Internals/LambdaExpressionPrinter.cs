@@ -3,22 +3,20 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 
-namespace Epam.GraphQL.Filters
+namespace Epam.GraphQL.Diagnostics.Internals
 {
-    internal interface IInlineFilter<TExecutionContext> : IEquatable<IInlineFilter<TExecutionContext>>
+    internal class LambdaExpressionPrinter : IPrinter<LambdaExpression?>
     {
-        Type FieldType { get; }
+        public static LambdaExpressionPrinter Instance { get; } = new LambdaExpressionPrinter();
 
-        string FieldName { get; }
-
-        Type FilterType { get; }
-
-        IChainConfigurationContext ConfigurationContext { get; }
-
-        LambdaExpression BuildExpression(TExecutionContext context, object? filter);
+        public string Print(LambdaExpression? value)
+        {
+            return value == null
+                ? "null"
+                : ExpressionPrinter.Print(value, noIndent: true);
+        }
     }
 }

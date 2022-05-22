@@ -10,19 +10,21 @@ using NUnit.Framework;
 namespace Epam.GraphQL.Tests.Diagnostics
 {
     [TestFixture]
-    public class MethodCallConfigurationContextTests
+    public class MethodCallConfigurationContextTests : IChainConfigurationContextOwner
     {
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; }
+
         [Test]
         public void OneOperationNoArgs()
         {
-            var context = new ObjectConfigurationContext(null).Operation("Name");
+            var context = ConfigurationContext.Create().Chain(this, "Name");
             Assert.AreEqual("Name()", context.ToString());
         }
 
         [Test]
         public void OneOperationOneArg()
         {
-            var context = new ObjectConfigurationContext(null).Operation("Name")
+            var context = ConfigurationContext.Create().Chain(this, "Name")
                 .Argument("test");
 
             Assert.AreEqual("Name(\"test\")", context.ToString());
@@ -31,7 +33,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void OneOperationTwoArgs()
         {
-            var context = new ObjectConfigurationContext(null).Operation("Name")
+            var context = ConfigurationContext.Create().Chain(this, "Name")
                 .Argument("test")
                 .Argument("test");
 
@@ -46,9 +48,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void TwoOperationsOneArgEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("test");
 
             Assert.AreEqual(
@@ -61,9 +63,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void TwoOperationsOneArgAndTwoArgs()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("test")
                     .Argument("test");
 
@@ -79,10 +81,10 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void TwoOperationsTwoArgsEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test1")
                     .Argument("test2")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("first")
                     .Argument("second");
 
@@ -100,11 +102,11 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void ThreeOperationsOneArgEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("test")
-                .NextOperation("Third")
+                .Chain("Third")
                     .Argument("test");
 
             Assert.AreEqual(
@@ -118,13 +120,13 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void ThreeOperationsTwoArgsEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test1")
                     .Argument("test2")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("first")
                     .Argument("second")
-                .NextOperation("Third")
+                .Chain("Third")
                     .Argument("first")
                     .Argument("second");
 
@@ -145,13 +147,13 @@ namespace Epam.GraphQL.Tests.Diagnostics
         [Test]
         public void IndentThreeOperationsTwoArgsEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test1")
                     .Argument("test2")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("first")
                     .Argument("second")
-                .NextOperation("Third")
+                .Chain("Third")
                     .Argument("first")
                     .Argument("second");
 

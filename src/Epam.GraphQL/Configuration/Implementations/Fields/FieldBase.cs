@@ -21,20 +21,52 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
         where TEntity : class
     {
-        protected FieldBase(MethodCallConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+        protected FieldBase(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : this(parent)
         {
             ConfigurationContext = configurationContext;
             Name = name.ToCamelCase();
+        }
+
+        protected FieldBase(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Func<IChainConfigurationContext, string> nameFactory)
+            : this(parent)
+        {
+            ConfigurationContext = configurationContextFactory(this);
+            Name = nameFactory(ConfigurationContext);
+        }
+
+        protected FieldBase(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name)
+            : this(parent, name)
+        {
+            ConfigurationContext = configurationContextFactory(this);
+        }
+
+        private FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent)
+        {
             Parent = parent;
+        }
+
+        private FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : this(parent)
+        {
+            Name = name.ToCamelCase();
         }
 
         public LazyQueryArguments? Arguments { get; set; }
 
-        public MethodCallConfigurationContext ConfigurationContext { get; set; }
+        public IChainConfigurationContext ConfigurationContext { get; private set; } = null!;
+
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get => ConfigurationContext; set => ConfigurationContext = value; }
 
         public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => GraphTypeDescriptor<TExecutionContext>.NullInstance;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         public string? DeprecationReason { get; set; }
 

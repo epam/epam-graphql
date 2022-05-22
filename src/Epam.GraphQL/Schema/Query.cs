@@ -16,10 +16,12 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL
 {
-    public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>
+    public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>, IChainConfigurationContextOwner
     {
         private static MethodInfo? _connectionMethodInfo;
         private static MethodInfo? _groupConnectionMethodInfo;
+
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; } = null!;
 
         protected internal new IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
@@ -27,7 +29,7 @@ namespace Epam.GraphQL
 
             var field = Configurator.AddField(
                 new QueryField<TExecutionContext>(
-                    Configurator.ConfigurationContext.Operation(nameof(Field))
+                    owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
                         .Argument(name),
                     Configurator,
                     name),
@@ -52,7 +54,7 @@ namespace Epam.GraphQL
             if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
             {
                 // TODO Make Dummy IConnectionField implementation
-                var configurationContext = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(Connection))
+                var configurationContext = Configurator.ConfigurationContext.Chain<TChildLoader>(this, nameof(Connection))
                     .Argument(name);
 
                 var msg = configurationContext
@@ -93,7 +95,7 @@ namespace Epam.GraphQL
 
             if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
             {
-                var configurationContext = Configurator.ConfigurationContext.Operation<TChildLoader>(nameof(GroupConnection))
+                var configurationContext = Configurator.ConfigurationContext.Chain<TChildLoader>(this, nameof(GroupConnection))
                     .Argument(name);
                 var msg = configurationContext
                     .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);

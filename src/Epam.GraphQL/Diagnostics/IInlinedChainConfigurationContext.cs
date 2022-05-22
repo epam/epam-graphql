@@ -3,20 +3,14 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Diagnostics.Internals;
+using System;
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal static class ConfigurationContext
+    internal interface IInlinedChainConfigurationContext : IChainConfigurationContext
     {
-        public static IObjectConfigurationContext Create()
-        {
-            return new ObjectConfigurationContext(null);
-        }
+        IChainArgumentConfigurationContext Build { get; }
 
-        public static IObjectConfigurationContext Create<TProjection>()
-        {
-            return new ObjectConfigurationContext<TProjection>();
-        }
+        new IInlinedChainConfigurationContext OptionalArgument(Delegate? arg);
     }
 }

@@ -10,9 +10,9 @@ namespace Epam.GraphQL.Diagnostics
 {
     internal interface IObjectConfigurationContext : IConfigurationContext
     {
-        MethodCallConfigurationContext Operation(string operation);
+        IChainConfigurationContext Chain(IChainConfigurationContextOwner owner, string operation);
 
-        MethodCallConfigurationContext Operation<T>(string operation);
+        IChainConfigurationContext Chain<T>(IChainConfigurationContextOwner owner, string operation);
 
         void AppendBody(StringBuilder stringBuilder, IEnumerable<IConfigurationContext> choosenItems, int indent);
     }

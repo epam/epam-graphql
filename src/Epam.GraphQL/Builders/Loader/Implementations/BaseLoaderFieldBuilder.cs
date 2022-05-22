@@ -36,7 +36,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         {
             var descriptor = Registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             var loaderField = Field.Parent.FromLoader<TLoader, TChildLoader, TChildEntity>(
-                Field.ConfigurationContext.NextOperation<TChildLoader, TChildEntity>(nameof(FromLoader))
+                Field.ConfigurationContext.Chain<TChildLoader, TChildEntity>(nameof(FromLoader))
                     .Argument(condition)
                     .Argument(relationType.ToString())
                     .OptionalArgument(navigationProperty)

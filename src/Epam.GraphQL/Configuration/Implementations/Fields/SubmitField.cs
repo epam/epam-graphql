@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         where TEntity : class
     {
         public SubmitField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
@@ -24,7 +24,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Type argGraphType,
             Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
             Type fieldType)
-            : base(configurationContext, parent, name)
+            : base(configurationContextFactory, parent, name)
         {
             GraphType = returnGraphType;
             Resolver = new AsyncFieldResolver<object>(ctx => resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"]));

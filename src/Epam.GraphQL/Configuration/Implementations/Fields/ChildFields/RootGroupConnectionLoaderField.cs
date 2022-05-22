@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public RootGroupConnectionLoaderField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver,
@@ -57,7 +57,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
         protected override RootGroupConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             IRootQueryableResolver<TChildEntity, TExecutionContext> resolver)
         {
             return new RootGroupConnectionLoaderField<TChildLoader, TChildEntity, TExecutionContext>(

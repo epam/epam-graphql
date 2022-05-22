@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TEntity : class
     {
         public QueryableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
@@ -51,7 +51,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         public QueryableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
@@ -77,7 +77,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             var naturalSorters = order.GetSorters();
             var connectionField = new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
-                ConfigurationContext.NextOperation(nameof(AsConnection)).Argument(order),
+                ConfigurationContext.Chain(nameof(AsConnection)).Argument(order),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -90,7 +90,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected override QueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
             return new QueryableField<TEntity, TReturnType, TExecutionContext>(

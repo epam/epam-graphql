@@ -4,7 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Diagnostics.Internals;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Diagnostics

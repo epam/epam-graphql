@@ -32,7 +32,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public LoaderField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
@@ -53,7 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private LoaderField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -78,7 +78,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> naturalOrder)
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                ConfigurationContext.NextOperation(nameof(AsConnection)).Argument(naturalOrder),
+                ConfigurationContext.Chain(nameof(AsConnection)).Argument(naturalOrder),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -92,7 +92,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IConnectionField AsConnection()
         {
             var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                ConfigurationContext.NextOperation(nameof(AsConnection)),
+                ConfigurationContext.Chain(nameof(AsConnection)),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -104,7 +104,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected override LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             var queryableField = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
@@ -129,7 +129,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         where TChildEntity : class
     {
         public LoaderField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,

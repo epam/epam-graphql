@@ -30,28 +30,28 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
 
         public ExpressionField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TEntity, TReturnType>> expression,
             string? name)
             : base(
-                  configurationContext,
+                  configurationContextFactory,
                   parent,
-                  GenerateName(configurationContext, name, expression))
+                  configurationContext => GenerateName(configurationContext, name, expression))
         {
             _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
 
         public ExpressionField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
             string name)
             : base(
-                  configurationContext,
+                  configurationContextFactory,
                   parent,
-                  name)
+                  configurationContext => name)
         {
             _expression = new FieldContextExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
@@ -104,7 +104,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public ExpressionField<TEntity, TReturnType, TExecutionContext> Filterable(TReturnType[] defaultValues)
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Filterable))
+            ConfigurationContext.Chain(nameof(Filterable))
                 .OptionalArgument(defaultValues);
 
             if (defaultValues != null && defaultValues.Any(value => value == null))
@@ -120,7 +120,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Filterable(NullOption nullValue)
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Filterable))
+            ConfigurationContext.Chain(nameof(Filterable))
                 .Argument(nullValue.ToString());
             NullValue = nullValue;
             IsFilterable = true;
@@ -128,31 +128,31 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public void Filterable()
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Filterable));
+            ConfigurationContext.Chain(nameof(Filterable));
             IsFilterable = true;
         }
 
         public void Sortable()
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Sortable));
+            ConfigurationContext.Chain(nameof(Sortable));
             Parent.Sorter(_expression);
         }
 
         public void Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Sortable)).Argument(sorter);
+            ConfigurationContext.Chain(nameof(Sortable)).Argument(sorter);
             Parent.Sorter(Name, sorter);
         }
 
         public void Sortable<TValue>(Func<TExecutionContext, Expression<Func<TEntity, TValue>>> sorterFactory)
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Sortable)).Argument(sorterFactory);
+            ConfigurationContext.Chain(nameof(Sortable)).Argument(sorterFactory);
             Parent.Sorter(Name, sorterFactory);
         }
 
         public void Groupable()
         {
-            ConfigurationContext = ConfigurationContext.NextOperation(nameof(Groupable));
+            ConfigurationContext.Chain(nameof(Groupable));
             IsGroupable = true;
         }
 
@@ -267,7 +267,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         protected virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter() => throw new NotSupportedException();
 
-        private static string GenerateName(MethodCallConfigurationContext configurationContext, string? name, Expression<Func<TEntity, TReturnType>> expression)
+        private static string GenerateName(IChainConfigurationContext configurationContext, string? name, Expression<Func<TEntity, TReturnType>> expression)
         {
             if (name != null)
             {

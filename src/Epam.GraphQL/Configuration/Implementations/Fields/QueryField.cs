@@ -24,8 +24,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         FieldBase<object, TExecutionContext>,
         IQueryField<TExecutionContext>
     {
-        public QueryField(MethodCallConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
-            : base(configurationContext, parent, name)
+        public QueryField(Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory, BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent, string name)
+            : base(configurationContextFactory, parent, name)
         {
         }
 
@@ -34,7 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
             var result = new RootQueryableField<TReturnType, TExecutionContext>(
-                ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable)).Argument(query),
+                ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable)).Argument(query),
                 Parent,
                 Name,
                 query,
@@ -50,13 +50,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
             where TReturnType : class
         {
-            var configurationContext = ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+            var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
                 .Argument(query)
                 .OptionalArgument(configure);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, configure, configurationContext);
             var result = new RootQueryableField<TReturnType, TExecutionContext>(
-                configurationContext.Parent,
+                configurationContext,
                 Parent,
                 Name,
                 query,
@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphResultType = Registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             return Parent.ReplaceField(this, new RootLoaderField<TChildLoader, TChildEntity, TExecutionContext>(
-                ConfigurationContext.NextOperation<TChildLoader, TChildEntity>(nameof(FromLoader)),
+                ConfigurationContext.Chain<TChildLoader, TChildEntity>(nameof(FromLoader)),
                 Parent,
                 Name,
                 graphResultType,
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
             return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -96,7 +96,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
             return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -106,14 +106,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TReturnType : class
         {
             var configurationContext = ConfigurationContext
-                .NextOperation<TReturnType>(nameof(Resolve))
+                .Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
                 .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
 
             return Parent.ApplyResolvedField<TReturnType>(
-                configurationContext.Parent,
+                configurationContext,
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -123,14 +123,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TReturnType : class
         {
             var configurationContext = ConfigurationContext
-                .NextOperation<TReturnType>(nameof(Resolve))
+                .Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
                 .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
 
             return Parent.ApplyResolvedField<TReturnType>(
-                configurationContext.Parent,
+                configurationContext,
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -140,7 +140,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor();
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -150,7 +150,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor();
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.NextOperation<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -160,14 +160,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TReturnType : class
         {
             var configurationContext = ConfigurationContext
-                .NextOperation<TReturnType>(nameof(Resolve))
+                .Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
                 .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext).MakeListDescriptor();
 
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                configurationContext.Parent,
+                configurationContext,
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -177,14 +177,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TReturnType : class
         {
             var configurationContext = ConfigurationContext
-                .NextOperation<TReturnType>(nameof(Resolve))
+                .Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
                 .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext).MakeListDescriptor();
 
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                configurationContext.Parent,
+                configurationContext,
                 this,
                 graphType,
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(resolve)));
@@ -201,7 +201,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
             var unionField = UnionQueryField.Create(
                 ConfigurationContext
-                    .NextOperation<TLastElementType>(nameof(And))
+                    .Chain<TLastElementType>(nameof(And))
                     .OptionalArgument(build),
                 Parent,
                 Name,
@@ -226,7 +226,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IArgumentedQueryField<TArgType, TExecutionContext> Argument<TArgType>(string argName)
         {
             var argumentedField = new ArgumentedQueryField<TArgType, TExecutionContext>(
-                ConfigurationContext.NextOperation<TArgType>(nameof(Argument)).Argument(argName),
+                ConfigurationContext.Chain<TArgType>(nameof(Argument)).Argument(argName),
                 Parent,
                 Name,
                 new Arguments<TArgType, TExecutionContext>(Registry, argName));
@@ -238,7 +238,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TEntity : class
         {
             var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(
-                ConfigurationContext.NextOperation<TProjection, TEntity>(nameof(FilterArgument)).Argument(argName),
+                ConfigurationContext.Chain<TProjection, TEntity>(nameof(FilterArgument)).Argument(argName),
                 Parent,
                 Name,
                 new Arguments<Expression<Func<TEntity, bool>>, TExecutionContext>(Registry, argName, typeof(TProjection), typeof(TEntity)));
@@ -248,7 +248,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public IPayloadFieldedQueryField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName)
         {
             var payloadedField = new ArgumentedQueryField<TArgType, TExecutionContext>(
-                ConfigurationContext.NextOperation<TArgType>(nameof(PayloadField)).Argument(argName),
+                ConfigurationContext.Chain<TArgType>(nameof(PayloadField)).Argument(argName),
                 Parent,
                 Name,
                 new PayloadFields<TArgType, TExecutionContext>(Name, Registry, argName));
@@ -260,7 +260,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             where TEntity : class
         {
             var argumentedField = new ArgumentedQueryField<Expression<Func<TEntity, bool>>, TExecutionContext>(
-                ConfigurationContext.NextOperation<TProjection, TEntity>(nameof(FilterPayloadField)).Argument(argName),
+                ConfigurationContext.Chain<TProjection, TEntity>(nameof(FilterPayloadField)).Argument(argName),
                 Parent,
                 Name,
                 new PayloadFields<Expression<Func<TEntity, bool>>, TExecutionContext>(Name, Registry, argName, typeof(TProjection), typeof(TEntity)));

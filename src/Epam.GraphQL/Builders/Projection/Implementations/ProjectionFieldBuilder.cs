@@ -34,7 +34,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
             where TReturnType : class
         {
-            var configurationContext = Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+            var configurationContext = Field.ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
                 .Argument(query)
                 .Argument(condition)
                 .OptionalArgument(build);
@@ -42,7 +42,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             var graphType = Field.Parent.GetGraphQLTypeDescriptor(Field, build, configurationContext);
 
             var result = new QueryableField<TEntity, TReturnType, TExecutionContext>(
-                configurationContext.Parent,
+                configurationContext,
                 Field.Parent,
                 Field.Name,
                 query,
@@ -59,7 +59,7 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             Expression<Func<TEntity, TReturnType, bool>> condition)
         {
             return Field.Parent.FromIQueryable(
-                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(FromIQueryable))
+                Field.ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
                     .Argument(query)
                     .Argument(condition),
                 Field,

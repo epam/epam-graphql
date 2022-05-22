@@ -140,8 +140,8 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> Editable()
         {
             // TODO All other methods in this class should change Field.ConfigurationContext
-            Field.ConfigurationContext = Field.ConfigurationContext
-                .NextOperation(nameof(Editable));
+            Field.ConfigurationContext
+                .Chain(nameof(Editable));
 
             Field.EditSettings?.Editable();
             return this;

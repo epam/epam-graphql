@@ -3,20 +3,19 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Diagnostics.Internals;
+using System;
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
-    internal static class ConfigurationContext
+    internal class DelegatePrinter : IPrinter<Delegate?>
     {
-        public static IObjectConfigurationContext Create()
-        {
-            return new ObjectConfigurationContext(null);
-        }
+        public static DelegatePrinter Instance { get; } = new DelegatePrinter();
 
-        public static IObjectConfigurationContext Create<TProjection>()
+        public string Print(Delegate? value)
         {
-            return new ObjectConfigurationContext<TProjection>();
+            return value == null
+                ? "null"
+                : value.Method.Print();
         }
     }
 }
