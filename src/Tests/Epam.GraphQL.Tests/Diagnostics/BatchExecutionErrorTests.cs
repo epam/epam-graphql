@@ -65,6 +65,61 @@ namespace Epam.GraphQL.Tests.Diagnostics
         }
 
         [Test]
+        public void FromBatchWithBuildReturnsNullDictionary()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader
+                        .Field("test")
+                        .FromBatch(BatchFunc, build => build.Field(p => p.Id));
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            static IDictionary<Person, Person> BatchFunc(IEnumerable<Person> items)
+            {
+                return null;
+            }
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                    .FromLoader<Person, TestUserContext>(personLoaderType);
+            }
+
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            var result = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                @"query {
+                    people {
+                        test {
+                            id
+                        }
+                    }
+                }");
+
+            Assert.That(
+                result.Errors,
+                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
+                    "Error during resolving field `people.0.test`. Batch delegate has returned null.",
+                    "PersonLoader:",
+                    "public override void OnConfigure()",
+                    "{",
+                    "    Field(\"test\")",
+                    "        .FromBatch<Person>(",
+                    "            BatchFunc, // <-----",
+                    "            build =>",
+                    "            {",
+                    "                // ...",
+                    "            });",
+                    "}")));
+        }
+
+        [Test]
         public void FromBatchTaskReturnsNull()
         {
             var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
@@ -106,6 +161,58 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "{",
                     "    Field(\"test\")",
                     "        .FromBatch<int>(BatchFunc); // <-----",
+                    "}")));
+        }
+
+        [Test]
+        public void FromBatchWithBuildTaskReturnsNull()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader => loader
+                    .Field("test")
+                    .FromBatch(BatchFunc, build => build.Field(p => p.Id)),
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            static Task<IDictionary<Person, Person>> BatchFunc(IEnumerable<Person> items)
+            {
+                return null;
+            }
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                    .FromLoader<Person, TestUserContext>(personLoaderType);
+            }
+
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            var result = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                @"query {
+                    people {
+                        test {
+                            id
+                        }
+                    }
+                }");
+
+            Assert.That(
+                result.Errors,
+                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
+                    "Error during resolving field `people.0.test`. Batch delegate has returned null.",
+                    "PersonLoader:",
+                    "public override void OnConfigure()",
+                    "{",
+                    "    Field(\"test\")",
+                    "        .FromBatch<Person>(",
+                    "            BatchFunc, // <-----",
+                    "            build =>",
+                    "            {",
+                    "                // ...",
+                    "            });",
                     "}")));
         }
 
@@ -249,6 +356,108 @@ namespace Epam.GraphQL.Tests.Diagnostics
                         "        .FromBatch<int>(BatchFunc); // <-----",
                         "}"))
                     .And.InnerException.TypeOf<NotSupportedException>().And.InnerException.Message.EqualTo("Something went wrong"));
+        }
+
+        [Test]
+        public void OnEntityLoaderReturnsNull()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.OnEntityLoaded(p => p.Id, BatchFunc, (ctx, id) => { });
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            static IDictionary<int, int> BatchFunc(TestUserContext ctx, IEnumerable<int> ids)
+            {
+                return null;
+            }
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                    .FromLoader<Person, TestUserContext>(personLoaderType);
+            }
+
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            var result = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                @"query {
+                    people {
+                        id
+                    }
+                }");
+
+            Assert.That(
+                result.Errors,
+                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
+                    "Error during resolving field `people`. Batch delegate has returned null.",
+                    "PersonLoader:",
+                    "public override void OnConfigure()",
+                    "{",
+                    "    Field(p => p.Id);",
+                    string.Empty,
+                    "    OnEntityLoaded(",
+                    "        p => p.Id,",
+                    "        BatchFunc, // <-----",
+                    "        (ctx, id) => ...);",
+                    "}")));
+        }
+
+        [Test]
+        public void OnEntityLoaderTaskReturnsNull()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.OnEntityLoaded(p => p.Id, BatchFunc, (ctx, id) => { });
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            static Task<IDictionary<int, int>> BatchFunc(TestUserContext ctx, IEnumerable<int> ids)
+            {
+                return Task.FromResult<IDictionary<int, int>>(null);
+            }
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                    .FromLoader<Person, TestUserContext>(personLoaderType);
+            }
+
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            var result = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                @"query {
+                    people {
+                        id
+                    }
+                }");
+
+            Assert.That(
+                result.Errors,
+                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
+                    "Error during resolving field `people`. Batch delegate has returned null dictionary.",
+                    "PersonLoader:",
+                    "public override void OnConfigure()",
+                    "{",
+                    "    Field(p => p.Id);",
+                    string.Empty,
+                    "    OnEntityLoaded(",
+                    "        p => p.Id,",
+                    "        BatchFunc, // <-----",
+                    "        (ctx, id) => ...);",
+                    "}")));
         }
     }
 }

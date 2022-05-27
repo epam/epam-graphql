@@ -17,20 +17,22 @@ using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
-    internal abstract class LoadEntityHook<TEntity, TExecutionContext>
+    internal abstract class LoadEntityHook<TEntity, TExecutionContext> : IChainConfigurationContextOwner
     {
+        public IChainConfigurationContext ConfigurationContext { get; set; } = null!;
+
         public abstract IDataLoader<TKey, TKey> ExecuteAsync<TKey>(Func<TKey, Proxy<TEntity>> key, IResolveFieldContext context);
     }
 
     internal class LoadEntityHook<TEntity, TEntityProxy, TExecutionContext> : LoadEntityHook<TEntity, TEntityProxy, TEntityProxy, TExecutionContext>
     {
         public LoadEntityHook(
-            IChainConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TEntityProxy>> proxyExpression,
             Action<TExecutionContext, TEntityProxy> hook)
             : base(
-                  configurationContext.Argument<TExecutionContext, TEntityProxy, TEntityProxy>((ctx, items) => items.ToDictionary(item => item)),
+                  owner => configurationContextFactory(owner).Argument<TExecutionContext, TEntityProxy, TEntityProxy>((ctx, items) => items.ToDictionary(item => item)),
                   proxyAccessor,
                   proxyExpression,
                   hook,
@@ -45,11 +47,11 @@ namespace Epam.GraphQL.Configuration.Implementations
         private readonly ProxyAccessor<TEntity, TExecutionContext> _proxyAccessor;
         private readonly Action<TExecutionContext, TEntityProxy> _hook;
         private readonly Lazy<Func<Proxy<TEntity>, TKey>> _proxyKeyGetter;
-        private readonly Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> _resolver;
+        private readonly Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> _resolver = null!;
         private readonly Delegate _batchFunc;
 
         public LoadEntityHook(
-            IResolvedChainConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IResolvedChainConfigurationContext> configurationContextFactory,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TKey>> keyExpression,
             Action<TExecutionContext, TEntityProxy> hook,
@@ -58,13 +60,14 @@ namespace Epam.GraphQL.Configuration.Implementations
                   proxyAccessor,
                   keyExpression,
                   hook,
-                  CreateResolver(configurationContext, batchFunc),
                   batchFunc)
         {
+            ConfigurationContext = configurationContextFactory(this);
+            _resolver = CreateResolver((IResolvedChainConfigurationContext)ConfigurationContext, batchFunc);
         }
 
         public LoadEntityHook(
-            IResolvedChainConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IResolvedChainConfigurationContext> configurationContextFactory,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TKey>> keyExpression,
             Action<TExecutionContext, TEntityProxy> hook,
@@ -73,23 +76,22 @@ namespace Epam.GraphQL.Configuration.Implementations
                   proxyAccessor,
                   keyExpression,
                   hook,
-                  CreateResolver(configurationContext, batchFunc),
                   batchFunc)
         {
+            ConfigurationContext = configurationContextFactory(this);
+            _resolver = CreateResolver((IResolvedChainConfigurationContext)ConfigurationContext, batchFunc);
         }
 
         private LoadEntityHook(
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TKey>> keyExpression,
             Action<TExecutionContext, TEntityProxy> hook,
-            Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> resolver,
             Delegate batchFunc)
         {
             _proxyAccessor = proxyAccessor;
             _keyExpression = keyExpression;
             _hook = hook;
             _batchFunc = batchFunc;
-            _resolver = resolver;
             _proxyAccessor.AddMember(keyExpression);
             _proxyKeyGetter = new Lazy<Func<Proxy<TEntity>, TKey>>(() => _proxyAccessor.Rewrite(_keyExpression).Compile());
         }

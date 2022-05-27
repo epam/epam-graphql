@@ -34,8 +34,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 {
 #pragma warning disable CA1506
     internal abstract class BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> :
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext>, IEquatable<BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>>,
-        IChainConfigurationContextOwner
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext>, IEquatable<BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>>
 #pragma warning restore CA1506
         where TEntity : class
     {
@@ -122,8 +121,6 @@ namespace Epam.GraphQL.Configuration.Implementations
         public IRegistry<TExecutionContext> Registry { get; }
 
         public IObjectConfigurationContext ConfigurationContext { get; }
-
-        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; } = null!;
 
         protected bool IsAuto { get; }
 
@@ -423,39 +420,45 @@ namespace Epam.GraphQL.Configuration.Implementations
             _sorters.Add(sorter);
         }
 
-        public void AddOnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
+        public void OnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
         {
-            var configurationContext = ConfigurationContext.Chain(this, nameof(AddOnEntityLoaded))
-                .Argument(proxyExpression)
-                .Argument(hook);
-
-            ProxyAccessor.AddLoadHook(configurationContext, proxyExpression, hook);
+            ProxyAccessor.AddLoadHook(
+                owner => ConfigurationContext
+                    .Chain(owner, nameof(OnEntityLoaded))
+                    .Argument(proxyExpression)
+                    .Argument(hook),
+                proxyExpression,
+                hook);
         }
 
-        public void AddOnEntityLoaded<TKey, T>(
+        public void OnEntityLoaded<TKey, T>(
             Expression<Func<TEntity, TKey>> keyExpression,
             Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
             Action<TExecutionContext, T> hook)
         {
-            var configurationContext = ConfigurationContext.Chain(this, nameof(AddOnEntityLoaded))
-                .Argument(keyExpression)
-                .Argument(batchFunc)
-                .Argument(hook);
-
-            ProxyAccessor.AddLoadHook(configurationContext, keyExpression, batchFunc, hook);
+            ProxyAccessor.AddLoadHook(
+                owner => ConfigurationContext.Chain(owner, nameof(OnEntityLoaded))
+                    .Argument(keyExpression)
+                    .Argument(batchFunc)
+                    .Argument(hook),
+                keyExpression,
+                batchFunc,
+                hook);
         }
 
-        public void AddOnEntityLoaded<TKey, T>(
+        public void OnEntityLoaded<TKey, T>(
             Expression<Func<TEntity, TKey>> keyExpression,
             Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
             Action<TExecutionContext, T> hook)
         {
-            var configurationContext = ConfigurationContext.Chain(this, nameof(AddOnEntityLoaded))
-                .Argument(keyExpression)
-                .Argument(batchFunc)
-                .Argument(hook);
-
-            ProxyAccessor.AddLoadHook(configurationContext, keyExpression, batchFunc, hook);
+            ProxyAccessor.AddLoadHook(
+                owner => ConfigurationContext.Chain(owner, nameof(OnEntityLoaded))
+                    .Argument(keyExpression)
+                    .Argument(batchFunc)
+                    .Argument(hook),
+                keyExpression,
+                batchFunc,
+                hook);
         }
 
         public IInlineFilters<TEntity, TExecutionContext> CreateInlineFilters()

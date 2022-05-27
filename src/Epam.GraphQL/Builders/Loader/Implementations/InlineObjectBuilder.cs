@@ -203,7 +203,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Guards.ThrowIfNull(expression, nameof(expression));
             Guards.ThrowIfNull(action, nameof(action));
 
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(expression, action);
+            _objectGraphTypeConfigurator.OnEntityLoaded(expression, action);
         }
 
         public void OnEntityLoaded<TKey, T>(
@@ -215,7 +215,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Guards.ThrowIfNull(fetch, nameof(fetch));
             Guards.ThrowIfNull(action, nameof(action));
 
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(keyExpression, fetch, action);
+            _objectGraphTypeConfigurator.OnEntityLoaded(keyExpression, fetch, action);
         }
 
         public void OnEntityLoaded<TKey, T>(
@@ -227,7 +227,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Guards.ThrowIfNull(fetch, nameof(fetch));
             Guards.ThrowIfNull(action, nameof(action));
 
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(keyExpression, fetch, action);
+            _objectGraphTypeConfigurator.OnEntityLoaded(keyExpression, fetch, action);
         }
     }
 }

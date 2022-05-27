@@ -28,7 +28,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 Assert.AreEqual(
                     TestHelpers.ConcatLines(
                         "Field(\"people\")",
-                        "    .FromIQueryable<Person>(_ => ...)"),
+                        "    .FromIQueryable<Person>(_ => ...);"),
                     field.ToString());
             }
         }
@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                         "        configure =>",
                         "        {",
                         "            Field(p => p.Id);",
-                        "        })"),
+                        "        });"),
                     field.ToString());
             }
         }
@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .FromIQueryable<Person>(_ => ...)",
-                        "    .AsConnection(query => query.OrderBy(person => person.Id))"),
+                        "    .AsConnection(query => query.OrderBy(person => person.Id));"),
                     field.ToString());
             }
         }
@@ -94,7 +94,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .FromIQueryable<Person>(_ => ...)",
-                        "    .AsGroupConnection()"),
+                        "    .AsGroupConnection();"),
                     field.ToString());
             }
         }
@@ -113,7 +113,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 Assert.AreEqual(
                     TestHelpers.ConcatLines(
                         "Field(\"people\")",
-                        "    .Resolve<int>(_ => ...)"),
+                        "    .Resolve<int>(_ => ...);"),
                     field.ToString());
             }
         }
@@ -134,7 +134,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .Argument<string>(\"arg1\")",
-                        "    .Resolve<int>((_, arg1) => ...)"),
+                        "    .Resolve<int>((_, arg1) => ...);"),
                     field.ToString());
             }
         }

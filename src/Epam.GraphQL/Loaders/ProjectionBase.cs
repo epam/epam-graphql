@@ -155,7 +155,7 @@ namespace Epam.GraphQL.Loaders
             if (!IsConfiguringInputType)
             {
                 ThrowIfIsNotConfiguring();
-                Configurator.AddOnEntityLoaded(proxyExpression, hook);
+                Configurator.OnEntityLoaded(proxyExpression, hook);
             }
         }
 
@@ -167,7 +167,7 @@ namespace Epam.GraphQL.Loaders
             if (!IsConfiguringInputType)
             {
                 ThrowIfIsNotConfiguring();
-                Configurator.AddOnEntityLoaded(keyExpression, batchFunc, hook);
+                Configurator.OnEntityLoaded(keyExpression, batchFunc, hook);
             }
         }
 
@@ -179,7 +179,7 @@ namespace Epam.GraphQL.Loaders
             if (!IsConfiguringInputType)
             {
                 ThrowIfIsNotConfiguring();
-                Configurator.AddOnEntityLoaded(keyExpression, batchFunc, hook);
+                Configurator.OnEntityLoaded(keyExpression, batchFunc, hook);
             }
         }
 

@@ -49,6 +49,8 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
         protected IChainConfigurationContext? Previous { get; }
 
+        protected IChainConfigurationContext? Next { get; private set; }
+
         public override bool Contains(IConfigurationContext item)
         {
             return (Previous != null && (ReferenceEquals(Previous, item) || Previous.Contains(item)))
@@ -58,10 +60,9 @@ namespace Epam.GraphQL.Diagnostics.Internals
         public IChainConfigurationContext Chain(string operation)
         {
             var newContext = new ChainConfigurationContext(_owner, Parent, this, operation);
-
             Parent.ReplaceChild(this, newContext);
-
             _owner.ConfigurationContext = newContext;
+            Next = newContext;
 
             return newContext;
         }
@@ -199,10 +200,25 @@ namespace Epam.GraphQL.Diagnostics.Internals
                 if (i < lastIndex)
                 {
                     builder.Append(',');
+
+                    if (choosenItems.Contains(arguments[i]))
+                    {
+                        builder.Append(" // <-----");
+                    }
                 }
             }
 
             builder.Append(')');
+
+            if (Next == null)
+            {
+                builder.Append(';');
+            }
+
+            if (lastIndex >= 0 && choosenItems.Contains(arguments[lastIndex]))
+            {
+                builder.Append(" // <-----");
+            }
         }
     }
 }

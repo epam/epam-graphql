@@ -10,7 +10,7 @@ namespace Epam.GraphQL.Diagnostics.Internals
     internal class InlinedResolvedChainConfigurationContext : ResolvedChainConfigurationContext,
         IInlinedResolvedChainConfigurationContext
     {
-        public InlinedResolvedChainConfigurationContext(ChainConfigurationContext toClone, Func<ConfigurationContext, IConfigurationContext> additionalChildFactory)
+        public InlinedResolvedChainConfigurationContext(ResolvedChainConfigurationContext toClone, Func<ConfigurationContext, IConfigurationContext> additionalChildFactory)
             : base(toClone, additionalChildFactory)
         {
             Build = (IChainArgumentConfigurationContext)Children[Children.Count - 1];

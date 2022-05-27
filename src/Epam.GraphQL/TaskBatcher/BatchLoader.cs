@@ -129,12 +129,12 @@ namespace Epam.GraphQL.TaskBatcher
                 catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext), e);
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext.Resolver), e);
                 }
 
                 if (ret == null)
                 {
-                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null.", configurationContext));
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null.", configurationContext.Resolver));
                 }
 
                 return ret.ToDictionary(r => r.Key, r => r.Value);
@@ -257,12 +257,12 @@ namespace Epam.GraphQL.TaskBatcher
                 catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext), e);
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext.Resolver), e);
                 }
 
                 if (task == null)
                 {
-                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null.", configurationContext));
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null.", configurationContext.Resolver));
                 }
 
                 try
@@ -273,12 +273,12 @@ namespace Epam.GraphQL.TaskBatcher
                 catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext), e);
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext.Resolver), e);
                 }
 
                 if (ret == null)
                 {
-                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null dictionary.", configurationContext));
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null dictionary.", configurationContext.Resolver));
                 }
 
                 return ret;

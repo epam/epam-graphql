@@ -75,7 +75,6 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
                 var child = Children[index];
                 child.Append(stringBuilder, choosenItems, indent);
-                stringBuilder.Append(';');
 
                 if (choosenItems.Contains(child))
                 {
@@ -88,7 +87,11 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
             if (nextIndex != Children.Count)
             {
-                stringBuilder.AppendLine();
+                if (indicies.Count > 0)
+                {
+                    stringBuilder.AppendLine();
+                }
+
                 stringBuilder.Append(' ', 4 * indent);
                 stringBuilder.AppendLine("// ...");
             }

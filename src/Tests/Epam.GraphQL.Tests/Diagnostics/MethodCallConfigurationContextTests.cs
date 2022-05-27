@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
         public void OneOperationNoArgs()
         {
             var context = ConfigurationContext.Create().Chain(this, "Name");
-            Assert.AreEqual("Name()", context.ToString());
+            Assert.AreEqual("Name();", context.ToString());
         }
 
         [Test]
@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var context = ConfigurationContext.Create().Chain(this, "Name")
                 .Argument("test");
 
-            Assert.AreEqual("Name(\"test\")", context.ToString());
+            Assert.AreEqual("Name(\"test\");", context.ToString());
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 TestHelpers.ConcatLines(
                     "Name(",
                     "    \"test\",",
-                    "    \"test\")"),
+                    "    \"test\");"),
                 context.ToString());
         }
 
@@ -56,7 +56,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             Assert.AreEqual(
                 TestHelpers.ConcatLines(
                     "First(\"test\")",
-                    "    .Second(\"test\")"),
+                    "    .Second(\"test\");"),
                 context.ToString());
         }
 
@@ -74,7 +74,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "    First(\"test\")",
                     "        .Second(",
                     "            \"test\",",
-                    "            \"test\")"),
+                    "            \"test\");"),
                 context.ToString(1));
         }
 
@@ -95,7 +95,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "    \"test2\")",
                     "    .Second(",
                     "        \"first\",",
-                    "        \"second\")"),
+                    "        \"second\");"),
                 context.ToString());
         }
 
@@ -113,7 +113,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 TestHelpers.ConcatLines(
                     "First(\"test\")",
                     "    .Second(\"test\")",
-                    "    .Third(\"test\")"),
+                    "    .Third(\"test\");"),
                 context.ToString());
         }
 
@@ -140,7 +140,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "        \"second\")",
                     "    .Third(",
                     "        \"first\",",
-                    "        \"second\")"),
+                    "        \"second\");"),
                 context.ToString());
         }
 
@@ -167,7 +167,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "                \"second\")",
                     "            .Third(",
                     "                \"first\",",
-                    "                \"second\")"),
+                    "                \"second\");"),
                 context.ToString(2));
         }
     }

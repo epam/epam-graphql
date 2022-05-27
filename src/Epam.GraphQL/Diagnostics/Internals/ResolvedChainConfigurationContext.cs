@@ -13,7 +13,16 @@ namespace Epam.GraphQL.Diagnostics.Internals
         public ResolvedChainConfigurationContext(ChainConfigurationContext toClone, Func<ConfigurationContext, IConfigurationContext> additionalChildFactory)
             : base(toClone, additionalChildFactory)
         {
+            Resolver = (IChainArgumentConfigurationContext)Children[Children.Count - 1];
         }
+
+        protected ResolvedChainConfigurationContext(ResolvedChainConfigurationContext toClone, Func<ConfigurationContext, IConfigurationContext> additionalChildFactory)
+            : base(toClone, additionalChildFactory)
+        {
+            Resolver = toClone.Resolver;
+        }
+
+        public IChainArgumentConfigurationContext Resolver { get; }
 
         IResolvedChainConfigurationContext IResolvedChainConfigurationContext.Argument(Delegate arg)
         {

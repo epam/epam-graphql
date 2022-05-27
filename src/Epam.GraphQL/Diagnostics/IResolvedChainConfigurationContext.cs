@@ -10,6 +10,8 @@ namespace Epam.GraphQL.Diagnostics
 {
     internal interface IResolvedChainConfigurationContext : IChainConfigurationContext
     {
+        IChainArgumentConfigurationContext Resolver { get; }
+
         new IResolvedChainConfigurationContext Argument(Delegate arg);
 
         new IResolvedChainConfigurationContext OptionalArgument(Delegate? arg);
