@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
@@ -13,11 +14,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
         where TEntity : class
     {
         public BatchEnumerableKeyResolver(
+            IResolvedChainConfigurationContext configurationContext,
             string fieldName,
             Expression<Func<TEntity, TKey>> keySelector,
             Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, IEnumerable<TReturnType>>> batchFunc,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
-            : base(fieldName, keySelector, batchFunc, proxyAccessor)
+            : base(configurationContext, fieldName, keySelector, batchFunc, proxyAccessor)
         {
         }
     }

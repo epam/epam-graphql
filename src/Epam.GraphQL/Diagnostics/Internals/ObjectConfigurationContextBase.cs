@@ -127,6 +127,17 @@ namespace Epam.GraphQL.Diagnostics.Internals
             return builder.ToString();
         }
 
+        public string GetRuntimeError(string message, params IConfigurationContext[] invalidItems)
+        {
+            var builder = new StringBuilder();
+
+            builder.Append(DoGetRuntimeError(message));
+            builder.AppendLine();
+            this.GetRoot().Append(builder, invalidItems, 0);
+
+            return builder.ToString();
+        }
+
         public void ThrowErrors()
         {
             if (_errors.Count > 0)
@@ -136,6 +147,11 @@ namespace Epam.GraphQL.Diagnostics.Internals
         }
 
         protected virtual string DoGetError(string message)
+        {
+            return message;
+        }
+
+        protected virtual string DoGetRuntimeError(string message)
         {
             return message;
         }

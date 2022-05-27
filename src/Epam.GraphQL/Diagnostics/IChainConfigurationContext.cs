@@ -4,7 +4,9 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 
 namespace Epam.GraphQL.Diagnostics
@@ -24,6 +26,14 @@ namespace Epam.GraphQL.Diagnostics
         IChainConfigurationContext OptionalArgument(Delegate? arg);
 
         IChainConfigurationContext OptionalArgument<T>(T[]? arg);
+
+        IResolvedChainConfigurationContext Argument<TKey, TValue>(Func<IEnumerable<TKey>, IEnumerable<KeyValuePair<TKey, TValue>>> arg);
+
+        IResolvedChainConfigurationContext Argument<TContext, TKey, TValue>(Func<TContext, IEnumerable<TKey>, IEnumerable<KeyValuePair<TKey, TValue>>> arg);
+
+        IResolvedChainConfigurationContext Argument<TKey, TValue>(Func<IEnumerable<TKey>, Task<IDictionary<TKey, TValue>>> arg);
+
+        IResolvedChainConfigurationContext Argument<TContext, TKey, TValue>(Func<TContext, IEnumerable<TKey>, Task<IDictionary<TKey, TValue>>> arg);
 
         IInlinedChainConfigurationContext Argument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> arg)
             where TReturnType : class;

@@ -3,8 +3,8 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System.Text;
 using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Diagnostics
@@ -38,7 +38,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "Name(",
                     "    \"test\",",
                     "    \"test\")"),
@@ -54,7 +54,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(\"test\")",
                     "    .Second(\"test\")"),
                 context.ToString());
@@ -70,7 +70,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    First(\"test\")",
                     "        .Second(",
                     "            \"test\",",
@@ -89,7 +89,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument("second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(",
                     "    \"test1\",",
                     "    \"test2\")",
@@ -110,7 +110,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(\"test\")",
                     "    .Second(\"test\")",
                     "    .Third(\"test\")"),
@@ -131,7 +131,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument("second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(",
                     "    \"test1\",",
                     "    \"test2\")",
@@ -158,7 +158,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Argument("second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "        First(",
                     "            \"test1\",",
                     "            \"test2\")",
@@ -169,23 +169,6 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "                \"first\",",
                     "                \"second\")"),
                 context.ToString(2));
-        }
-
-        private static string ConcatLines(params string[] lines)
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.AppendLine();
-                }
-
-                sb.Append(lines[i]);
-            }
-
-            return sb.ToString();
         }
     }
 }

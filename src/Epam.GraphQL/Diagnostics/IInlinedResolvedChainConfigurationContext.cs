@@ -5,14 +5,7 @@
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal interface IRootConfigurationContext : IObjectConfigurationContext
+    internal interface IInlinedResolvedChainConfigurationContext : IInlinedChainConfigurationContext, IResolvedChainConfigurationContext
     {
-        void AddError(string message, params IConfigurationContext[] invalidItems);
-
-        string GetError(string message, params IConfigurationContext[] invalidItems);
-
-        string GetRuntimeError(string message, params IConfigurationContext[] invalidItems);
-
-        void ThrowErrors();
     }
 }

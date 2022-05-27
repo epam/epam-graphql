@@ -3,8 +3,8 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System.Text;
 using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Diagnostics
@@ -20,7 +20,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var context = ConfigurationContext.Create<object>();
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "    }"),
@@ -35,7 +35,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             context.Chain(this, "Method");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        Method();",
@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 .Chain("Second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        Method()",
@@ -69,7 +69,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var method = context.Chain(this, "Method");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        Method(); // <-----",
@@ -86,7 +86,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             method.Chain("Second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        Method() // <-----",
@@ -107,7 +107,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 .Chain("Next");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        First()",
@@ -131,7 +131,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             context.Chain(this, "Next");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        Previous();",
@@ -157,7 +157,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
             context.Chain(this, "Last");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    public override void OnConfigure()",
                     "    {",
                     "        // ...",
@@ -171,23 +171,6 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "        // ...",
                     "    }"),
                 context.ToString(1, method));
-        }
-
-        private static string ConcatLines(params string[] lines)
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.AppendLine();
-                }
-
-                sb.Append(lines[i]);
-            }
-
-            return sb.ToString();
         }
     }
 }

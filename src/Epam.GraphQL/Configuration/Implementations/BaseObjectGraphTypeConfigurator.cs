@@ -33,7 +33,9 @@ using TypeExtensions = Epam.GraphQL.Extensions.TypeExtensions;
 namespace Epam.GraphQL.Configuration.Implementations
 {
 #pragma warning disable CA1506
-    internal abstract class BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> : IObjectGraphTypeConfigurator<TEntity, TExecutionContext>, IEquatable<BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>>
+    internal abstract class BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> :
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext>, IEquatable<BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>>,
+        IChainConfigurationContextOwner
 #pragma warning restore CA1506
         where TEntity : class
     {
@@ -120,6 +122,8 @@ namespace Epam.GraphQL.Configuration.Implementations
         public IRegistry<TExecutionContext> Registry { get; }
 
         public IObjectConfigurationContext ConfigurationContext { get; }
+
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; } = null!;
 
         protected bool IsAuto { get; }
 
@@ -421,7 +425,11 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public void AddOnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
         {
-            ProxyAccessor.AddLoadHook(proxyExpression, hook);
+            var configurationContext = ConfigurationContext.Chain(this, nameof(AddOnEntityLoaded))
+                .Argument(proxyExpression)
+                .Argument(hook);
+
+            ProxyAccessor.AddLoadHook(configurationContext, proxyExpression, hook);
         }
 
         public void AddOnEntityLoaded<TKey, T>(
@@ -429,7 +437,12 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
             Action<TExecutionContext, T> hook)
         {
-            ProxyAccessor.AddLoadHook(keyExpression, batchFunc, hook);
+            var configurationContext = ConfigurationContext.Chain(this, nameof(AddOnEntityLoaded))
+                .Argument(keyExpression)
+                .Argument(batchFunc)
+                .Argument(hook);
+
+            ProxyAccessor.AddLoadHook(configurationContext, keyExpression, batchFunc, hook);
         }
 
         public void AddOnEntityLoaded<TKey, T>(
@@ -437,7 +450,12 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
             Action<TExecutionContext, T> hook)
         {
-            ProxyAccessor.AddLoadHook(keyExpression, batchFunc, hook);
+            var configurationContext = ConfigurationContext.Chain(this, nameof(AddOnEntityLoaded))
+                .Argument(keyExpression)
+                .Argument(batchFunc)
+                .Argument(hook);
+
+            ProxyAccessor.AddLoadHook(configurationContext, keyExpression, batchFunc, hook);
         }
 
         public IInlineFilters<TEntity, TExecutionContext> CreateInlineFilters()
@@ -548,7 +566,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         public abstract Type GenerateGraphType();
 
         public BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -566,7 +584,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -584,7 +602,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
@@ -597,7 +615,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc,
@@ -610,7 +628,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
         {
@@ -626,7 +644,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
         {
@@ -642,7 +660,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
@@ -653,7 +671,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc)
@@ -664,7 +682,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -674,7 +692,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -684,7 +702,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
@@ -695,7 +713,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc,
@@ -706,7 +724,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc)
         {
@@ -714,7 +732,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, IEnumerable<TReturnType>>> batchFunc)
         {
@@ -722,7 +740,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc)
@@ -731,7 +749,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, IEnumerable<TReturnType>>> batchFunc)
@@ -740,7 +758,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -758,7 +776,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -776,7 +794,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>,
@@ -796,7 +814,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc,
@@ -815,7 +833,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
         {
@@ -831,7 +849,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
         {
@@ -847,7 +865,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
@@ -858,7 +876,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc)
@@ -869,7 +887,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -879,7 +897,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
@@ -889,7 +907,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
@@ -900,7 +918,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableClassField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc,
@@ -911,7 +929,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc)
         {
@@ -919,7 +937,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, IEnumerable<TReturnType>>>> batchFunc)
         {
@@ -927,7 +945,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc)
@@ -936,7 +954,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchEnumerableField<TEntity, TKeyType, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, IEnumerable<TReturnType>>>> batchFunc)
@@ -1054,7 +1072,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1062,13 +1080,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
+            var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1076,13 +1094,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
+            var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TKeyType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1091,13 +1109,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(field.Name, keySelector, batchFunc, ProxyAccessor);
+            var batchResolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, batchFunc, ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TKeyType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1106,13 +1124,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(field.Name, keySelector, (ctx, items) => batchFunc(items), ProxyAccessor);
+            var batchResolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, (ctx, items) => batchFunc(items), ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1120,13 +1138,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
+            var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1134,13 +1152,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
+            var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TKeyType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1149,13 +1167,13 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(field.Name, keySelector, batchFunc, ProxyAccessor);
+            var batchResolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, batchFunc, ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TFromType, TKeyType, TAnotherReturnType>(
-            IInlinedChainConfigurationContext configurationContext,
+            IInlinedResolvedChainConfigurationContext configurationContext,
             FieldBase<TEntity, TExecutionContext> field,
             IBatchResolver<TEntity, TFromType> firstResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
@@ -1164,7 +1182,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
             where TAnotherReturnType : class
         {
-            var batchResolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(field.Name, keySelector, (ctx, items) => batchFunc(items), ProxyAccessor);
+            var batchResolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, (ctx, items) => batchFunc(items), ProxyAccessor);
 
             return ApplyBatchUnion(configurationContext, field, firstResolver, firstGraphType, batchResolver, build);
         }

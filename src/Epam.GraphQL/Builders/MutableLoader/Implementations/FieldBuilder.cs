@@ -124,7 +124,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings?.EditableIf(_registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
+            var configurationContext = Field.ConfigurationContext
+                .Chain(nameof(BatchedEditableIf))
+                .Argument(batchFunc)
+                .Argument(predicate)
+                .OptionalArgument(reason);
+
+            Field.EditSettings?.EditableIf(configurationContext, _registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
             return this;
         }
 
@@ -133,7 +139,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings?.EditableIf(batchFunc, predicate, reason);
+            var configurationContext = Field.ConfigurationContext
+                .Chain(nameof(BatchedEditableIf))
+                .Argument(batchFunc)
+                .Argument(predicate)
+                .OptionalArgument(reason);
+
+            Field.EditSettings?.EditableIf(configurationContext, batchFunc, predicate, reason);
             return this;
         }
 

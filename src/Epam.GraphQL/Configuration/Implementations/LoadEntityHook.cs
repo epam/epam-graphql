@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.TaskBatcher;
@@ -24,10 +25,12 @@ namespace Epam.GraphQL.Configuration.Implementations
     internal class LoadEntityHook<TEntity, TEntityProxy, TExecutionContext> : LoadEntityHook<TEntity, TEntityProxy, TEntityProxy, TExecutionContext>
     {
         public LoadEntityHook(
+            IChainConfigurationContext configurationContext,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TEntityProxy>> proxyExpression,
             Action<TExecutionContext, TEntityProxy> hook)
             : base(
+                  configurationContext.Argument<TExecutionContext, TEntityProxy, TEntityProxy>((ctx, items) => items.ToDictionary(item => item)),
                   proxyAccessor,
                   proxyExpression,
                   hook,
@@ -46,6 +49,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         private readonly Delegate _batchFunc;
 
         public LoadEntityHook(
+            IResolvedChainConfigurationContext configurationContext,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TKey>> keyExpression,
             Action<TExecutionContext, TEntityProxy> hook,
@@ -54,12 +58,13 @@ namespace Epam.GraphQL.Configuration.Implementations
                   proxyAccessor,
                   keyExpression,
                   hook,
-                  CreateResolver(batchFunc),
+                  CreateResolver(configurationContext, batchFunc),
                   batchFunc)
         {
         }
 
         public LoadEntityHook(
+            IResolvedChainConfigurationContext configurationContext,
             ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
             Expression<Func<TEntity, TKey>> keyExpression,
             Action<TExecutionContext, TEntityProxy> hook,
@@ -68,7 +73,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                   proxyAccessor,
                   keyExpression,
                   hook,
-                  CreateResolver(batchFunc),
+                  CreateResolver(configurationContext, batchFunc),
                   batchFunc)
         {
         }
@@ -135,21 +140,25 @@ namespace Epam.GraphQL.Configuration.Implementations
             return hashCode.ToHashCode();
         }
 
-        private static Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> CreateResolver(Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TEntityProxy>> batchFunc)
+        private static Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> CreateResolver(
+            IResolvedChainConfigurationContext configurationContext,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TEntityProxy>> batchFunc)
         {
             return context =>
             {
                 var batcher = context.GetBatcher();
-                return batcher.Get(context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc);
+                return batcher.Get(configurationContext, context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc);
             };
         }
 
-        private static Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> CreateResolver(Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, TEntityProxy>>> batchFunc)
+        private static Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> CreateResolver(
+            IResolvedChainConfigurationContext configurationContext,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, TEntityProxy>>> batchFunc)
         {
             return context =>
             {
                 var batcher = context.GetBatcher();
-                return batcher.Get(context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc);
+                return batcher.Get(configurationContext, context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc);
             };
         }
     }

@@ -6,8 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Epam.Contracts.Models;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
 using Microsoft.Extensions.Logging;
@@ -121,6 +123,25 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke(dataContext);
+        }
+
+        public static string ConcatLines(params string[] lines)
+        {
+            Guards.ThrowIfNull(lines, nameof(lines));
+
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.AppendLine();
+                }
+
+                sb.Append(lines[i]);
+            }
+
+            return sb.ToString();
         }
 
         private static ILoggerFactory CreateLoggerFactory() => LoggerFactory.Create(

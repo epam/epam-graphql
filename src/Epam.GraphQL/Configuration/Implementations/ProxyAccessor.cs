@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -320,25 +321,27 @@ namespace Epam.GraphQL.Configuration.Implementations
             _members.Remove(member);
         }
 
-        public void AddLoadHook<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
+        public void AddLoadHook<T>(IChainConfigurationContext configurationContext, Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
         {
-            _loadEntityHooks.Add(new LoadEntityHook<TEntity, T, TExecutionContext>(this, proxyExpression, hook));
+            _loadEntityHooks.Add(new LoadEntityHook<TEntity, T, TExecutionContext>(configurationContext, this, proxyExpression, hook));
         }
 
         public void AddLoadHook<TKey, T>(
+            IResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKey>> keyExpression,
             Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
             Action<TExecutionContext, T> hook)
         {
-            _loadEntityHooks.Add(new LoadEntityHook<TEntity, TKey, T, TExecutionContext>(this, keyExpression, hook, batchFunc));
+            _loadEntityHooks.Add(new LoadEntityHook<TEntity, TKey, T, TExecutionContext>(configurationContext, this, keyExpression, hook, batchFunc));
         }
 
         public void AddLoadHook<TKey, T>(
+            IResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKey>> keyExpression,
             Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
             Action<TExecutionContext, T> hook)
         {
-            _loadEntityHooks.Add(new LoadEntityHook<TEntity, TKey, T, TExecutionContext>(this, keyExpression, hook, batchFunc));
+            _loadEntityHooks.Add(new LoadEntityHook<TEntity, TKey, T, TExecutionContext>(configurationContext, this, keyExpression, hook, batchFunc));
         }
 
         private Type GetConcreteProxyType(IEnumerable<string> fieldNames)

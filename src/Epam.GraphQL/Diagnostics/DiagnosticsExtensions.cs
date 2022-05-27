@@ -35,6 +35,11 @@ namespace Epam.GraphQL.Diagnostics
             return GetRoot(context).GetError(message, invalidItems);
         }
 
+        public static string GetRuntimeError(this IConfigurationContext context, string message, params IConfigurationContext[] invalidItems)
+        {
+            return GetRoot(context).GetRuntimeError(message, invalidItems);
+        }
+
         public static void ThrowErrors(this IConfigurationContext context)
         {
             GetRoot(context).ThrowErrors();

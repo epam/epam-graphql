@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public BatchField(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
@@ -33,13 +33,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
                 configurationContext,
                 parent,
                 name,
-                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
+                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(configurationContext, name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }
 
         public BatchField(
-            IChainConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
@@ -49,7 +49,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
                 configurationContext,
                 parent,
                 name,
-                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
+                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(configurationContext, name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }

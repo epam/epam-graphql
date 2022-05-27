@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Extensions;
 
@@ -123,6 +124,26 @@ namespace Epam.GraphQL.Diagnostics.Internals
         {
             AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: true));
             return this;
+        }
+
+        public IResolvedChainConfigurationContext Argument<TKey, TValue>(Func<IEnumerable<TKey>, IEnumerable<KeyValuePair<TKey, TValue>>> arg)
+        {
+            return new ResolvedChainConfigurationContext(this, parent => ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg, optional: false));
+        }
+
+        public IResolvedChainConfigurationContext Argument<TContext, TKey, TValue>(Func<TContext, IEnumerable<TKey>, IEnumerable<KeyValuePair<TKey, TValue>>> arg)
+        {
+            return new ResolvedChainConfigurationContext(this, parent => ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg, optional: false));
+        }
+
+        public IResolvedChainConfigurationContext Argument<TKey, TValue>(Func<IEnumerable<TKey>, Task<IDictionary<TKey, TValue>>> arg)
+        {
+            return new ResolvedChainConfigurationContext(this, parent => ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg, optional: false));
+        }
+
+        public IResolvedChainConfigurationContext Argument<TContext, TKey, TValue>(Func<TContext, IEnumerable<TKey>, Task<IDictionary<TKey, TValue>>> arg)
+        {
+            return new ResolvedChainConfigurationContext(this, parent => ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg, optional: false));
         }
 
         public override void Append(StringBuilder builder, IEnumerable<IConfigurationContext> choosenItems, int indent)

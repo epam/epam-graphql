@@ -50,5 +50,14 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
             return stringBuilder.ToString();
         }
+
+        protected override string DoGetRuntimeError(string message)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine(message);
+            stringBuilder.Append($"{typeof(TProjection).HumanizedName()}:");
+
+            return stringBuilder.ToString();
+        }
     }
 }
