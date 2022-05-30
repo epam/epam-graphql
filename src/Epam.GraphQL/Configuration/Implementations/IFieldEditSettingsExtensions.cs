@@ -38,14 +38,17 @@ namespace Epam.GraphQL.Configuration.Implementations
             settings.CanEdit = ctx => BatchLoader.FromResult<IFieldChange<TEntity, TExecutionContext>, (bool, string)>(change => (predicate((IFieldChange<TEntity, TReturnType, TExecutionContext>)change), reason.Safe()((IFieldChange<TEntity, TReturnType, TExecutionContext>)change)));
         }
 
-        public static void EditableIf<TEntity, TReturnType, TExecutionContext, TItem>(
+        public static void BatchEditableIf<TEntity, TReturnType, TExecutionContext, TItem>(
             this IFieldEditSettings<TEntity, TReturnType, TExecutionContext> settings,
             IResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            settings.CanEdit = GetEditableIf<TEntity, TReturnType, TItem, TExecutionContext, (bool, string)>(batchFunc, item => (predicate(item), reason.Safe()(item)), configurationContext, nameof(EditableIf));
+            settings.CanEdit = GetBatchedEditableIf<TEntity, TReturnType, TItem, TExecutionContext, (bool, string)>(
+                batchFunc,
+                item => (predicate(item), reason.Safe()(item)),
+                configurationContext);
         }
 
         public static void EditableIf<TEntity, TReturnType, TExecutionContext, TItem>(this IFieldEditSettings<TEntity, TReturnType, TExecutionContext> settings, Func<IFieldChange<TEntity, TExecutionContext>, bool> predicate, Func<IFieldChange<TEntity, TExecutionContext>, string>? reason = null)
@@ -61,7 +64,10 @@ namespace Epam.GraphQL.Configuration.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason = null)
         {
-            settings.CanEdit = GetEditableIf<TEntity, TReturnType, TItem, TExecutionContext, (bool, string)>(batchFunc, item => (predicate(item), reason.Safe()(item)), configurationContext, nameof(BatchedEditableIf));
+            settings.CanEdit = GetBatchedEditableIf<TEntity, TReturnType, TItem, TExecutionContext, (bool, string)>(
+                batchFunc,
+                item => (predicate(item), reason.Safe()(item)),
+                configurationContext);
         }
 
         public static void SetOnWrite<TEntity, TReturnType, TExecutionContext>(this IFieldEditSettings<TEntity, TReturnType, TExecutionContext> settings, Action<TExecutionContext, TEntity, TReturnType> save)
@@ -74,17 +80,16 @@ namespace Epam.GraphQL.Configuration.Implementations
             settings.OnWriteAsync = (ctx, entity, result) => save(ctx.GetUserContext<TExecutionContext>(), entity, result);
         }
 
-        private static Func<IResolveFieldContext, IDataLoader<IFieldChange<TEntity, TExecutionContext>, TResult>> GetEditableIf<TEntity, TReturnType, TItem, TExecutionContext, TResult>(
+        private static Func<IResolveFieldContext, IDataLoader<IFieldChange<TEntity, TExecutionContext>, TResult>> GetBatchedEditableIf<TEntity, TReturnType, TItem, TExecutionContext, TResult>(
             Func<TExecutionContext, IEnumerable<TEntity>, IEnumerable<KeyValuePair<TEntity, TItem>>> batchFunc,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, TResult> func,
-            IResolvedChainConfigurationContext configurationContext,
-            string callerName)
+            IResolvedChainConfigurationContext configurationContext)
         {
             IDataLoader<IFieldChange<TEntity, TExecutionContext>, (IFieldChange<TEntity, TExecutionContext> Change, TItem? Item)> BatchCall(IResolveFieldContext context)
             {
                 Func<IFieldChange<TEntity, TExecutionContext>, TEntity> entityGetter = change => change.Entity;
                 var batcher = context.GetBatcher();
-                var task = batcher.Get(configurationContext, () => callerName, context.GetUserContext<TExecutionContext>(), batchFunc);
+                var task = batcher.Get(configurationContext, () => context.GetPath(), context.GetUserContext<TExecutionContext>(), batchFunc);
 
                 var result = entityGetter
                     .Then(task)

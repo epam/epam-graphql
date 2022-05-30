@@ -459,5 +459,70 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "        (ctx, id) => ...);",
                     "}")));
         }
+
+        [Test]
+        public void BatchEditableIfReturnsNullDictionary()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateMutableLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(x => x.Id);
+                    loader.Field(x => x.FullName)
+                        .BatchedEditableIf(BatchFunc, change => false);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            static IDictionary<Person, int> BatchFunc(IEnumerable<Person> items)
+            {
+                return null;
+            }
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                    .FromLoader<Person, TestUserContext>(personLoaderType);
+            }
+
+            void MutationBuilder(Mutation<TestUserContext> mutation)
+            {
+                mutation
+                    .SubmitField(personLoaderType, "people");
+            }
+
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(MutationBuilder);
+
+            var result = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                @"mutation {
+                    submit(payload: {
+                        people: [{
+                            id: 1,
+                            fullName: ""test""
+                        }]
+                    }) {
+                        people {
+                            id
+                        }
+                    }
+                }");
+
+            Assert.That(
+                result.Errors,
+                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
+                    "Error during resolving field `submit`. Batch delegate has returned null.",
+                    "PersonLoader:",
+                    "public override void OnConfigure()",
+                    "{",
+                    "    Field(x => x.Id);",
+                    string.Empty,
+                    "    Field(x => x.FullName)",
+                    "        .BatchedEditableIf(",
+                    "            BatchFunc, // <-----",
+                    "            change => ...);",
+                    "}")));
+        }
     }
 }

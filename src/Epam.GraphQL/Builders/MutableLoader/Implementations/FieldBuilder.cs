@@ -130,7 +130,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
                 .Argument(predicate)
                 .OptionalArgument(reason);
 
-            Field.EditSettings?.EditableIf(configurationContext, _registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
+            Field.EditSettings?.BatchEditableIf(configurationContext, _registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
             return this;
         }
 
@@ -145,7 +145,7 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
                 .Argument(predicate)
                 .OptionalArgument(reason);
 
-            Field.EditSettings?.EditableIf(configurationContext, batchFunc, predicate, reason);
+            Field.EditSettings?.BatchEditableIf(configurationContext, batchFunc, predicate, reason);
             return this;
         }
 
