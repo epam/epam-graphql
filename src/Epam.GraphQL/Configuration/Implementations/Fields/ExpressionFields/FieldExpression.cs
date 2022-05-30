@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public string Name { get; }
 
-        public MethodCallConfigurationContext ConfigurationContext => _field.ConfigurationContext;
+        public IChainConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         public PropertyInfo? PropertyInfo => _originalExpression.IsProperty() ? _originalExpression.GetPropertyInfo() : null;
 

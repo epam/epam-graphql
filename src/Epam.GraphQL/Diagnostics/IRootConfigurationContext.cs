@@ -11,6 +11,8 @@ namespace Epam.GraphQL.Diagnostics
 
         string GetError(string message, params IConfigurationContext[] invalidItems);
 
+        string GetRuntimeError(string message, params IConfigurationContext[] invalidItems);
+
         void ThrowErrors();
     }
 }

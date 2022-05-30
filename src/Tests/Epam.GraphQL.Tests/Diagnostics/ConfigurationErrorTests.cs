@@ -5,7 +5,6 @@
 
 using System;
 using System.Linq;
-using System.Text;
 using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
@@ -22,7 +21,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
         {
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "OnConfigure() method must have a declaration of one field at least.",
                         "Details:",
@@ -43,7 +42,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
         {
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "Field `test` must have resolver.",
                         "Details:",
@@ -64,7 +63,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
         {
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "Field name cannot be null or empty.",
                         "Details:",
@@ -87,7 +86,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
         {
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "Field name cannot be null or empty.",
                         "Details:",
@@ -118,7 +117,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "A field with the name `test` is already registered.",
                         "Details:",
@@ -147,7 +146,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "Cannot find the corresponding generic base type `Loader<,>` for type `object`.",
                         "Details:",
@@ -172,7 +171,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "Cannot find the corresponding generic base type `Loader<,>` for type `object`.",
                         "Details:",
@@ -204,7 +203,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "Field `test` must have resolver.",
                         "Details:",
@@ -236,7 +235,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "Expression (p => (2 * p.Id)), provided for field is not a property. Consider giving a name to the field explicitly.",
                         "Details:",
@@ -263,7 +262,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "The type: ValueTuple<string, string> cannot be coerced effectively to a GraphQL type.",
                         "Details:",
@@ -296,7 +295,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "Client projection (value(Epam.GraphQL.Tests.Diagnostics.ConfigurationErrorTests).GetPersonName(p)) contains a call of instance method 'GetPersonName' of type 'ConfigurationErrorTests'. This could potentially cause memory leak. Consider making the method static so that it does not capture constant in the instance.",
                         "Details:",
@@ -331,7 +330,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during Query.OnConfigure() call.",
                         "Cannot find the corresponding generic base type `Filter<,,>` for type `object`.",
                         "Details:",
@@ -391,7 +390,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "Type `Empty` must have a declaration of one field at least.",
                         "Details:",
@@ -429,7 +428,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A field with the name `test` is already registered.",
                         "Details:",
@@ -473,7 +472,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A filter for field with the name `fullName` is already registered.",
                         "Details:",
@@ -506,7 +505,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A filter for field with the name `fullName` is already registered.",
                         "Details:",
@@ -557,7 +556,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A sorter with the name `fullName` is already registered.",
                         "Details:",
@@ -590,7 +589,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A sorter with the name `fullName` is already registered.",
                         "Details:",
@@ -641,7 +640,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "Type `WithIndexedProperty` must have a declaration of one field at least.",
                         "Details:",
@@ -678,7 +677,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A sorter with the name `id` is already registered.",
                         "Details:",
@@ -720,7 +719,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             Assert.Throws(
                 Is.TypeOf<ConfigurationException>().And.Message.EqualTo(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Error during PersonLoader.OnConfigure() call.",
                         "A sorter with the name `customSorter` is already registered.",
                         "Details:",
@@ -747,23 +746,6 @@ namespace Epam.GraphQL.Tests.Diagnostics
                 query
                     .Connection(personLoader, "people");
             }
-        }
-
-        private static string ConcatLines(params string[] lines)
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.AppendLine();
-                }
-
-                sb.Append(lines[i]);
-            }
-
-            return sb.ToString();
         }
 
 #pragma warning disable CA1822 // Mark members as static

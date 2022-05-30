@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using Epam.GraphQL.Extensions;
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
     internal class ObjectConfigurationContext : ObjectConfigurationContextBase
     {
@@ -47,6 +47,15 @@ namespace Epam.GraphQL.Diagnostics
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine($"Error during {typeof(TProjection).HumanizedName()}.OnConfigure() call.");
             stringBuilder.Append(message);
+
+            return stringBuilder.ToString();
+        }
+
+        protected override string DoGetRuntimeError(string message)
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine(message);
+            stringBuilder.Append($"{typeof(TProjection).HumanizedName()}:");
 
             return stringBuilder.ToString();
         }

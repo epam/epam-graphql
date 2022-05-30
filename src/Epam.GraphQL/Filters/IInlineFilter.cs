@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Filters
 
         Type FilterType { get; }
 
-        MethodCallConfigurationContext ConfigurationContext { get; }
+        IChainConfigurationContext ConfigurationContext { get; }
 
         LambdaExpression BuildExpression(TExecutionContext context, object? filter);
     }

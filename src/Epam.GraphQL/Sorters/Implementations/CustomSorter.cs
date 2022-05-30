@@ -10,23 +10,29 @@ using GraphQL;
 
 namespace Epam.GraphQL.Sorters.Implementations
 {
-    internal class CustomSorter<TEntity, TValueType, TExecutionContext> : ISorter<TExecutionContext>
+    internal class CustomSorter<TEntity, TValueType, TExecutionContext> : ISorter<TExecutionContext>, IChainConfigurationContextOwner
     {
         private readonly Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> _selectorFactory;
 
-        public CustomSorter(MethodCallConfigurationContext configurationContext, string name, Expression<Func<TEntity, TValueType>> selector)
-            : this(configurationContext, name, _ => selector)
+        public CustomSorter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Expression<Func<TEntity, TValueType>> selector)
+            : this(configurationContextFactory, name, _ => selector)
         {
         }
 
-        public CustomSorter(MethodCallConfigurationContext configurationContext, string name, Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> selectorFactory)
+        public CustomSorter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> selectorFactory)
         {
-            ConfigurationContext = configurationContext;
+            ConfigurationContext = configurationContextFactory(this);
             Name = name.ToCamelCase();
             _selectorFactory = selectorFactory;
         }
 
-        public MethodCallConfigurationContext ConfigurationContext { get; }
+        public IChainConfigurationContext ConfigurationContext { get; set; }
 
         public string Name { get; }
 

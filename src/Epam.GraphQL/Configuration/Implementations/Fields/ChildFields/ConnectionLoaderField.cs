@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public ConnectionLoaderField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -59,7 +59,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public override IFieldResolver Resolver => QueryableFieldResolver.AsConnection();
 
         protected override ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             return new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(

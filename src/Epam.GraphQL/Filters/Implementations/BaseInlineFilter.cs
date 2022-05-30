@@ -38,7 +38,7 @@ namespace Epam.GraphQL.Filters.Implementations
             ? typeof(ComparisonsFilter<TItemType, TListItemType>)
             : typeof(InFilter<TItemType, TListItemType>);
 
-        public MethodCallConfigurationContext ConfigurationContext => _field.ConfigurationContext;
+        public IChainConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {

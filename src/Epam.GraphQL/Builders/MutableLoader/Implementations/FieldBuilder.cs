@@ -124,7 +124,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings?.EditableIf(_registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
+            var configurationContext = Field.ConfigurationContext
+                .Chain(nameof(BatchedEditableIf))
+                .Argument(batchFunc)
+                .Argument(predicate)
+                .OptionalArgument(reason);
+
+            Field.EditSettings?.BatchEditableIf(configurationContext, _registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
             return this;
         }
 
@@ -133,15 +139,21 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TEntity, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Field.EditSettings?.EditableIf(batchFunc, predicate, reason);
+            var configurationContext = Field.ConfigurationContext
+                .Chain(nameof(BatchedEditableIf))
+                .Argument(batchFunc)
+                .Argument(predicate)
+                .OptionalArgument(reason);
+
+            Field.EditSettings?.BatchEditableIf(configurationContext, batchFunc, predicate, reason);
             return this;
         }
 
         public IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> Editable()
         {
             // TODO All other methods in this class should change Field.ConfigurationContext
-            Field.ConfigurationContext = Field.ConfigurationContext
-                .NextOperation(nameof(Editable));
+            Field.ConfigurationContext
+                .Chain(nameof(Editable));
 
             Field.EditSettings?.Editable();
             return this;

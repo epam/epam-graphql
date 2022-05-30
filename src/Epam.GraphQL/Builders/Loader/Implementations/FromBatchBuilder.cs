@@ -37,7 +37,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
-                Field.ConfigurationContext.NextOperation<TAnotherReturnType>(nameof(AndFromBatch))
+                Field.ConfigurationContext.Chain<TAnotherReturnType>(nameof(AndFromBatch))
                     .Argument(batchFunc)
                     .OptionalArgument(build),
                 batchFunc,
@@ -51,7 +51,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
-                Field.ConfigurationContext.NextOperation<TAnotherReturnType>(nameof(AndFromBatch))
+                Field.ConfigurationContext.Chain<TAnotherReturnType>(nameof(AndFromBatch))
                     .Argument(batchFunc)
                     .OptionalArgument(build),
                 batchFunc,
@@ -66,7 +66,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
-                Field.ConfigurationContext.NextOperation<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
+                Field.ConfigurationContext.Chain<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
                     .Argument(keySelector)
                     .Argument(batchFunc)
                     .OptionalArgument(build),
@@ -83,7 +83,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
-                Field.ConfigurationContext.NextOperation<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
+                Field.ConfigurationContext.Chain<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
                     .Argument(keySelector)
                     .Argument(batchFunc)
                     .OptionalArgument(build),

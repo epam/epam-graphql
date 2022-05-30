@@ -19,15 +19,18 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType, TExecutionContext>
         where TSourceType : class
     {
-        internal FromBatchEditableBuilder(RelationRegistry<TExecutionContext> registry, IFieldEditSettings<TSourceType, TReturnType, TExecutionContext>? settings)
+        internal FromBatchEditableBuilder(RelationRegistry<TExecutionContext> registry, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext> field)
         {
-            Guards.ThrowIfNull(settings, nameof(settings));
+            Guards.ThrowIfNull(field.EditSettings, nameof(field.EditSettings));
 
+            Field = (IField<TSourceType, TExecutionContext>)field;
             Registry = registry;
-            Settings = settings;
+            Settings = field.EditSettings;
         }
 
         protected RelationRegistry<TExecutionContext> Registry { get; }
+
+        protected IField<TSourceType, TExecutionContext> Field { get; }
 
         protected IFieldEditSettings<TSourceType, TReturnType, TExecutionContext> Settings { get; }
 
@@ -60,7 +63,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TSourceType, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TSourceType, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Settings.BatchedEditableIf(Registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
+            var configurationContext = Field.ConfigurationContext
+                .Chain(nameof(BatchedEditableIf))
+                .Argument(batchFunc)
+                .Argument(predicate)
+                .OptionalArgument(reason);
+
+            Settings.BatchedEditableIf(configurationContext, Registry.WrapFuncByUnusedContext(batchFunc), predicate, reason);
         }
 
         public void BatchedEditableIf<TItem>(
@@ -68,7 +77,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Func<IBatchFieldChange<TSourceType, TReturnType, TItem, TExecutionContext>, bool> predicate,
             Func<IBatchFieldChange<TSourceType, TReturnType, TItem, TExecutionContext>, string>? reason)
         {
-            Settings.BatchedEditableIf(batchFunc, predicate, reason);
+            var configurationContext = Field.ConfigurationContext
+                .Chain(nameof(BatchedEditableIf))
+                .Argument(batchFunc)
+                .Argument(predicate)
+                .OptionalArgument(reason);
+
+            Settings.BatchedEditableIf(configurationContext, batchFunc, predicate, reason);
         }
 
         public IHasEditableAndOnWrite<TSourceType, TReturnType, TExecutionContext> MandatoryForUpdate()

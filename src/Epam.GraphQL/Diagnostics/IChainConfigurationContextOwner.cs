@@ -5,18 +5,8 @@
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal class GenericPrinter<T> : IPrinter<T>
+    internal interface IChainConfigurationContextOwner
     {
-        public static GenericPrinter<T> Instance { get; } = new GenericPrinter<T>();
-
-        public string Print(T value)
-        {
-            if (value == null)
-            {
-                return "null";
-            }
-
-            return value.ToString();
-        }
+        IChainConfigurationContext ConfigurationContext { get; set; }
     }
 }

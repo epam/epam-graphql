@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public BatchField(
-            MethodCallConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
@@ -33,13 +33,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
                 configurationContext,
                 parent,
                 name,
-                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
+                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(configurationContext, name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }
 
         public BatchField(
-            MethodCallConfigurationContext configurationContext,
+            IResolvedChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TKeyType>> keySelector,
@@ -49,13 +49,13 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
                 configurationContext,
                 parent,
                 name,
-                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
+                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(configurationContext, name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }
 
         protected BatchField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, TReturnType> resolver,
@@ -88,14 +88,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         protected IBatchResolver<TEntity, TReturnType> BatchFieldResolver { get; }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector)
         {
             return Parent.ApplySelect<TReturnType1>(configurationContext, this, BatchFieldResolver.Select(selector));
         }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
-            MethodCallArgumentConfigurationContext configurationContext,
+            IInlinedChainConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
             where TReturnType1 : class
@@ -105,14 +105,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector)
         {
             return ApplySelect(configurationContext, selector);
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
-            MethodCallArgumentConfigurationContext configurationContext,
+            IInlinedChainConfigurationContext configurationContext,
             Func<TReturnType, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {

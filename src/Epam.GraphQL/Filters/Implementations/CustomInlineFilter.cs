@@ -11,19 +11,25 @@ using GraphQL;
 
 namespace Epam.GraphQL.Filters.Implementations
 {
-    internal class CustomInlineFilter<TEntity, TValueType, TExecutionContext> : IInlineFilter<TExecutionContext>
+    internal class CustomInlineFilter<TEntity, TValueType, TExecutionContext> : IInlineFilter<TExecutionContext>, IChainConfigurationContextOwner
         where TEntity : class
     {
         private readonly Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> _filterPredicateFactory;
 
-        public CustomInlineFilter(MethodCallConfigurationContext configurationContext, string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-            : this(configurationContext, name, (context, value) => filterPredicateFactory(value))
+        public CustomInlineFilter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+            : this(configurationContextFactory, name, (context, value) => filterPredicateFactory(value))
         {
         }
 
-        public CustomInlineFilter(MethodCallConfigurationContext configurationContext, string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+        public CustomInlineFilter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
         {
-            ConfigurationContext = configurationContext;
+            ConfigurationContext = configurationContextFactory(this);
             FieldName = name.ToCamelCase();
             _filterPredicateFactory = filterPredicateFactory;
         }
@@ -34,7 +40,7 @@ namespace Epam.GraphQL.Filters.Implementations
 
         public Type FilterType => typeof(TValueType);
 
-        public MethodCallConfigurationContext ConfigurationContext { get; }
+        public IChainConfigurationContext ConfigurationContext { get; set; }
 
         LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {

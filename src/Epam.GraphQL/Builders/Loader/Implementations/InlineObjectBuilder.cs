@@ -32,22 +32,28 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             IField<TExecutionContext> parent,
             RelationRegistry<TExecutionContext> registry,
             Action<IInlineObjectBuilder<TSourceType, TExecutionContext>>? build,
-            IConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             bool isInputType)
         {
             _registry = registry;
 
             if (build == null)
             {
+                var context = configurationContext.New();
+
                 _objectGraphTypeConfigurator = isInputType
-                    ? _registry.RegisterInputAutoObjectGraphType<TSourceType>(configurationContext.New())
-                    : _registry.RegisterAutoObjectGraphType<TSourceType>(configurationContext.New());
+                    ? _registry.RegisterInputAutoObjectGraphType<TSourceType>(context)
+                    : _registry.RegisterAutoObjectGraphType<TSourceType>(context);
             }
             else
             {
+                var context = configurationContext is IInlinedChainConfigurationContext inlinedChainConfigurationContext
+                    ? inlinedChainConfigurationContext.Build.New()
+                    : configurationContext.New();
+
                 _objectGraphTypeConfigurator = isInputType
-                    ? new InputObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, configurationContext.New(), registry, isAuto: false)
-                    : new ObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, configurationContext.New(), registry, isAuto: false);
+                    ? new InputObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, context, registry, isAuto: false)
+                    : new ObjectGraphTypeConfigurator<TSourceType, TExecutionContext>(parent, context, registry, isAuto: false);
 
                 build(this);
             }
@@ -58,7 +64,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
-                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(expression),
                 null,
                 expression,
@@ -69,7 +75,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
-                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(name)
                     .Argument(expression),
                 name,
@@ -81,7 +87,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
-                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(name)
                     .Argument(expression),
                 name,
@@ -93,7 +99,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IVoid Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
         {
             _objectGraphTypeConfigurator.AddField(
-                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field)).Argument(expression),
+                owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field)).Argument(expression),
                 null,
                 expression,
                 deprecationReason);
@@ -104,7 +110,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IVoid Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
         {
             _objectGraphTypeConfigurator.AddField(
-                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(name)
                     .Argument(expression),
                 name,
@@ -117,7 +123,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         public IVoid Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason)
         {
             _objectGraphTypeConfigurator.AddField(
-                _objectGraphTypeConfigurator.ConfigurationContext.Operation(nameof(Field))
+                owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
                     .Argument(name)
                     .Argument(expression),
                 name,
@@ -197,7 +203,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Guards.ThrowIfNull(expression, nameof(expression));
             Guards.ThrowIfNull(action, nameof(action));
 
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(expression, action);
+            _objectGraphTypeConfigurator.OnEntityLoaded(expression, action);
         }
 
         public void OnEntityLoaded<TKey, T>(
@@ -209,7 +215,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Guards.ThrowIfNull(fetch, nameof(fetch));
             Guards.ThrowIfNull(action, nameof(action));
 
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(keyExpression, fetch, action);
+            _objectGraphTypeConfigurator.OnEntityLoaded(keyExpression, fetch, action);
         }
 
         public void OnEntityLoaded<TKey, T>(
@@ -221,7 +227,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Guards.ThrowIfNull(fetch, nameof(fetch));
             Guards.ThrowIfNull(action, nameof(action));
 
-            _objectGraphTypeConfigurator.AddOnEntityLoaded(keyExpression, fetch, action);
+            _objectGraphTypeConfigurator.OnEntityLoaded(keyExpression, fetch, action);
         }
     }
 }

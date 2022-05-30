@@ -16,20 +16,20 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         where TEntity : class
     {
         public NullableExpressionField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TEntity, TReturnType?>> expression,
             string? name)
-            : base(configurationContext, parent, expression, name)
+            : base(configurationContextFactory, parent, expression, name)
         {
         }
 
         public NullableExpressionField(
-            MethodCallConfigurationContext configurationContext,
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression,
             string name)
-            : base(configurationContext, parent, expression, name)
+            : base(configurationContextFactory, parent, expression, name)
         {
         }
 

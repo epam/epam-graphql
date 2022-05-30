@@ -3,133 +3,135 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System.Text;
 using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Diagnostics
 {
     [TestFixture]
-    public class MethodCallConfigurationContextTests
+    public class MethodCallConfigurationContextTests : IChainConfigurationContextOwner
     {
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; }
+
         [Test]
         public void OneOperationNoArgs()
         {
-            var context = new ObjectConfigurationContext(null).Operation("Name");
-            Assert.AreEqual("Name()", context.ToString());
+            var context = ConfigurationContext.Create().Chain(this, "Name");
+            Assert.AreEqual("Name();", context.ToString());
         }
 
         [Test]
         public void OneOperationOneArg()
         {
-            var context = new ObjectConfigurationContext(null).Operation("Name")
+            var context = ConfigurationContext.Create().Chain(this, "Name")
                 .Argument("test");
 
-            Assert.AreEqual("Name(\"test\")", context.ToString());
+            Assert.AreEqual("Name(\"test\");", context.ToString());
         }
 
         [Test]
         public void OneOperationTwoArgs()
         {
-            var context = new ObjectConfigurationContext(null).Operation("Name")
+            var context = ConfigurationContext.Create().Chain(this, "Name")
                 .Argument("test")
                 .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "Name(",
                     "    \"test\",",
-                    "    \"test\")"),
+                    "    \"test\");"),
                 context.ToString());
         }
 
         [Test]
         public void TwoOperationsOneArgEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(\"test\")",
-                    "    .Second(\"test\")"),
+                    "    .Second(\"test\");"),
                 context.ToString());
         }
 
         [Test]
         public void TwoOperationsOneArgAndTwoArgs()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("test")
                     .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "    First(\"test\")",
                     "        .Second(",
                     "            \"test\",",
-                    "            \"test\")"),
+                    "            \"test\");"),
                 context.ToString(1));
         }
 
         [Test]
         public void TwoOperationsTwoArgsEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test1")
                     .Argument("test2")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("first")
                     .Argument("second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(",
                     "    \"test1\",",
                     "    \"test2\")",
                     "    .Second(",
                     "        \"first\",",
-                    "        \"second\")"),
+                    "        \"second\");"),
                 context.ToString());
         }
 
         [Test]
         public void ThreeOperationsOneArgEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("test")
-                .NextOperation("Third")
+                .Chain("Third")
                     .Argument("test");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(\"test\")",
                     "    .Second(\"test\")",
-                    "    .Third(\"test\")"),
+                    "    .Third(\"test\");"),
                 context.ToString());
         }
 
         [Test]
         public void ThreeOperationsTwoArgsEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test1")
                     .Argument("test2")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("first")
                     .Argument("second")
-                .NextOperation("Third")
+                .Chain("Third")
                     .Argument("first")
                     .Argument("second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "First(",
                     "    \"test1\",",
                     "    \"test2\")",
@@ -138,25 +140,25 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "        \"second\")",
                     "    .Third(",
                     "        \"first\",",
-                    "        \"second\")"),
+                    "        \"second\");"),
                 context.ToString());
         }
 
         [Test]
         public void IndentThreeOperationsTwoArgsEach()
         {
-            var context = new ObjectConfigurationContext(null).Operation("First")
+            var context = ConfigurationContext.Create().Chain(this, "First")
                     .Argument("test1")
                     .Argument("test2")
-                .NextOperation("Second")
+                .Chain("Second")
                     .Argument("first")
                     .Argument("second")
-                .NextOperation("Third")
+                .Chain("Third")
                     .Argument("first")
                     .Argument("second");
 
             Assert.AreEqual(
-                ConcatLines(
+                TestHelpers.ConcatLines(
                     "        First(",
                     "            \"test1\",",
                     "            \"test2\")",
@@ -165,25 +167,8 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     "                \"second\")",
                     "            .Third(",
                     "                \"first\",",
-                    "                \"second\")"),
+                    "                \"second\");"),
                 context.ToString(2));
-        }
-
-        private static string ConcatLines(params string[] lines)
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.AppendLine();
-                }
-
-                sb.Append(lines[i]);
-            }
-
-            return sb.ToString();
         }
     }
 }

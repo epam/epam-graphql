@@ -5,8 +5,7 @@
 
 namespace Epam.GraphQL.Diagnostics
 {
-    internal interface IPrinter<T>
+    internal interface IInlinedResolvedChainConfigurationContext : IInlinedChainConfigurationContext, IResolvedChainConfigurationContext
     {
-        string Print(T value);
     }
 }

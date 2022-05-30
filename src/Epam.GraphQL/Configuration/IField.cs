@@ -13,7 +13,7 @@ using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal interface IField<TExecutionContext>
+    internal interface IField<TExecutionContext> : IChainConfigurationContextOwner
     {
         IObjectGraphTypeConfigurator<TExecutionContext> Parent { get; }
 
@@ -23,7 +23,7 @@ namespace Epam.GraphQL.Configuration
 
         IFieldResolver Resolver { get; }
 
-        MethodCallConfigurationContext ConfigurationContext { get; }
+        new IChainConfigurationContext ConfigurationContext { get; }
 
         FieldType AsFieldType();
 

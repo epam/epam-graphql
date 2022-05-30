@@ -3,7 +3,7 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
     internal class StringPrinter : IPrinter<string?>
     {

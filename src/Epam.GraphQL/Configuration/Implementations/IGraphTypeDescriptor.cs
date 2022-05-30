@@ -17,7 +17,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         IObjectGraphTypeConfigurator<TExecutionContext>? Configurator { get; }
 
-        void Validate(MethodCallConfigurationContext configurationContext);
+        void Validate(IChainConfigurationContext configurationContext);
     }
 
     internal interface IGraphTypeDescriptor<TType, TExecutionContext> : IGraphTypeDescriptor<TExecutionContext>

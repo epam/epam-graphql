@@ -22,12 +22,12 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>
     {
         internal FromBatchSelectableEditableBuilder(RelationRegistry<TExecutionContext> registry, TField field)
-            : base(registry, ((IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>)field).EditSettings)
+            : base(registry, field)
         {
             Field = field;
         }
 
-        protected TField Field { get; set; }
+        protected new TField Field { get; set; }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType, TExecutionContext> ReferenceTo<TChildEntity, TChildEntityLoader>(Predicate<TReturnType> isFakePropValue)
             where TChildEntity : class
@@ -42,29 +42,29 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             where TReturnType1 : struct
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
                 selector);
 
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select.EditSettings);
+            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select);
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1?, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1?> selector)
             where TReturnType1 : struct
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType1>(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
                 selector);
 
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1?, TExecutionContext>(Registry, select.EditSettings);
+            return new FromBatchEditableBuilder<TSourceType, TReturnType1?, TExecutionContext>(Registry, select);
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, string, TExecutionContext> Select(Func<TReturnType, string> selector)
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation(nameof(Select)).Argument(selector),
+                Field.ConfigurationContext.Chain(nameof(Select)).Argument(selector),
                 selector);
 
-            return new FromBatchEditableBuilder<TSourceType, string, TExecutionContext>(Registry, select.EditSettings);
+            return new FromBatchEditableBuilder<TSourceType, string, TExecutionContext>(Registry, select);
         }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(
@@ -73,13 +73,13 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             where TReturnType1 : class
         {
             var select = Field.ApplySelect(
-                Field.ConfigurationContext.NextOperation<TReturnType>(nameof(Select))
+                Field.ConfigurationContext.Chain<TReturnType>(nameof(Select))
                     .Argument(selector)
                     .OptionalArgument(build),
                 selector,
                 build);
 
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select.EditSettings);
+            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select);
         }
     }
 }

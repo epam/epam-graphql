@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using Epam.GraphQL.Extensions;
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
     internal abstract class ObjectConfigurationContextBase : ConfigurationContext, IRootConfigurationContext
     {
@@ -75,7 +75,6 @@ namespace Epam.GraphQL.Diagnostics
 
                 var child = Children[index];
                 child.Append(stringBuilder, choosenItems, indent);
-                stringBuilder.Append(';');
 
                 if (choosenItems.Contains(child))
                 {
@@ -88,7 +87,11 @@ namespace Epam.GraphQL.Diagnostics
 
             if (nextIndex != Children.Count)
             {
-                stringBuilder.AppendLine();
+                if (indicies.Count > 0)
+                {
+                    stringBuilder.AppendLine();
+                }
+
                 stringBuilder.Append(' ', 4 * indent);
                 stringBuilder.AppendLine("// ...");
             }
@@ -100,14 +103,14 @@ namespace Epam.GraphQL.Diagnostics
             _errors.Clear();
         }
 
-        public MethodCallConfigurationContext Operation(string operation)
+        public IChainConfigurationContext Chain(IChainConfigurationContextOwner owner, string operation)
         {
-            return AddChild(new MethodCallConfigurationContext(this, null, operation));
+            return AddChild(new ChainConfigurationContext(owner, this, null, operation));
         }
 
-        public MethodCallConfigurationContext Operation<T>(string operation)
+        public IChainConfigurationContext Chain<T>(IChainConfigurationContextOwner owner, string operation)
         {
-            return Operation($"{operation}<{typeof(T).HumanizedName()}>");
+            return Chain(owner, $"{operation}<{typeof(T).HumanizedName()}>");
         }
 
         public void AddError(string message, params IConfigurationContext[] invalidItems)
@@ -127,6 +130,17 @@ namespace Epam.GraphQL.Diagnostics
             return builder.ToString();
         }
 
+        public string GetRuntimeError(string message, params IConfigurationContext[] invalidItems)
+        {
+            var builder = new StringBuilder();
+
+            builder.Append(DoGetRuntimeError(message));
+            builder.AppendLine();
+            this.GetRoot().Append(builder, invalidItems, 0);
+
+            return builder.ToString();
+        }
+
         public void ThrowErrors()
         {
             if (_errors.Count > 0)
@@ -136,6 +150,11 @@ namespace Epam.GraphQL.Diagnostics
         }
 
         protected virtual string DoGetError(string message)
+        {
+            return message;
+        }
+
+        protected virtual string DoGetRuntimeError(string message)
         {
             return message;
         }

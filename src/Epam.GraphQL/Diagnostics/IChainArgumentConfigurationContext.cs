@@ -3,20 +3,10 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System.Linq.Expressions;
-using Epam.GraphQL.Helpers;
-
 namespace Epam.GraphQL.Diagnostics
 {
-    internal class LambdaExpressionPrinter : IPrinter<LambdaExpression?>
+    internal interface IChainArgumentConfigurationContext : IChildConfigurationContext
     {
-        public static LambdaExpressionPrinter Instance { get; } = new LambdaExpressionPrinter();
-
-        public string Print(LambdaExpression? value)
-        {
-            return value == null
-                ? "null"
-                : ExpressionPrinter.Print(value, noIndent: true);
-        }
+        new IChainConfigurationContext Parent { get; }
     }
 }

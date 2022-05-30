@@ -26,7 +26,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IRootQueryableField<TReturnType, TExecutionContext>
     {
         public RootQueryableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Func<TExecutionContext, IQueryable<TReturnType>> query,
@@ -48,7 +48,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         public RootQueryableField(
-            MethodCallConfigurationContext configurationContext,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             IRootQueryableResolver<TReturnType, TExecutionContext> resolver,
@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsConnection(Expression<Func<IQueryable<TReturnType>, IOrderedQueryable<TReturnType>>> order)
         {
             var connectionField = new RootConnectionQueryableField<TReturnType, TExecutionContext>(
-                ConfigurationContext.NextOperation(nameof(AsConnection)).Argument(order),
+                ConfigurationContext.Chain(nameof(AsConnection)).Argument(order),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -88,7 +88,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         public IVoid AsGroupConnection()
         {
             var connectionField = new RootGroupConnectionQueryableField<TReturnType, TExecutionContext>(
-                ConfigurationContext.NextOperation(nameof(AsGroupConnection)),
+                ConfigurationContext.Chain(nameof(AsGroupConnection)),
                 Parent,
                 Name,
                 QueryableFieldResolver,
@@ -100,7 +100,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             return ApplyField(connectionField);
         }
 
-        protected override RootQueryableField<TReturnType, TExecutionContext> ReplaceResolver(MethodCallConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
+        protected override RootQueryableField<TReturnType, TExecutionContext> ReplaceResolver(IChainConfigurationContext configurationContext, IRootQueryableResolver<TReturnType, TExecutionContext> resolver)
         {
             var queryableField = new RootQueryableField<TReturnType, TExecutionContext>(
                 configurationContext,

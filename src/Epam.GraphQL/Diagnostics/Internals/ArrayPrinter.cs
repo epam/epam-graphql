@@ -6,7 +6,7 @@
 using System.Text;
 using Epam.GraphQL.Extensions;
 
-namespace Epam.GraphQL.Diagnostics
+namespace Epam.GraphQL.Diagnostics.Internals
 {
     internal class ArrayPrinter<T> : IPrinter<T[]?>
     {

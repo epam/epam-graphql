@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -32,6 +33,7 @@ namespace Epam.GraphQL.TaskBatcher
         internal IProfiler Profiler { get; }
 
         public IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
+            IResolvedChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> loader)
@@ -43,11 +45,12 @@ namespace Epam.GraphQL.TaskBatcher
                 var loader = (Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>>)key.Loader;
                 var context = (TExecutionContext)key.Context;
                 var curriedLoader = loader.Curry()(context);
-                return new BatchLoader<TId, TItem>(curriedLoader, stepNameFactory, Profiler);
+                return new BatchLoader<TId, TItem>(curriedLoader, configurationContext, stepNameFactory, Profiler);
             }
         }
 
         public IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
+            IResolvedChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>> loader)
@@ -59,7 +62,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var loader = (Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>>)key.Loader;
                 var context = (TExecutionContext)key.Context;
                 var curriedLoader = loader.Curry()(context);
-                return new TaskBatchLoader<TId, TItem>(curriedLoader, stepNameFactory, Profiler);
+                return new TaskBatchLoader<TId, TItem>(curriedLoader, configurationContext, stepNameFactory, Profiler);
             }
         }
 

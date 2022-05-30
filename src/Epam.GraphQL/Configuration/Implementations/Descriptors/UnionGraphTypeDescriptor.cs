@@ -52,7 +52,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
             _types.Add(graphType);
         }
 
-        public void Validate(MethodCallConfigurationContext configurationContext)
+        public void Validate(IChainConfigurationContext configurationContext)
         {
             foreach (var type in _types)
             {

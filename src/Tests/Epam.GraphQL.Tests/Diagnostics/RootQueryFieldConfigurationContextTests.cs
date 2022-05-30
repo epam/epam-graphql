@@ -5,7 +5,6 @@
 
 using System;
 using System.Linq;
-using System.Text;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
@@ -27,9 +26,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .FromIQueryable(_ => FakeData.People.AsQueryable());
 
                 Assert.AreEqual(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Field(\"people\")",
-                        "    .FromIQueryable<Person>(_ => ...)"),
+                        "    .FromIQueryable<Person>(_ => ...);"),
                     field.ToString());
             }
         }
@@ -46,14 +45,14 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .FromIQueryable(_ => FakeData.People.AsQueryable(), configure => configure.Field(p => p.Id));
 
                 Assert.AreEqual(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .FromIQueryable<Person>(",
                         "        _ => ...,",
                         "        configure =>",
                         "        {",
                         "            Field(p => p.Id);",
-                        "        })"),
+                        "        });"),
                     field.ToString());
             }
         }
@@ -71,10 +70,10 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .AsConnection(query => query.OrderBy(person => person.Id));
 
                 Assert.AreEqual(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .FromIQueryable<Person>(_ => ...)",
-                        "    .AsConnection(query => query.OrderBy(person => person.Id))"),
+                        "    .AsConnection(query => query.OrderBy(person => person.Id));"),
                     field.ToString());
             }
         }
@@ -92,10 +91,10 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .AsGroupConnection();
 
                 Assert.AreEqual(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .FromIQueryable<Person>(_ => ...)",
-                        "    .AsGroupConnection()"),
+                        "    .AsGroupConnection();"),
                     field.ToString());
             }
         }
@@ -112,9 +111,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Resolve(_ => 100500);
 
                 Assert.AreEqual(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Field(\"people\")",
-                        "    .Resolve<int>(_ => ...)"),
+                        "    .Resolve<int>(_ => ...);"),
                     field.ToString());
             }
         }
@@ -132,10 +131,10 @@ namespace Epam.GraphQL.Tests.Diagnostics
                     .Resolve((_, arg1) => 100500);
 
                 Assert.AreEqual(
-                    ConcatLines(
+                    TestHelpers.ConcatLines(
                         "Field(\"people\")",
                         "    .Argument<string>(\"arg1\")",
-                        "    .Resolve<int>((_, arg1) => ...)"),
+                        "    .Resolve<int>((_, arg1) => ...);"),
                     field.ToString());
             }
         }
@@ -144,23 +143,6 @@ namespace Epam.GraphQL.Tests.Diagnostics
         {
             var queryType = GraphQLTypeBuilder.CreateQueryType(queryBuilder);
             return ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
-        }
-
-        private static string ConcatLines(params string[] lines)
-        {
-            var sb = new StringBuilder();
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (i > 0)
-                {
-                    sb.AppendLine();
-                }
-
-                sb.Append(lines[i]);
-            }
-
-            return sb.ToString();
         }
 
         public class Empty
