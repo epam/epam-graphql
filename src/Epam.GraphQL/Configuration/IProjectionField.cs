@@ -6,11 +6,13 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Builders.Loader;
 
-namespace Epam.GraphQL.Builders.Loader
+namespace Epam.GraphQL.Configuration
 {
-    public interface IHasFromIQueryable<TEntity, TExecutionContext>
+    public interface IProjectionField<TEntity, TExecutionContext> :
+        IUnionableField<TEntity, TExecutionContext>
+        where TEntity : class
     {
         IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,

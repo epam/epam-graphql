@@ -10,7 +10,7 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader
 {
-    public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : IHasFromIQueryable<TEntity, TExecutionContext>, IHasFromBatch<TEntity, TExecutionContext>
+    public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : IProjectionField<TEntity, TExecutionContext>, IHasFromBatch<TEntity, TExecutionContext>
         where TEntity : class
     {
         IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)

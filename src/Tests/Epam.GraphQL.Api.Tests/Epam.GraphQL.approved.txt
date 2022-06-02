@@ -138,12 +138,6 @@ namespace Epam.GraphQL.Builders.Loader
         Epam.GraphQL.Builders.Loader.IHasSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TKeyType>> keySelector, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKeyType>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKeyType, TReturnType>>> batchFunc, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
             where TReturnType :  class;
     }
-    public interface IHasFromIQueryable<TEntity, TExecutionContext>
-    {
-        Epam.GraphQL.Configuration.IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition);
-        Epam.GraphQL.Configuration.IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
-            where TReturnType :  class;
-    }
     public interface IHasSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasSelect<TReturnType, TExecutionContext>
         where TEntity :  class
     {
@@ -191,14 +185,14 @@ namespace Epam.GraphQL.Builders.Loader
         void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Collections.Generic.IDictionary<TKey, T>> fetch, System.Action<TExecutionContext, T> action);
         void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKey, T>>> fetch, System.Action<TExecutionContext, T> action);
     }
-    public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>
+    public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IProjectionField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>
         where TEntity :  class
     {
         Epam.GraphQL.Configuration.IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Epam.GraphQL.Loaders.Loader<TChildEntity, TExecutionContext>, new ()
             where TChildEntity :  class;
     }
-    public interface ILoaderFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFromLoader<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Projection.IProjectionFieldBuilder<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>
+    public interface ILoaderFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFromLoader<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IProjectionField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>
         where TEntity :  class { }
 }
 namespace Epam.GraphQL.Builders.MutableLoader
@@ -402,12 +396,7 @@ namespace Epam.GraphQL.Builders.MutableLoader
         Epam.GraphQL.Builders.MutableLoader.IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TReturnType, TExecutionContext> FromBatch<TKeyType, TReturnType>(System.Linq.Expressions.Expression<System.Func<TEntity, TKeyType>> keySelector, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKeyType>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKeyType, TReturnType>>> batchFunc, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
             where TReturnType :  class;
     }
-    public interface IMutableLoaderFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFromLoader<TEntity, TExecutionContext>, Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFromBatch<TEntity, TExecutionContext>
-        where TEntity :  class { }
-}
-namespace Epam.GraphQL.Builders.Projection
-{
-    public interface IProjectionFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Loader.IHasFromIQueryable<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>
+    public interface IMutableLoaderFieldBuilder<TEntity, TExecutionContext> : Epam.GraphQL.Builders.Common.IHasFromLoader<TEntity, TExecutionContext>, Epam.GraphQL.Builders.MutableLoader.IHasFromBatch<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IProjectionField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>
         where TEntity :  class { }
 }
 namespace Epam.GraphQL.Configuration.Enums
@@ -602,6 +591,13 @@ namespace Epam.GraphQL.Configuration
             where TProjection : Epam.GraphQL.Loaders.Projection<TEntity1, TExecutionContext>
             where TEntity1 :  class;
         Epam.GraphQL.Configuration.IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> PayloadField<TArgType5>(string argName);
+    }
+    public interface IProjectionField<TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IResolvableField<TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableField<TEntity, TExecutionContext>
+        where TEntity :  class
+    {
+        Epam.GraphQL.Configuration.IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition);
+        Epam.GraphQL.Configuration.IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(System.Func<TExecutionContext, System.Linq.IQueryable<TReturnType>> query, System.Linq.Expressions.Expression<System.Func<TEntity, TReturnType, bool>> condition, System.Action<Epam.GraphQL.Builders.Loader.IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
+            where TReturnType :  class;
     }
     public interface IQueryField<TExecutionContext> : Epam.GraphQL.Configuration.IResolvableRootField<TExecutionContext>, Epam.GraphQL.Configuration.IUnionableFieldBase<Epam.GraphQL.Configuration.IUnionableRootField<TExecutionContext>, TExecutionContext>, Epam.GraphQL.Configuration.IUnionableRootField<TExecutionContext>
     {
@@ -1233,7 +1229,7 @@ namespace Epam.GraphQL.Loaders
         protected ProjectionBase() { }
         protected string? InputName { get; set; }
         protected string? Name { get; set; }
-        protected Epam.GraphQL.Builders.Projection.IProjectionFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null) { }
+        protected Epam.GraphQL.Configuration.IProjectionField<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null) { }
     }
     public abstract class Projection<TEntity, TExecutionContext> : Epam.GraphQL.Loaders.ProjectionBase<TEntity, TExecutionContext>
         where TEntity :  class

@@ -17,7 +17,7 @@ using Epam.GraphQL.Sorters.Implementations;
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {
     internal class ProjectionFieldBuilder<TField, TEntity, TExecutionContext> :
-        IProjectionFieldBuilder<TEntity, TExecutionContext>
+        IProjectionField<TEntity, TExecutionContext>
         where TEntity : class
         where TField : FieldBase<TEntity, TExecutionContext>, IUnionableField<TEntity, TExecutionContext>
     {
