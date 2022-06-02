@@ -4,12 +4,12 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Configuration;
 
 namespace Epam.GraphQL.Builders.MutableLoader
 {
     public interface IMutableLoaderFieldBuilder<TEntity, TExecutionContext> :
-        IHasFromIQueryable<TEntity, TExecutionContext>,
+        IProjectionField<TEntity, TExecutionContext>,
         IHasFromBatch<TEntity, TExecutionContext>,
         IHasFromLoader<TEntity, TExecutionContext>
         where TEntity : class

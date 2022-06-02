@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Projection;
 using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
@@ -90,7 +89,7 @@ namespace Epam.GraphQL.Loaders
             return InputObjectGraphTypeConfigurator;
         }
 
-        protected internal IProjectionFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null)
+        protected internal IProjectionField<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             var field = AddField(name, deprecationReason);
             return new ProjectionFieldBuilder<Field<TEntity, TExecutionContext>, TEntity, TExecutionContext>(field);

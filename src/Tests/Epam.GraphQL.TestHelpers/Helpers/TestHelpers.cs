@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Epam.Contracts.Models;
+using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
@@ -60,6 +61,62 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            using var loggerFactory = CreateLoggerFactory();
+            var actualResult = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                query,
+                configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
+
+            Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
+
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            Assert.AreEqual(expectedJson, actualJson);
+        }
+
+        public static void TestMutableLoader<TEntity>(
+            Action<MutableLoader<TEntity, int, TestUserContext>> builder,
+            Func<TestUserContext, IQueryable<TEntity>> getBaseQuery,
+            string connectionName,
+            string query,
+            string expected)
+            where TEntity : class, IHasId<int>
+        {
+            var loaderType = GraphQLTypeBuilder.CreateMutableLoaderType(
+                    onConfigure: builder,
+                    getBaseQuery: getBaseQuery);
+
+            var expectedResult = ExecuteHelpers.Deserialize(expected);
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            using var loggerFactory = CreateLoggerFactory();
+            var actualResult = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                query,
+                configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
+
+            Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
+
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            Assert.AreEqual(expectedJson, actualJson);
+        }
+
+        public static void TestInlineBuilder<TEntity>(
+            Action<IInlineObjectBuilder<TEntity, TestUserContext>> builder,
+            Func<TestUserContext, IQueryable<TEntity>> getBaseQuery,
+            string fieldName,
+            string query,
+            string expected)
+            where TEntity : class, IHasId<int>
+        {
+            var expectedResult = ExecuteHelpers.Deserialize(expected);
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Field(fieldName).Resolve(ctx => getBaseQuery(ctx), builder));
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
