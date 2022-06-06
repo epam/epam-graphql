@@ -308,8 +308,6 @@ namespace Epam.GraphQL.Tests
             RelationType relationType = RelationType.Association,
             Expression<Func<TChildEntity, TEntity>> navigationProperty = null,
             Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty = null)
-            where TEntity : class
-            where TChildEntity : class
         {
             var methodInfo = typeof(IHasFromLoader<TEntity, TExecutionContext>).GetPublicGenericMethod(
                 nameof(IHasFromLoader<TEntity, TExecutionContext>.FromLoader),
@@ -328,8 +326,6 @@ namespace Epam.GraphQL.Tests
             this IInlineObjectFieldBuilder<TEntity, TExecutionContext> builder,
             Type childLoaderType,
             Expression<Func<TEntity, TChildEntity, bool>> condition)
-            where TEntity : class
-            where TChildEntity : class
         {
             var methodInfo = typeof(IInlineObjectFieldBuilder<TEntity, TExecutionContext>).GetPublicGenericMethod(
                 nameof(IInlineObjectFieldBuilder<TEntity, TExecutionContext>.FromLoader),
@@ -344,7 +340,6 @@ namespace Epam.GraphQL.Tests
         public static void ConfigureFrom<TEntity, TExecutionContext>(
             this IInlineObjectBuilder<TEntity, TExecutionContext> builder,
             Type projectionType)
-            where TEntity : class
         {
             var methodInfo = typeof(IInlineObjectBuilder<TEntity, TExecutionContext>).GetPublicGenericMethod(
                 nameof(IInlineObjectBuilder<TEntity, TExecutionContext>.ConfigureFrom),
@@ -360,7 +355,6 @@ namespace Epam.GraphQL.Tests
             Expression<Func<TParentEntity, TReturnType>> parentProperty,
             Expression<Func<TEntity, TParentEntity>> navigationProperty,
             RelationType relationType)
-            where TParentEntity : class
         {
             var foreignKeyMethodInfo = typeof(IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext>).GetPublicGenericMethod(
                 nameof(ReferencesTo),
@@ -386,7 +380,6 @@ namespace Epam.GraphQL.Tests
         internal static ProjectionBase<TEntity, TExecutionContext> ResolveLoader<TEntity, TExecutionContext>(
             this RelationRegistry<TExecutionContext> registry,
             Type loaderType)
-            where TEntity : class
         {
             var registryResolveLoaderMethodInfo = ReflectionHelpers.GetMethodInfo(registry.ResolveLoader<DummyMutableLoader<TExecutionContext>, object>)
                 .MakeGenericMethod(loaderType, typeof(TEntity));

@@ -51,7 +51,7 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         public static void TestLoader<TEntity>(Action<Loader<TEntity, TestUserContext>> builder, Func<TestUserContext, IQueryable<TEntity>> getBaseQuery, string connectionName, string query, string expected)
-            where TEntity : class, IHasId<int>
+            where TEntity : IHasId<int>
         {
             var loaderType = GraphQLTypeBuilder.CreateLoaderType(
                     onConfigure: builder,
@@ -113,7 +113,7 @@ namespace Epam.GraphQL.Tests.Helpers
             string fieldName,
             string query,
             string expected)
-            where TEntity : class, IHasId<int>
+            where TEntity : IHasId<int>
         {
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Field(fieldName).Resolve(ctx => getBaseQuery(ctx), builder));

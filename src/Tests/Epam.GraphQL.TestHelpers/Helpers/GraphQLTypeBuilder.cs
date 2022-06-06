@@ -162,7 +162,6 @@ namespace Epam.GraphQL.Tests.Helpers
             string typeName = null,
             Action<Loader<TEntity, TExecutionContext>> onConfigure = null,
             Func<TExecutionContext, IQueryable<TEntity>> getBaseQuery = null)
-            where TEntity : class
         {
             var typeBuilder = GetTypeBuilder(typeName, baseType);
 
@@ -204,7 +203,6 @@ namespace Epam.GraphQL.Tests.Helpers
 
         public static Type CreateProjectionType<TEntity, TExecutionContext>(
             Action<Projection<TEntity, TExecutionContext>> onConfigure)
-            where TEntity : class
         {
             void OnConfigureWrapper(ProjectionBase<TEntity, TExecutionContext> query)
             {
@@ -220,7 +218,6 @@ namespace Epam.GraphQL.Tests.Helpers
             Expression<Func<TEntity, TId>> idExpression,
             Func<TExecutionContext, IQueryable<TEntity>, IQueryable<TEntity>> applySecurityFilter = null,
             string typeName = null)
-            where TEntity : class
         {
             void OnConfigureWrapper(Loader<TEntity, TExecutionContext> query)
             {
@@ -311,7 +308,6 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         public static Type CreateLoaderFilterType<TEntity, TFilter, TExecutionContext>(Func<TExecutionContext, IQueryable<TEntity>, TFilter, IQueryable<TEntity>> applyFilter)
-            where TEntity : class
             where TFilter : Input
         {
             var loaderFilterType = typeof(Filter<,,>).MakeGenericType(typeof(TEntity), typeof(TFilter), typeof(TExecutionContext));
@@ -350,7 +346,6 @@ namespace Epam.GraphQL.Tests.Helpers
             Func<IQueryable<TEntity>, TExecutionContext, string, IQueryable<TEntity>> all,
             Func<IQueryable<TEntity>, string, IOrderedQueryable<TEntity>> applySearchOrderBy,
             Func<IOrderedQueryable<TEntity>, string, IOrderedQueryable<TEntity>> applySearchThenBy)
-            where TEntity : class
         {
             var type = CreateSearcherTypeBuilder($"{nameof(Person)}Searcher", typeof(OrderedSearcher<TEntity, TExecutionContext>), all, typeBuilder =>
             {
@@ -396,7 +391,6 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         private static void OverrideIdExpression<TEntity, TId, TExecutionContext>(TypeBuilder typeBuilder)
-            where TEntity : class
         {
             var getIdExpressionMethodInfo = typeof(IdentifiableLoader<TEntity, TId, TExecutionContext>).GetMethod("get_IdExpression", BindingFlags.Instance | BindingFlags.NonPublic);
             var getIdExpressionMethodBuilder = typeBuilder.DefineMethod(
