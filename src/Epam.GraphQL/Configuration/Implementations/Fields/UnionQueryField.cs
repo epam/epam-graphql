@@ -69,97 +69,55 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve)
-        {
-            var resolver = ResolvedFieldResolverFactory.Create(
-                Resolvers.ConvertFieldResolver(resolve));
-            return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                GraphType,
-                resolver);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve)
-        {
-            var resolver = ResolvedFieldResolverFactory.Create(
-                Resolvers.ConvertFieldResolver(resolve));
-            return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                GraphType,
-                resolver);
-        }
-
         public IVoid Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class
         {
             var resolver = ResolvedFieldResolverFactory.Create(
                 Resolvers.ConvertFieldResolver(resolve));
             return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
+                    .Argument(resolve)
+                    .OptionalArgument(build),
                 this,
                 GraphType,
                 resolver);
         }
 
         public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class
         {
             var resolver = ResolvedFieldResolverFactory.Create(
                 Resolvers.ConvertFieldResolver(resolve));
             return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
+                    .Argument(resolve)
+                    .OptionalArgument(build),
                 this,
                 GraphType,
                 resolver);
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve)
-        {
-            var resolver = ResolvedFieldResolverFactory.Create(
-                Resolvers.ConvertFieldResolver(resolve));
-
-            return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                GraphType.MakeListDescriptor(),
-                resolver);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve)
-        {
-            var resolver = ResolvedFieldResolverFactory.Create(
-                Resolvers.ConvertFieldResolver(resolve));
-
-            return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                GraphType.MakeListDescriptor(),
-                resolver);
-        }
-
         public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class
         {
             var resolver = ResolvedFieldResolverFactory.Create(
                 Resolvers.ConvertFieldResolver(resolve));
 
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
+                    .Argument(resolve)
+                    .OptionalArgument(build),
                 this,
                 GraphType.MakeListDescriptor(),
                 resolver);
         }
 
         public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class
         {
             var resolver = ResolvedFieldResolverFactory.Create(
                 Resolvers.ConvertFieldResolver(resolve));
 
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
+                ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
+                    .Argument(resolve)
+                    .OptionalArgument(build),
                 this,
                 GraphType.MakeListDescriptor(),
                 resolver);
