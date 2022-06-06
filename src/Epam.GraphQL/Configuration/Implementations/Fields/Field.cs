@@ -89,13 +89,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var unionField = UnionField.Create(
                 ConfigurationContext.Chain<TLastElementType>(nameof(And))
@@ -108,14 +106,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }

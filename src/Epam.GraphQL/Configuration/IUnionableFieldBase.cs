@@ -11,20 +11,16 @@ namespace Epam.GraphQL.Configuration
 {
     public interface IUnionableFieldBase<out TThisType, TExecutionContext>
     {
-        TThisType AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null)
-            where TLastElementType : class;
+        TThisType AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null);
 
-        TThisType And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null)
-            where TLastElementType : class;
+        TThisType And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null);
 
         [Obsolete("Consider using AsUnionOf with one type parameter.")]
         TThisType AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null)
-            where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class;
+            where TEnumerable : IEnumerable<TLastElementType>;
 
         [Obsolete("Consider using And with one type parameter.")]
         TThisType And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build = null)
-            where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class;
+            where TEnumerable : IEnumerable<TLastElementType>;
     }
 }

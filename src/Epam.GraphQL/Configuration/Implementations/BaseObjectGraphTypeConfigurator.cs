@@ -856,7 +856,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
 
@@ -870,7 +869,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
 
@@ -885,7 +883,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, batchFunc, ProxyAccessor);
 
@@ -900,7 +897,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, (ctx, items) => batchFunc(items), ProxyAccessor);
 
@@ -914,7 +910,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, batchFunc, ProxyAccessor);
 
@@ -928,7 +923,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, FuncConstants<TEntity>.IdentityExpression, (ctx, e) => batchFunc(e), ProxyAccessor);
 
@@ -943,7 +937,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, batchFunc, ProxyAccessor);
 
@@ -958,7 +951,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var batchResolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(configurationContext, field.Name, keySelector, (ctx, items) => batchFunc(items), ProxyAccessor);
 
@@ -972,7 +964,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             IBatchResolver<TEntity, TAnotherReturnType> secondResolver,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var secondGraphType = GetGraphQLTypeDescriptor(field, build, configurationContext);
 

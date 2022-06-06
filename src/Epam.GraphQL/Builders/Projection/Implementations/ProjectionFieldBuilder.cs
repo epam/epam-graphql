@@ -73,27 +73,23 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
         }
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
-            where TType : class
         {
             return Field.AsUnionOf(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TElementType>
-            where TElementType : class
         {
             return Field.AsUnionOf(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
-            where TType : class
         {
             return Field.And(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TElementType>
-            where TElementType : class
         {
             return Field.And(build);
         }

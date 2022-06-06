@@ -215,13 +215,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var unionField = UnionMutationField.Create(
                 ConfigurationContext
@@ -234,14 +232,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }

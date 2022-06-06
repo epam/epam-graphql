@@ -22,7 +22,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             BaseObjectGraphTypeConfigurator<object, TExecutionContext> parent,
             string name,
             Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return new UnionQueryField<TExecutionContext>(configurationContext, parent, name, typeof(TLastElementType), CreateTypeResolver(build, configurationContext));
         }
@@ -30,7 +29,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         public static Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> CreateTypeResolver<TLastElementType, TExecutionContext>(
             Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build,
             IInlinedChainConfigurationContext configurationContext)
-            where TLastElementType : class
         {
             return field => field.Parent.GetGraphQLTypeDescriptor(field, build, configurationContext);
         }
@@ -124,13 +122,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var configurationContext = ConfigurationContext.Chain<TLastElementType>(nameof(And)).OptionalArgument(build);
             var unionField = new UnionQueryField<TExecutionContext>(
@@ -146,14 +142,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }

@@ -67,7 +67,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -77,7 +76,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -88,7 +86,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -99,7 +96,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -109,7 +105,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -119,7 +114,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -130,7 +124,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();
@@ -141,7 +134,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             // TODO Implement ApplyBatchUnion method
             throw new NotImplementedException();

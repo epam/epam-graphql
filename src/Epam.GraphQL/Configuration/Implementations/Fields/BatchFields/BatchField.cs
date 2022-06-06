@@ -107,7 +107,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
@@ -116,7 +115,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
@@ -126,7 +124,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType1>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType1>, IDictionary<TKeyType1, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
@@ -136,7 +133,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType1>> keySelector,
             Func<IEnumerable<TKeyType1>, IDictionary<TKeyType1, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
@@ -145,7 +141,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
@@ -154,7 +149,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
@@ -164,7 +158,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType1>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType1>, Task<IDictionary<TKeyType1, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
@@ -174,7 +167,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Expression<Func<TEntity, TKeyType1>> keySelector,
             Func<IEnumerable<TKeyType1>, Task<IDictionary<TKeyType1, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
             return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }

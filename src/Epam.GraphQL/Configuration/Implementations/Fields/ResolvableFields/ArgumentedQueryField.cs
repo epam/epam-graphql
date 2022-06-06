@@ -119,13 +119,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public new IUnionableRootField<TArgType, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public new IUnionableRootField<TArgType, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var configurationContext = ConfigurationContext.Chain<TLastElementType>(nameof(And))
                 .OptionalArgument(build);
@@ -143,14 +141,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public new IUnionableRootField<TArgType, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public new IUnionableRootField<TArgType, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }
@@ -262,13 +258,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var configurationContext = ConfigurationContext
                 .Chain<TLastElementType>(nameof(And))
@@ -286,14 +280,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public new IUnionableRootField<TArgType1, TArgType2, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }
@@ -429,13 +421,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var configurationContext = ConfigurationContext
                 .Chain<TLastElementType>(nameof(And))
@@ -453,14 +443,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }
@@ -596,13 +584,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var configurationContext = ConfigurationContext
                 .Chain<TLastElementType>(nameof(And))
@@ -620,14 +606,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }
@@ -762,13 +746,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var configurationContext = ConfigurationContext
                 .Chain<TLastElementType>(nameof(And))
@@ -786,14 +768,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public new IUnionableRootField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }
