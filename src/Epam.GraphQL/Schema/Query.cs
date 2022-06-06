@@ -40,7 +40,6 @@ namespace Epam.GraphQL
 
         protected internal IRootLoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
             where TLoader : Loader<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             return Field(name, deprecationReason)
                 .FromLoader<TLoader, TEntity>();
@@ -81,7 +80,6 @@ namespace Epam.GraphQL
             Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order,
             string? deprecationReason = null)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             return (IConnectionField)Field(name, deprecationReason)
                 .FromLoader<TChildLoader, TChildEntity>()
@@ -119,7 +117,6 @@ namespace Epam.GraphQL
             string name,
             string deprecationReason)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             return (IConnectionField)Field(name, deprecationReason)
                 .FromLoader<TChildLoader, TChildEntity>()
@@ -128,7 +125,6 @@ namespace Epam.GraphQL
 
         private IConnectionField GroupConnection<TChildLoader, TChildEntity>(string name, string? deprecationReason)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             return (IConnectionField)Field(name, deprecationReason)
                 .FromLoader<TChildLoader, TChildEntity>()

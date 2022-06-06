@@ -23,13 +23,11 @@ namespace Epam.GraphQL.Configuration
         IArgumentedQueryField<TArgType, TExecutionContext> Argument<TArgType>(string argName);
 
         IArgumentedQueryField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class;
+            where TProjection : Projection<TEntity1, TExecutionContext>;
 
         IPayloadFieldedQueryField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
 
         IPayloadFieldedQueryField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class;
+            where TProjection : Projection<TEntity1, TExecutionContext>;
     }
 }

@@ -32,7 +32,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             var graphResultType = _registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             var result = new InlineLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(

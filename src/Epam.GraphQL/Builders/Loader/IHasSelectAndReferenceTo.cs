@@ -11,7 +11,6 @@ namespace Epam.GraphQL.Builders.Loader
     public interface IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext> : IHasSelect<TReturnType, TExecutionContext>
     {
         IHasSelect<TReturnType, TExecutionContext> ReferenceTo<TParentEntity, TParentEntityLoader>(Predicate<TReturnType> isFakePropValue)
-            where TParentEntity : class
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new();
     }
 }

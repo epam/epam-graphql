@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasEditable<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWrite<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
     {
         internal FromBatchEditableBuilder(RelationRegistry<TExecutionContext> registry, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext> field)
         {

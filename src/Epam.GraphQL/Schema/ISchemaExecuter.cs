@@ -25,8 +25,7 @@ namespace Epam.GraphQL
         Task<ExecutionResult> ExecuteAsync(SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions);
 
         Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object> filterValue)
-            where TProjection : Projection<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>, new();
     }
 
     /// <inheritdoc/>

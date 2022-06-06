@@ -19,7 +19,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
     internal class MutableLoaderFieldBuilder<TEntity, TLoader, TExecutionContext> : BaseLoaderFieldBuilder<Field<TEntity, TExecutionContext>, TEntity, TLoader, TExecutionContext>,
         IMutableLoaderFieldBuilder<TEntity, TExecutionContext>
         where TLoader : Loader<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         internal MutableLoaderFieldBuilder(RelationRegistry<TExecutionContext> registry, Field<TEntity, TExecutionContext> fieldType)
             : base(registry, fieldType)

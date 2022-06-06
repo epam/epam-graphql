@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
     internal class ArgumentedUnionFieldBase<TArguments, TEntity, TExecutionContext> :
         UnionFieldBase<TEntity, TExecutionContext>
         where TArguments : IArguments
-        where TEntity : class
     {
         protected ArgumentedUnionFieldBase(
             IChainConfigurationContext configurationContext,

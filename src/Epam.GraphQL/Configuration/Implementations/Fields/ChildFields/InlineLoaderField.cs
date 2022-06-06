@@ -22,7 +22,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TChildEntity,
             TExecutionContext>,
         IInlineLoaderField<TEntity, TChildEntity, TExecutionContext>
-        where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         public InlineLoaderField(

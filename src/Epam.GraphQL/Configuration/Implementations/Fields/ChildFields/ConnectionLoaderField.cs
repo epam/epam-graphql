@@ -26,7 +26,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IConnectionField<TChildEntity, TExecutionContext>,
         IConnectionField,
         IVoid
-        where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;

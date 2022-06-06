@@ -179,14 +179,12 @@ namespace Epam.GraphQL.Configuration
         }
 
         public void ConfigureAutoObjectGraphType<TEntity>(IObjectGraphType graphType)
-            where TEntity : class
         {
             RegisterAutoObjectGraphType<TEntity>(ConfigurationContext.Create())
                 .ConfigureGraphType(graphType);
         }
 
         public void ConfigureInputAutoObjectGraphType<TEntity>(IInputObjectGraphType graphType)
-            where TEntity : class
         {
             RegisterInputAutoObjectGraphType<TEntity>(ConfigurationContext.Create())
                 .ConfigureGraphType(graphType);
@@ -248,7 +246,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public void RegisterRelationPostponedForSave<TEntity, TChildEntity, TChildEntityLoader, TPropertyType, TChildPropertyType>(string propName, Predicate<TPropertyType> isFakePropValue)
-            where TChildEntity : class
             where TChildEntityLoader : Loader<TChildEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
             Relations<TEntity> childRelations;

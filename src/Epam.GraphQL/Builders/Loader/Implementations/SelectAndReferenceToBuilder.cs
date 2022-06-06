@@ -24,7 +24,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         protected RelationRegistry<TExecutionContext> Registry { get; }
 
         public IHasSelect<TReturnType, TExecutionContext> ReferenceTo<TChildEntity, TChildEntityLoader>(Predicate<TReturnType> isFakePropValue)
-            where TChildEntity : class
             where TChildEntityLoader : Loader<TChildEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
             Registry.RegisterRelationPostponedForSave<TSourceType, TChildEntity, TChildEntityLoader, TReturnType, TReturnType>(Field.Name, isFakePropValue);

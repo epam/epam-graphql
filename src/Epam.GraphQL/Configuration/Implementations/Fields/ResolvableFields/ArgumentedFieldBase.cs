@@ -9,7 +9,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedFieldBase<TArguments, TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>
         where TArguments : IArguments
-        where TEntity : class
     {
         protected ArgumentedFieldBase(
             IChainConfigurationContext configurationContext,

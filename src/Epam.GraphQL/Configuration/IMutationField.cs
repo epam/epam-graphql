@@ -31,13 +31,11 @@ namespace Epam.GraphQL.Configuration
         IArgumentedMutationField<TArgType, TExecutionContext> Argument<TArgType>(string argName);
 
         IArgumentedMutationField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class;
+            where TProjection : Projection<TEntity1, TExecutionContext>;
 
         IPayloadFieldedMutationField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
 
         IPayloadFieldedMutationField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class;
+            where TProjection : Projection<TEntity1, TExecutionContext>;
     }
 }

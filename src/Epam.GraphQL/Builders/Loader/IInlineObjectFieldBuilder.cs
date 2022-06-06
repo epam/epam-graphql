@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Builders.Loader
     public interface IInlineObjectFieldBuilder<TEntity, TExecutionContext> : IProjectionField<TEntity, TExecutionContext>, IHasFromBatch<TEntity, TExecutionContext>
     {
         IInlineLoaderField<TEntity, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(Expression<Func<TEntity, TChildEntity, bool>> condition)
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class;
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new();
     }
 }

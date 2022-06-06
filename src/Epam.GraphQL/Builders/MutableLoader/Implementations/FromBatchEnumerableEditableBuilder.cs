@@ -16,7 +16,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FromBatchEnumerableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext> : FromBatchSelectableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
         where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>
     {
         internal FromBatchEnumerableEditableBuilder(RelationRegistry<TExecutionContext> registry, TField field)

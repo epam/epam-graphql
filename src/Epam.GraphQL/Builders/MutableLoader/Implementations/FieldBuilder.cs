@@ -84,7 +84,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TParentEntity, TReturnType>> property,
             Expression<Func<TEntity, TParentEntity>> navigationProperty,
             RelationType relationType)
-            where TParentEntity : class
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
             Guards.ThrowIfNull(property, nameof(property));

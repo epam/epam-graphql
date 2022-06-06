@@ -14,7 +14,6 @@ namespace Epam.GraphQL.Builders.MutableLoader
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelect<TEntity, TReturnType, TExecutionContext>
     {
         IHasEditableAndOnWriteAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> ReferenceTo<TParentEntity, TParentEntityLoader>(Predicate<TReturnType> isFakePropValue)
-            where TParentEntity : class
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new();
     }
 }

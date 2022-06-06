@@ -780,7 +780,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Expression<Func<TChildEntity, TEntity>>? navigationProperty,
             Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphResultType)
-            where TChildEntity : class
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
             where TLoader : Loader<TEntity, TExecutionContext>, new()
         {
@@ -812,7 +811,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphResultType)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
                 configurationContext,

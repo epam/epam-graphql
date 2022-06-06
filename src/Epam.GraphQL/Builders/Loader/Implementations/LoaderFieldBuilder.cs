@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
     internal class LoaderFieldBuilder<TEntity, TLoader, TExecutionContext> : BaseLoaderFieldBuilder<Field<TEntity, TExecutionContext>, TEntity, TLoader, TExecutionContext>,
         ILoaderFieldBuilder<TEntity, TExecutionContext>
         where TLoader : Loader<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         public LoaderFieldBuilder(RelationRegistry<TExecutionContext> registry, Field<TEntity, TExecutionContext> fieldType)
             : base(registry, fieldType)
