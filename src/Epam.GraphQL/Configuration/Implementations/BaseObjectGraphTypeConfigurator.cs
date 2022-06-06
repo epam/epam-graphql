@@ -560,13 +560,9 @@ namespace Epam.GraphQL.Configuration.Implementations
         public abstract IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext);
-
-        public abstract IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
+            IChainConfigurationContext configurationContext);
 
         public abstract string GetGraphQLTypeName(Type entityType, Type? projectionType, IField<TExecutionContext> field);
-
-        public abstract Type GenerateGraphType();
 
         public BatchField<TEntity, TEntity, TReturnType, TExecutionContext> FromBatch<TReturnType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
@@ -803,26 +799,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
 
             return result;
-        }
-
-        public LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>(
-            IChainConfigurationContext configurationContext,
-            FieldBase<TEntity, TExecutionContext> field,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphResultType)
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        {
-            var result = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                configurationContext,
-                this,
-                field.Name,
-                condition,
-                graphResultType,
-                arguments: null,
-                searcher: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            return ReplaceField(field, result);
         }
 
         public SelectField<TEntity, TReturnType, TExecutionContext> ApplySelect<TReturnType>(

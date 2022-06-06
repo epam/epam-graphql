@@ -38,17 +38,10 @@ namespace Epam.GraphQL.Configuration.Implementations
         public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext)
+            IChainConfigurationContext configurationContext)
         {
             return Registry.GetInputGraphTypeDescriptor(parent, build, configurationContext);
         }
-
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent)
-        {
-            return Registry.GetInputGraphTypeDescriptor<TReturnType>(parent);
-        }
-
-        public override Type GenerateGraphType() => Registry.GenerateInputGraphType(typeof(TEntity));
 
         public override void ConfigureGraphType(IComplexGraphType graphType)
         {
@@ -92,8 +85,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Configure();
             base.ConfigureGraphType(graphType);
         }
-
-        public override Type GenerateGraphType() => Registry.GetInputEntityGraphType<TProjection, TEntity>();
 
         protected override void OnConfigure()
         {

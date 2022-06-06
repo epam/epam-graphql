@@ -66,19 +66,15 @@ namespace Epam.GraphQL.Configuration
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext);
-
-        IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
+            IChainConfigurationContext configurationContext);
 
         IGraphTypeDescriptor<TEntity, TExecutionContext> GetGraphTypeDescriptor<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();
 
-        IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
-
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext);
+            IChainConfigurationContext configurationContext);
 
         Type GetEntityGraphType<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();

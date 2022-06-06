@@ -61,7 +61,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
             get
             {
-                IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
+                IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this, null, ConfigurationContext);
 
                 if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !(EditSettings?.IsMandatoryForUpdate ?? false))
                 {

@@ -7,6 +7,5 @@ namespace Epam.GraphQL.Diagnostics
 {
     internal interface IChainArgumentConfigurationContext : IChildConfigurationContext
     {
-        new IChainConfigurationContext Parent { get; }
     }
 }

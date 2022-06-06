@@ -51,12 +51,6 @@ namespace Epam.GraphQL.Configuration.Implementations
                 configurationContext);
         }
 
-        public static void EditableIf<TEntity, TReturnType, TExecutionContext, TItem>(this IFieldEditSettings<TEntity, TReturnType, TExecutionContext> settings, Func<IFieldChange<TEntity, TExecutionContext>, bool> predicate, Func<IFieldChange<TEntity, TExecutionContext>, string>? reason = null)
-        {
-            var сanEdit = BatchLoader.FromResult<IFieldChange<TEntity, TExecutionContext>, (bool, string)>(change => (predicate(change), reason.Safe()(change)));
-            settings.CanEdit = ctx => сanEdit;
-        }
-
         public static void BatchedEditableIf<TEntity, TReturnType, TExecutionContext, TItem>(
             this IFieldEditSettings<TEntity, TReturnType, TExecutionContext> settings,
             IResolvedChainConfigurationContext configurationContext,

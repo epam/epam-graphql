@@ -7,6 +7,5 @@ namespace Epam.GraphQL.Diagnostics
 {
     internal interface IChildConfigurationContext : IConfigurationContext
     {
-        new IConfigurationContext Parent { get; }
     }
 }

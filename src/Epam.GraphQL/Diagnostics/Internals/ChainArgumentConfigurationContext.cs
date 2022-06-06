@@ -21,10 +21,6 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
         public bool IsDefault { get; }
 
-        public new IChainConfigurationContext Parent => (IChainConfigurationContext)base.Parent!;
-
-        IConfigurationContext IChildConfigurationContext.Parent => Parent;
-
         public static ChainArgumentConfigurationContext Create<T>(ChainConfigurationContext parent, T[]? array, bool optional)
         {
             return new ChainArgumentConfigurationContext<T[]?>(parent, new ArrayPrinter<T>(GenericPrinter<T>.Instance), array, optional && array == null);

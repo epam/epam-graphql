@@ -610,7 +610,7 @@ namespace Epam.GraphQL.Configuration
         public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext)
+            IChainConfigurationContext configurationContext)
         {
             if (build == null)
             {
@@ -623,7 +623,7 @@ namespace Epam.GraphQL.Configuration
         public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext)
+            IChainConfigurationContext configurationContext)
         {
             if (build == null)
             {
@@ -632,12 +632,6 @@ namespace Epam.GraphQL.Configuration
 
             return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, build, configurationContext, true);
         }
-
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent)
-            => GetGraphTypeDescriptor<TReturnType>(parent, parent.ConfigurationContext, false);
-
-        public IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent)
-            => GetGraphTypeDescriptor<TReturnType>(parent, parent.ConfigurationContext, true);
 
         public IGraphTypeDescriptor<TEntity, TExecutionContext> GetGraphTypeDescriptor<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
@@ -719,9 +713,7 @@ namespace Epam.GraphQL.Configuration
                     .CreateInstanceAndHoistBaseException(elementDescriptor);
             }
 
-            return (IGraphTypeDescriptor<TReturnType, TExecutionContext>)typeof(ObjectGraphTypeDescriptor<,>)
-                .MakeGenericType(typeof(TReturnType), typeof(TExecutionContext))
-                .CreateInstanceAndHoistBaseException(parent, this, null, configurationContext, isInput);
+            return new ObjectGraphTypeDescriptor<TReturnType, TExecutionContext>(parent, this, null, configurationContext, isInput);
         }
 
         private bool TryGetGraphValueType(Type type, out Type graphType)

@@ -43,8 +43,6 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
         public new ObjectConfigurationContextBase Parent => (ObjectConfigurationContextBase)base.Parent!;
 
-        IConfigurationContext IChildConfigurationContext.Parent => Parent;
-
         protected string Operation { get; }
 
         protected IChainConfigurationContext? Previous { get; }
