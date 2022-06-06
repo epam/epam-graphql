@@ -26,7 +26,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>,
         IExpressionField<TEntity, TReturnType, TExecutionContext>,
         ISortableGroupableField<TEntity, TExecutionContext>
-        where TEntity : class
     {
         private readonly Type _loaderType;
         private readonly RelationRegistry<TExecutionContext> _registry;

@@ -16,7 +16,6 @@ namespace Epam.GraphQL.Diagnostics
 
         new IResolvedChainConfigurationContext OptionalArgument(Delegate? arg);
 
-        new IInlinedResolvedChainConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg)
-            where TReturnType : class;
+        new IInlinedResolvedChainConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg);
     }
 }

@@ -198,7 +198,6 @@ namespace Epam.GraphQL.Tests.Helpers
             Func<IOrderedQueryable<TEntity>, IOrderedQueryable<TEntity>> applyNaturalThenBy = null,
             Func<TExecutionContext, IQueryable<TEntity>, IQueryable<TEntity>> applySecurityFilter = null,
             string typeName = null)
-            where TEntity : class
         {
             return CreateLoaderType(typeName ?? $"{typeof(TEntity).Name}Loader", typeof(Loader<TEntity, TExecutionContext>), onConfigure, getBaseQuery, applyNaturalOrderBy, applyNaturalThenBy, applySecurityFilter);
         }
@@ -537,7 +536,6 @@ namespace Epam.GraphQL.Tests.Helpers
             Func<IOrderedQueryable<TEntity>, IOrderedQueryable<TEntity>> applyNaturalThenBy,
             Func<TExecutionContext, IQueryable<TEntity>, IQueryable<TEntity>> applySecurityFilter,
             Action<TypeBuilder> afterBuild = null)
-            where TEntity : class
         {
             void OnConfigureWrapper(ProjectionBase<TEntity, TExecutionContext> query)
             {
@@ -642,7 +640,6 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         private static void OverrideGetBaseQuery<TEntity, TExecutionContext>(TypeBuilder typeBuilder)
-            where TEntity : class
         {
             var methodInfo = typeof(Loader<TEntity, TExecutionContext>).GetMethod("GetBaseQuery", BindingFlags.Instance | BindingFlags.NonPublic);
             var methodBuilder = typeBuilder.DefineMethod(
@@ -697,7 +694,6 @@ namespace Epam.GraphQL.Tests.Helpers
         }
 
         private static Type CreateProjectionBaseType<TEntity, TExecutionContext>(string typeName, Type baseType, Action<ProjectionBase<TEntity, TExecutionContext>> onConfigure, Action<TypeBuilder> afterBuild = null)
-            where TEntity : class
         {
             var typeBuilder = GetTypeBuilder(typeName, baseType, onConfigure == null);
 

@@ -12,7 +12,6 @@ using Epam.GraphQL.Diagnostics;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class BatchEnumerableTaskKeyResolver<TEntity, TKey, TReturnType, TExecutionContext> : BatchTaskKeyResolver<TEntity, TKey, IEnumerable<TReturnType>, TExecutionContext>
-        where TEntity : class
     {
         public BatchEnumerableTaskKeyResolver(
             IResolvedChainConfigurationContext configurationContext,

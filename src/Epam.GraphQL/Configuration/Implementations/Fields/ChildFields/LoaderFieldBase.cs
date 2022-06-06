@@ -21,7 +21,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TEntity,
             TChildEntity,
             TExecutionContext>
-        where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TThis : LoaderFieldBase<TThis, TThisIntf, TEntity, TChildLoader, TChildEntity, TExecutionContext>, TThisIntf

@@ -12,7 +12,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IBatchResolver<TEntity> : IFieldResolver
-        where TEntity : class
     {
         IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context);
 
@@ -20,7 +19,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     }
 
     internal interface IBatchResolver<TEntity, TReturnType> : IBatchResolver<TEntity>
-        where TEntity : class
     {
         IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TReturnType, TSelectType> selector);
     }

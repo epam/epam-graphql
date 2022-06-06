@@ -15,7 +15,6 @@ using GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
-        where TEntity : class
     {
         public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IObjectConfigurationContext context, IRegistry<TExecutionContext> registry, bool isAuto)
             : base(context, parent, registry, isAuto)
@@ -78,7 +77,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 
     internal class InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> : InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>
         where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         private TProjection? _projection;
         private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;

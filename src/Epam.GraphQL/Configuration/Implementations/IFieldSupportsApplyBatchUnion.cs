@@ -14,7 +14,6 @@ using Epam.GraphQL.Diagnostics;
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>
-        where TEntity : class
     {
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
             IInlinedResolvedChainConfigurationContext configurationContext,

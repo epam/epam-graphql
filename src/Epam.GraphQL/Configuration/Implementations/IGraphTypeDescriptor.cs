@@ -23,5 +23,7 @@ namespace Epam.GraphQL.Configuration.Implementations
     internal interface IGraphTypeDescriptor<TType, TExecutionContext> : IGraphTypeDescriptor<TExecutionContext>
     {
         new IObjectGraphTypeConfigurator<TType, TExecutionContext>? Configurator { get; }
+
+        string Name { get; }
     }
 }

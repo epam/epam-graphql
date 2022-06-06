@@ -22,7 +22,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         IInlineObjectBuilder<TSourceType, TExecutionContext>,
         IInlineGraphTypeResolver<TSourceType, TExecutionContext>,
         IVoid
-        where TSourceType : class
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
         private readonly BaseObjectGraphTypeConfigurator<TSourceType, TExecutionContext> _objectGraphTypeConfigurator;

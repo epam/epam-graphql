@@ -27,7 +27,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TChildEntity,
             TExecutionContext>,
         ILoaderField<TEntity, TChildEntity, TExecutionContext>
-        where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
@@ -125,7 +124,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
     internal sealed class LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
         where TLoader : Loader<TEntity, TExecutionContext>, new()
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TEntity : class
         where TChildEntity : class
     {
         public LoaderField(

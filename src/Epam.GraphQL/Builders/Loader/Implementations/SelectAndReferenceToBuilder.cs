@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class SelectAndReferenceToBuilder<TField, TSourceType, TReturnType, TExecutionContext> : SelectBuilder<TField, TSourceType, TReturnType, TExecutionContext>,
         IHasSelectAndReferenceTo<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
         where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>
     {
         internal SelectAndReferenceToBuilder(RelationRegistry<TExecutionContext> registry, TField field)

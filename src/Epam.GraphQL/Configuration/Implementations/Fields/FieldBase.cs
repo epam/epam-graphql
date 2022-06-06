@@ -19,7 +19,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
-        where TEntity : class
     {
         protected FieldBase(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
             : this(parent)

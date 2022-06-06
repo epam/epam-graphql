@@ -27,23 +27,19 @@ namespace Epam.GraphQL.Configuration
 
         Func<TExecutionContext, TArgType, TResultType> WrapFuncByUnusedContext<TArgType, TResultType>(Func<TArgType, TResultType> func);
 
-        InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext)
-            where TEntity : class;
+        InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext);
 
         TLoader ResolveLoader<TLoader, TEntity>()
-            where TLoader : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TLoader : ProjectionBase<TEntity, TExecutionContext>, new();
 
         IFilter<TEntity, TExecutionContext> ResolveFilter<TEntity>(Type loaderFilterType);
 
         ISearcher<TEntity, TExecutionContext> ResolveSearcher<TSearcher, TEntity>()
             where TSearcher : ISearcher<TEntity, TExecutionContext>;
 
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType)
-            where TEntity : class;
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType);
 
-        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType)
-            where TEntity : class;
+        IObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType);
 
         void Register<TEntity, TChildEntity>(
             Type loaderType,
@@ -53,58 +49,49 @@ namespace Epam.GraphQL.Configuration
             Expression<Func<TEntity, TChildEntity>>? childNavigationProperty,
             RelationType relationType);
 
-        void SetGraphQLTypeName<TEntity>(string? oldName, string newName)
-            where TEntity : class;
+        void SetGraphQLTypeName<TEntity>(string? oldName, string newName);
 
         void SetGraphQLTypeName<TProjection, TEntity>(string? oldName, string newName)
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>;
 
-        string GetGraphQLAutoTypeName<TEntity>(bool isInput)
-            where TEntity : class;
+        string GetGraphQLAutoTypeName<TEntity>(bool isInput);
 
-        string GetGraphQLTypeName<TEntity>(bool isInput, IField<TExecutionContext>? parent)
-            where TEntity : class;
+        string GetGraphQLTypeName<TEntity>(bool isInput, IField<TExecutionContext>? parent);
 
         string GetGraphQLTypeName(Type entityType, Type? projectionType, bool isInput, IField<TExecutionContext>? parent, string? name = null);
 
         string GetProjectionTypeName<TProjection, TEntity>(bool isInput)
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();
 
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext)
-            where TReturnType : class;
+            IInlinedChainConfigurationContext configurationContext);
 
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
 
         IGraphTypeDescriptor<TEntity, TExecutionContext> GetGraphTypeDescriptor<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();
 
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(IField<TExecutionContext> parent);
 
         IGraphTypeDescriptor<TReturnType, TExecutionContext> GetInputGraphTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext)
-            where TReturnType : class;
+            IInlinedChainConfigurationContext configurationContext);
 
         Type GetEntityGraphType<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();
 
         Type GetInputEntityGraphType<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();
 
         Type GetPropperBaseProjectionType<TProjection, TEntity>(
             Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> equalPredicate)
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class;
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new();
 
         IObjectGraphTypeConfigurator<TExecutionContext>? GetObjectGraphTypeConfigurator(Type type, Type? loaderType = null);
+
+        bool IsSimpleType(Type type);
     }
 }

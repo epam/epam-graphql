@@ -11,7 +11,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class SelectBuilder<TField, TSourceType, TReturnType, TExecutionContext> :
         IHasSelect<TReturnType, TExecutionContext>
-        where TSourceType : class
         where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>
     {
         internal SelectBuilder(TField field)
@@ -21,31 +20,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         protected TField Field { get; set; }
 
-        public void Select<TReturnType1>(Func<TReturnType, TReturnType1> selector)
-            where TReturnType1 : struct
-        {
-            Field.ApplySelect(
-                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
-                selector);
-        }
-
-        public void Select<TReturnType1>(Func<TReturnType, TReturnType1?> selector)
-            where TReturnType1 : struct
-        {
-            Field.ApplySelect(
-                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
-                selector);
-        }
-
-        public void Select(Func<TReturnType, string> selector)
-        {
-            Field.ApplySelect(
-                Field.ConfigurationContext.Chain(nameof(Select)).Argument(selector),
-                selector);
-        }
-
         public void Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
-            where TReturnType1 : class
         {
             Field.ApplySelect(
                 Field.ConfigurationContext.Chain<TReturnType>(nameof(Select))

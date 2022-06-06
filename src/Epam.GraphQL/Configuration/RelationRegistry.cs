@@ -92,7 +92,6 @@ namespace Epam.GraphQL.Configuration
 
         public void ConfigureGraphType<TProjection, TEntity>(IObjectGraphType graphType)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             InitializeLoader<TProjection, TEntity>();
             var key = (typeof(TProjection), typeof(TEntity));
@@ -101,7 +100,6 @@ namespace Epam.GraphQL.Configuration
 
         public void ConfigureInputGraphType<TProjection, TEntity>(IInputObjectGraphType graphType)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             InitializeLoader<TProjection, TEntity>();
             var key = (typeof(TProjection), typeof(TEntity));
@@ -113,12 +111,7 @@ namespace Epam.GraphQL.Configuration
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
             IChainConfigurationContext configurationContext,
             bool isInputType)
-            where TReturnType : class
         {
-            Guards.ThrowInvalidOperationIf(
-                typeof(TReturnType).IsValueType || typeof(TReturnType) == typeof(string),
-                $"Call of Configure method is not supported for a field type `{typeof(TReturnType).Name}`.");
-
             return (IInlineGraphTypeResolver<TReturnType, TExecutionContext>)_inlineConfiguratorsToResolversMap.GetOrAdd(
                 (typeof(TReturnType), build, parent, isInputType),
                 key => new InlineObjectBuilder<TReturnType, TExecutionContext>(key.Parent, this, (Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>?)key.Builder, configurationContext, key.IsInput));
@@ -126,7 +119,6 @@ namespace Epam.GraphQL.Configuration
 
         public ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> Register<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var key = (typeof(TProjection), typeof(TEntity));
             return (ObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>)_loadersToObjectGraphTypeConfiguratorsMap.GetOrAdd(
@@ -135,7 +127,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> Register<TEntity>(Type projectionType)
-            where TEntity : class
         {
             _registerMethodInfo ??= ReflectionHelpers.GetMethodInfo(
                 Register<DummyMutableLoader<TExecutionContext>, object>);
@@ -151,7 +142,6 @@ namespace Epam.GraphQL.Configuration
 
         public InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> RegisterInput<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var key = (typeof(TProjection), typeof(TEntity));
             return (InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext>)_loadersToInputObjectGraphTypeConfiguratorsMap.GetOrAdd(
@@ -160,7 +150,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInput<TEntity>(Type projectionType)
-            where TEntity : class
         {
             _registerInputMethodInfo ??= ReflectionHelpers.GetMethodInfo(
                 RegisterInput<DummyMutableLoader<TExecutionContext>, object>);
@@ -204,7 +193,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public ObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext)
-            where TEntity : class
         {
             return (ObjectGraphTypeConfigurator<TEntity, TExecutionContext>)_autoEntityTypesToConfiguratorsMap.GetOrAdd(
                 typeof(TEntity),
@@ -212,7 +200,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> RegisterInputAutoObjectGraphType<TEntity>(IObjectConfigurationContext configurationContext)
-            where TEntity : class
         {
             return (InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>)_inputAutoEntityTypesToConfiguratorsMap.GetOrAdd(
                 typeof(TEntity),
@@ -228,7 +215,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public bool HasFakePropertyValues<TEntity>(Type loaderType, TEntity entity, IDictionary<string, object?> propertyValues)
-            where TEntity : class
         {
             if (_relationMap.TryGetValue((loaderType, typeof(TEntity)), out var childRels))
             {
@@ -251,7 +237,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public Task<bool> CanViewParentAsync<TChildEntity>(Type childLoaderType, GraphQLContext<TExecutionContext> context, TChildEntity entity)
-            where TChildEntity : class
         {
             if (_relationMap.TryGetValue((childLoaderType, typeof(TChildEntity)), out var rel))
             {
@@ -282,7 +267,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public bool HasFakePropertyValuesPostponedForSave<TChildEntity>(TChildEntity entity, IDictionary<string, object?> propertyValues)
-            where TChildEntity : class
         {
             if (_relationMapPostponedForSave.TryGetValue(typeof(TChildEntity), out var rel))
             {
@@ -331,7 +315,6 @@ namespace Epam.GraphQL.Configuration
 
         public TLoader ResolveLoader<TLoader, TEntity>()
             where TLoader : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             if (_cache.ContainsKey(typeof(TLoader)))
             {
@@ -370,13 +353,11 @@ namespace Epam.GraphQL.Configuration
 
         public IObjectGraphType ResolveObjectGraphTypeWrapper<TLoader, TEntity>()
             where TLoader : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             return (IObjectGraphType)_serviceProvider.GetRequiredService(GetEntityGraphType<TLoader, TEntity>());
         }
 
         public string GetGraphQLTypeName<TEntity>(bool isInput, IField<TExecutionContext>? parent)
-            where TEntity : class
         {
             return GetGraphQLTypeName(typeof(TEntity), null, isInput, parent);
         }
@@ -412,7 +393,6 @@ namespace Epam.GraphQL.Configuration
         }
 
         public string GetGraphQLAutoTypeName<TEntity>(bool isInput)
-            where TEntity : class
         {
             return GetGraphQLAutoTypeName(typeof(TEntity), isInput);
         }
@@ -461,7 +441,6 @@ namespace Epam.GraphQL.Configuration
 
         public string GetProjectionTypeName<TProjection, TEntity>(bool isInput)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var projectionType = typeof(TProjection);
             var entityType = typeof(TEntity);
@@ -510,14 +489,12 @@ namespace Epam.GraphQL.Configuration
         }
 
         public void SetGraphQLTypeName<TEntity>(string? oldName, string newName)
-            where TEntity : class
         {
             SetGraphQLTypeName(null, typeof(TEntity), oldName, newName);
         }
 
         public void SetGraphQLTypeName<TProjection, TEntity>(string? oldName, string newName)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>
-            where TEntity : class
         {
             SetGraphQLTypeName(typeof(TProjection), typeof(TEntity), oldName, newName);
         }
@@ -533,7 +510,6 @@ namespace Epam.GraphQL.Configuration
 
         public Type GetEntityGraphType<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var baseType = GetPropperBaseProjectionType<TProjection, TEntity>();
 
@@ -555,7 +531,6 @@ namespace Epam.GraphQL.Configuration
 
         public Type GetInputEntityGraphType<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var baseType = GetPropperBaseProjectionType<TProjection, TEntity>();
 
@@ -591,14 +566,12 @@ namespace Epam.GraphQL.Configuration
         }
 
         public Type GetPropperBaseProjectionType<TProjection, TEntity>()
-            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class =>
+            where TProjection : ProjectionBase<TEntity, TExecutionContext>, new() =>
             GetPropperBaseProjectionType<TProjection, TEntity>((first, second) => first.Equals(second));
 
         public Type GetPropperBaseProjectionType<TProjection, TEntity>(
             Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> equalPredicate)
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var foundType = typeof(TProjection);
             var baseType = typeof(TProjection).BaseType;
@@ -641,7 +614,6 @@ namespace Epam.GraphQL.Configuration
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
             IInlinedChainConfigurationContext configurationContext)
-            where TReturnType : class
         {
             if (build == null)
             {
@@ -655,7 +627,6 @@ namespace Epam.GraphQL.Configuration
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
             IInlinedChainConfigurationContext configurationContext)
-            where TReturnType : class
         {
             if (build == null)
             {
@@ -673,7 +644,6 @@ namespace Epam.GraphQL.Configuration
 
         public IGraphTypeDescriptor<TEntity, TExecutionContext> GetGraphTypeDescriptor<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             return new EntityGraphTypeDescriptor<TProjection, TEntity, TExecutionContext>(this, false);
         }
@@ -695,6 +665,13 @@ namespace Epam.GraphQL.Configuration
             }
 
             throw new ArgumentOutOfRangeException(nameof(TEnumType));
+        }
+
+        public bool IsSimpleType(Type type)
+        {
+            type = type.UnwrapIfNullable();
+
+            return type == typeof(string) || type.IsEnum || _structTypeMap.ContainsKey(type);
         }
 
         private static string GetGraphQLTypePrefix(IField<TExecutionContext> parentField)
@@ -875,9 +852,7 @@ namespace Epam.GraphQL.Configuration
             Expression<Func<TEntity, TChildEntity>>? navigationProperty,
             Expression<Func<TChildEntity, TEntity>>? childNavigationProperty,
             RelationType relationType)
-            where TEntity : class
             where TLoader : Loader<TEntity, TExecutionContext>, new()
-            where TChildEntity : class
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         {
             var childRelations = GetOrAddChildRelations<TChildLoader, TChildEntity>();
@@ -956,7 +931,6 @@ namespace Epam.GraphQL.Configuration
 
         private void InitializeLoader<TProjection, TEntity>()
             where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             InitializeLoader(typeof(TProjection), typeof(TEntity));
         }

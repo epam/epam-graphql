@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     internal class EnumerableAsyncFuncResolver<TEntity, TReturnType, TExecutionContext> :
         EnumerableAsyncFuncResolverBase<IEnumerableResolver<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TReturnType, TExecutionContext>,
         IEnumerableResolver<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         public EnumerableAsyncFuncResolver(
             string fieldName,

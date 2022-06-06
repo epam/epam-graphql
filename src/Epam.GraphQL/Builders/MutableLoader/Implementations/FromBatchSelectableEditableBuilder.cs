@@ -38,39 +38,9 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1> selector)
-            where TReturnType1 : struct
-        {
-            var select = Field.ApplySelect(
-                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
-                selector);
-
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select);
-        }
-
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1?, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1?> selector)
-            where TReturnType1 : struct
-        {
-            var select = Field.ApplySelect(
-                Field.ConfigurationContext.Chain<TReturnType1>(nameof(Select)).Argument(selector),
-                selector);
-
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1?, TExecutionContext>(Registry, select);
-        }
-
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, string, TExecutionContext> Select(Func<TReturnType, string> selector)
-        {
-            var select = Field.ApplySelect(
-                Field.ConfigurationContext.Chain(nameof(Select)).Argument(selector),
-                selector);
-
-            return new FromBatchEditableBuilder<TSourceType, string, TExecutionContext>(Registry, select);
-        }
-
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(
             Func<TReturnType, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
-            where TReturnType1 : class
         {
             var select = Field.ApplySelect(
                 Field.ConfigurationContext.Chain<TReturnType>(nameof(Select))

@@ -18,7 +18,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     internal class SelectEnumerableAsyncFuncResolver<TEntity, TChildEntity, TChildEntityTransformedType, TReturnType, TTransformedReturnType, TExecutionContext> :
         EnumerableAsyncFuncResolverBase<IEnumerableResolver<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TTransformedReturnType, TExecutionContext>,
         IEnumerableResolver<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         private readonly Func<IResolveFieldContext, IDataLoader<TEntity, IGrouping<TEntity, TTransformedReturnType>>> _batchTaskResolver;
         private readonly Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IGrouping<Proxy<TEntity>, TTransformedReturnType>>> _proxiedBatchTaskResolver;

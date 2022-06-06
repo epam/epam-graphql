@@ -37,7 +37,6 @@ namespace Epam.GraphQL.TaskBatcher
             TLoader loader,
             Expression<Func<TEntity, TProperty>> propSelector)
             where TLoader : Loader<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return (Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>>)_loaderQueriesCache.GetOrAdd(loader, key =>
             {

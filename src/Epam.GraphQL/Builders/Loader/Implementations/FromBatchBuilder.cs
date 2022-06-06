@@ -17,8 +17,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         IHasSelect<TReturnType, TExecutionContext>,
         IHasSelectAndReferenceTo<TSourceType, TReturnType, TExecutionContext>,
         IHasSelectAndReferenceToAndAndFromBatch<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
-        where TReturnType : class
         where TField : FieldBase<TSourceType, TExecutionContext>,
             IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>,
             IFieldSupportsApplyBatchUnion<TSourceType, TExecutionContext>

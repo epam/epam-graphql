@@ -5,7 +5,6 @@
 
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
-using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
@@ -13,7 +12,6 @@ namespace Epam.GraphQL.Types
 {
     internal class EdgeGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TChildEntity : class
     {
         public EdgeGraphType(RelationRegistry<TExecutionContext> registry)
         {
@@ -35,7 +33,7 @@ namespace Epam.GraphQL.Types
     {
         public EdgeGraphType(IGraphTypeDescriptor<TReturnType, TExecutionContext> graphType)
         {
-            var typeName = graphType.Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
+            var typeName = graphType.Name;
 
             Name = $"{typeName}Edge";
 

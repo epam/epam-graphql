@@ -43,7 +43,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             Func<Type, PropertyInfo?> getPrimaryKeyPropertyInfo,
             RelationType relationType)
             where TLoader : Loader<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             var relation = new Relation<TEntity, TLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext>(registry, property, navigationProperty, childProperty, childNavigationProperty, getPrimaryKeyPropertyInfo, relationType);
 

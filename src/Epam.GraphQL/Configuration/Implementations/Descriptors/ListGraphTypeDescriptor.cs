@@ -44,5 +44,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
         }
 
         IObjectGraphTypeConfigurator<TEnumerable, TExecutionContext>? IGraphTypeDescriptor<TEnumerable, TExecutionContext>.Configurator => throw new NotImplementedException();
+
+        public string Name => throw new NotSupportedException();
     }
 }

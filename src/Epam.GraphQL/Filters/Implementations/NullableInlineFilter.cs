@@ -15,7 +15,6 @@ using Epam.GraphQL.Helpers;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class NullableInlineFilter<TEntity, TReturnType, TExecutionContext> : BaseInlineFilter<TEntity, TReturnType?, TReturnType?, TReturnType, TExecutionContext>
-        where TEntity : class
         where TReturnType : struct
     {
         public NullableInlineFilter(ExpressionField<TEntity, TReturnType?, TExecutionContext> field, TReturnType?[]? defaultValues, NullOption? nullValue)

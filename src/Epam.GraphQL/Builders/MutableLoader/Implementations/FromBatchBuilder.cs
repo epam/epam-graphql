@@ -22,7 +22,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TSourceType, TReturnType, TExecutionContext>
         where TSourceType : class
-        where TReturnType : class
         where TField : FieldBase<TSourceType, TExecutionContext>,
             IFieldSupportsApplyBatchUnion<TSourceType, TExecutionContext>,
             IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>,

@@ -13,7 +13,6 @@ using GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal class ObjectGraphTypeDescriptor<TReturnType, TExecutionContext> : IGraphTypeDescriptor<TReturnType, TExecutionContext>
-        where TReturnType : class
     {
         private readonly Lazy<(IGraphType? GraphType, Type? Type)> _type;
         private readonly IInlineGraphTypeResolver<TReturnType, TExecutionContext> _resolver;
@@ -38,6 +37,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
         public IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> Configurator { get; }
 
         IObjectGraphTypeConfigurator<TExecutionContext> IGraphTypeDescriptor<TExecutionContext>.Configurator => Configurator;
+
+        public string Name => Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
 
         public void Validate(IChainConfigurationContext configurationContext)
         {

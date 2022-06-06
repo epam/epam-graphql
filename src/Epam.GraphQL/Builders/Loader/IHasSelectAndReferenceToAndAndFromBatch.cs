@@ -9,7 +9,6 @@ namespace Epam.GraphQL.Builders.Loader
         IHasSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext>,
         IHasSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext>,
         IHasSelect<TReturnType, TExecutionContext>
-        where TEntity : class
     {
     }
 }

@@ -28,7 +28,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IConnectionField<TChildEntity, TExecutionContext>,
         IConnectionField,
         IVoid
-        where TEntity : class
         where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TThis : ConnectionLoaderFieldBase<TThis, TEntity, TChildLoader, TChildEntity, TExecutionContext>

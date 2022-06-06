@@ -46,7 +46,6 @@ namespace Epam.GraphQL.Diagnostics.Internals
         }
 
         public static ChainDelegateArgumentConfigurationContext Create<TReturnType, TExecutionContext>(ChainConfigurationContext parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> func)
-            where TReturnType : class
         {
             return new ChainDelegateArgumentConfigurationContext(parent, func);
         }

@@ -30,25 +30,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
-            Func<TExecutionContext, IQueryable<TReturnType>> query)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
-            var result = new RootQueryableField<TReturnType, TExecutionContext>(
-                ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable)).Argument(query),
-                Parent,
-                Name,
-                query,
-                graphType,
-                searcher: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            return Parent.ReplaceField(this, result);
-        }
-
-        public IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
-            where TReturnType : class
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
                 .Argument(query)
@@ -69,7 +52,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IRootLoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             var graphResultType = Registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             return Parent.ReplaceField(this, new RootLoaderField<TChildLoader, TChildEntity, TExecutionContext>(

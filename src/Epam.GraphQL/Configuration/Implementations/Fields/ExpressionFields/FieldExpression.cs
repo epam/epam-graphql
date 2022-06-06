@@ -17,7 +17,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class FieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldExpression<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
         private readonly Expression<Func<TEntity, TReturnType>> _originalExpression;

@@ -17,7 +17,6 @@ using Epam.GraphQL.Filters.Inputs;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal abstract class BaseInlineFilter<TEntity, TReturnType, TItemType, TListItemType, TExecutionContext> : IInlineFilter<TExecutionContext>
-        where TEntity : class
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
         private readonly TReturnType[]? _defaultValues;

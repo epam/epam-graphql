@@ -24,7 +24,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TReturnType,
             TExecutionContext>,
         IQueryableField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         public QueryableField(
             IChainConfigurationContext configurationContext,

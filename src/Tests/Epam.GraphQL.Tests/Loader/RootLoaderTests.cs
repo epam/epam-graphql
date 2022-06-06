@@ -52,6 +52,40 @@ namespace Epam.GraphQL.Tests.Loader
         }
 
         [Test]
+        public void TestQueryItemsInt()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<int, TestUserContext>(
+                onConfigure: loader => loader.Field("id", id => id),
+                getBaseQuery: _ => FakeData.People.Select(p => p.Id).AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                    .FromLoader<int, TestUserContext>(personLoaderType);
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        people {
+                            id
+                        }
+                    }",
+                @"{
+                    people: [
+                        { id: 1 },
+                        { id: 2 },
+                        { id: 3 },
+                        { id: 4 },
+                        { id: 5 },
+                        { id: 6 }
+                    ]
+                }");
+        }
+
+        [Test]
         public void TestQueryItemsViaShortcut()
         {
             var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(

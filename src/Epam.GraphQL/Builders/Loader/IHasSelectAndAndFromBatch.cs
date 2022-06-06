@@ -11,7 +11,6 @@ namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext> :
         IHasSelect<TReturnType, TExecutionContext>
-        where TEntity : class
     {
         IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,

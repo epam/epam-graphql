@@ -9,7 +9,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IBatchCompoundResolver<TEntity, TExecutionContext> : IBatchResolver<TEntity, IEnumerable<object>>, IFieldResolver
-        where TEntity : class
     {
         void Add(IBatchResolver<TEntity> resolver);
     }

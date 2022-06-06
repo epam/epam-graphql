@@ -11,7 +11,6 @@ using Epam.GraphQL.Builders.Loader;
 namespace Epam.GraphQL.Configuration
 {
     public interface IResolvableField<TEntity, TExecutionContext>
-        where TEntity : class
     {
         void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve);
 

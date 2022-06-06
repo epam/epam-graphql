@@ -55,7 +55,6 @@ namespace Epam.GraphQL.Loaders
     }
 
     public abstract class ProjectionBase<TEntity, TExecutionContext> : ProjectionBase<TExecutionContext>
-        where TEntity : class
     {
         internal ObjectGraphTypeConfigurator<TEntity, TExecutionContext> ObjectGraphTypeConfigurator { get; private set; } = null!;
 

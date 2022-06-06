@@ -52,9 +52,15 @@ namespace Epam.GraphQL.Tests.Suites
 
         public static IEnumerable<TestCaseData> RootIntTestData => GetRootIntTestData();
 
+        public static IEnumerable<TestCaseData> RootIntClassTestData => GetRootIntClassTestData();
+
         public static IEnumerable<TestCaseData> IntTestData => GetIntTestData(Kind.Loader)
             .Concat(GetIntTestData(Kind.Query))
             .Concat(GetIntTestData(Kind.Batch));
+
+        public static IEnumerable<TestCaseData> IntClassTestData => GetIntClassTestData(Kind.Loader)
+            .Concat(GetIntClassTestData(Kind.Query))
+            .Concat(GetIntClassTestData(Kind.Batch));
 
         public static IEnumerable<TestCaseData> RootNullableIntTestData => GetRootNullableIntTestData();
 
@@ -103,6 +109,22 @@ namespace Epam.GraphQL.Tests.Suites
                 person => person.Id);
         }
 
+        [TestCaseSource(typeof(FromQueryableTests), nameof(RootIntClassTestData))]
+        public void RootFromQueryableIntClass(
+            DataSet dataSet,
+            Action<IRootQueryableField<int, TestUserContext>> configure,
+            string queryFragment,
+            string resultFragment)
+        {
+            RootFromQueryable(
+                dataSet,
+                configure,
+                queryFragment,
+                resultFragment,
+                person => person.Id,
+                builder => builder.Field("id", id => id));
+        }
+
         [TestCaseSource(typeof(FromQueryableTests), nameof(RootNullableIntTestData))]
         public void RootFromQueryableInt(
             DataSet dataSet,
@@ -135,6 +157,26 @@ namespace Epam.GraphQL.Tests.Suites
                 outerQuery: _ => BaseTests.CreateData().Countries.AsQueryable(),
                 outerIdExpression: country => country.Id,
                 innerQuery: GetDataFactory(dataSet, p => p.Id));
+        }
+
+        [TestCaseSource(typeof(FromQueryableTests), nameof(IntClassTestData))]
+        public void FromQueryableIntClass(
+            Kind kind,
+            DataSet dataSet,
+            Action<IQueryableField<Country, int, TestUserContext>> configure,
+            string queryFragment,
+            string resultFragment)
+        {
+            FromQueryable(
+                kind,
+                configure,
+                queryFragment,
+                resultFragment,
+                condition: (c, id) => c.Id == id,
+                outerQuery: _ => BaseTests.CreateData().Countries.AsQueryable(),
+                outerIdExpression: country => country.Id,
+                innerQuery: GetDataFactory(dataSet, p => p.Id),
+                builder => builder.Field("id", id => id));
         }
 
         [TestCaseSource(typeof(FromQueryableTests), nameof(NullableIntTestData))]
@@ -295,7 +337,8 @@ namespace Epam.GraphQL.Tests.Suites
             Expression<Func<TOuter, TInner, bool>> condition,
             Func<TestUserContext, IQueryable<TOuter>> outerQuery,
             Expression<Func<TOuter, TOuterId>> outerIdExpression,
-            Func<TestUserContext, IQueryable<TInner>> innerQuery)
+            Func<TestUserContext, IQueryable<TInner>> innerQuery,
+            Action<IInlineObjectBuilder<TInner, TestUserContext>> configureBuilder = null)
             where TOuter : class
             where TOuterId : struct
         {
@@ -312,7 +355,8 @@ namespace Epam.GraphQL.Tests.Suites
                                 loader.Field("test")
                                     .FromIQueryable(
                                         innerQuery,
-                                        condition));
+                                        condition,
+                                        configureBuilder));
                         },
                         getBaseQuery: outerQuery,
                         applyNaturalOrderBy: q => q.OrderBy(outerIdExpression),
@@ -357,7 +401,8 @@ namespace Epam.GraphQL.Tests.Suites
                                         .Field("test")
                                         .FromIQueryable(
                                             innerQuery,
-                                            condition)));
+                                            condition,
+                                            configureBuilder)));
                         },
                         getBaseQuery: outerQuery,
                         applyNaturalOrderBy: q => q.OrderBy(outerIdExpression),
@@ -417,7 +462,8 @@ namespace Epam.GraphQL.Tests.Suites
                                     .Field("test")
                                     .FromIQueryable(
                                         innerQuery,
-                                        condition))),
+                                        condition,
+                                        configureBuilder))),
                         query,
                         result,
                         new DataContextMock());
@@ -588,7 +634,8 @@ namespace Epam.GraphQL.Tests.Suites
             Action<IRootQueryableField<T, TestUserContext>> configure,
             string queryFragment,
             string resultFragment,
-            Func<Person, T> selector)
+            Expression<Func<Person, T>> selector,
+            Action<IInlineObjectBuilder<T, TestUserContext>> configureBuilder = null)
         {
             var factory = GetDataFactory(dataSet, selector);
 
@@ -604,7 +651,7 @@ namespace Epam.GraphQL.Tests.Suites
             configure ??= _ => { };
 
             TestHelpers.TestQuery(
-                query => configure(query.Field("test").FromIQueryable(factory)),
+                query => configure(query.Field("test").FromIQueryable(factory, configureBuilder)),
                 query,
                 result,
                 new DataContextMock());
@@ -644,7 +691,7 @@ namespace Epam.GraphQL.Tests.Suites
                     null,
                     null,
                     @"{
-                    id
+                        id
                     }",
                     @"[{
                         id: 1
@@ -950,11 +997,11 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         dataSet,
                         rootConfigure == null
-                            ? field => field.Select(x => x)
-                            : ExpressionHelpers.Compose(rootConfigure, field => field.Select(x => x)),
+                            ? field => field.Select(x => x, null)
+                            : ExpressionHelpers.Compose(rootConfigure, field => field.Select(x => x, null)),
                         configure == null
-                            ? field => field.Select(x => x)
-                            : ExpressionHelpers.Compose(configure, field => field.Select(x => x)),
+                            ? field => field.Select(x => x, null)
+                            : ExpressionHelpers.Compose(configure, field => field.Select(x => x, null)),
                         query,
                         result,
                         args,
@@ -965,11 +1012,11 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         dataSet,
                         rootConfigure == null
-                            ? field => field.Select(x => x).Select(x => x)
-                            : ExpressionHelpers.Compose(rootConfigure, field => field.Select(x => x).Select(x => x)),
+                            ? field => field.Select(x => x, null).Select(x => x, null)
+                            : ExpressionHelpers.Compose(rootConfigure, field => field.Select(x => x, null).Select(x => x, null)),
                         configure == null
-                            ? field => field.Select(x => x).Select(x => x)
-                            : ExpressionHelpers.Compose(configure, field => field.Select(x => x).Select(x => x)),
+                            ? field => field.Select(x => x, null).Select(x => x, null)
+                            : ExpressionHelpers.Compose(configure, field => field.Select(x => x, null).Select(x => x, null)),
                         query,
                         result,
                         args,
@@ -1001,21 +1048,21 @@ namespace Epam.GraphQL.Tests.Suites
                         rootConfigure == null
                             ? field => field
                                 .Select(x => x, configure => configure.Field(x => x.Id, null))
-                                .Select(x => x)
+                                .Select(x => x, null)
                             : ExpressionHelpers.Compose(
                                 rootConfigure,
                                 field => field
                                     .Select(x => x, configure => configure.Field(x => x.Id, null))
-                                    .Select(x => x)),
+                                    .Select(x => x, null)),
                         configure == null
                             ? field => field
                                 .Select(x => x, configure => configure.Field(x => x.Id, null))
-                                .Select(x => x)
+                                .Select(x => x, null)
                             : ExpressionHelpers.Compose(
                                 configure,
                                 field => field
                                     .Select(x => x, configure => configure.Field(x => x.Id, null))
-                                    .Select(x => x)),
+                                    .Select(x => x, null)),
                         query,
                         result,
                         args,
@@ -1055,8 +1102,8 @@ namespace Epam.GraphQL.Tests.Suites
                             kind,
                             dataSet,
                             configure == null
-                                ? field => field.Select((c, x) => c != null ? x : default)
-                                : ExpressionHelpers.Compose(configure, field => field.Select((c, x) => c != null ? x : default)),
+                                ? field => field.Select((c, x) => c != null ? x : default, null)
+                                : ExpressionHelpers.Compose(configure, field => field.Select((c, x) => c != null ? x : default, null)),
                             query,
                             result,
                             args,
@@ -1068,13 +1115,13 @@ namespace Epam.GraphQL.Tests.Suites
                             dataSet,
                             configure == null
                                 ? field => field
-                                    .Select((c, x) => c != null ? x : default)
-                                    .Select(x => x)
+                                    .Select((c, x) => c != null ? x : default, null)
+                                    .Select(x => x, null)
                                 : ExpressionHelpers.Compose(
                                     configure,
                                     field => field
-                                        .Select((c, x) => c != null ? x : default)
-                                        .Select(x => x)),
+                                        .Select((c, x) => c != null ? x : default, null)
+                                        .Select(x => x, null)),
                             query,
                             result,
                             args,
@@ -1087,12 +1134,12 @@ namespace Epam.GraphQL.Tests.Suites
                             configure == null
                                 ? field => field
                                     .Select(x => x, configure => configure.Field(x => x.Id, null))
-                                    .Select((c, x) => c != null ? x : default)
+                                    .Select((c, x) => c != null ? x : default, null)
                                 : ExpressionHelpers.Compose(
                                     configure,
                                     field => field
                                         .Select(x => x, configure => configure.Field(x => x.Id, null))
-                                        .Select((c, x) => c != null ? x : default)),
+                                        .Select((c, x) => c != null ? x : default, null)),
                             query,
                             result,
                             args,
@@ -1104,13 +1151,13 @@ namespace Epam.GraphQL.Tests.Suites
                             dataSet,
                             configure == null
                                 ? field => field
-                                    .Select((c, x) => c != null ? x : default)
-                                    .Select((c, x) => c != null ? x : default)
+                                    .Select((c, x) => c != null ? x : default, null)
+                                    .Select((c, x) => c != null ? x : default, null)
                                 : ExpressionHelpers.Compose(
                                     configure,
                                     field => field
-                                        .Select((c, x) => c != null ? x : default)
-                                        .Select((c, x) => c != null ? x : default)),
+                                        .Select((c, x) => c != null ? x : default, null)
+                                        .Select((c, x) => c != null ? x : default, null)),
                             query,
                             result,
                             args,
@@ -1311,6 +1358,182 @@ namespace Epam.GraphQL.Tests.Suites
             }
         }
 
+        private static IEnumerable<TestCaseData> GetRootIntClassTestData()
+        {
+            return Impl().SelectMany(x => x);
+
+            static IEnumerable<IEnumerable<TestCaseData>> Impl()
+            {
+                yield return Create<int>(
+                    DataSet.All,
+                    null,
+                    @"{
+                        id
+                    }",
+                    @"[{
+                        id: 1
+                    }, {
+                        id: 2
+                    }, {
+                        id: 3
+                    }, {
+                        id: 4
+                    }, {
+                        id: 5
+                    }, {
+                        id: 6
+                    }]",
+                    hasInlineBuilder: true);
+
+                var searcher = GraphQLTypeBuilder.CreateSearcherType<int, TestUserContext>((query, user, search) => query.Where(x => x.ToString(CultureInfo.InvariantCulture) == search));
+
+                yield return Create<int>(
+                    DataSet.All,
+                    builder => builder.WithSearch(searcher),
+                    @"{
+                        id
+                    }",
+                    @"[{
+                        id: 1
+                    }]",
+                    "search: \"1\"",
+                    hasInlineBuilder: true);
+
+                yield return CreateRootOnly<int, IConnectionField<int, TestUserContext>>(
+                    DataSet.All,
+                    builder => ((IConnectionField<int, TestUserContext>)builder.AsConnection(query => query.OrderBy(x => x))).WithSearch(searcher),
+                    @"{
+                        items {
+                            id
+                        }
+                    }",
+                    @"{
+                        items: [{
+                            id: 1
+                        }]
+                    }",
+                    "search: \"1\"");
+
+                yield return CreateRootOnly<int, IVoid>(
+                    DataSet.All,
+                    builder => builder.AsGroupConnection(),
+                    @"{
+                        items {
+                            item {
+                                id
+                            }
+                            count
+                        }
+                    }",
+                    @"{
+                        items:[{
+                            item: {
+                                id: 1
+                            },
+                            count: 1
+                        },{
+                            item: {
+                                id: 2
+                            },
+                            count:1
+                        },{
+                            item: {
+                                id: 3
+                            },
+                            count:1
+                        },{
+                            item: {
+                                id: 4
+                            },
+                            count:1
+                        },{
+                            item: {
+                                id: 5
+                            },
+                            count:1
+                        },{
+                            item: {
+                                id: 6
+                            },
+                            count:1
+                        }]
+                    }");
+
+                yield return CreateRootOnly<int, IVoid>(
+                    DataSet.All,
+                    builder => builder.AsGroupConnection(),
+                    @"{
+                        items {
+                            item {
+                                id
+                            }
+                        }
+                    }",
+                    @"{
+                        items:[{
+                            item: {
+                                id: 1
+                            }
+                        },{
+                            item: {
+                                id: 2
+                            }
+                        },{
+                            item: {
+                                id: 3
+                            }
+                        },{
+                            item: {
+                                id: 4
+                            }
+                        },{
+                            item: {
+                                id: 5
+                            }
+                        },{
+                            item: {
+                                id: 6
+                            }
+                        }]
+                    }");
+
+                yield return CreateRootOnly<int, IVoid>(
+                    DataSet.All,
+                    builder => builder.AsGroupConnection(),
+                    @"{
+                        items {
+                            count
+                        }
+                    }",
+                    @"{
+                        items:[{
+                            count: 6
+                        }]
+                    }");
+
+                yield return CreateRootOnly<int, IConnectionField<int, TestUserContext>>(
+                    DataSet.All,
+                    builder => ((IConnectionField<int, TestUserContext>)builder.AsGroupConnection()).WithSearch(searcher),
+                    @"{
+                    items {
+                            item {
+                                id
+                            }
+                            count
+                        }
+                    }",
+                    @"{
+                        items:[{
+                            item: {
+                                id: 1
+                            },
+                            count: 1
+                        }]
+                    }",
+                    "search: \"1\"");
+            }
+        }
+
         private static IEnumerable<TestCaseData> GetIntTestData(Kind kind)
         {
             return Impl().SelectMany(x => x);
@@ -1339,7 +1562,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select((country, id) => id)
+                            .Select((country, id) => id, null)
                             .Where(id => true),
                         string.Empty,
                         @"[1]"),
@@ -1372,7 +1595,7 @@ namespace Epam.GraphQL.Tests.Suites
                         DataSet.All,
                         builder => builder
                             .Select(x => Tuple.Create(x), config => config.Field("item", x => x.Item1, null))
-                            .Select((c, x) => c.Id + x.Item1),
+                            .Select((c, x) => c.Id + x.Item1, null),
                         string.Empty,
                         @"[2]"),
                     1);
@@ -1382,8 +1605,8 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
-                            .Select((c, x) => c.Id + x),
+                            .Select(x => x, null)
+                            .Select((c, x) => c.Id + x, null),
                         string.Empty,
                         @"[2]"),
                     1);
@@ -1429,7 +1652,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
+                            .Select(x => x, null)
                             .FirstOrDefault(null),
                         string.Empty,
                         @"1"),
@@ -1440,7 +1663,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
+                            .Select(x => x, null)
                             .SingleOrDefault(null),
                         string.Empty,
                         @"1"),
@@ -1451,7 +1674,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
+                            .Select(x => x, null)
                             .FirstOrDefault(x => true),
                         string.Empty,
                         @"1"),
@@ -1462,7 +1685,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
+                            .Select(x => x, null)
                             .SingleOrDefault(x => true),
                         string.Empty,
                         @"1"),
@@ -1499,6 +1722,93 @@ namespace Epam.GraphQL.Tests.Suites
                             .SingleOrDefault(x => true),
                         @"{item}",
                         @"{item: 1}"),
+                    1);
+            }
+        }
+
+        private static IEnumerable<TestCaseData> GetIntClassTestData(Kind kind)
+        {
+            return Impl().SelectMany(x => x);
+
+            IEnumerable<IEnumerable<TestCaseData>> Impl()
+            {
+                yield return CreateNonRootSuite<int>(
+                    kind,
+                    DataSet.All,
+                    null,
+                    @"{
+                        id
+                    }",
+                    @"[{
+                        id: 1
+                    }]",
+                    hasInlineBuilder: true);
+
+                var searcher = GraphQLTypeBuilder.CreateSearcherType<int, TestUserContext>((query, user, search) => query.Where(x => x.ToString(CultureInfo.InvariantCulture) == search));
+
+                yield return CreateNonRootSuite<int>(
+                    kind,
+                    DataSet.All,
+                    builder => builder.WithSearch(searcher),
+                    @"{
+                        id
+                    }",
+                    @"[{
+                        id: 1
+                    }]",
+                    "search: \"1\"",
+                    hasInlineBuilder: true);
+
+                yield return Enumerable.Repeat(
+                    CreateNonRoot<int, IVoid>(
+                        kind,
+                        DataSet.All,
+                        builder => builder.FirstOrDefault(null),
+                        @"{
+                            id
+                        }",
+                        @"{
+                            id: 1
+                        }"),
+                    1);
+
+                yield return Enumerable.Repeat(
+                    CreateNonRoot<int, IVoid>(
+                        kind,
+                        DataSet.All,
+                        builder => builder.SingleOrDefault(null),
+                        @"{
+                            id
+                        }",
+                        @"{
+                            id: 1
+                        }"),
+                    1);
+
+                yield return Enumerable.Repeat(
+                    CreateNonRoot<int, IVoid>(
+                        kind,
+                        DataSet.All,
+                        builder => builder.FirstOrDefault(x => true),
+                        @"{
+                            id
+                        }",
+                        @"{
+                            id: 1
+                        }"),
+                    1);
+
+                yield return Enumerable.Repeat(
+                    CreateNonRoot<int, IVoid>(
+                        kind,
+                        DataSet.All,
+                        builder => builder.SingleOrDefault(x => true),
+                        @"{
+                            id
+                        }",
+                        @"{
+                            id: 1
+                        }"),
                     1);
             }
         }
@@ -1624,7 +1934,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select((country, id) => id)
+                            .Select((country, id) => id, null)
                             .Where(id => true),
                         string.Empty,
                         @"[1,1]"),
@@ -1657,7 +1967,7 @@ namespace Epam.GraphQL.Tests.Suites
                         DataSet.All,
                         builder => builder
                             .Select(x => Tuple.Create(x), config => config.Field("item", x => x.Item1, null))
-                            .Select((c, x) => c.NullableId + x.Item1),
+                            .Select((c, x) => c.NullableId + x.Item1, null),
                         string.Empty,
                         @"[2, 2]"),
                     1);
@@ -1685,7 +1995,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
+                            .Select(x => x, null)
                             .FirstOrDefault(null),
                         string.Empty,
                         @"1"),
@@ -1696,7 +2006,7 @@ namespace Epam.GraphQL.Tests.Suites
                         kind,
                         DataSet.All,
                         builder => builder
-                            .Select(x => x)
+                            .Select(x => x, null)
                             .FirstOrDefault(x => true),
                         string.Empty,
                         @"1"),
@@ -1732,9 +2042,9 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.Id),
+                    .Select(x => x.Id, null),
                 builder => builder
-                    .Select(x => x.Id),
+                    .Select(x => x.Id, null),
                 string.Empty,
                 "[1, 2, 3, 4, 5, 6]");
 
@@ -1742,9 +2052,9 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.ManagerId),
+                    .Select(x => x.ManagerId, null),
                 builder => builder
-                    .Select(x => x.ManagerId),
+                    .Select(x => x.ManagerId, null),
                 string.Empty,
                 "[null, 1, 1, 2, 2, 5]");
 
@@ -1754,8 +2064,8 @@ namespace Epam.GraphQL.Tests.Suites
                     kind,
                     DataSet.All,
                     builder => builder
-                        .Select(x => x.ManagerId)
-                        .Select((c, managerId) => c.Id + managerId),
+                        .Select(x => x.ManagerId, null)
+                        .Select((c, managerId) => c.Id + managerId, null),
                     string.Empty,
                     "[null, 2, 2, 3, 3, 6]",
                     null,
@@ -1766,9 +2076,9 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.FullName),
+                    .Select(x => x.FullName, null),
                 builder => builder
-                    .Select(x => x.FullName),
+                    .Select(x => x.FullName, null),
                 string.Empty,
                 @"[""Linoel Livermore"", ""Sophie Gandley"", ""Hannie Everitt"", ""Florance Goodricke"", ""Aldon Exley"", ""Walton Alvarez""]");
 
@@ -1891,8 +2201,8 @@ namespace Epam.GraphQL.Tests.Suites
             yield return Create(
                 kind,
                 DataSet.All,
-                builder => builder.Select(x => x),
-                builder => builder.Select(x => x),
+                builder => builder.Select(x => x, null),
+                builder => builder.Select(x => x, null),
                 @"{
                     id
                 }",
@@ -1917,7 +2227,7 @@ namespace Epam.GraphQL.Tests.Suites
                 yield return CreateNonRoot<Person, IEnumerableField<Country, int, TestUserContext>>(
                     kind,
                     DataSet.All,
-                    builder => builder.Select((c, x) => x.Id + c.Id),
+                    builder => builder.Select((c, x) => x.Id + c.Id, null),
                     string.Empty,
                     @"[7, 6, 5, 4, 3, 2]",
                     @"sorting: { field: ""id"", direction: DESC }",
@@ -1928,11 +2238,11 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.Id)
-                    .Select(id => 2 * id),
+                    .Select(x => x.Id, null)
+                    .Select(id => 2 * id, null),
                 builder => builder
-                    .Select(x => x.Id)
-                    .Select(id => 2 * id),
+                    .Select(x => x.Id, null)
+                    .Select(id => 2 * id, null),
                 string.Empty,
                 "[2, 4, 6, 8, 10, 12]");
 
@@ -1940,11 +2250,11 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.ManagerId)
-                    .Select(managerId => 2 * managerId),
+                    .Select(x => x.ManagerId, null)
+                    .Select(managerId => 2 * managerId, null),
                 builder => builder
-                    .Select(x => x.ManagerId)
-                    .Select(managerId => 2 * managerId),
+                    .Select(x => x.ManagerId, null)
+                    .Select(managerId => 2 * managerId, null),
                 string.Empty,
                 "[null, 2, 2, 4, 4, 10]");
 
@@ -1952,11 +2262,11 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.FullName)
-                    .Select(fullName => $"*{fullName}"),
+                    .Select(x => x.FullName, null)
+                    .Select(fullName => $"*{fullName}", null),
                 builder => builder
-                    .Select(x => x.FullName)
-                    .Select(fullName => $"*{fullName}"),
+                    .Select(x => x.FullName, null)
+                    .Select(fullName => $"*{fullName}", null),
                 string.Empty,
                 @"[""*Linoel Livermore"", ""*Sophie Gandley"", ""*Hannie Everitt"", ""*Florance Goodricke"", ""*Aldon Exley"", ""*Walton Alvarez""]");
 
@@ -1965,10 +2275,10 @@ namespace Epam.GraphQL.Tests.Suites
                 DataSet.All,
                 builder => builder
                     .Select(x => x.Unit, null)
-                    .Select(u => u.Id),
+                    .Select(u => u.Id, null),
                 builder => builder
                     .Select(x => x.Unit, null)
-                    .Select(u => u.Id),
+                    .Select(u => u.Id, null),
                 string.Empty,
                 "[1, 1, 1, 2, 2, 2]");
 
@@ -1977,10 +2287,10 @@ namespace Epam.GraphQL.Tests.Suites
                 DataSet.All,
                 builder => builder
                     .Select(x => x.Unit, null)
-                    .Select(u => u.ParentId),
+                    .Select(u => u.ParentId, null),
                 builder => builder
                     .Select(x => x.Unit, null)
-                    .Select(u => u.ParentId),
+                    .Select(u => u.ParentId, null),
                 string.Empty,
                 "[null, null, null, 1, 1, 1]");
 
@@ -1989,10 +2299,10 @@ namespace Epam.GraphQL.Tests.Suites
                 DataSet.All,
                 builder => builder
                     .Select(x => x.Unit, null)
-                    .Select(u => u.Name),
+                    .Select(u => u.Name, null),
                 builder => builder
                     .Select(x => x.Unit, null)
-                    .Select(u => u.Name),
+                    .Select(u => u.Name, null),
                 string.Empty,
                 @"[""Alpha"", ""Alpha"", ""Alpha"", ""Beta"", ""Beta"", ""Beta""]");
 
@@ -2108,10 +2418,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .Select(x => Tuple.Create(x), config => config.Field("id", x => x.Item1, null)),
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .Select(x => Tuple.Create(x), config => config.Field("id", x => x.Item1, null)),
                 @"{
                     id
@@ -2214,10 +2524,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .FirstOrDefault(null),
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .FirstOrDefault(null),
                 string.Empty,
                 "1");
@@ -2226,10 +2536,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.One,
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .SingleOrDefault(null),
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .SingleOrDefault(null),
                 string.Empty,
                 "1");
@@ -2238,10 +2548,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .FirstOrDefault(i => i == 1),
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .FirstOrDefault(i => i == 1),
                 string.Empty,
                 "1");
@@ -2250,10 +2560,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .SingleOrDefault(i => i == 1),
                 builder => builder
-                    .Select(x => x.Id)
+                    .Select(x => x.Id, null)
                     .SingleOrDefault(i => i == 1),
                 string.Empty,
                 "1");
@@ -2262,10 +2572,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.ManagerId)
+                    .Select(x => x.ManagerId, null)
                     .FirstOrDefault(m => m == null),
                 builder => builder
-                    .Select(x => x.ManagerId)
+                    .Select(x => x.ManagerId, null)
                     .FirstOrDefault(m => m == null),
                 string.Empty,
                 "null");
@@ -2274,10 +2584,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.ManagerId)
+                    .Select(x => x.ManagerId, null)
                     .SingleOrDefault(m => m == null),
                 builder => builder
-                    .Select(x => x.ManagerId)
+                    .Select(x => x.ManagerId, null)
                     .SingleOrDefault(m => m == null),
                 string.Empty,
                 "null");
@@ -2286,10 +2596,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .FirstOrDefault(null),
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .FirstOrDefault(null),
                 string.Empty,
                 @"""Linoel Livermore""");
@@ -2298,10 +2608,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.One,
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .SingleOrDefault(null),
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .SingleOrDefault(null),
                 string.Empty,
                 @"""Linoel Livermore""");
@@ -2310,10 +2620,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .FirstOrDefault(n => n == "Linoel Livermore"),
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .FirstOrDefault(n => n == "Linoel Livermore"),
                 string.Empty,
                 @"""Linoel Livermore""");
@@ -2322,10 +2632,10 @@ namespace Epam.GraphQL.Tests.Suites
                 kind,
                 DataSet.All,
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .SingleOrDefault(n => n == "Linoel Livermore"),
                 builder => builder
-                    .Select(x => x.FullName)
+                    .Select(x => x.FullName, null)
                     .SingleOrDefault(n => n == "Linoel Livermore"),
                 string.Empty,
                 @"""Linoel Livermore""");
@@ -2511,14 +2821,14 @@ namespace Epam.GraphQL.Tests.Suites
             };
         }
 
-        private static Func<TestUserContext, IQueryable<T>> GetDataFactory<T>(DataSet dataSet, Func<Person, T> selector)
+        private static Func<TestUserContext, IQueryable<T>> GetDataFactory<T>(DataSet dataSet, Expression<Func<Person, T>> selector)
         {
             return dataSet switch
             {
                 DataSet.Empty => _ => Enumerable.Empty<T>().AsQueryable(),
-                DataSet.One => _ => BaseTests.CreateData().People.Take(1).Select(selector).AsQueryable(),
-                DataSet.AllWithManager => _ => BaseTests.CreateData().People.Where(x => x.Manager != null).Select(selector).AsQueryable(),
-                DataSet.All => _ => BaseTests.CreateData().People.Select(selector).AsQueryable(),
+                DataSet.One => _ => BaseTests.CreateData().People.Take(1).AsQueryable().Select(selector),
+                DataSet.AllWithManager => _ => BaseTests.CreateData().People.AsQueryable().Where(x => x.Manager != null).Select(selector),
+                DataSet.All => _ => BaseTests.CreateData().People.AsQueryable().Select(selector),
                 _ => throw new NotImplementedException(),
             };
         }
@@ -2592,7 +2902,8 @@ namespace Epam.GraphQL.Tests.Suites
             Expression<Func<IRootQueryableField<T, TestUserContext>, IRootQueryableField<T, TestUserContext>>> configure,
             string query,
             string result,
-            string args = null)
+            string args = null,
+            bool hasInlineBuilder = false)
         {
             yield return CreateRootOnly(
                 dataSet,
@@ -2611,93 +2922,96 @@ namespace Epam.GraphQL.Tests.Suites
                 args,
                 asConnection: true).Single();
 
-            yield return CreateRootOnly(
-                dataSet,
-                configure == null
-                    ? field => field.Select(x => x)
-                    : ExpressionHelpers.Compose(configure, field => field.Select(x => x)),
-                query,
-                result,
-                args).Single();
+            if (!hasInlineBuilder)
+            {
+                yield return CreateRootOnly(
+                    dataSet,
+                    configure == null
+                        ? field => field.Select(x => x, null)
+                        : ExpressionHelpers.Compose(configure, field => field.Select(x => x, null)),
+                    query,
+                    result,
+                    args).Single();
 
-            yield return CreateRootOnly(
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => x)
-                        .Select(x => x)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
-                            .Select(x => x)
-                            .Select(x => x)),
-                query,
-                result,
-                args).Single();
+                yield return CreateRootOnly(
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select(x => x, null)
+                            .Select(x => x, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => x, null)
+                                .Select(x => x, null)),
+                    query,
+                    result,
+                    args).Single();
 
-            yield return CreateRootOnly(
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
+                yield return CreateRootOnly(
+                    dataSet,
+                    configure == null
+                        ? field => field
                             .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args).Single();
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args).Single();
 
-            yield return CreateRootOnly(
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => Tuple.Create(x), null)
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
+                yield return CreateRootOnly(
+                    dataSet,
+                    configure == null
+                        ? field => field
                             .Select(x => Tuple.Create(x), null)
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args).Single();
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => Tuple.Create(x), null)
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args).Single();
 
-            yield return CreateRootOnly(
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => x)
-                        .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
-                            .Select(x => x)
+                yield return CreateRootOnly(
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select(x => x, null)
                             .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args).Single();
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => x, null)
+                                .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args).Single();
 
-            yield return CreateRootOnly(
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => x)
-                        .Select(x => Tuple.Create(x), null)
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
-                            .Select(x => x)
+                yield return CreateRootOnly(
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select(x => x, null)
                             .Select(x => Tuple.Create(x), null)
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args).Single();
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => x, null)
+                                .Select(x => Tuple.Create(x), null)
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args).Single();
+            }
         }
 
         private static IEnumerable<TestCaseData> CreateNonRootSuite<T>(
@@ -2706,7 +3020,8 @@ namespace Epam.GraphQL.Tests.Suites
             Expression<Func<IQueryableField<Country, T, TestUserContext>, IQueryableField<Country, T, TestUserContext>>> configure,
             string query,
             string result,
-            string args = null)
+            string args = null,
+            bool hasInlineBuilder = false)
         {
             yield return CreateNonRoot(
                 kind,
@@ -2727,155 +3042,158 @@ namespace Epam.GraphQL.Tests.Suites
                 args,
                 asConnection: true);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field.Select(x => x)
-                    : ExpressionHelpers.Compose(configure, field => field.Select(x => x)),
-                query,
-                result,
-                args);
+            if (!hasInlineBuilder)
+            {
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field.Select(x => x, null)
+                        : ExpressionHelpers.Compose(configure, field => field.Select(x => x, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => x)
-                        .Select(x => x)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
-                            .Select(x => x)
-                            .Select(x => x)),
-                query,
-                result,
-                args);
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select(x => x, null)
+                            .Select(x => x, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => x, null)
+                                .Select(x => x, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
                             .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args);
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => Tuple.Create(x), null)
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
                             .Select(x => Tuple.Create(x), null)
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args);
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => Tuple.Create(x), null)
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => x)
-                        .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
-                            .Select(x => x)
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select(x => x, null)
                             .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args);
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => x, null)
+                                .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select(x => x)
-                        .Select(x => Tuple.Create(x), null)
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(
-                        configure,
-                        field => field
-                            .Select(x => x)
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select(x => x, null)
                             .Select(x => Tuple.Create(x), null)
-                            .Select(x => x.Item1)),
-                query,
-                result,
-                args);
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(
+                            configure,
+                            field => field
+                                .Select(x => x, null)
+                                .Select(x => Tuple.Create(x), null)
+                                .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field.Select((c, x) => c != null ? x : default)
-                    : ExpressionHelpers.Compose(configure, field => field.Select((c, x) => c != null ? x : default)),
-                query,
-                result,
-                args);
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field.Select((c, x) => c != null ? x : default, null)
+                        : ExpressionHelpers.Compose(configure, field => field.Select((c, x) => c != null ? x : default, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select((c, x) => c != null ? x : default)
-                        .Select(x => x)
-                    : ExpressionHelpers.Compose(configure, field => field
-                        .Select((c, x) => c != null ? x : default)
-                        .Select(x => x)),
-                query,
-                result,
-                args);
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select((c, x) => c != null ? x : default, null)
+                            .Select(x => x, null)
+                        : ExpressionHelpers.Compose(configure, field => field
+                            .Select((c, x) => c != null ? x : default, null)
+                            .Select(x => x, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select((c, x) => c != null ? x : default)
-                        .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(configure, field => field
-                        .Select((c, x) => c != null ? x : default)
-                        .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
-                        .Select(x => x.Item1)),
-                query,
-                result,
-                args);
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select((c, x) => c != null ? x : default, null)
+                            .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(configure, field => field
+                            .Select((c, x) => c != null ? x : default, null)
+                            .Select(x => Tuple.Create(x), b => b.Field(x => x.Item1, null))
+                            .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args);
 
-            yield return CreateNonRoot(
-                kind,
-                dataSet,
-                configure == null
-                    ? field => field
-                        .Select((c, x) => c != null ? x : default)
-                        .Select(x => Tuple.Create(x), null)
-                        .Select(x => x.Item1)
-                    : ExpressionHelpers.Compose(configure, field => field
-                        .Select((c, x) => c != null ? x : default)
-                        .Select(x => Tuple.Create(x), null)
-                        .Select(x => x.Item1)),
-                query,
-                result,
-                args);
+                yield return CreateNonRoot(
+                    kind,
+                    dataSet,
+                    configure == null
+                        ? field => field
+                            .Select((c, x) => c != null ? x : default, null)
+                            .Select(x => Tuple.Create(x), null)
+                            .Select(x => x.Item1, null)
+                        : ExpressionHelpers.Compose(configure, field => field
+                            .Select((c, x) => c != null ? x : default, null)
+                            .Select(x => Tuple.Create(x), null)
+                            .Select(x => x.Item1, null)),
+                    query,
+                    result,
+                    args);
+            }
         }
     }
 }

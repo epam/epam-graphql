@@ -20,7 +20,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>,
         IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, IEnumerable<object>, TExecutionContext>
-        where TEntity : class
     {
         private readonly IBatchCompoundResolver<TEntity, TExecutionContext> _resolver;
         private readonly UnionGraphTypeDescriptor<TExecutionContext> _unionGraphType = new();
@@ -149,26 +148,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
-            IChainConfigurationContext configurationContext,
-            Func<IEnumerable<object>, TReturnType1> selector)
-        {
-            return Parent.ApplySelect<TReturnType1>(configurationContext, this, _resolver.Select(selector));
-        }
-
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
             IInlinedChainConfigurationContext configurationContext,
             Func<IEnumerable<object>, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
-            where TReturnType1 : class
         {
             return Parent.ApplySelect(configurationContext, this, _resolver.Select(selector), build);
-        }
-
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(
-            IChainConfigurationContext configurationContext,
-            Func<IEnumerable<object>, TReturnType1> selector)
-        {
-            return ApplySelect(configurationContext, selector);
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(

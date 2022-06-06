@@ -30,7 +30,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TEntity,
             TReturnType,
             TExecutionContext>
-        where TEntity : class
         where TThis : QueryableFieldBase<TThis, TThisIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected QueryableFieldBase(

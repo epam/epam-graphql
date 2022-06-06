@@ -4,7 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration.Implementations;
-using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 using GraphQL.Types.Relay;
 
@@ -15,7 +14,7 @@ namespace Epam.GraphQL.Types
         public GroupConnectionGraphType(IGraphTypeDescriptor<TChildEntity, TExecutionContext> graphType)
         {
             // TODO Type name should be the same as an entity type name (e.g. for two loaders for the same entity and field set)
-            var typeName = graphType.Configurator?.Name ?? typeof(TChildEntity).GraphQLTypeName(false);
+            var typeName = graphType.Name;
 
             Name = $"{typeName}GroupConnection";
 

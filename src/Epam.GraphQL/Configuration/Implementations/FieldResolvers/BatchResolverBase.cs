@@ -12,7 +12,6 @@ using GraphQL.DataLoader;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class BatchResolverBase<TEntity, TReturnType> : AsyncFuncResolver<TEntity, TReturnType?>, IBatchResolver<TEntity, TReturnType>
-        where TEntity : class
     {
         public BatchResolverBase(
             Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType?>> resolver,

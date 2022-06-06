@@ -18,7 +18,6 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
 {
     internal class ProjectionFieldBuilder<TField, TEntity, TExecutionContext> :
         IProjectionField<TEntity, TExecutionContext>
-        where TEntity : class
         where TField : FieldBase<TEntity, TExecutionContext>, IUnionableField<TEntity, TExecutionContext>
     {
         public ProjectionFieldBuilder(TField field)
@@ -32,7 +31,6 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class
         {
             var configurationContext = Field.ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
                 .Argument(query)
@@ -52,19 +50,6 @@ namespace Epam.GraphQL.Builders.Projection.Implementations
                 naturalSorters: SortingHelpers.Empty);
 
             return Field.Parent.ReplaceField(Field, result);
-        }
-
-        public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
-            Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>> condition)
-        {
-            return Field.Parent.FromIQueryable(
-                Field.ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
-                    .Argument(query)
-                    .Argument(condition),
-                Field,
-                query,
-                condition);
         }
 
         public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)

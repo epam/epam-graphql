@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class Field<TEntity, TExecutionContext> :
         FieldBase<TEntity, TExecutionContext>,
         IUnionableField<TEntity, TExecutionContext>
-        where TEntity : class
     {
         public Field(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
             : base(configurationContext, parent, name)

@@ -12,7 +12,6 @@ namespace Epam.GraphQL.Builders.Loader
         IProjectionField<TEntity, TExecutionContext>,
         IHasFromBatch<TEntity, TExecutionContext>,
         IHasFromLoader<TEntity, TExecutionContext>
-        where TEntity : class
     {
     }
 }
