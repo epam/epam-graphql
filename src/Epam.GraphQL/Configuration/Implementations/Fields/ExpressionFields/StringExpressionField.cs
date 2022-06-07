@@ -12,7 +12,6 @@ using Epam.GraphQL.Filters.Implementations;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class StringExpressionField<TEntity, TExecutionContext> : ExpressionField<TEntity, string, TExecutionContext>
-        where TEntity : class
     {
         public StringExpressionField(
             Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,

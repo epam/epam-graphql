@@ -10,7 +10,6 @@ using Epam.GraphQL.Configuration;
 namespace Epam.GraphQL.Loaders
 {
     public abstract class Projection<TEntity, TExecutionContext> : ProjectionBase<TEntity, TExecutionContext>
-        where TEntity : class
     {
         protected internal IExpressionField<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
            => AddField(expression, deprecationReason);

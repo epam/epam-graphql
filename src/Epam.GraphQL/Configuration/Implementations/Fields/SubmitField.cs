@@ -13,7 +13,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class SubmitField<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
-        where TEntity : class
     {
         public SubmitField(
             Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,

@@ -12,7 +12,6 @@ using GraphQL;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class CustomInlineFilter<TEntity, TValueType, TExecutionContext> : IInlineFilter<TExecutionContext>, IChainConfigurationContextOwner
-        where TEntity : class
     {
         private readonly Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> _filterPredicateFactory;
 

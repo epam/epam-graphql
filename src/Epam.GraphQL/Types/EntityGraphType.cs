@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Types
 {
     internal class EntityGraphType<TProjection, TEntity, TExecutionContext> : ObjectGraphType<object>, IHasGetEntityType
         where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         public EntityGraphType(RelationRegistry<TExecutionContext> registry)
         {

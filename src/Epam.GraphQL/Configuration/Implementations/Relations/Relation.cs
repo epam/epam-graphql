@@ -23,7 +23,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
 {
     internal class Relation<TEntity, TEntityLoader, TChildEntity, TProperty, TChildProperty, TExecutionContext> : IRelation
         where TEntityLoader : Loader<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         private readonly Func<Type, PropertyInfo?> _getPrimaryKeyPropertyInfo;
         private readonly Expression<Func<TEntity, TProperty>> _property;

@@ -6,6 +6,7 @@
 using System;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
+using Epam.GraphQL.Helpers;
 using GraphQL;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
@@ -26,10 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             {
                 var configurator = registry.GetObjectGraphTypeConfigurator(_entityType, _projectionType);
 
-                if (configurator == null)
-                {
-                    throw new NotSupportedException();
-                }
+                Guards.ThrowNotSupportedIf(configurator == null);
 
                 var inlineFilters = configurator.CreateInlineFilters();
                 return inlineFilters;

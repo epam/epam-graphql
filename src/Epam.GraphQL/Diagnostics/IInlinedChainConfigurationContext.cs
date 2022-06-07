@@ -11,6 +11,8 @@ namespace Epam.GraphQL.Diagnostics
     {
         IChainArgumentConfigurationContext Build { get; }
 
+        new IInlinedChainConfigurationContext Argument(Delegate arg);
+
         new IInlinedChainConfigurationContext OptionalArgument(Delegate? arg);
     }
 }

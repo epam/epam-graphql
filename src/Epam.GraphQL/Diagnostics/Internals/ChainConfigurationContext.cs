@@ -43,8 +43,6 @@ namespace Epam.GraphQL.Diagnostics.Internals
 
         public new ObjectConfigurationContextBase Parent => (ObjectConfigurationContextBase)base.Parent!;
 
-        IConfigurationContext IChildConfigurationContext.Parent => Parent;
-
         protected string Operation { get; }
 
         protected IChainConfigurationContext? Previous { get; }
@@ -102,13 +100,11 @@ namespace Epam.GraphQL.Diagnostics.Internals
         }
 
         public IInlinedChainConfigurationContext Argument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> arg)
-            where TReturnType : class
         {
             return new InlinedChainConfigurationContext(this, parent => ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg));
         }
 
         public IInlinedChainConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg)
-            where TReturnType : class
         {
             return new InlinedChainConfigurationContext(this, parent => arg == null
                 ? ChainArgumentConfigurationContext.Create((ChainConfigurationContext)parent, arg, optional: true)

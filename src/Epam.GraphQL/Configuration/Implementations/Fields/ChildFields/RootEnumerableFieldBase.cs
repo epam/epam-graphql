@@ -44,23 +44,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         protected IRootEnumerableResolver<TReturnType, TExecutionContext> EnumerableFieldResolver { get; }
 
         public IRootEnumerableField<TReturnType1, TExecutionContext> Select<TReturnType1>(
-            Expression<Func<TReturnType, TReturnType1>> selector)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType1>(this);
-
-            var enumerableField = CreateSelect(
-                ConfigurationContext
-                    .Chain(nameof(Select))
-                    .Argument(selector),
-                selector,
-                graphType);
-            return ApplyField(enumerableField);
-        }
-
-        public IRootEnumerableField<TReturnType1, TExecutionContext> Select<TReturnType1>(
             Expression<Func<TReturnType, TReturnType1>> selector,
-            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build = default)
-            where TReturnType1 : class
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext
                 .Chain(nameof(Select))

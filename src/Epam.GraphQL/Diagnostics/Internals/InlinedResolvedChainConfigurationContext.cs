@@ -22,5 +22,10 @@ namespace Epam.GraphQL.Diagnostics.Internals
         {
             return (IInlinedChainConfigurationContext)OptionalArgument(arg);
         }
+
+        IInlinedChainConfigurationContext IInlinedChainConfigurationContext.Argument(Delegate arg)
+        {
+            return (IInlinedChainConfigurationContext)Argument(arg);
+        }
     }
 }

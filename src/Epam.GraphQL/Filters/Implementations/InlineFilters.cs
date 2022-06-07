@@ -16,7 +16,6 @@ using Epam.GraphQL.Infrastructure;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal sealed class InlineFilters<TEntity, TExecutionContext> : IInlineFilters<TEntity, TExecutionContext>
-        where TEntity : class
     {
         private readonly List<IInlineFilter<TExecutionContext>> _inlineFilters = new();
         private readonly string _name;

@@ -12,7 +12,6 @@ using Epam.GraphQL.Helpers;
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class UnionFieldBase<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
-        where TEntity : class
     {
         protected UnionFieldBase(
             IChainConfigurationContext configurationContext,

@@ -565,7 +565,7 @@ namespace Epam.GraphQL.Loaders
 
                     if (!result.Any())
                     {
-                        entity.Payload = null;
+                        entity.Payload = default;
                     }
                     else if (result.Count > 1)
                     {
@@ -576,7 +576,7 @@ namespace Epam.GraphQL.Loaders
                         var group = result.Single().ToList();
                         if (!group.Any())
                         {
-                            entity.Payload = null;
+                            entity.Payload = default;
                         }
                         else if (group.Count > 1)
                         {

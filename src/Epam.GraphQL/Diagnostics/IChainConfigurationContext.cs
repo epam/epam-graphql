@@ -35,11 +35,9 @@ namespace Epam.GraphQL.Diagnostics
 
         IResolvedChainConfigurationContext Argument<TContext, TKey, TValue>(Func<TContext, IEnumerable<TKey>, Task<IDictionary<TKey, TValue>>> arg);
 
-        IInlinedChainConfigurationContext Argument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> arg)
-            where TReturnType : class;
+        IInlinedChainConfigurationContext Argument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> arg);
 
-        IInlinedChainConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg)
-            where TReturnType : class;
+        IInlinedChainConfigurationContext OptionalArgument<TReturnType, TExecutionContext>(Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? arg);
 
         IChainConfigurationContext Argument(LambdaExpression arg);
 

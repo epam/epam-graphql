@@ -46,7 +46,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             string fieldName,
             Func<TExecutionContext, TEntity, TReturnType> func,
             IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
-            where TEntity : class
         {
             proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
             var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>

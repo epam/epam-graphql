@@ -19,7 +19,6 @@ using GraphQL.DataLoader;
 namespace Epam.GraphQL.Loaders
 {
     public abstract class Loader<TEntity, TExecutionContext> : Projection<TEntity, TExecutionContext>, ILoader<TEntity, TExecutionContext>
-        where TEntity : class
     {
         protected internal NullOption NullValues => NullOption.NullValues;
 

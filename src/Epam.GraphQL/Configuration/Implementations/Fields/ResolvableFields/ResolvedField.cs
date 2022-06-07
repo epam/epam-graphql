@@ -10,7 +10,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ResolvedField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>, IVoid
-        where TEntity : class
     {
         public ResolvedField(
             IChainConfigurationContext configurationContext,

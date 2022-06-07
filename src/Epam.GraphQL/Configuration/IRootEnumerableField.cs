@@ -13,12 +13,9 @@ namespace Epam.GraphQL.Configuration
     public interface IRootEnumerableField<out TThis, TSourceType, TExecutionContext>
         : IWhereableField<TThis, TSourceType>
     {
-        IRootEnumerableField<TReturnType, TExecutionContext> Select<TReturnType>(Expression<Func<TSourceType, TReturnType>> selector);
-
         IRootEnumerableField<TReturnType, TExecutionContext> Select<TReturnType>(
             Expression<Func<TSourceType, TReturnType>> selector,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
-            where TReturnType : class;
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null);
 
         IVoid SingleOrDefault(Expression<Func<TSourceType, bool>>? predicate = null);
 

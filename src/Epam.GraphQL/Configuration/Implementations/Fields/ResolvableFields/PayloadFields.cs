@@ -35,7 +35,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new PayloadFields<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }
@@ -70,7 +69,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new PayloadFields<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }
@@ -105,7 +103,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new PayloadFields<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }
@@ -140,7 +137,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new PayloadFields<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }

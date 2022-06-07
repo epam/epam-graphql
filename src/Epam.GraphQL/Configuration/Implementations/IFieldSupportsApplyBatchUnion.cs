@@ -14,58 +14,49 @@ using Epam.GraphQL.Diagnostics;
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>
-        where TEntity : class
     {
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
             IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
     }
 }

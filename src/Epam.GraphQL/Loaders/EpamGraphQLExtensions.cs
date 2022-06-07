@@ -16,59 +16,26 @@ namespace Epam.GraphQL.Loaders
     {
         public static void Resolve<TEntity, TReturnType, TExecutionContext>(
             this IResolvableField<TEntity, TExecutionContext> field,
-            Func<TEntity, TReturnType> resolve)
-            where TEntity : class
-        {
-            Guards.ThrowIfNull(field, nameof(field));
-            field.Resolve((ctx, entity) => resolve(entity));
-        }
-
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(
-            this IResolvableField<TEntity, TExecutionContext> field,
             Func<TEntity, TReturnType> resolve,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity : class
-            where TReturnType : class
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
         {
             Guards.ThrowIfNull(field, nameof(field));
             field.Resolve((ctx, entity) => resolve(entity), build);
-        }
-
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(
-            this IResolvableField<TEntity, TExecutionContext> field,
-            Func<TEntity, Task<TReturnType>> resolve)
-            where TEntity : class
-        {
-            Guards.ThrowIfNull(field, nameof(field));
-            field.Resolve((ctx, entity) => resolve(entity));
         }
 
         public static void Resolve<TEntity, TReturnType, TExecutionContext>(
             this IResolvableField<TEntity, TExecutionContext> field,
             Func<TEntity, Task<TReturnType>> resolve,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity : class
-            where TReturnType : class
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
         {
             Guards.ThrowIfNull(field, nameof(field));
             field.Resolve((ctx, entity) => resolve(entity), build);
-        }
-
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(
-            this IResolvableField<TEntity, TExecutionContext> field,
-            Func<TEntity, IEnumerable<TReturnType>> resolve)
-            where TEntity : class
-        {
-            Guards.ThrowIfNull(field, nameof(field));
-            field.Resolve((ctx, entity) => resolve(entity));
         }
 
         public static void Resolve<TEntity, TReturnType, TExecutionContext>(
             this IResolvableField<TEntity, TExecutionContext> field,
             Func<TEntity, IEnumerable<TReturnType>> resolve,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity : class
-            where TReturnType : class
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
         {
             Guards.ThrowIfNull(field, nameof(field));
             field.Resolve((ctx, entity) => resolve(entity), build);
@@ -76,19 +43,8 @@ namespace Epam.GraphQL.Loaders
 
         public static void Resolve<TEntity, TReturnType, TExecutionContext>(
             this IResolvableField<TEntity, TExecutionContext> field,
-            Func<TEntity, Task<IEnumerable<TReturnType>>> resolve)
-            where TEntity : class
-        {
-            Guards.ThrowIfNull(field, nameof(field));
-            field.Resolve((ctx, entity) => resolve(entity));
-        }
-
-        public static void Resolve<TEntity, TReturnType, TExecutionContext>(
-            this IResolvableField<TEntity, TExecutionContext> field,
             Func<TEntity, Task<IEnumerable<TReturnType>>> resolve,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TEntity : class
-            where TReturnType : class
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
         {
             Guards.ThrowIfNull(field, nameof(field));
             field.Resolve((ctx, entity) => resolve(entity), build);

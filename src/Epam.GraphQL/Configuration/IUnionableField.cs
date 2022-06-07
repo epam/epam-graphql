@@ -8,7 +8,6 @@ namespace Epam.GraphQL.Configuration
     public interface IUnionableField<TEntity, TExecutionContext> :
         IResolvableField<TEntity, TExecutionContext>,
         IUnionableFieldBase<IUnionableField<TEntity, TExecutionContext>, TExecutionContext>
-        where TEntity : class
     {
     }
 }

@@ -15,7 +15,6 @@ using GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
-        where TEntity : class
     {
         public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IObjectConfigurationContext context, IRegistry<TExecutionContext> registry, bool isAuto)
             : base(context, parent, registry, isAuto)
@@ -39,17 +38,10 @@ namespace Epam.GraphQL.Configuration.Implementations
         public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(
             IField<TExecutionContext> parent,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
-            IInlinedChainConfigurationContext configurationContext)
+            IChainConfigurationContext configurationContext)
         {
             return Registry.GetInputGraphTypeDescriptor(parent, build, configurationContext);
         }
-
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent)
-        {
-            return Registry.GetInputGraphTypeDescriptor<TReturnType>(parent);
-        }
-
-        public override Type GenerateGraphType() => Registry.GenerateInputGraphType(typeof(TEntity));
 
         public override void ConfigureGraphType(IComplexGraphType graphType)
         {
@@ -78,7 +70,6 @@ namespace Epam.GraphQL.Configuration.Implementations
 
     internal class InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> : InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>
         where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         private TProjection? _projection;
         private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
@@ -94,8 +85,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Configure();
             base.ConfigureGraphType(graphType);
         }
-
-        public override Type GenerateGraphType() => Registry.GetInputEntityGraphType<TProjection, TEntity>();
 
         protected override void OnConfigure()
         {

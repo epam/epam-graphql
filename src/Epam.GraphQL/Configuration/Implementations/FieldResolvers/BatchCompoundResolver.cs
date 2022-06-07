@@ -15,7 +15,6 @@ using GraphQL.DataLoader;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class BatchCompoundResolver<TEntity, TExecutionContext> : IBatchCompoundResolver<TEntity, TExecutionContext>
-        where TEntity : class
     {
         private readonly List<IBatchResolver<TEntity>> _resolvers = new();
 

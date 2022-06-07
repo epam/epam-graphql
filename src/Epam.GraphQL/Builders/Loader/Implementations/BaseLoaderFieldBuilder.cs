@@ -15,7 +15,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class BaseLoaderFieldBuilder<TField, TEntity, TLoader, TExecutionContext> : ProjectionFieldBuilder<TField, TEntity, TExecutionContext>
         where TLoader : Loader<TEntity, TExecutionContext>, new()
-        where TEntity : class
         where TField : Field<TEntity, TExecutionContext>, IUnionableField<TEntity, TExecutionContext>
     {
         internal BaseLoaderFieldBuilder(RelationRegistry<TExecutionContext> registry, TField fieldType)
@@ -32,7 +31,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             Expression<Func<TChildEntity, TEntity>>? navigationProperty = null,
             Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             var descriptor = Registry.GetGraphTypeDescriptor<TChildLoader, TChildEntity>();
             var loaderField = Field.Parent.FromLoader<TLoader, TChildLoader, TChildEntity>(

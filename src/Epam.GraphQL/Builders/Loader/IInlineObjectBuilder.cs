@@ -14,7 +14,6 @@ using Epam.GraphQL.Loaders;
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IInlineObjectBuilder<TSourceType, TExecutionContext>
-        where TSourceType : class
     {
         string Name { get; set; }
 

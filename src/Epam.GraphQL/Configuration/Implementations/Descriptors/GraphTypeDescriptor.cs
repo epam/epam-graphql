@@ -5,6 +5,7 @@
 
 using System;
 using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -82,6 +83,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
                   () => registry.GetObjectGraphTypeConfigurator(typeof(TReturnType), null))
         {
         }
+
+        public string Name => Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
 
         IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? IGraphTypeDescriptor<TReturnType, TExecutionContext>.Configurator => Configurator as IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>;
     }

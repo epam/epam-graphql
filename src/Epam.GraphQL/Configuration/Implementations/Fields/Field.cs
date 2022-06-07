@@ -17,7 +17,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class Field<TEntity, TExecutionContext> :
         FieldBase<TEntity, TExecutionContext>,
         IUnionableField<TEntity, TExecutionContext>
-        where TEntity : class
     {
         public Field(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
             : base(configurationContext, parent, name)
@@ -29,32 +28,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         {
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
-            Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
-            Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
-                .Argument(build);
+                .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
 
@@ -65,12 +43,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
-                .Argument(build);
+                .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
 
@@ -81,32 +58,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor();
-            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor();
-            Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                graphType,
-                ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
-        }
-
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
-                .Argument(build);
+                .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext).MakeListDescriptor();
 
@@ -117,12 +73,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 ResolvedFieldResolverFactory.Create(Resolvers.ConvertFieldResolver(Name, resolve, Parent.ProxyAccessor)));
         }
 
-        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
-                .Argument(build);
+                .OptionalArgument(build);
 
             var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext).MakeListDescriptor();
 
@@ -134,13 +89,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var unionField = UnionField.Create(
                 ConfigurationContext.Chain<TLastElementType>(nameof(And))
@@ -153,14 +106,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableField<TEntity, TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }

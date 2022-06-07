@@ -115,6 +115,9 @@ namespace Epam.GraphQL.Tests.Helpers
                 dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, Proxy<Branch>>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, Proxy<Branch>>>>>(0).ToAsyncEnumerable());
 
+                dataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<Proxy<int>>>())
+                    .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<int>>>(0));
+
                 dataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<Proxy<Person>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<Person>>>(0));
                 dataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<Proxy<Unit>>>())

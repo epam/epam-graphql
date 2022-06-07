@@ -72,7 +72,6 @@ namespace Epam.GraphQL
 
         public Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object> filterValue)
             where TProjection : Projection<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             Guards.ThrowIfNull(filterValue, nameof(filterValue));
 

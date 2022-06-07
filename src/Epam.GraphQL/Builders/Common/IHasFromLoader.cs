@@ -18,7 +18,6 @@ namespace Epam.GraphQL.Builders.Common
             RelationType relationType = RelationType.Association,
             Expression<Func<TChildEntity, TEntity>>? navigationProperty = null,
             Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty = null)
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class;
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new();
     }
 }

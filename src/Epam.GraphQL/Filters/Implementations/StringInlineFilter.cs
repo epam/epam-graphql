@@ -15,7 +15,6 @@ using Epam.GraphQL.Helpers;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class StringInlineFilter<TEntity, TExecutionContext> : BaseInlineFilter<TEntity, string?, string?, string?, TExecutionContext>
-        where TEntity : class
     {
         public StringInlineFilter(ExpressionField<TEntity, string, TExecutionContext> field, string[]? defaultValues, NullOption? nullValue)
             : base(field, defaultValues, nullValue)

@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class StructExpressionField<TEntity, TReturnType, TExecutionContext> : ExpressionField<TEntity, TReturnType, TExecutionContext>
         where TReturnType : struct
-        where TEntity : class
     {
         public StructExpressionField(
             Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,

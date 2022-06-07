@@ -25,9 +25,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         IExpressionField<TEntity, TReturnType, TExecutionContext>,
         IInlineExpressionField<TEntity, TReturnType, TExecutionContext>,
         IVoid
-        where TEntity : class
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
+        private bool _isGroupable;
 
         public ExpressionField(
             Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
@@ -61,7 +61,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
             get
             {
-                IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
+                IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this, null, ConfigurationContext);
 
                 if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !(EditSettings?.IsMandatoryForUpdate ?? false))
                 {
@@ -74,7 +74,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public bool IsFilterable { get; set; }
 
-        public bool IsGroupable { get; protected set; }
+        public bool IsGroupable => _isGroupable || Registry.IsSimpleType(typeof(TEntity));
 
         public PropertyInfo? PropertyInfo => _expression.PropertyInfo;
 
@@ -153,7 +153,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         public void Groupable()
         {
             ConfigurationContext.Chain(nameof(Groupable));
-            IsGroupable = true;
+            _isGroupable = true;
         }
 
         public override FieldType AsFieldType()

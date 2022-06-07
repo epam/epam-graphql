@@ -11,7 +11,6 @@ namespace Epam.GraphQL.Types
 {
     internal class InputEntityGraphType<TProjection, TEntity, TExecutionContext> : InputObjectGraphType<TEntity>
         where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         public InputEntityGraphType(RelationRegistry<TExecutionContext> registry)
         {

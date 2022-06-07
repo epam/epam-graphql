@@ -11,7 +11,6 @@ namespace Epam.GraphQL.Builders.MutableLoader
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelect<TEntity, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TEntity, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
     }
 }

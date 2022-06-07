@@ -22,24 +22,20 @@ namespace Epam.GraphQL.Configuration
 
         IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
 
-        IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class;
+        IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder);
 
         IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder);
 
-        IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType : class;
+        IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder);
 
         IArgumentedMutationField<TArgType, TExecutionContext> Argument<TArgType>(string argName);
 
         IArgumentedMutationField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class;
+            where TProjection : Projection<TEntity1, TExecutionContext>;
 
         IPayloadFieldedMutationField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
 
         IPayloadFieldedMutationField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
-            where TProjection : Projection<TEntity1, TExecutionContext>
-            where TEntity1 : class;
+            where TProjection : Projection<TEntity1, TExecutionContext>;
     }
 }

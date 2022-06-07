@@ -20,8 +20,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TExecutionContext> Add<TArg2>(string argName);
 
         IArguments<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TResult> resolve);
     }
@@ -31,8 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TArg3, TExecutionContext> Add<TArg3>(string argName);
 
         IArguments<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TResult> resolve);
     }
@@ -42,8 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TArg3, TArg4, TExecutionContext> Add<TArg4>(string argName);
 
         IArguments<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TResult> resolve);
     }
@@ -53,8 +50,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TArg3, TArg4, TArg5, TExecutionContext> Add<TArg5>(string argName);
 
         IArguments<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TResult> resolve);
     }

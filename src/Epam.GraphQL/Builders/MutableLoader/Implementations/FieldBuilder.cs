@@ -26,7 +26,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext>,
         IExpressionField<TEntity, TReturnType, TExecutionContext>,
         ISortableGroupableField<TEntity, TExecutionContext>
-        where TEntity : class
     {
         private readonly Type _loaderType;
         private readonly RelationRegistry<TExecutionContext> _registry;
@@ -85,7 +84,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TParentEntity, TReturnType>> property,
             Expression<Func<TEntity, TParentEntity>> navigationProperty,
             RelationType relationType)
-            where TParentEntity : class
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
             Guards.ThrowIfNull(property, nameof(property));

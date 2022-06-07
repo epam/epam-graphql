@@ -9,7 +9,6 @@ using Epam.GraphQL.Diagnostics;
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class TypedField<TEntity, TReturnType, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
-        where TEntity : class
     {
         public TypedField(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
             : base(configurationContext, parent, name)

@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
     internal class SelectField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
         IVoid,
         IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 

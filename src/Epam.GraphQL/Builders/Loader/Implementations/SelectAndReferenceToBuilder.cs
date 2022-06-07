@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 {
     internal class SelectAndReferenceToBuilder<TField, TSourceType, TReturnType, TExecutionContext> : SelectBuilder<TField, TSourceType, TReturnType, TExecutionContext>,
         IHasSelectAndReferenceTo<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
         where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>
     {
         internal SelectAndReferenceToBuilder(RelationRegistry<TExecutionContext> registry, TField field)
@@ -25,7 +24,6 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
         protected RelationRegistry<TExecutionContext> Registry { get; }
 
         public IHasSelect<TReturnType, TExecutionContext> ReferenceTo<TChildEntity, TChildEntityLoader>(Predicate<TReturnType> isFakePropValue)
-            where TChildEntity : class
             where TChildEntityLoader : Loader<TChildEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
             Registry.RegisterRelationPostponedForSave<TSourceType, TChildEntity, TChildEntityLoader, TReturnType, TReturnType>(Field.Name, isFakePropValue);

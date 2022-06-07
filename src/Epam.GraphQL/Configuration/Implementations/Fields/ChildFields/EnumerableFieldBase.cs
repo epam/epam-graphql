@@ -19,7 +19,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         TypedField<TEntity, IEnumerable<TReturnType>, TExecutionContext>,
         IEnumerableField<TThisIntf, TEntity, TReturnType, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, IEnumerable<TReturnType>, TExecutionContext>
-        where TEntity : class
         where TThis : EnumerableFieldBase<TThis, TThisIntf, TResolverIntf, TEntity, TReturnType, TExecutionContext>, TThisIntf
     {
         protected EnumerableFieldBase(
@@ -48,25 +47,18 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         protected IEnumerableResolver<TResolverIntf, TEntity, TReturnType, TExecutionContext> EnumerableFieldResolver { get; }
 
-        public IEnumerableField<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector)
+        public IEnumerableField<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(
+            Expression<Func<TEntity, TReturnType, TReturnType1>> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType1>(this);
-            var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                ConfigurationContext.Chain(nameof(Select)).Argument(selector),
-                Parent,
-                Name,
-                EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
-                graphType,
-                Arguments);
+            var configurationContext = ConfigurationContext.Chain<TReturnType1>(nameof(Select))
+                .Argument(selector)
+                .OptionalArgument(build);
 
-            return ApplyField(enumerableField);
-        }
+            var graphType = Parent.GetGraphQLTypeDescriptor(this, build, configurationContext);
 
-        public IEnumerableField<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(Expression<Func<TEntity, TReturnType, TReturnType1>> selector)
-        {
-            var graphType = Parent.GetGraphQLTypeDescriptor<TReturnType1>(this);
             var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                ConfigurationContext.Chain(nameof(Select)).Argument(selector),
+                configurationContext,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Select(selector),
@@ -78,8 +70,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public IEnumerableField<TEntity, TReturnType1, TExecutionContext> Select<TReturnType1>(
             Expression<Func<TReturnType, TReturnType1>> selector,
-            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build = default)
-            where TReturnType1 : class
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType1>(nameof(Select))
                 .Argument(selector)

@@ -12,7 +12,6 @@ using GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal class EntityGraphTypeDescriptor<TProjection, TReturnType, TExecutionContext> : IGraphTypeDescriptor<TReturnType, TExecutionContext>
-        where TReturnType : class
         where TProjection : ProjectionBase<TReturnType, TExecutionContext>, new()
     {
         private readonly Lazy<Type> _type;
@@ -36,6 +35,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
         public IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> Configurator { get; }
 
         IObjectGraphTypeConfigurator<TExecutionContext> IGraphTypeDescriptor<TExecutionContext>.Configurator => Configurator;
+
+        public string Name => Configurator.Name;
 
         public void Validate(IChainConfigurationContext configurationContext)
         {

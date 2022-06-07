@@ -13,14 +13,13 @@ namespace Epam.GraphQL.Configuration
     public interface IEnumerableField<out TThis, TEntity, TSourceType, TExecutionContext>
         : IWhereableField<TThis, TSourceType>
     {
-        IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(Expression<Func<TSourceType, TReturnType>> selector);
-
         IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(
             Expression<Func<TSourceType, TReturnType>> selector,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
-            where TReturnType : class;
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null);
 
-        IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(Expression<Func<TEntity, TSourceType, TReturnType>> selector);
+        IEnumerableField<TEntity, TReturnType, TExecutionContext> Select<TReturnType>(
+            Expression<Func<TEntity, TSourceType, TReturnType>> selector,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null);
 
         IVoid SingleOrDefault(Expression<Func<TSourceType, bool>>? predicate = null);
 

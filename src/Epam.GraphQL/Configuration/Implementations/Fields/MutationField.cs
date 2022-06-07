@@ -34,36 +34,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         internal Mutation<TExecutionContext> Mutation { get; }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve)
-        {
-            var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
-                Parent.GetGraphQLTypeDescriptor<TReturnType>(this),
-                Resolvers.ConvertFieldResolver(resolve));
-            return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                graphType,
-                resolver);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve)
-        {
-            var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
-                Parent.GetGraphQLTypeDescriptor<TReturnType>(this),
-                Resolvers.ConvertFieldResolver(resolve));
-            return Parent.ApplyResolvedField<TReturnType>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve)).Argument(resolve),
-                this,
-                graphType,
-                resolver);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
-                .Argument(build);
+                .OptionalArgument(build);
 
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
                 Parent.GetGraphQLTypeDescriptor(this, build, configurationContext),
@@ -76,12 +51,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 resolver);
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
-                .Argument(build);
+                .OptionalArgument(build);
 
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
                 Parent.GetGraphQLTypeDescriptor(this, build, configurationContext),
@@ -94,47 +68,90 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 resolver);
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
+            var configurationContext = ConfigurationContext
+                .Chain<TReturnType>(nameof(Resolve))
+                .Argument(resolve)
+                .OptionalArgument(build);
+
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
                 this,
-                Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor(),
+                Parent.GetGraphQLTypeDescriptor(this, build, configurationContext).MakeListDescriptor(),
                 Resolvers.ConvertFieldResolver(resolve),
-                optionsBuilder);
+                optionsBuilder: null);
 
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
-                    .Argument(resolve)
-                    .OptionalArgument(optionsBuilder),
+                configurationContext,
                 this,
                 graphType,
                 resolver);
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder>? optionsBuilder)
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
         {
+            var configurationContext = ConfigurationContext
+                .Chain<TReturnType>(nameof(Resolve))
+                .Argument(resolve)
+                .OptionalArgument(build);
+
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
                 this,
-                Parent.GetGraphQLTypeDescriptor<TReturnType>(this).MakeListDescriptor(),
+                Parent.GetGraphQLTypeDescriptor(this, build, configurationContext).MakeListDescriptor(),
                 Resolvers.ConvertFieldResolver(resolve),
-                optionsBuilder);
+                optionsBuilder: null);
 
             return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
-                ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
-                    .Argument(resolve)
-                    .OptionalArgument(optionsBuilder),
+                configurationContext,
                 this,
                 graphType,
                 resolver);
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
-            where TReturnType : class
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
+                .Argument(resolve)
+                .Argument(optionsBuilder);
+
+            var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
+                this,
+                Parent.GetGraphQLTypeDescriptor<TReturnType>(this, null, configurationContext).MakeListDescriptor(),
+                Resolvers.ConvertFieldResolver(resolve),
+                optionsBuilder);
+
+            return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                configurationContext,
+                this,
+                graphType,
+                resolver);
+        }
+
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<ResolveOptionsBuilder> optionsBuilder)
+        {
+            var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
+                .Argument(resolve)
+                .Argument(optionsBuilder);
+
+            var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
+                this,
+                Parent.GetGraphQLTypeDescriptor<TReturnType>(this, null, configurationContext).MakeListDescriptor(),
+                Resolvers.ConvertFieldResolver(resolve),
+                optionsBuilder);
+
+            return Parent.ApplyResolvedField<IEnumerable<TReturnType>>(
+                configurationContext,
+                this,
+                graphType,
+                resolver);
+        }
+
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
                 .Argument(build)
-                .OptionalArgument(optionsBuilder);
+                .Argument(optionsBuilder);
 
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
                 this,
@@ -149,13 +166,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 resolver);
         }
 
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder>? optionsBuilder)
-            where TReturnType : class
+        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build, Action<ResolveOptionsBuilder> optionsBuilder)
         {
             var configurationContext = ConfigurationContext.Chain<TReturnType>(nameof(Resolve))
                 .Argument(resolve)
                 .Argument(build)
-                .OptionalArgument(optionsBuilder);
+                .Argument(optionsBuilder);
 
             var (resolver, graphType) = ResolvedMutationFieldResolverFactory.Create(
                 this,
@@ -203,13 +219,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
         }
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             return And(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
-            where TLastElementType : class
         {
             var unionField = UnionMutationField.Create(
                 ConfigurationContext
@@ -222,14 +236,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IUnionableRootField<TExecutionContext> AsUnionOf<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And<TEnumerable, TLastElementType>(build);
         }
 
         public IUnionableRootField<TExecutionContext> And<TEnumerable, TLastElementType>(Action<IInlineObjectBuilder<TLastElementType, TExecutionContext>>? build)
             where TEnumerable : IEnumerable<TLastElementType>
-            where TLastElementType : class
         {
             return And(build);
         }
@@ -245,7 +257,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IArgumentedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             var argumentedField = new ArgumentedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext>(
                 ConfigurationContext.Chain<TProjection, TEntity>(nameof(FilterArgument)).Argument(argName),
@@ -265,35 +276,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public IPayloadFieldedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             var argumentedField = new ArgumentedMutationField<Expression<Func<TEntity, bool>>, TExecutionContext>(
                 ConfigurationContext.Chain<TProjection, TEntity>(nameof(FilterPayloadField)).Argument(argName),
                 this,
                 new PayloadFields<Expression<Func<TEntity, bool>>, TExecutionContext>(Name, Registry, argName, typeof(TProjection), typeof(TEntity)));
             return Parent.ReplaceField(this, argumentedField);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve)
-        {
-            return Resolve(resolve, (Action<ResolveOptionsBuilder>?)null);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve)
-        {
-            return Resolve(resolve, (Action<ResolveOptionsBuilder>?)null);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
-        {
-            return Resolve(resolve, build, null);
-        }
-
-        public IVoid Resolve<TReturnType>(Func<TExecutionContext, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
-            where TReturnType : class
-        {
-            return Resolve(resolve, build, null);
         }
     }
 }

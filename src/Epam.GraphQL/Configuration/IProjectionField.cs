@@ -12,16 +12,10 @@ namespace Epam.GraphQL.Configuration
 {
     public interface IProjectionField<TEntity, TExecutionContext> :
         IUnionableField<TEntity, TExecutionContext>
-        where TEntity : class
     {
         IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
-            where TReturnType : class;
-
-        IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
-            Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Expression<Func<TEntity, TReturnType, bool>> condition);
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null);
     }
 }

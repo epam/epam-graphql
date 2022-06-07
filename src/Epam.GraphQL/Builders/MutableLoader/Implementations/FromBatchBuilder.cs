@@ -21,8 +21,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelect<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
-        where TReturnType : class
         where TField : FieldBase<TSourceType, TExecutionContext>,
             IFieldSupportsApplyBatchUnion<TSourceType, TExecutionContext>,
             IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>,
@@ -39,7 +37,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType>(nameof(AndFromBatch))
@@ -53,7 +50,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType>(nameof(AndFromBatch))
@@ -68,7 +64,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
@@ -85,7 +80,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
@@ -101,7 +95,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType>(nameof(AndFromBatch))
@@ -115,7 +108,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType>(nameof(AndFromBatch))
@@ -130,7 +122,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))
@@ -147,7 +138,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             var newField = Field.ApplyBatchUnion(
                 Field.ConfigurationContext.Chain<TAnotherReturnType, TKeyType>(nameof(AndFromBatch))

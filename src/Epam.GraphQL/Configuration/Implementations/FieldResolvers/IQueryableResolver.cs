@@ -14,7 +14,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IQueryableResolver<TEntity, TReturnType, TExecutionContext> : IEnumerableResolver<IQueryableResolver<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         // For filter and search
         IQueryableResolver<TEntity, TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector);

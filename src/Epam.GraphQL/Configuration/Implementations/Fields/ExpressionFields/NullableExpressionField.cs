@@ -13,7 +13,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class NullableExpressionField<TEntity, TReturnType, TExecutionContext> : ExpressionField<TEntity, TReturnType?, TExecutionContext>
         where TReturnType : struct
-        where TEntity : class
     {
         public NullableExpressionField(
             Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,

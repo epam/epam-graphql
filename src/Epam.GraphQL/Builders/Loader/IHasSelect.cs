@@ -9,15 +9,6 @@ namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasSelect<TSourceType, TExecutionContext>
     {
-        void Select<TReturnType>(Func<TSourceType, TReturnType> selector)
-            where TReturnType : struct;
-
-        void Select<TReturnType>(Func<TSourceType, TReturnType?> selector)
-            where TReturnType : struct;
-
-        void Select(Func<TSourceType, string> selector);
-
-        void Select<TReturnType>(Func<TSourceType, TReturnType> selector, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null)
-            where TReturnType : class;
+        void Select<TReturnType>(Func<TSourceType, TReturnType> selector, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build = null);
     }
 }

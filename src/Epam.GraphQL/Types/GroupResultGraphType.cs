@@ -4,7 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration.Implementations;
-using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
@@ -13,7 +12,7 @@ namespace Epam.GraphQL.Types
     {
         public GroupResultGraphType(IGraphTypeDescriptor<TReturnType, TExecutionContext> graphType)
         {
-            var typeName = graphType.Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
+            var typeName = graphType.Name;
 
             Name = $"{typeName}GroupResult";
 

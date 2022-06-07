@@ -10,7 +10,6 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal interface IEnumerableResolver<out TThis, TEntity, TReturnType, TExecutionContext> : IFieldResolver
-        where TEntity : class
     {
         IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(Expression<Func<TEntity, TReturnType, TSelectType>> selector);
 
@@ -24,7 +23,6 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     }
 
     internal interface IEnumerableResolver<TEntity, TReturnType, TExecutionContext> : IEnumerableResolver<IEnumerableResolver<TEntity, TReturnType, TExecutionContext>, TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
     }
 }
