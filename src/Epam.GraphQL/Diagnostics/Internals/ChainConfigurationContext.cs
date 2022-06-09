@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 
 namespace Epam.GraphQL.Diagnostics.Internals
@@ -94,6 +95,12 @@ namespace Epam.GraphQL.Diagnostics.Internals
         }
 
         public IChainConfigurationContext OptionalArgument<T>(T[]? arg)
+        {
+            AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: true));
+            return this;
+        }
+
+        public IChainConfigurationContext OptionalArgument(RelationType arg)
         {
             AddChild(ChainArgumentConfigurationContext.Create(this, arg, optional: true));
             return this;

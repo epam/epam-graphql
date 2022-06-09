@@ -36,7 +36,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             var loaderField = Field.Parent.FromLoader<TLoader, TChildLoader, TChildEntity>(
                 Field.ConfigurationContext.Chain<TChildLoader, TChildEntity>(nameof(FromLoader))
                     .Argument(condition)
-                    .Argument(relationType.ToString())
+                    .OptionalArgument(relationType)
                     .OptionalArgument(navigationProperty)
                     .OptionalArgument(reverseNavigationProperty),
                 Field,

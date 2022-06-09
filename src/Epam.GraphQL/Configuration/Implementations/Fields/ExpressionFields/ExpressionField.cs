@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                   parent,
                   configurationContext => GenerateName(configurationContext, name, expression))
         {
-            _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
+            _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
 
@@ -53,7 +53,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
                   parent,
                   configurationContext => name)
         {
-            _expression = new FieldContextExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
+            _expression = new FieldContextExpression<TEntity, TReturnType, TExecutionContext>(this, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
 

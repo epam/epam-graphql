@@ -277,9 +277,14 @@ namespace Epam.GraphQL.Helpers
                 Append("(");
             }
 
-            foreach (var parameter in lambdaExpression.Parameters)
+            for (var i = 0; i < lambdaExpression.Parameters.Count; i++)
             {
-                Visit(parameter);
+                if (i != 0)
+                {
+                    Append(", ");
+                }
+
+                Visit(lambdaExpression.Parameters[i]);
             }
 
             if (lambdaExpression.Parameters.Count != 1)

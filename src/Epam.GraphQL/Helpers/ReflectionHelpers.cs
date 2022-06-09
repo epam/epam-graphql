@@ -92,6 +92,11 @@ namespace Epam.GraphQL.Helpers
             return GetMethodInfoImpl(method);
         }
 
+        public static MethodInfo GetMethodInfo<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> method)
+        {
+            return GetMethodInfoImpl(method);
+        }
+
         public static MethodInfo GetMethodInfo<T>(Action<T> method)
         {
             return GetMethodInfoImpl(method);

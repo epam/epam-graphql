@@ -28,6 +28,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 
             var connection = ConnectionUtils.ToConnection(
                 children,
+                context.GetFieldConfigurationContext(),
                 () => context.GetPath(),
                 context.GetQueryExecuter(),
                 first,

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Enums;
 
 namespace Epam.GraphQL.Diagnostics.Internals
 {
@@ -24,6 +25,11 @@ namespace Epam.GraphQL.Diagnostics.Internals
         public static ChainArgumentConfigurationContext Create<T>(ChainConfigurationContext parent, T[]? array, bool optional)
         {
             return new ChainArgumentConfigurationContext<T[]?>(parent, new ArrayPrinter<T>(GenericPrinter<T>.Instance), array, optional && array == null);
+        }
+
+        public static ChainArgumentConfigurationContext Create(ChainConfigurationContext parent, RelationType arg, bool optional)
+        {
+            return new ChainArgumentConfigurationContext<RelationType>(parent, EnumPrinter<RelationType>.Instance, arg, optional && arg == RelationType.Association);
         }
 
         public static ChainArgumentConfigurationContext Create(ChainConfigurationContext parent, string? str, bool optional)

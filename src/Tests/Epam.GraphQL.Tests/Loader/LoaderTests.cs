@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
@@ -75,7 +76,7 @@ namespace Epam.GraphQL.Tests.Loader
             var ids = new[] { 2, 3 };
             var people = await _loader
                 .All(_context.ExecutionContext)
-                .GroupByValues(ids, person => person.Id, FuncConstants<Person>.IdentityExpression, () => string.Empty, _queryExecuter, null, null)
+                .GroupByValues(ids, person => person.Id, FuncConstants<Person>.IdentityExpression, ConfigurationContext.Create(), () => string.Empty, _queryExecuter, null, null)
                 .ToListAsync()
                 .ConfigureAwait(false);
 
@@ -88,7 +89,7 @@ namespace Epam.GraphQL.Tests.Loader
             var ids = new[] { 1 };
             var people = await _loader
                 .All(_context.ExecutionContext)
-                .GroupByValues(ids, person => person.Unit.Id, FuncConstants<Person>.IdentityExpression, () => string.Empty, _queryExecuter, null, null)
+                .GroupByValues(ids, person => person.Unit.Id, FuncConstants<Person>.IdentityExpression, ConfigurationContext.Create(), () => string.Empty, _queryExecuter, null, null)
                 .ToListAsync()
                 .ConfigureAwait(false);
 
