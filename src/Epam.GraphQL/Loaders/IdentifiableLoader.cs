@@ -16,7 +16,9 @@ namespace Epam.GraphQL.Loaders
 
         protected internal abstract Expression<Func<TEntity, TId>> IdExpression { get; }
 
+#pragma warning disable CS0672 // Member overrides obsolete member
         public override IOrderedQueryable<TEntity> ApplyNaturalOrderBy(IQueryable<TEntity> query)
+#pragma warning restore CS0672 // Member overrides obsolete member
         {
             return query.OrderBy(IdExpression);
         }
