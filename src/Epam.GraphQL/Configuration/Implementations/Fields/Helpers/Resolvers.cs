@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Relay;
@@ -56,19 +57,85 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 
             TReturnType Resolver(IResolveFieldContext ctx)
             {
-                var context = ctx.GetUserContext<TExecutionContext>();
-                if (ctx.Source is Proxy<TEntity> proxy)
+                try
                 {
-                    return func(context, converter.Value(proxy));
-                }
+                    var context = ctx.GetUserContext<TExecutionContext>();
+                    var entity = ctx.Source is Proxy<TEntity> proxy
+                        ? converter.Value(proxy)
+                        : (TEntity)ctx.Source;
 
-                return func(context, (TEntity)ctx.Source);
+                    return func(context, entity);
+                }
+                catch (Exception e)
+                {
+                    throw ctx.CreateFieldExecutionError(e);
+                }
             }
         }
 
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(Func<TExecutionContext, TReturnType> func)
+        public static Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, Task<TReturnType>> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
         {
-            return ctx => func(ctx.GetUserContext<TExecutionContext>());
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                proxyAccessor.Rewrite(FuncConstants<TEntity>.IdentityExpression).Compile());
+
+            return Resolver;
+
+            async Task<TReturnType> Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    var context = ctx.GetUserContext<TExecutionContext>();
+                    var entity = ctx.Source is Proxy<TEntity> proxy
+                        ? converter.Value(proxy)
+                        : (TEntity)ctx.Source;
+
+                    return await func(context, entity).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    throw ctx.CreateFieldExecutionError(e);
+                }
+            }
+        }
+
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(
+            Func<TExecutionContext, TReturnType> func)
+        {
+            return Resolver;
+
+            TReturnType Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    return func(ctx.GetUserContext<TExecutionContext>());
+                }
+                catch (Exception e)
+                {
+                    throw ctx.CreateFieldExecutionError(e);
+                }
+            }
+        }
+
+        public static Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType, TExecutionContext>(
+            Func<TExecutionContext, Task<TReturnType>> func)
+        {
+            return Resolver;
+
+            async Task<TReturnType> Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    return await func(ctx.GetUserContext<TExecutionContext>()).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    throw ctx.CreateFieldExecutionError(e);
+                }
+            }
         }
     }
 }
