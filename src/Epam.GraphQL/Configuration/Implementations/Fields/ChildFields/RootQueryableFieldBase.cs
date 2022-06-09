@@ -84,7 +84,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             var sortableFields = ObjectGraphTypeConfigurator?.Sorters.Select(f => f.Name).ToArray();
             if (sortableFields != null && sortableFields.Any())
             {
-                Argument("sorting", new ListGraphType(new SortingOptionGraphType(typeof(TReturnType).Name, sortableFields)));
+                Argument("sorting", new ListGraphType(new SortingOptionGraphType(ObjectGraphTypeConfigurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false), sortableFields)));
             }
 
             Searcher = searcher;
