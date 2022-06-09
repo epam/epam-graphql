@@ -21,7 +21,14 @@ namespace Epam.GraphQL.Tests.Helpers
 {
     public static class TestHelpers
     {
-        public static void TestQuery(Action<Query<TestUserContext>> builder, string query, string expected, IDataContext dataContext = null, Action checks = null, Action beforeExecute = null, Action<SchemaOptionsBuilder<TestUserContext>> optionsBuilder = null)
+        public static void TestQuery(
+            Action<Query<TestUserContext>> builder,
+            string query,
+            string expected,
+            IDataContext dataContext = null,
+            Action checks = null,
+            Action beforeExecute = null,
+            Action<SchemaOptionsBuilder<TestUserContext>> optionsBuilder = null)
         {
             beforeExecute?.Invoke();
 
@@ -48,6 +55,34 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke();
+        }
+
+        public static void TestQuery(
+            Action<Query<TestUserContext>> builder,
+            string query,
+            string expected,
+            Action<SchemaExecutionOptionsBuilder<TestUserContext>> executionOptionsBuilder)
+        {
+            var expectedResult = ExecuteHelpers.Deserialize(expected);
+            var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+
+            using var loggerFactory = CreateLoggerFactory();
+            var actualResult = ExecuteHelpers.ExecuteQuery<TestUserContext>(
+                queryType,
+                mutationType,
+                configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory),
+                configureExecutionOptions: schemaExecutionOptionsBuilder =>
+                {
+                    schemaExecutionOptionsBuilder.Query(query);
+                    executionOptionsBuilder(schemaExecutionOptionsBuilder);
+                });
+
+            Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
+
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            Assert.AreEqual(expectedJson, actualJson);
         }
 
         public static void TestLoader<TEntity>(Action<Loader<TEntity, TestUserContext>> builder, Func<TestUserContext, IQueryable<TEntity>> getBaseQuery, string connectionName, string query, string expected)
