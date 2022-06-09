@@ -129,6 +129,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         {
             return Arguments.GetResolver(resolve);
         }
+
+        private Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType, Task<TReturnType>> resolve)
+        {
+            return Arguments.GetResolver(resolve);
+        }
     }
 
     internal class ArgumentedUnionQueryField<TArgType1, TArgType2, TExecutionContext> :
@@ -243,6 +248,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         private Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TReturnType> resolve)
+        {
+            return Arguments.GetResolver(resolve);
+        }
+
+        private Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, Task<TReturnType>> resolve)
         {
             return Arguments.GetResolver(resolve);
         }
@@ -363,6 +373,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         {
             return Arguments.GetResolver(resolve);
         }
+
+        private Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, Task<TReturnType>> resolve)
+        {
+            return Arguments.GetResolver(resolve);
+        }
     }
 
     internal class ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> :
@@ -480,6 +495,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         {
             return Arguments.GetResolver(resolve);
         }
+
+        private Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, Task<TReturnType>> resolve)
+        {
+            return Arguments.GetResolver(resolve);
+        }
     }
 
     internal class ArgumentedUnionQueryField<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> :
@@ -594,6 +614,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         }
 
         private Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TReturnType> resolve)
+        {
+            return Arguments.GetResolver(resolve);
+        }
+
+        private Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType>(Func<TExecutionContext, TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, Task<TReturnType>> resolve)
         {
             return Arguments.GetResolver(resolve);
         }

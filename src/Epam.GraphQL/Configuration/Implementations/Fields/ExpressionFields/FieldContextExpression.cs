@@ -59,7 +59,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
             catch (Exception e)
             {
-                throw new ExecutionError(ConfigurationContext.GetRuntimeError($"Error during resolving field. See an inner exception for details.", ConfigurationContext), e);
+                throw context.CreateFieldExecutionError(e);
             }
         }
 

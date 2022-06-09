@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 
@@ -23,6 +24,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, TExecutionContext> : IArguments
@@ -33,6 +36,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, out TArg3, TExecutionContext> : IArguments
@@ -43,6 +48,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, out TArg3, out TArg4, TExecutionContext> : IArguments
@@ -53,10 +60,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, out TArg3, out TArg4, out TArg5, TExecutionContext> : IArguments
     {
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TArg5, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TArg5, Task<TResult>> resolve);
     }
 }

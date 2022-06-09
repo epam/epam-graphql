@@ -68,6 +68,13 @@ namespace Epam.GraphQL.Extensions
 
         public static IChainConfigurationContext GetFieldConfigurationContext(this IResolveFieldContext context) => (IChainConfigurationContext)context.FieldDefinition.Metadata["CONFIGURATION_CONTEXT"];
 
+        public static ExecutionError CreateFieldExecutionError(this IResolveFieldContext context, Exception innerException)
+        {
+            var configurationContext = context.GetFieldConfigurationContext();
+            var path = context.GetPath();
+            throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{path}`. See an inner exception for details.", configurationContext), innerException);
+        }
+
         public static string? GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
 
         public static int? GetFirst(this IResolveFieldContext context) => GetArgument<int?>(context, "first");
