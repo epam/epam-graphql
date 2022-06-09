@@ -82,7 +82,12 @@ namespace Epam.GraphQL.TaskBatcher
                 var context = key.Context;
                 var query = queryFactory(context);
                 var queryExecuter = context.GetQueryExecuter();
-                var factory = BatchHelpers.GetQueryJoinFactory<TOuterEntity, TInnerEntity, TTransformedInnerEntity, IResolveFieldContext>(context.GetPath, transform, outerExpression, innerExpression);
+                var factory = BatchHelpers.GetQueryJoinFactory<TOuterEntity, TInnerEntity, TTransformedInnerEntity, IResolveFieldContext>(
+                    context.GetFieldConfigurationContext(),
+                    context.GetPath,
+                    transform,
+                    outerExpression,
+                    innerExpression);
                 return factory(context, Profiler, queryExecuter, hooksExecuter, query, sorters?.Invoke(context));
             }
         }

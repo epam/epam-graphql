@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
@@ -22,12 +23,12 @@ namespace Epam.GraphQL.Extensions
     {
         public static IEnumerable<TEntity> ExecuteQuery<TEntity>(this IResolveFieldContext context, Func<IResolveFieldContext, IQueryable<TEntity>> queryFactory)
         {
-            return context.Bind(ctx => ctx.GetQueryExecuter().ToEnumerable(() => ctx.GetPath(), queryFactory(ctx)));
+            return context.Bind(ctx => ctx.GetQueryExecuter().ToEnumerable(context.GetFieldConfigurationContext(), () => ctx.GetPath(), queryFactory(ctx)));
         }
 
         public static TReturnType ExecuteQuery<TEntity, TReturnType>(this IResolveFieldContext context, Func<IResolveFieldContext, IQueryable<TEntity>> queryFactory, Func<IQueryable<TEntity>, TReturnType> transform, string transformName)
         {
-            return context.Bind(ctx => ctx.GetQueryExecuter().Execute(() => ctx.GetPath(), queryFactory(ctx), transform, transformName));
+            return context.Bind(ctx => ctx.GetQueryExecuter().Execute(context.GetFieldConfigurationContext(), () => ctx.GetPath(), queryFactory(ctx), transform, transformName));
         }
 
         public static TExecutionContext GetUserContext<TExecutionContext>(this IResolveFieldContext context) => ((GraphQLContext<TExecutionContext>)context.UserContext["ctx"]).ExecutionContext;
@@ -64,6 +65,8 @@ namespace Epam.GraphQL.Extensions
         }
 
         public static string GetPath(this IResolveFieldContext context) => string.Join(".", context.Path.SafeNull());
+
+        public static IChainConfigurationContext GetFieldConfigurationContext(this IResolveFieldContext context) => (IChainConfigurationContext)context.FieldDefinition.Metadata["CONFIGURATION_CONTEXT"];
 
         public static string? GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
 

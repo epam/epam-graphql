@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using GraphQL.Types.Relay.DataObjects;
@@ -17,6 +18,7 @@ namespace Epam.GraphQL.Relay
     {
         public static Connection<TSource> ToConnection<TSource>(
             IQueryable<TSource> query,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             IQueryExecuter executer,
             int? first,
@@ -46,7 +48,7 @@ namespace Epam.GraphQL.Relay
                 before = null;
             }
 
-            Paginatior<TSource> wrapper = Paginator.From(executer, stepNameFactory, query, shouldMaterialize: shouldComputeEndOffset || shouldComputeCount);
+            Paginatior<TSource> wrapper = Paginator.From(executer, configurationContext, stepNameFactory, query, shouldMaterialize: shouldComputeEndOffset || shouldComputeCount);
             PaginatorResult<TSource> result;
 
             if (after >= before)
@@ -85,7 +87,7 @@ namespace Epam.GraphQL.Relay
                 totalCount = result.TotalCount;
                 if (totalCount == null)
                 {
-                    totalCount = executer.Execute(stepNameFactory, query, query => query.Count(), nameof(Queryable.Count));
+                    totalCount = executer.Execute(configurationContext, stepNameFactory, query, query => query.Count(), nameof(Queryable.Count));
                 }
             }
 

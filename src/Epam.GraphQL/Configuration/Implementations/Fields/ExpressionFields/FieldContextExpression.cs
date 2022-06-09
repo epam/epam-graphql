@@ -19,13 +19,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
         private readonly Expression<Func<TExecutionContext, TEntity, TReturnType>> _expression;
-        private Func<TExecutionContext, TEntity, TReturnType>? _resolver;
+        private readonly Lazy<Func<TExecutionContext, TEntity, TReturnType>> _resolver;
+        private readonly Lazy<Func<object, object?>> _proxyResolver;
 
-        public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
+        public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
         {
             _expression = expression;
             _field = field;
-            Name = name;
+            _resolver = new Lazy<Func<TExecutionContext, TEntity, TReturnType>>(_expression.Compile);
+            _proxyResolver = new Lazy<Func<object, object?>>(() => _field.Parent.ProxyAccessor.ProxyType.GetPropertyDelegate(Name));
         }
 
         public bool IsGroupable => _field.IsGroupable;
@@ -38,7 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public PropertyInfo? PropertyInfo => null;
 
-        public string Name { get; }
+        public string Name => _field.Name;
 
         public IChainConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
@@ -49,17 +51,16 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public TReturnType? Resolve(IResolveFieldContext context)
         {
-            // TODO Check for input field (!_field.IsInputField && ...)
-            if (context.Source is Proxy<TEntity> proxy)
+            try
             {
-                var name = _field.Name;
-                var func = proxy.GetType().GetPropertyDelegate(name);
-                return (TReturnType?)func(proxy);
+                return context.Source is Proxy<TEntity> proxy
+                    ? (TReturnType?)_proxyResolver.Value(proxy)
+                    : _resolver.Value(context.GetUserContext<TExecutionContext>(), (TEntity)context.Source);
             }
-
-            _resolver ??= _expression.Compile();
-
-            return _resolver(context.GetUserContext<TExecutionContext>(), (TEntity)context.Source);
+            catch (Exception e)
+            {
+                throw new ExecutionError(ConfigurationContext.GetRuntimeError($"Error during resolving field. See an inner exception for details.", ConfigurationContext), e);
+            }
         }
 
         object? IFieldResolver.Resolve(IResolveFieldContext context)

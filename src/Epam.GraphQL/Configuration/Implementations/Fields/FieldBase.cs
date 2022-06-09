@@ -101,6 +101,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 DeprecationReason = DeprecationReason,
             };
 
+            fieldType.Metadata.Add("CONFIGURATION_CONTEXT", ConfigurationContext);
+
             return fieldType;
         }
 

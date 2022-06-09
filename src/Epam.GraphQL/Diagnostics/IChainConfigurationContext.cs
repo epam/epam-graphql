@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Enums;
 
 namespace Epam.GraphQL.Diagnostics
 {
@@ -26,6 +27,8 @@ namespace Epam.GraphQL.Diagnostics
         IChainConfigurationContext OptionalArgument(Delegate? arg);
 
         IChainConfigurationContext OptionalArgument<T>(T[]? arg);
+
+        IChainConfigurationContext OptionalArgument(RelationType arg);
 
         IResolvedChainConfigurationContext Argument<TKey, TValue>(Func<IEnumerable<TKey>, IEnumerable<KeyValuePair<TKey, TValue>>> arg);
 
