@@ -97,7 +97,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
                 ElementGraphType,
                 Arguments,
                 Searcher,
+#pragma warning disable CS0618 // Type or member is obsolete
                 Loader.ApplyNaturalOrderBy(Enumerable.Empty<TChildEntity>().AsQueryable()).GetSorters());
+#pragma warning restore CS0618 // Type or member is obsolete
             return ApplyField(connectionField);
         }
 

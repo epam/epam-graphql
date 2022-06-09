@@ -846,7 +846,12 @@ namespace Epam.GraphQL.Loaders
         protected Epam.GraphQL.Configuration.Enums.NullOption NotNullValues { get; }
         protected Epam.GraphQL.Configuration.Enums.NullOption NullValues { get; }
         public System.Linq.IQueryable<TEntity> All(TExecutionContext context) { }
+        [System.Obsolete("Pass an order expression as a parameter of a Connection()/AsConnection() call. Se" +
+            "e https://github.com/epam/epam-graphql/issues/5#issuecomment-1150973474 for deta" +
+            "ils.")]
         public virtual System.Linq.IOrderedQueryable<TEntity> ApplyNaturalOrderBy(System.Linq.IQueryable<TEntity> query) { }
+        [System.Obsolete("The method is not used anymore. You can remove the overridden method ApplyNatural" +
+            "ThenBy safely.")]
         public virtual System.Linq.IOrderedQueryable<TEntity> ApplyNaturalThenBy(System.Linq.IOrderedQueryable<TEntity> query) { }
         protected virtual System.Linq.IQueryable<TEntity> ApplySecurityFilter(TExecutionContext context, System.Linq.IQueryable<TEntity> query) { }
         protected Epam.GraphQL.Builders.Loader.ILoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null) { }
