@@ -1692,6 +1692,93 @@ namespace Epam.GraphQL.Tests.Mutation
                 }");
         }
 
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/13.
+        /// </summary>
+        [Test]
+        public void Issue13()
+        {
+            Type personLoader = null;
+            var unitLoader = GraphQLTypeBuilder.CreateMutableLoaderType<Unit, TestUserContext>(
+                onConfigure: builder =>
+                {
+                    builder.Field(p => p.Id);
+                    builder.Field("people")
+                        .FromLoader<Unit, Person, TestUserContext>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Aggregation, p => p.Unit);
+                },
+                getBaseQuery: context => context.DataContext.GetQueryable<Unit>());
+
+            personLoader = GraphQLTypeBuilder.CreateMutableLoaderType<Person, TestUserContext>(
+                onConfigure: builder =>
+                {
+                    builder.Field(p => p.Id);
+                    builder.Field(p => p.UnitId);
+                    builder.Field(p => p.FullName);
+                    builder.Field("unit")
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
+                },
+                getBaseQuery: context => context.DataContext.GetQueryable<Person>());
+
+            void QueryBuilder(Query<TestUserContext> query)
+            {
+                query.Connection(unitLoader, "units");
+                query.Connection(personLoader, "people");
+            }
+
+            void MutationBuilder(Mutation<TestUserContext> mutation)
+            {
+                mutation.SubmitField(personLoader, "people");
+                mutation.SubmitField(unitLoader, "units");
+            }
+
+            TestMutation(
+                QueryBuilder,
+                MutationBuilder,
+                @"mutation {
+                    submit(payload: {
+                        people: [{
+                             id: -1,
+                             unitId: -2
+                        }],
+                        units: [{
+                            id: -2
+                        }]
+                    }) {
+                        people {
+                            id
+                            payload {
+                                id
+                                unitId
+                            }
+                        }
+                        units {
+                            id
+                                payload {
+                                id
+                            }
+                        }
+                    }
+                }",
+                @"{
+                    submit: {
+                        people: [{
+                            id: -1,
+                            payload: {
+                                id: 7,
+                                unitId: 3
+                            }
+                        }],
+                        units: [{
+                            id: -2,
+                            payload: {
+                                id: 3
+                            }
+                        }]
+                    }
+                }",
+                null);
+        }
+
         private static bool IsFakeGuid(Guid guid)
         {
             var bytes = guid.ToByteArray();
