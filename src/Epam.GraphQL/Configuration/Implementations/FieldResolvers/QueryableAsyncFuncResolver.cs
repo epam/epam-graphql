@@ -71,7 +71,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             _batchTaskResolver = new Lazy<Func<IResolveFieldContext, IDataLoader<TEntity, IGrouping<TEntity, TTransformedReturnType>>>>(
                 () => GetBatchTaskResolver<TEntity>(_resolver, _condition, _transform, _sorters, FuncConstants<LambdaExpression>.Identity));
             _proxiedBatchTaskResolver = new Lazy<Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IGrouping<Proxy<TEntity>, TTransformedReturnType>>>>(
-                () => GetBatchTaskResolver<Proxy<TEntity>>(_resolver, _condition, _transform, _sorters, leftExpression => outerProxyAccessor.Rewrite(leftExpression)));
+                () => GetBatchTaskResolver<Proxy<TEntity>>(_resolver, _condition, _transform, _sorters, leftExpression => outerProxyAccessor.Rewrite(leftExpression, leftExpression)));
 
             var factorizationResults = ExpressionHelpers.Factorize(condition);
             outerProxyAccessor.AddMembers(fieldName, innerProxyAccessor, factorizationResults);

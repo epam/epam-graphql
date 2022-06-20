@@ -96,9 +96,9 @@ namespace Epam.GraphQL.Configuration.Implementations
             return originalExpression;
         }
 
-        public LambdaExpression Rewrite(LambdaExpression originalExpression)
+        public LambdaExpression Rewrite(LambdaExpression expression, LambdaExpression originalExpression)
         {
-            return originalExpression;
+            return expression;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Epam.GraphQL.Configuration
 
         Expression<Func<TTransformedEntity, T>> Rewrite<T>(Expression<Func<TEntity, T>> originalExpression);
 
-        LambdaExpression Rewrite(LambdaExpression originalExpression);
+        LambdaExpression Rewrite(LambdaExpression expression, LambdaExpression originalExpression);
 
         IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetGroupSort(
             IResolveFieldContext context,

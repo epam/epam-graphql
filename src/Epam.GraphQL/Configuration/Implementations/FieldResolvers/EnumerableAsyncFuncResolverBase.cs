@@ -80,7 +80,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 var outerProxyParam = Expression.Parameter(typeof(Proxy<TEntity>));
                 var innerProxyParam = Expression.Parameter(typeof(TTransformedReturnType));
                 var outers = factorizationResult.LeftExpressions
-                    .Select(e => OuterProxyAccessor.Rewrite(e).CastFirstParamTo<Proxy<TEntity>>())
+                    .Select(e => OuterProxyAccessor.Rewrite(e, e).CastFirstParamTo<Proxy<TEntity>>())
                     .Select(e => e.Body.ReplaceParameter(e.Parameters[0], outerProxyParam))
                     .ToList();
 
@@ -165,7 +165,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         protected LambdaExpression TransformInnerExpression(LambdaExpression expression)
         {
-            return ReturnTypeProxyAccessor.Rewrite(expression).CastFirstParamTo<TTransformedReturnType>();
+            return ReturnTypeProxyAccessor.Rewrite(expression, expression).CastFirstParamTo<TTransformedReturnType>();
         }
 
         protected void AddMembers(ExpressionFactorizationResult factorizationResult)

@@ -142,7 +142,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        public LambdaExpression Rewrite(LambdaExpression expression)
+        public LambdaExpression Rewrite(LambdaExpression expression, LambdaExpression originalExpression)
         {
             var param = Expression.Parameter(ProxyType);
             var unaryExpr = expression.Body as UnaryExpression;
@@ -166,7 +166,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
 
             var fieldName = Fields.OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
-                .FirstOrDefault(field => ExpressionEqualityComparer.Instance.Equals(expression, field.OriginalExpression))
+                .FirstOrDefault(field => ExpressionEqualityComparer.Instance.Equals(originalExpression, field.OriginalExpression))
                 ?.Name;
 
             Guards.AssertType<TEntity>(fieldName == null);
@@ -178,7 +178,7 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         public Expression<Func<Proxy<TEntity>, T>> Rewrite<T>(Expression<Func<TEntity, T>> originalExpression)
         {
-            return (Expression<Func<Proxy<TEntity>, T>>)Rewrite((LambdaExpression)originalExpression).CastFirstParamTo<Proxy<TEntity>>();
+            return (Expression<Func<Proxy<TEntity>, T>>)Rewrite(originalExpression, originalExpression).CastFirstParamTo<Proxy<TEntity>>();
         }
 
         public Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression(IEnumerable<string> fieldNames)
@@ -246,8 +246,9 @@ namespace Epam.GraphQL.Configuration.Implementations
                 .Select(name => Fields.FirstOrDefault(field => string.Equals(field.Name, name, StringComparison.Ordinal)))
                 .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>();
 
-            var result = sortFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.Item1.BuildExpression(context.GetUserContext<TExecutionContext>()))), f.Direction))
-                .Concat(subFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.OriginalExpression ?? throw new NotSupportedException())), SortDirection.Asc)));
+            var ctx = context.GetUserContext<TExecutionContext>();
+            var result = sortFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.Item1.BuildExpression(ctx), f.Item1.BuildOriginalExpression(ctx))), f.Direction))
+                .Concat(subFields.Select(f => (ExpressionHelpers.Compose(getter, Rewrite(f.OriginalExpression, f.OriginalExpression)), SortDirection.Asc)));
 
             return result.ToList();
         }
