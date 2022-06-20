@@ -63,6 +63,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
         }
 
+        public LambdaExpression BuildOriginalExpression(TExecutionContext context) => _expression;
+
         object? IFieldResolver.Resolve(IResolveFieldContext context)
         {
             return Resolve(context);

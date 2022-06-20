@@ -39,5 +39,7 @@ namespace Epam.GraphQL.Sorters.Implementations
         public bool IsGroupable => false;
 
         public LambdaExpression BuildExpression(TExecutionContext context) => _selectorFactory(context);
+
+        public LambdaExpression BuildOriginalExpression(TExecutionContext context) => _selectorFactory(context);
     }
 }

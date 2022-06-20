@@ -17,5 +17,7 @@ namespace Epam.GraphQL.Sorters
         IChainConfigurationContext ConfigurationContext { get; }
 
         LambdaExpression BuildExpression(TExecutionContext context);
+
+        LambdaExpression BuildOriginalExpression(TExecutionContext context);
     }
 }

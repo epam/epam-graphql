@@ -40,7 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             _transform = transform;
             InnerProxyAccessor = innerProxyAccessor;
             _batchTaskResolver = GetBatchTaskResolver<TEntity>(resolver, condition, transform, FuncConstants<LambdaExpression>.Identity);
-            _proxiedBatchTaskResolver = GetBatchTaskResolver<Proxy<TEntity>>(resolver, condition, transform, leftExpression => OuterProxyAccessor.Rewrite(leftExpression));
+            _proxiedBatchTaskResolver = GetBatchTaskResolver<Proxy<TEntity>>(resolver, condition, transform, leftExpression => OuterProxyAccessor.Rewrite(leftExpression, leftExpression));
 
             innerProxyAccessor?.AddMember(transform);
         }

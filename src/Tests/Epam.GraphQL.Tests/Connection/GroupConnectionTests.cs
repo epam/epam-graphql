@@ -1109,6 +1109,58 @@ namespace Epam.GraphQL.Tests.Connection
                     }");
         }
 
+        [Test]
+        public void TestGroupConnectionQueryItemsWithSortingContextedExpression()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field("managerId", (ctx, p) => p.ManagerId + ctx.UserId).Sortable().Groupable();
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .GroupConnection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        people(sorting: {field: ""managerId"" }) {
+                            items {
+                                item {
+                                    managerId
+                                }
+                            }
+                        }
+                    }",
+                @"{
+                    people: {
+                        items: [{
+                            item: {
+                                managerId: null
+                            }
+                        },{
+                            item: {
+                                managerId: 6
+                            }
+                        },{
+                            item: {
+                                managerId: 7
+                            }
+                        },{
+                            item: {
+                                managerId: 10
+                            }
+                        }]
+                    }
+                }");
+        }
+
         public class PersonFilter : Input
         {
             public List<int> Ids { get; set; }
