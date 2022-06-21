@@ -59,7 +59,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -77,7 +78,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -104,7 +106,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -123,7 +126,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -151,7 +155,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -171,7 +176,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -200,7 +206,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -221,7 +228,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -251,7 +259,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }
@@ -273,7 +282,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 }
                 catch (Exception e)
                 {
-                    throw ctx.CreateFieldExecutionError(e);
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             };
         }

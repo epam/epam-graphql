@@ -6,8 +6,11 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Diagnostics
@@ -15,6 +18,19 @@ namespace Epam.GraphQL.Tests.Diagnostics
     [TestFixture]
     public class ResolveErrorTests : BaseTests
     {
+        private ILoggerFactory _loggerFactory;
+        private MockLogger _logger;
+
+        [SetUp]
+        public new void SetUp()
+        {
+            base.SetUp();
+            _loggerFactory = Substitute.For<ILoggerFactory>();
+            _logger = Substitute.For<MockLogger>();
+            _loggerFactory.CreateLogger(Arg.Any<string>())
+                .Returns(_logger);
+        }
+
         [Test]
         public void Resolve()
         {
@@ -33,24 +49,27 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -76,24 +95,27 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -118,26 +140,29 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     people {
                         test
                     }
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `people.0.test`. See an inner exception for details.",
-                    "PersonLoader:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `people.0.test`.",
+                "PersonLoader:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -167,26 +192,29 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     people {
                         test
                     }
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `people.0.test`. See an inner exception for details.",
-                    "PersonLoader:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `people.0.test`.",
+                "PersonLoader:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -208,25 +236,28 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -253,25 +284,28 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -294,26 +328,29 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -341,26 +378,29 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -384,27 +424,30 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Argument<int?>(\"arg3\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Argument<int?>(\"arg3\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -433,27 +476,30 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Argument<int?>(\"arg3\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Argument<int?>(\"arg3\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -478,28 +524,31 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Argument<int?>(\"arg3\")",
-                    "        .Argument<int?>(\"arg4\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Argument<int?>(\"arg3\")",
+                "        .Argument<int?>(\"arg4\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -529,28 +578,31 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Argument<int?>(\"arg3\")",
-                    "        .Argument<int?>(\"arg4\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Argument<int?>(\"arg3\")",
+                "        .Argument<int?>(\"arg4\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -576,29 +628,32 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Argument<int?>(\"arg3\")",
-                    "        .Argument<int?>(\"arg4\")",
-                    "        .Argument<int?>(\"arg5\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Argument<int?>(\"arg3\")",
+                "        .Argument<int?>(\"arg4\")",
+                "        .Argument<int?>(\"arg5\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
         }
 
         [Test]
@@ -629,29 +684,44 @@ namespace Epam.GraphQL.Tests.Diagnostics
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
-            var result = ExecuteHelpers.ExecuteQuery(
+            Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
                 mutationType,
                 @"query {
                     test
-                }");
+                }",
+                configure: optionsBuilder => optionsBuilder.UseLoggerFactory(_loggerFactory)));
 
-            Assert.That(
-                result.Errors,
-                Is.Not.Empty.And.All.Message.EqualTo(TestHelpers.ConcatLines(
-                    "Error during resolving field `test`. See an inner exception for details.",
-                    "Query:",
-                    "public override void OnConfigure()",
-                    "{",
-                    "    Field(\"test\")",
-                    "        .Argument<int?>(\"arg1\")",
-                    "        .Argument<int?>(\"arg2\")",
-                    "        .Argument<int?>(\"arg3\")",
-                    "        .Argument<int?>(\"arg4\")",
-                    "        .Argument<int?>(\"arg5\")",
-                    "        .Resolve<int>(Resolver); // <-----",
-                    "}"))
-                    .And.InnerException.TypeOf<InvalidOperationException>());
+            var expected = TestHelpers.ConcatLines(
+                "Error during resolving field `test`.",
+                "Query:",
+                "public override void OnConfigure()",
+                "{",
+                "    Field(\"test\")",
+                "        .Argument<int?>(\"arg1\")",
+                "        .Argument<int?>(\"arg2\")",
+                "        .Argument<int?>(\"arg3\")",
+                "        .Argument<int?>(\"arg4\")",
+                "        .Argument<int?>(\"arg5\")",
+                "        .Resolve<int>(Resolver); // <-----",
+                "}");
+
+            _logger.Received()
+                .Log(
+                    Constants.Logging.ExecutionError.Level,
+                    Arg.Is<string>(message => message.Equals(expected, StringComparison.Ordinal)));
+        }
+
+        public abstract class MockLogger : ILogger
+        {
+            void ILogger.Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) =>
+                Log(logLevel, formatter(state, exception));
+
+            public abstract void Log(LogLevel logLevel, string message);
+
+            public virtual bool IsEnabled(LogLevel logLevel) => true;
+
+            public abstract IDisposable BeginScope<TState>(TState state);
         }
     }
 }

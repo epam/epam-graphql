@@ -16,6 +16,7 @@ using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Language.AST;
+using Microsoft.Extensions.Logging;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -36,6 +37,8 @@ namespace Epam.GraphQL.Extensions
         public static ISchemaExecutionListener GetListener(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Listener;
 
         public static IQueryExecuter GetQueryExecuter(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).QueryExecuter;
+
+        public static ILogger GetLogger(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Logger;
 
         public static TResult Bind<TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
 
@@ -73,6 +76,18 @@ namespace Epam.GraphQL.Extensions
             var configurationContext = context.GetFieldConfigurationContext();
             var path = context.GetPath();
             throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{path}`. See an inner exception for details.", configurationContext), innerException);
+        }
+
+        public static void LogFieldExecutionError(this IResolveFieldContext context, Exception innerException)
+        {
+            var configurationContext = context.GetFieldConfigurationContext();
+            var path = context.GetPath();
+            var logger = context.GetLogger();
+            logger.Log(
+                Constants.Logging.ExecutionError.Level,
+                Constants.Logging.ExecutionError.EventId,
+                innerException,
+                configurationContext.GetRuntimeError($"Error during resolving field `{path}`.", configurationContext));
         }
 
         public static string? GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
