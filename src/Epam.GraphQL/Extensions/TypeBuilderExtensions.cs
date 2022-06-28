@@ -58,7 +58,11 @@ namespace Epam.GraphQL.Extensions
         {
             var propertyType = backingField.FieldType;
             var methodName = $"get_{propertyName}";
-            var flags = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+
+            var methodInfo = tb.BaseType != null ? tb.GetBaseType().GetMethod(methodName) : null;
+            var canReuse = methodInfo != null && !methodInfo.IsFinal;
+            var flags = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual
+                | (canReuse ? MethodAttributes.ReuseSlot : MethodAttributes.NewSlot);
 
             var getterMethodBuilder = tb.DefineMethod(
                 methodName,
@@ -70,20 +74,6 @@ namespace Epam.GraphQL.Extensions
                 .Ldarg(0)
                 .Ldfld(backingField)
                 .Ret();
-
-            if (tb.BaseType != null)
-            {
-                var methodInfo = tb.GetBaseType().GetMethod(methodName);
-                if (methodInfo != null && methodInfo.IsVirtual && !methodInfo.IsFinal)
-                {
-                    if (tb.BaseType.IsGenericType && !tb.BaseType.IsGenericTypeDefinition)
-                    {
-                        methodInfo = TypeBuilder.GetMethod(tb.BaseType, methodInfo);
-                    }
-
-                    tb.DefineMethodOverride(getterMethodBuilder, methodInfo);
-                }
-            }
 
             return getterMethodBuilder;
         }
@@ -152,7 +142,11 @@ namespace Epam.GraphQL.Extensions
         {
             var propertyType = backingField.FieldType;
             var methodName = $"set_{propertyName}";
-            var flags = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+
+            var methodInfo = tb.BaseType != null ? tb.GetBaseType().GetMethod(methodName) : null;
+            var canReuse = methodInfo != null && !methodInfo.IsFinal;
+            var flags = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.Virtual
+                | (canReuse ? MethodAttributes.ReuseSlot : MethodAttributes.NewSlot);
 
             var setterMethodBuilder = tb.DefineMethod(
                 methodName,
@@ -165,20 +159,6 @@ namespace Epam.GraphQL.Extensions
                 .Ldarg(1)
                 .Stfld(backingField)
                 .Ret();
-
-            if (tb.BaseType != null)
-            {
-                var methodInfo = tb.GetBaseType().GetMethod(methodName, new[] { propertyType });
-                if (methodInfo != null && methodInfo.IsVirtual && !methodInfo.IsFinal)
-                {
-                    if (tb.BaseType.IsGenericType && !tb.BaseType.IsGenericTypeDefinition)
-                    {
-                        methodInfo = TypeBuilder.GetMethod(tb.BaseType, methodInfo);
-                    }
-
-                    tb.DefineMethodOverride(setterMethodBuilder, methodInfo);
-                }
-            }
 
             return setterMethodBuilder;
         }

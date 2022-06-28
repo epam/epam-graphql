@@ -33,8 +33,10 @@ namespace Epam.GraphQL.Configuration.Implementations
 
         private readonly ConcurrentDictionary<ICollection<string>, Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>> _createSelectorExpressionCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
         private readonly ConcurrentDictionary<ICollection<string>, Type> _concreteProxyTypeCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
+        private Type? _baseProxyGenericType;
         private Type? _proxyGenericType;
         private Type? _proxyType;
+        private Type? _baseProxyType;
 
         public ProxyAccessor(IObjectGraphTypeConfigurator<TEntity, TExecutionContext> owner)
         {
@@ -52,6 +54,15 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
+        public Type BaseProxyGenericType
+        {
+            get
+            {
+                ConfigureBase();
+                return _baseProxyGenericType;
+            }
+        }
+
         public Type ProxyType
         {
             get
@@ -62,6 +73,19 @@ namespace Epam.GraphQL.Configuration.Implementations
                 }
 
                 return _proxyType;
+            }
+        }
+
+        public Type BaseProxyType
+        {
+            get
+            {
+                if (_baseProxyType == null)
+                {
+                    _baseProxyType = BaseProxyGenericType.MakeGenericType(typeof(TEntity));
+                }
+
+                return _baseProxyType;
             }
         }
 
@@ -78,12 +102,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             var fieldTypes = new Dictionary<string, Type>();
             var i = 1;
 
-            foreach (var calculatedField in Fields)
-            {
-                var name = calculatedField.Name;
-                fieldTypes.Add(name.ToCamelCase(), calculatedField.FieldType);
-            }
-
             foreach (var dep in _conditionMembers)
             {
                 foreach (var depExpr in dep.Value.DependentOn)
@@ -97,7 +115,7 @@ namespace Epam.GraphQL.Configuration.Implementations
                 AddNewField(string.Empty, e);
             }
 
-            _proxyGenericType = fieldTypes.MakeProxyType(typeof(TEntity).Name);
+            _proxyGenericType = fieldTypes.MakeProxyType(BaseProxyGenericType, typeof(TEntity).Name);
 
             void AddNewField(string fieldPrefix, LambdaExpression depExpr)
             {
@@ -503,6 +521,18 @@ namespace Epam.GraphQL.Configuration.Implementations
 
             var result = Expression.Lambda(groupResultInit, keyParam, enumerableParam);
             return result;
+        }
+
+        [MemberNotNull(nameof(_baseProxyGenericType))]
+        private void ConfigureBase()
+        {
+            if (_baseProxyGenericType != null)
+            {
+                return;
+            }
+
+            var fieldTypes = Fields.ToDictionary(f => f.Name.ToCamelCase(), f => f.FieldType);
+            _baseProxyGenericType = fieldTypes.MakeBaseProxyType(typeof(TEntity).Name);
         }
     }
 }

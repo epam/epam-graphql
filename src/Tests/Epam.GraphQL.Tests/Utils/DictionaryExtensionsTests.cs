@@ -22,7 +22,7 @@ namespace Epam.GraphQL.Tests.Utils
                 ["stringProp"] = typeof(string),
             };
 
-            var proxyType = properties.MakeProxyType(nameof(Object)).MakeGenericType(typeof(object));
+            var proxyType = properties.MakeBaseProxyType(nameof(Object)).MakeGenericType(typeof(object));
 
             Assert.AreEqual(typeof(Proxy<object>), proxyType.BaseType);
 
@@ -46,7 +46,7 @@ namespace Epam.GraphQL.Tests.Utils
                 ["stringProp"] = typeof(string),
             };
 
-            var proxyType = properties.MakeProxyType(nameof(SimpleType)).MakeGenericType(typeof(SimpleType));
+            var proxyType = properties.MakeBaseProxyType(nameof(SimpleType)).MakeGenericType(typeof(SimpleType));
 
             Assert.AreEqual(typeof(Proxy<SimpleType>), proxyType.BaseType);
 

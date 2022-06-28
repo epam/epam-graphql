@@ -108,7 +108,7 @@ namespace Epam.GraphQL.Tests.Utils
 
             var anonymous = new { Id = 1 };
             var type = anonymous.GetType();
-            var newType = props.MakeProxyType("test");
+            var newType = props.MakeBaseProxyType("test");
             newType.MakeGenericType(type);
         }
 

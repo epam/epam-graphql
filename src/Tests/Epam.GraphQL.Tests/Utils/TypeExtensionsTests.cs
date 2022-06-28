@@ -22,7 +22,8 @@ namespace Epam.GraphQL.Tests.Utils
                 ["intProp"] = typeof(int),
             };
 
-            var proxyType = props.MakeProxyType(nameof(Object));
+            var baseProxyType = props.MakeBaseProxyType(nameof(Object));
+            var proxyType = props.MakeProxyType(baseProxyType, nameof(Object));
             var concreteProxyType = proxyType.MakeInstantiatedProxyGenericType(new[] { "intProp" }).MakeGenericType(typeof(object));
             Assert.AreNotEqual(proxyType, concreteProxyType);
 

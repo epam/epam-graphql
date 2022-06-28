@@ -27,7 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             _expression = expression;
             _field = field;
             _resolver = new Lazy<Func<TExecutionContext, TEntity, TReturnType>>(_expression.Compile);
-            _proxyResolver = new Lazy<Func<object, object?>>(() => _field.Parent.ProxyAccessor.ProxyType.GetPropertyDelegate(Name));
+            _proxyResolver = new Lazy<Func<object, object?>>(() => _field.Parent.ProxyAccessor.BaseProxyType.GetPropertyDelegate(Name));
         }
 
         public bool IsGroupable => _field.IsGroupable;

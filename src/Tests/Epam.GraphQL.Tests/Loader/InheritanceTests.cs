@@ -366,6 +366,62 @@ namespace Epam.GraphQL.Tests.Loader
                 }");
         }
 
+        [Test]
+        public void Issue79()
+        {
+            Type personLoaderType = null;
+            personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field("children")
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p, c) => p.Id == c.ManagerId);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable().Take(2));
+
+            var person2LoaderType = GraphQLTypeBuilder.CreateInheritedLoaderType<Person, TestUserContext>(
+                personLoaderType,
+                typeName: "InheritedLoader");
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query.Field("people").FromLoader<Person, TestUserContext>(personLoaderType);
+                query.Field("people2").FromLoader<Person, TestUserContext>(person2LoaderType);
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        people {
+                            id
+                            children {
+                                id
+                            }
+                        }
+                        people2 {
+                            id
+                        }
+                    }
+                ",
+                @"{
+                    people: [{
+                        id: 1,
+                        children: [{
+                            id: 2
+                        }]
+                    },{
+                        id: 2,
+                        children: []
+                    }],
+                    people2: [{
+                        id: 1
+                    },{
+                        id: 2
+                    }]
+                }");
+        }
+
         private void TestMutableLoaderNoOverridenOnConfigure(string query, string expectedResult)
         {
             var personLoaderType = GraphQLTypeBuilder.CreateMutableLoaderType<Person, TestUserContext>(
