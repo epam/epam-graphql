@@ -144,12 +144,12 @@ namespace Epam.GraphQL.Extensions
         {
             Guards.ThrowArgumentExceptionIf(propertyNames.Any(name => string.IsNullOrEmpty(name)), "Property names must not contain null or empty strings.", nameof(propertyNames));
 
-            var invalidPropNames = propertyNames.Where(name => proxyGenericType.GetProperty(name) == null);
+            var invalidPropNames = propertyNames.Where(name => proxyGenericType.GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy) == null);
 
             Guards.ThrowArgumentExceptionIf(invalidPropNames.Any(), $"Cannot find a properties ({string.Join(", ", invalidPropNames)})  on type {proxyGenericType}.", nameof(propertyNames));
 
             Guards.ThrowArgumentExceptionIf(
-                proxyGenericType.BaseType.Name != typeof(Proxy<>).Name || proxyGenericType.BaseType.Assembly != typeof(Proxy<>).Assembly,
+                proxyGenericType.BaseType?.BaseType?.Name != typeof(Proxy<>).Name || proxyGenericType.BaseType?.BaseType?.Assembly != typeof(Proxy<>).Assembly,
                 "Type must be inherited from Proxy<>",
                 nameof(proxyGenericType));
 

@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
             _field = field;
             _resolver = new Lazy<Func<TEntity, TReturnType>>(_originalExpression.Compile);
-            _proxyResolver = new Lazy<Func<object, object?>>(() => _field.Parent.ProxyAccessor.ProxyType.GetPropertyDelegate(Name));
+            _proxyResolver = new Lazy<Func<object, object?>>(() => _field.Parent.ProxyAccessor.BaseProxyType.GetPropertyDelegate(Name));
         }
 
         public bool IsReadOnly => !_originalExpression.IsProperty() && !typeof(Input).IsAssignableFrom(typeof(TEntity));

@@ -23,12 +23,16 @@ namespace Epam.GraphQL.Extensions
         private static readonly ConcurrentDictionary<(Type? BaseType, string TypeName, ICollection<KeyValuePair<string, Type>> Properties), Type> _typeCache = new(
             new ValueTupleEqualityComparer<Type?, string, ICollection<KeyValuePair<string, Type>>>(EqualityComparer<Type?>.Default, EqualityComparer<string>.Default, new CollectionEqualityComparer<KeyValuePair<string, Type>>()));
 
-        private static readonly ConcurrentDictionary<ICollection<KeyValuePair<string, Type>>, Type> _proxyTypeCache = new(
+        private static readonly ConcurrentDictionary<ICollection<KeyValuePair<string, Type>>, Type> _baseProxyTypeCache = new(
             new CollectionEqualityComparer<KeyValuePair<string, Type>>());
+
+        private static readonly ConcurrentDictionary<(Type BaseType, ICollection<KeyValuePair<string, Type>> Properties), Type> _proxyTypeCache = new(
+            new ValueTupleEqualityComparer<Type, ICollection<KeyValuePair<string, Type>>>(EqualityComparer<Type>.Default, new CollectionEqualityComparer<KeyValuePair<string, Type>>()));
 
         private static long _typeCacheCount;
 
         private static long _proxyTypeCacheCount;
+        private static long _baseProxyTypeCacheCount;
 
         public static Type MakeType(this IDictionary<string, Type> properties, string typeName, Type? parent = null)
         {
@@ -101,15 +105,41 @@ namespace Epam.GraphQL.Extensions
             });
         }
 
-        public static Type MakeProxyType(this IDictionary<string, Type> properties, string typeName)
+        public static Type MakeProxyType(this IDictionary<string, Type> properties, Type baseType, string typeName)
         {
             Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
 
-            return _proxyTypeCache.GetOrAdd(properties, properties =>
+            return _proxyTypeCache.GetOrAdd((baseType, properties), key =>
             {
                 Interlocked.Increment(ref _proxyTypeCacheCount);
 
-                var tb = ILUtils.DefineType($"<{typeName}>__Proxy`{_proxyTypeCacheCount}", _proxyType);
+                var tb = ILUtils.DefineType($"<{typeName}>__Proxy`{_proxyTypeCacheCount}", key.BaseType);
+
+                foreach (var prop in key.Properties)
+                {
+                    tb.DefineNotImplementedVirtualProperty(prop.Key, prop.Value).MakeDebuggerBrowsableNever();
+                }
+
+                tb.MakeCompilerGenerated();
+
+                var objectType = tb.CreateTypeInfo();
+
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
+
+                return objectType;
+            });
+        }
+
+        public static Type MakeBaseProxyType(this IDictionary<string, Type> properties, string typeName)
+        {
+            Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
+
+            return _baseProxyTypeCache.GetOrAdd(properties, properties =>
+            {
+                Interlocked.Increment(ref _baseProxyTypeCacheCount);
+
+                var tb = ILUtils.DefineType($"<{typeName}>__BaseProxy`{_baseProxyTypeCacheCount}", _proxyType);
 
                 foreach (var prop in properties)
                 {
