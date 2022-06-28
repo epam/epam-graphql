@@ -8,7 +8,8 @@ namespace Epam.GraphQL.Adapters
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IQueryableToAsyncEnumerableConverter
     {
-        System.Collections.Generic.IAsyncEnumerable<TEntity> QueryableToAsyncEnumerable<TEntity>(System.Linq.IQueryable<TEntity> query);
+        bool CanConvert<TEntity>(System.Linq.IQueryable<TEntity> query);
+        System.Collections.Generic.IAsyncEnumerable<TEntity> Convert<TEntity>(System.Linq.IQueryable<TEntity> query);
     }
 }
 namespace Epam.GraphQL.Builders.Common

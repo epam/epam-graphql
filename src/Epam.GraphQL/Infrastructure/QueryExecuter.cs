@@ -135,8 +135,8 @@ namespace Epam.GraphQL.Infrastructure
 
         private IAsyncEnumerable<TEntity> QueryableToAsyncEnumerable<TEntity>(IQueryable<TEntity> query)
         {
-            return _queryableToAsyncEnumerableConverter != null
-                ? _queryableToAsyncEnumerableConverter.QueryableToAsyncEnumerable(query)
+            return _queryableToAsyncEnumerableConverter != null && _queryableToAsyncEnumerableConverter.CanConvert(query)
+                ? _queryableToAsyncEnumerableConverter.Convert(query)
                 : QueryableToAsyncEnumerableImpl(query);
         }
 
