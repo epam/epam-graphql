@@ -26,9 +26,9 @@ namespace Epam.GraphQL.Tests.Mutation
             {
                 var master = new List<HasGuidId>();
 
-                DataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidId>>>())
+                DataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidId>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidId>>>(0).ToAsyncEnumerable());
-                DataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidIdDetails>>>())
+                DataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidIdDetails>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidIdDetails>>>(0).ToAsyncEnumerable());
 
                 DataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<Guid, HasGuidId>>>())

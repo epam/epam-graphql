@@ -42,9 +42,14 @@ namespace Epam.GraphQL.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        public IAsyncEnumerable<TEntity> QueryableToAsyncEnumerable<TEntity>(IQueryable<TEntity> query)
+        public IAsyncEnumerable<TEntity> Convert<TEntity>(IQueryable<TEntity> query)
         {
             return query.AsAsyncEnumerable();
+        }
+
+        public bool CanConvert<TEntity>(IQueryable<TEntity> query)
+        {
+            return query is IAsyncEnumerable<TEntity>;
         }
 
         public async Task SaveChangesAsync()

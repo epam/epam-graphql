@@ -12,6 +12,8 @@ namespace Epam.GraphQL.Adapters
     [InternalApi]
     public interface IQueryableToAsyncEnumerableConverter
     {
-        IAsyncEnumerable<TEntity> QueryableToAsyncEnumerable<TEntity>(IQueryable<TEntity> query);
+        IAsyncEnumerable<TEntity> Convert<TEntity>(IQueryable<TEntity> query);
+
+        bool CanConvert<TEntity>(IQueryable<TEntity> query);
     }
 }
