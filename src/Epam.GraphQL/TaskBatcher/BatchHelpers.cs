@@ -214,7 +214,9 @@ namespace Epam.GraphQL.TaskBatcher
             where TProperty : struct
         {
             var param = Expression.Parameter(typeof(TChildEntity));
-            var convertedParam = Expression.Convert(param, propertyExpression.Parameters[0].Type);
+            Expression convertedParam = typeof(TChildEntity) == propertyExpression.Parameters[0].Type
+                ? param
+                : Expression.Convert(param, propertyExpression.Parameters[0].Type);
             var exprBody = propertyExpression.Body.ReplaceParameter(propertyExpression.Parameters[0], convertedParam);
             var expr = Expression.Lambda<Func<TChildEntity, TProperty>>(exprBody, param);
             var task = Get(configurationContext, stepNameFactory, expr, null, transform);
@@ -240,7 +242,10 @@ namespace Epam.GraphQL.TaskBatcher
             Func<string> stepNameFactory)
         {
             var param = Expression.Parameter(typeof(TChildEntity));
-            var convertedParam = Expression.Convert(param, propertyExpression.Parameters[0].Type);
+            Expression convertedParam = typeof(TChildEntity) == propertyExpression.Parameters[0].Type
+                ? param
+                : Expression.Convert(param, propertyExpression.Parameters[0].Type);
+
             var exprBody = propertyExpression.Body.ReplaceParameter(propertyExpression.Parameters[0], convertedParam);
             var expr = Expression.Lambda<Func<TChildEntity, string>>(exprBody, param);
             var task = Get(configurationContext, stepNameFactory, expr, null, transform);
@@ -295,7 +300,10 @@ namespace Epam.GraphQL.TaskBatcher
             where TProperty : struct
         {
             var param = Expression.Parameter(typeof(TChildEntity));
-            var convertedParam = Expression.Convert(param, propertyExpression.Parameters[0].Type);
+            Expression convertedParam = typeof(TChildEntity) == propertyExpression.Parameters[0].Type
+                ? param
+                : Expression.Convert(param, propertyExpression.Parameters[0].Type);
+
             var exprBody = propertyExpression.Body.ReplaceParameter(propertyExpression.Parameters[0], convertedParam);
             var expr = Expression.Lambda<Func<TChildEntity, TProperty?>>(exprBody, param);
             var task = GetNullable(configurationContext, stepNameFactory, expr, null, transform);
