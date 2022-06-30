@@ -17,6 +17,11 @@ namespace Epam.GraphQL.Tests.Filtration
     [TestFixture]
     public class GetExpressionByFilterValueTests
     {
+        public enum Issue83
+        {
+            InProgress,
+        }
+
         [Test]
         public void GetExpressionByFilterValue()
         {
@@ -49,6 +54,44 @@ namespace Epam.GraphQL.Tests.Filtration
             Expression<Func<Person, bool>> expected = p => p.Id == 100500;
 
             Assert.IsTrue(ExpressionEqualityComparer.Instance.Equals(filterExpression, expected));
+        }
+
+        [Test]
+        public void Issue83Test()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id).Filterable();
+                    loader.Field("test", p => Issue83.InProgress).Filterable();
+                },
+                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
+                getBaseQuery: _ => Enumerable.Empty<Person>().AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Connection(personLoaderType, "people");
+            }
+
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
+            var schemaExecuter = ExecuteHelpers.CreateSchemaExecuter<TestUserContext>(queryType, null);
+            var filterValue = new Dictionary<string, object>
+            {
+                ["test"] = new Dictionary<string, object>
+                {
+                    ["eq"] = "IN_PROGRESS",
+                },
+            };
+
+            var filterExpression = schemaExecuter.GetExpressionByFilterValue<Person, TestUserContext>(personLoaderType, new TestUserContext(null), filterValue);
+#pragma warning disable CS1718 // Comparison made to same variable
+            Expression<Func<Person, Issue83>> expected = p => Issue83.InProgress;
+#pragma warning restore CS1718 // Comparison made to same variable
+
+            Assert.IsTrue(filterExpression.Body.NodeType == ExpressionType.Equal);
+            Assert.IsTrue(ExpressionEqualityComparer.Instance.Equals(((BinaryExpression)filterExpression.Body).Left, expected.Body));
+            Assert.IsTrue(ExpressionEqualityComparer.Instance.Equals(((BinaryExpression)filterExpression.Body).Right, expected.Body));
         }
     }
 }

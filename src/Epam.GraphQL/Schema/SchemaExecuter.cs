@@ -4,7 +4,9 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
@@ -84,7 +86,83 @@ namespace Epam.GraphQL
             }
 
             var filters = configurator.CreateInlineFilters();
-            return (Expression<Func<TEntity, bool>>)filters.BuildExpression(executionContext, filterValue.ToObject(filters.FilterType));
+            var filterGraphType = Registry.GenerateInputGraphType(filters.FilterType);
+            var resolvedFilterGraphType = (IGraphType)Registry.GetService(filterGraphType);
+
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+            return (Expression<Func<TEntity, bool>>)filters.BuildExpression(executionContext, CoerceValue(resolvedFilterGraphType, filterValue).ToObject(filters.FilterType, resolvedFilterGraphType));
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+        }
+
+        private static object? CoerceValue(IGraphType type, object? input)
+        {
+            if (type is NonNullGraphType nonNull)
+            {
+                return CoerceValue(nonNull.ResolvedType, input);
+            }
+
+            if (input == null)
+            {
+                return null;
+            }
+
+            if (type is ListGraphType listType)
+            {
+                var listItemType = listType.ResolvedType;
+
+                if (input is IEnumerable list)
+                {
+                    return list
+                        .Cast<object>()
+                        .Select(item => CoerceValue(listItemType, item))
+                        .ToList();
+                }
+                else
+                {
+                    return new[] { CoerceValue(listItemType, input) };
+                }
+            }
+
+            if (type is IObjectGraphType or IInputObjectGraphType)
+            {
+                var complexType = (IComplexGraphType)type; // both IObjectGraphType and IInputObjectGraphType inherit from IComplexGraphType
+                if (input is IDictionary<string, object?> dictionary)
+                {
+                    return CoerceValue(complexType, dictionary);
+                }
+
+                return new Dictionary<string, object?>();
+            }
+
+            if (type is ScalarGraphType scalarType)
+            {
+                return scalarType.ParseValue(input) ?? throw new ArgumentException($"Unable to convert '{input}' to '{type.Name}'");
+            }
+
+            return null;
+        }
+
+        private static IDictionary<string, object?> CoerceValue(IGraphType type, IDictionary<string, object?> input)
+        {
+            var obj = new Dictionary<string, object?>();
+
+            if (type is IObjectGraphType or IInputObjectGraphType)
+            {
+                var complexType = (IComplexGraphType)type; // both IObjectGraphType and IInputObjectGraphType inherit from IComplexGraphType
+
+                if (input is IDictionary<string, object> dictionary)
+                {
+                    foreach (var field in complexType.Fields)
+                    {
+                        if (dictionary.TryGetValue(field.Name, out var item))
+                        {
+                            obj.Add(field.Name, CoerceValue(field.ResolvedType, item));
+                        }
+                    }
+                }
+            }
+
+            return obj;
         }
 
         private static object StringToSortDirection(object value)
