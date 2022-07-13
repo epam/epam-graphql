@@ -4,162 +4,140 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
-using GraphQL;
+using Epam.GraphQL.Search;
+using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : QueryableField<TEntity, TChildEntity, TExecutionContext>
-        where TEntity : class
-        where TChildEntity : class
+    internal class LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
+        LoaderFieldBase<
+            LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
+            ILoaderField<TEntity, TChildEntity, TExecutionContext>,
+            TEntity,
+            TChildLoader,
+            TChildEntity,
+            TExecutionContext>,
+        ILoaderField<TEntity, TChildEntity, TExecutionContext>
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
-        private readonly Expression<Func<TEntity, TChildEntity, bool>> _condition;
-
         public LoaderField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments arguments = null)
-            : this(
-                  registry,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
+            : base(
+                  configurationContext,
                   parent,
                   name,
                   condition,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
                   elementGraphType,
-                  arguments)
+                  arguments,
+                  searcher,
+                  naturalSorters)
         {
         }
 
-        protected LoaderField(
-            RelationRegistry<TExecutionContext> registry,
+        private LoaderField(
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            TChildLoader loader,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
-            LazyQueryArguments arguments)
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            TChildLoader loader,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
                   elementGraphType,
-                  loader.ObjectGraphTypeConfigurator,
-                  arguments)
-        {
-            _condition = condition;
-            Loader = loader ?? throw new ArgumentNullException(nameof(loader));
-        }
-
-        private LoaderField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            TChildLoader loader,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments arguments)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  condition,
                   loader,
-                  elementGraphType,
-                  CreateResolver(name, parent, loader, condition),
-                  arguments)
+                  arguments,
+                  searcher,
+                  naturalSorters)
         {
         }
 
-        protected TChildLoader Loader { get; }
-
-        public ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ApplyConnection()
+        public IVoid AsConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> naturalOrder)
         {
-            var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
-            return ApplyField(new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, Parent, Name, _condition, Arguments, loader.ApplyNaturalOrderBy, loader.ApplyNaturalThenBy));
+            var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.Chain(nameof(AsConnection)).Argument(naturalOrder),
+                Parent,
+                Name,
+                QueryableFieldResolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+                naturalOrder.GetSorters());
+            return ApplyField(connectionField);
         }
 
-        public override QueryableField<TEntity, TChildEntity, TExecutionContext> ApplyConnection(Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order)
+        public IConnectionField AsConnection()
         {
-            var loader = Registry.ResolveLoader<TChildLoader, TChildEntity>();
-            return ApplyField(new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(Registry, Parent, Name, _condition, Arguments, order.Compile(), order.GetThenBy().Compile()));
+            var connectionField = new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                ConfigurationContext.Chain(nameof(AsConnection)),
+                Parent,
+                Name,
+                QueryableFieldResolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+#pragma warning disable CS0618 // Type or member is obsolete
+                Loader.ApplyNaturalOrderBy(Enumerable.Empty<TChildEntity>().AsQueryable()).GetSorters());
+#pragma warning restore CS0618 // Type or member is obsolete
+            return ApplyField(connectionField);
         }
 
-        public override QueryableField<TEntity, TChildEntity, TExecutionContext> ApplyFilter<TLoaderFilter, TFilter>()
+        protected override LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
+            IChainConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
-            if (HasFilter)
-            {
-                throw new NotSupportedException($"{typeof(TChildEntity).HumanizedName()}: Simultaneous use of .WithFilter() and .Filterable() is not supported. Consider to use either .WithFilter() or .Filterable().");
-            }
+            var queryableField = new LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                resolver,
+                ElementGraphType,
+                Loader,
+                Arguments,
+                Searcher,
+                NaturalSorters);
 
-            return base.ApplyFilter<TLoaderFilter, TFilter>();
-        }
-
-        protected static Func<IResolveFieldContext, IQueryable<TChildEntity>> GetQuery(TChildLoader loader)
-        {
-            return context =>
-            {
-                var filter = loader.ObjectGraphTypeConfigurator.HasInlineFilters ? loader.ObjectGraphTypeConfigurator.CreateInlineFilters() : null;
-
-                var ctx = context.GetUserContext<TExecutionContext>();
-                var listener = context.GetListener();
-                var query = loader.DoGetBaseQuery(ctx);
-
-                if (filter != null)
-                {
-                    query = filter.All(listener, query, ctx, context.GetFilterValue(filter.FilterType), context.GetFilterFieldNames());
-                }
-
-                return query;
-            };
-        }
-
-        private static IQueryableResolver<TEntity, TChildEntity, TExecutionContext> CreateResolver(string fieldName, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, TChildLoader loader, Expression<Func<TEntity, TChildEntity, bool>> condition)
-        {
-            var func = GetQuery(loader);
-
-            // TODO avoid creation in descendands
-            if (condition == null)
-            {
-                return new QueryableFuncResolver<TEntity, TChildEntity, TExecutionContext>(loader.ObjectGraphTypeConfigurator.ProxyAccessor, func, (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query));
-            }
-            else
-            {
-                return new QueryableAsyncFuncResolver<TEntity, TChildEntity, TExecutionContext>(fieldName, func, condition, (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query), parent.ProxyAccessor, loader.ObjectGraphTypeConfigurator.ProxyAccessor);
-            }
+            return queryableField;
         }
     }
 
-#pragma warning disable CA1501
-    internal class LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
-#pragma warning restore CA1501
+    internal sealed class LoaderField<TLoader, TChildLoader, TEntity, TChildEntity, TExecutionContext> : LoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
         where TLoader : Loader<TEntity, TExecutionContext>, new()
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TEntity : class
-        where TChildEntity : class
     {
         public LoaderField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Expression<Func<TEntity, TChildEntity, bool>> condition,
             RelationType relationType,
-            Expression<Func<TChildEntity, TEntity>> navigationProperty,
-            Expression<Func<TEntity, TChildEntity>> reverseNavigationProperty,
+            Expression<Func<TChildEntity, TEntity>>? navigationProperty,
+            Expression<Func<TEntity, TChildEntity>>? reverseNavigationProperty,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType)
-            : base(registry, parent, name, condition, elementGraphType)
+            : base(configurationContext, parent, name, condition, elementGraphType, arguments: null, searcher: null, naturalSorters: SortingHelpers.Empty)
         {
-            registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
+            parent.Registry.Register(typeof(TChildLoader), typeof(TLoader), condition.SwapOperands(), reverseNavigationProperty, navigationProperty, relationType);
         }
     }
 }

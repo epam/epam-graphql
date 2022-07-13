@@ -4,19 +4,22 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Projection;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Projection.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Loaders
 {
     public abstract class ProjectionBase<TExecutionContext> : IEquatable<ProjectionBase<TExecutionContext>>
     {
-        internal RelationRegistry<TExecutionContext> Registry { get; set; }
+        internal RelationRegistry<TExecutionContext> Registry { get; set; } = null!;
 
         internal virtual bool ShouldConfigureInputType => false;
 
@@ -24,7 +27,7 @@ namespace Epam.GraphQL.Loaders
 
         public override bool Equals(object obj) => Equals(obj as ProjectionBase<TExecutionContext>);
 
-        public bool Equals(ProjectionBase<TExecutionContext> other)
+        public bool Equals(ProjectionBase<TExecutionContext>? other)
         {
             if (other == null)
             {
@@ -52,21 +55,133 @@ namespace Epam.GraphQL.Loaders
     }
 
     public abstract class ProjectionBase<TEntity, TExecutionContext> : ProjectionBase<TExecutionContext>
-        where TEntity : class
     {
-        internal ObjectGraphTypeConfigurator<TEntity, TExecutionContext> ObjectGraphTypeConfigurator { get; private set; }
+        internal ObjectGraphTypeConfigurator<TEntity, TExecutionContext> ObjectGraphTypeConfigurator { get; private set; } = null!;
 
-        internal InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> InputObjectGraphTypeConfigurator { get; private set; }
+        internal InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> InputObjectGraphTypeConfigurator { get; private set; } = null!;
 
-        protected internal string Name { get; set; }
+        protected internal string? Name { get; set; }
 
-        protected internal string InputName { get; set; }
+        protected internal string? InputName { get; set; }
 
-        private protected BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> Configurator { get; private set; }
+        private protected BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>? Configurator { get; private set; }
 
         private protected bool IsConfiguringInputType { get; set; }
 
-        internal void Configure(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
+        internal override void Configure() => Configure(ObjectGraphTypeConfigurator);
+
+        internal override void ConfigureInput() => ConfigureInput(InputObjectGraphTypeConfigurator);
+
+        internal override void AfterConstruction()
+        {
+            ObjectGraphTypeConfigurator = Registry.Register<TEntity>(GetType());
+            InputObjectGraphTypeConfigurator = Registry.RegisterInput<TEntity>(GetType());
+        }
+
+        internal override IObjectGraphTypeConfigurator<TExecutionContext> GetObjectGraphTypeConfigurator()
+        {
+            return ObjectGraphTypeConfigurator;
+        }
+
+        internal override IObjectGraphTypeConfigurator<TExecutionContext> GetInputObjectGraphTypeConfigurator()
+        {
+            return InputObjectGraphTypeConfigurator;
+        }
+
+        protected internal IProjectionField<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null)
+        {
+            var field = AddField(name, deprecationReason);
+            return new ProjectionFieldBuilder<Field<TEntity, TExecutionContext>, TEntity, TExecutionContext>(field);
+        }
+
+        [MemberNotNull(nameof(Configurator))]
+        private protected void ThrowIfIsNotConfiguring()
+        {
+            Guards.ThrowInvalidOperationIf(Configurator == null, $"Calling configuring methods are allowed from {nameof(OnConfigure)} method only.");
+        }
+
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? deprecationReason)
+        {
+            ThrowIfIsNotConfiguring();
+            return Configurator.AddField(
+                owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field)).Argument(expression),
+                null,
+                expression,
+                deprecationReason);
+        }
+
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(
+            string name,
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? deprecationReason)
+        {
+            ThrowIfIsNotConfiguring();
+            return Configurator.AddField(
+                owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
+        }
+
+        private protected ExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(
+            string name,
+            Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
+            string? deprecationReason)
+        {
+            ThrowIfIsNotConfiguring();
+            return Configurator.AddField(
+                owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
+                    .Argument(name)
+                    .Argument(expression),
+                name,
+                expression,
+                deprecationReason);
+        }
+
+        private protected Field<TEntity, TExecutionContext> AddField(string name, string? deprecationReason)
+        {
+            ThrowIfIsNotConfiguring();
+            return Configurator.Field(name, deprecationReason);
+        }
+
+        private protected void AddOnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
+        {
+            if (!IsConfiguringInputType)
+            {
+                ThrowIfIsNotConfiguring();
+                Configurator.OnEntityLoaded(proxyExpression, hook);
+            }
+        }
+
+        private protected void AddOnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, T>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            if (!IsConfiguringInputType)
+            {
+                ThrowIfIsNotConfiguring();
+                Configurator.OnEntityLoaded(keyExpression, batchFunc, hook);
+            }
+        }
+
+        private protected void AddOnEntityLoaded<TKey, T>(
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, T>>> batchFunc,
+            Action<TExecutionContext, T> hook)
+        {
+            if (!IsConfiguringInputType)
+            {
+                ThrowIfIsNotConfiguring();
+                Configurator.OnEntityLoaded(keyExpression, batchFunc, hook);
+            }
+        }
+
+        private void Configure(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
         {
             if (Configurator != null)
             {
@@ -78,6 +193,7 @@ namespace Epam.GraphQL.Loaders
             {
                 IsConfiguringInputType = false;
                 OnConfigure();
+                Configurator.ValidateFields();
                 AfterConfigure();
             }
             finally
@@ -86,7 +202,7 @@ namespace Epam.GraphQL.Loaders
             }
         }
 
-        internal void ConfigureInput(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
+        private void ConfigureInput(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> сonfigurator)
         {
             if (ShouldConfigureInputType)
             {
@@ -100,142 +216,13 @@ namespace Epam.GraphQL.Loaders
                 {
                     IsConfiguringInputType = true;
                     OnConfigure();
+                    Configurator.ValidateFields();
                     AfterConfigure();
                 }
                 finally
                 {
                     Configurator = null;
                 }
-            }
-        }
-
-        internal override void Configure() => Configure(ObjectGraphTypeConfigurator);
-
-        internal override void ConfigureInput() => ConfigureInput(InputObjectGraphTypeConfigurator);
-
-        internal override void AfterConstruction()
-        {
-            ObjectGraphTypeConfigurator = Registry.Register<TEntity>(GetType(), null);
-            InputObjectGraphTypeConfigurator = Registry.RegisterInput<TEntity>(GetType(), null);
-        }
-
-        internal override IObjectGraphTypeConfigurator<TExecutionContext> GetObjectGraphTypeConfigurator()
-        {
-            return ObjectGraphTypeConfigurator;
-        }
-
-        internal override IObjectGraphTypeConfigurator<TExecutionContext> GetInputObjectGraphTypeConfigurator()
-        {
-            return InputObjectGraphTypeConfigurator;
-        }
-
-        protected internal IProjectionFieldBuilder<TEntity, TExecutionContext> Field(string name, string deprecationReason = null)
-        {
-            var field = AddField(name, deprecationReason);
-            return new ProjectionFieldBuilder<TEntity, TExecutionContext>(field);
-        }
-
-        private protected void ThrowIfIsNotConfiguring()
-        {
-            if (Configurator == null)
-            {
-                throw new InvalidOperationException($"Calling configuring methods are allowed from {nameof(OnConfigure)} method only.");
-            }
-        }
-
-        private protected StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string deprecationReason = null)
-            where TReturnType : struct
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
-        }
-
-        private protected StructExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string deprecationReason = null)
-            where TReturnType : struct
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
-        }
-
-        private protected NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string deprecationReason = null)
-            where TReturnType : struct
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
-        }
-
-        private protected NullableExpressionField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string deprecationReason = null)
-            where TReturnType : struct
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
-        }
-
-        private protected StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TEntity, string>> expression, string deprecationReason = null)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
-        }
-
-        private protected StringExpressionField<TEntity, TExecutionContext> AddField(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string deprecationReason = null)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, expression, deprecationReason);
-        }
-
-        private protected Field<TEntity, TExecutionContext> AddField(string name, string deprecationReason)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField(name, deprecationReason);
-        }
-
-        private protected TypedField<TEntity, TReturnType, TExecutionContext> AddField<TReturnType>(string name, string deprecationReason)
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField<TReturnType>(name, deprecationReason);
-        }
-
-        private protected TypedField<TEntity, TReturnType, TExecutionContext> AddField<TProjection, TReturnType>(string name, string deprecationReason)
-            where TProjection : ProjectionBase<TReturnType, TExecutionContext>, new()
-            where TReturnType : class
-        {
-            ThrowIfIsNotConfiguring();
-            return Configurator.AddField<TProjection, TReturnType>(name, deprecationReason);
-        }
-
-        private protected void AddFilter<TValueType>(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-        {
-            ThrowIfIsNotConfiguring();
-            if (!IsConfiguringInputType)
-            {
-                Configurator.AddFilter(name, filterPredicateFactory);
-            }
-        }
-
-        private protected void AddFilter<TValueType>(string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
-        {
-            ThrowIfIsNotConfiguring();
-            if (!IsConfiguringInputType)
-            {
-                Configurator.AddFilter(name, filterPredicateFactory);
-            }
-        }
-
-        private protected void AddSorter<TValueType>(string name, Expression<Func<TEntity, TValueType>> selector)
-        {
-            if (!IsConfiguringInputType)
-            {
-                ThrowIfIsNotConfiguring();
-                Configurator.AddSorter(name, selector);
-            }
-        }
-
-        private protected void AddOnEntityLoaded<T>(Expression<Func<TEntity, T>> proxyExpression, Action<TExecutionContext, T> hook)
-        {
-            if (!IsConfiguringInputType)
-            {
-                ThrowIfIsNotConfiguring();
-                Configurator.AddOnEntityLoaded(proxyExpression, hook);
             }
         }
     }

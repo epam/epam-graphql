@@ -5,14 +5,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
-
-#nullable enable
 
 namespace Epam.GraphQL.Extensions
 {
@@ -105,6 +104,21 @@ namespace Epam.GraphQL.Extensions
             return expression;
         }
 
+        public static LambdaExpression RemoveConvert(this LambdaExpression expression)
+        {
+            var body = expression.Body.RemoveConvert();
+
+            if (body == expression.Body)
+            {
+                return expression;
+            }
+
+            var paramMap = expression.Parameters.ToDictionary(x => x, x => Expression.Parameter(x.Type, x.Name));
+            var newBody = body.ReplaceParameters(paramMap);
+
+            return Expression.Lambda(newBody, expression.Parameters.Select(p => paramMap[p]));
+        }
+
         public static Expression RemoveQuote(this Expression expression)
         {
             if (expression is UnaryExpression unaryExpr
@@ -157,69 +171,46 @@ namespace Epam.GraphQL.Extensions
 
         public static Expression ReplaceParameter<TParamType, TReturnType>(this Expression<Func<TParamType, TReturnType>> expression, ParameterExpression parameter)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
             if (!expression.Parameters[0].Type.IsAssignableFrom(parameter.Type))
             {
                 throw new InvalidCastException($"Cannot replace parameter of type {expression.Parameters[0].Type.Name} by parameter of type {parameter.Type.Name}.");
             }
 
-            return ExpressionHelpers.ParameterRebinder.ReplaceParameter(expression.Body, expression.Parameters[0], parameter);
+            return ExpressionHelpers.ParameterRebinder<ParameterExpression, ParameterExpression>.ReplaceParameter(expression.Body, expression.Parameters[0], parameter);
         }
 
         public static Expression ReplaceParameter(this Expression expression, ParameterExpression parameter, Expression parameterReplacement)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
+            return ExpressionHelpers.ParameterRebinder<ParameterExpression, Expression>.ReplaceParameter(expression, parameter, parameterReplacement);
+        }
 
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
-
-            if (parameterReplacement == null)
-            {
-                throw new ArgumentNullException(nameof(parameterReplacement));
-            }
-
-            return ExpressionHelpers.ParameterRebinder.ReplaceParameter(expression, parameter, parameterReplacement);
+        public static Expression ReplaceParameters<T>(this Expression expression, IReadOnlyDictionary<ParameterExpression, T> paramMap)
+            where T : Expression
+        {
+            return ExpressionHelpers.ParameterRebinder<ParameterExpression, T>.ReplaceParameters(paramMap, expression);
         }
 
         public static LambdaExpression ReplaceFirstParameter(this LambdaExpression expression, Expression parameterReplacement)
         {
-            if (expression.Parameters.Count == 0)
-            {
-                throw new ArgumentException("Expression must have one parameter at least.", nameof(expression));
-            }
+            expression.ShouldHaveOneParameterAtLeast(nameof(expression));
 
             if (!expression.Parameters[0].Type.IsAssignableFrom(parameterReplacement.Type))
             {
                 throw new ArgumentException($"Cannot replace parameter of type {expression.Parameters[0].Type.Name} by expression of type {parameterReplacement.Type.Name}.", nameof(expression));
             }
 
-            var body = expression.Body.ReplaceParameter(expression.Parameters[0], parameterReplacement);
-            var result = Expression.Lambda(body, expression.Parameters.Skip(1));
+            var remainingParams = expression.Parameters.Skip(1).ToDictionary(p => p, p => Expression.Parameter(p.Type));
+            var body = expression.Body
+                .ReplaceParameter(expression.Parameters[0], parameterReplacement)
+                .ReplaceParameters(remainingParams);
+
+            var result = Expression.Lambda(body, expression.Parameters.Skip(1).Select(p => remainingParams[p]));
 
             return result;
         }
 
         public static Expression<Func<T2, TResult>> BindFirstParameter<T1, T2, TResult>(this Expression<Func<T1, T2, TResult>> expression, T1 value)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             var secondParam = Expression.Parameter(expression.Parameters[1].Type, expression.Parameters[1].Name);
             var body = expression.Body
                 .ReplaceParameter(expression.Parameters[0], Expression.Constant(value, typeof(T1)))
@@ -232,20 +223,14 @@ namespace Epam.GraphQL.Extensions
 
         public static LambdaExpression BindFirstParameter<T>(this LambdaExpression expression, T value)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            var body = expression.Body.ReplaceParameter(expression.Parameters[0], Expression.Constant(value, typeof(T)));
-            var result = Expression.Lambda(body, expression.Parameters.Skip(1));
-
-            return result;
+            return expression.ReplaceFirstParameter(Expression.Constant(value, typeof(T)));
         }
 
-        public static bool IsProperty<TSource, TProperty>(this Expression<Func<TSource, TProperty>> propertyLambda)
+        public static bool IsProperty(this LambdaExpression propertyLambda)
         {
-            if (propertyLambda.Body is not MemberExpression member)
+            var body = propertyLambda.Body.RemoveTypeAsAndConvert();
+
+            if (body is not MemberExpression member)
             {
                 return false;
             }
@@ -261,7 +246,7 @@ namespace Epam.GraphQL.Extensions
                 return false;
             }
 
-            var type = typeof(TSource);
+            var type = propertyLambda.Parameters[0].Type;
             if (type != propInfo.ReflectedType && !propInfo.ReflectedType.IsAssignableFrom(type))
             {
                 return false;
@@ -270,8 +255,39 @@ namespace Epam.GraphQL.Extensions
             return true;
         }
 
-        public static PropertyInfo GetPropertyInfo<TSource, TProperty>(
-            this Expression<Func<TSource, TProperty>> propertyLambda)
+        public static bool TryGetNameOfProperty(this LambdaExpression propertyLambda, [NotNullWhen(true)] out string? propertyName)
+        {
+            propertyName = null;
+            var body = propertyLambda.Body.RemoveTypeAsAndConvert();
+
+            if (body is not MemberExpression member)
+            {
+                return false;
+            }
+
+            var propInfo = member.Member as PropertyInfo;
+            if (propInfo == null)
+            {
+                return false;
+            }
+
+            if (member.Expression is not ParameterExpression)
+            {
+                return false;
+            }
+
+            var type = propertyLambda.Parameters[0].Type;
+            if (type != propInfo.ReflectedType && !propInfo.ReflectedType.IsAssignableFrom(type))
+            {
+                return false;
+            }
+
+            propertyName = propInfo.Name;
+            return true;
+        }
+
+        public static PropertyInfo GetPropertyInfo(
+            this LambdaExpression propertyLambda)
         {
             MemberExpression? member;
 
@@ -298,7 +314,7 @@ namespace Epam.GraphQL.Extensions
                 throw new ArgumentException($"Expression '{propertyLambda}' refers to a field, not a property.");
             }
 
-            var type = typeof(TSource);
+            var type = propertyLambda.Parameters[0].Type;
             if (type != propInfo.ReflectedType && !propInfo.ReflectedType.IsAssignableFrom(type))
             {
                 throw new ArgumentException(
@@ -324,9 +340,7 @@ namespace Epam.GraphQL.Extensions
                     $"Expression '{propertyLambda}' refers to a property that does not have a setter.");
             }
 
-#pragma warning disable CS8601 // Possible null reference assignment.
-            return (source, value) => setMethodInfo.Invoke(source, new object[] { value });
-#pragma warning restore CS8601 // Possible null reference assignment.
+            return (source, value) => setMethodInfo.Invoke(source, new object?[] { value });
         }
 
         public static Func<TSource, TProperty> GetGetter<TSource, TProperty>(
@@ -411,31 +425,7 @@ namespace Epam.GraphQL.Extensions
 
         public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters<T>(this Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderExpression)
         {
-            return SortVisitor<T>.GetSorters(orderExpression);
-        }
-
-        public static Expression<Func<IOrderedQueryable<T>, IOrderedQueryable<T>>> GetThenBy<T>(this Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderExpression)
-        {
-            var sorters = orderExpression.GetSorters();
-
-            if (sorters.Count == 0)
-            {
-                throw new ArgumentException("Expression must contain one IQueryable<>.OrderBy call at least.", nameof(orderExpression));
-            }
-
-            var param = Expression.Parameter(typeof(IOrderedQueryable<T>));
-            Expression body = param;
-            foreach (var sorter in sorters)
-            {
-                var thenByCall = Expression.Quote(sorter.SortExpression);
-                var methodInfo = sorter.SortDirection == SortDirection.Asc
-                    ? CachedReflectionInfo.ForQueryable.ThenBy(typeof(T), sorter.SortExpression.ReturnType)
-                    : CachedReflectionInfo.ForQueryable.ThenByDescending(typeof(T), sorter.SortExpression.ReturnType);
-
-                body = Expression.Call(methodInfo, body, thenByCall);
-            }
-
-            return Expression.Lambda<Func<IOrderedQueryable<T>, IOrderedQueryable<T>>>(body, param);
+            return SortVisitor<T>.GetSorters(orderExpression.Body);
         }
 
         public static Expression<Func<TEntity, bool>> MakeComparisonExpression<TEntity, TPropertyType>(this Expression<Func<TEntity, TPropertyType>> propertyExpression, ComparisonType comparisonType, TPropertyType value)
@@ -470,6 +460,27 @@ namespace Epam.GraphQL.Extensions
             return expression is ConstantExpression constantExpr && constantExpr.Value is bool value && !value;
         }
 
+        public static LambdaExpression CastFirstParamTo<T>(this LambdaExpression expression)
+        {
+            if (typeof(T) == expression.Parameters[0].Type)
+            {
+                return expression;
+            }
+
+            var newParams = expression.Parameters.Skip(1).ToDictionary(x => x, x => Expression.Parameter(x.Type, x.Name));
+            var firstParam = Expression.Parameter(typeof(T), expression.Parameters[0].Name);
+
+            var castedParam = typeof(T).IsValueType
+                ? Expression.MakeUnary(ExpressionType.Convert, firstParam, expression.Parameters[0].Type)
+                : Expression.MakeUnary(ExpressionType.TypeAs, firstParam, expression.Parameters[0].Type);
+
+            return Expression.Lambda(
+                expression.Body
+                    .ReplaceParameter(expression.Parameters[0], castedParam)
+                    .ReplaceParameters(newParams),
+                Enumerable.Repeat(firstParam, 1).Concat(expression.Parameters.Skip(1).Select(p => newParams[p])));
+        }
+
         /// <summary>
         ///     Combines the first expression with the second using the specified merge function.
         /// </summary>
@@ -483,7 +494,7 @@ namespace Epam.GraphQL.Extensions
                            .ToDictionary(p => p.s, p => p.f as Expression);
 
             // replace parameters in the second lambda expression with the parameters in the first
-            var secondBody = ExpressionHelpers.ParameterRebinder.ReplaceParameters(map, second.Body);
+            var secondBody = second.Body.ReplaceParameters(map);
 
             // create a merged lambda expression with parameters from the first expression
             return Expression.Lambda<T>(merge(first.Body, secondBody), first.Parameters);
@@ -504,44 +515,16 @@ namespace Epam.GraphQL.Extensions
             return GetParameterOfType<T>(memberExpression.Expression);
         }
 
-        private class ParameterVisitor : ExpressionVisitor
-        {
-            private readonly ParameterExpression[] _parameters;
-            private bool _containsAnyParam;
-
-            private ParameterVisitor(ParameterExpression[] parameters)
-            {
-                _parameters = parameters;
-            }
-
-            public static bool ContainsAnyParameter(Expression expr, ParameterExpression[] parameters)
-            {
-                var visitor = new ParameterVisitor(parameters);
-                visitor.Visit(expr);
-                return visitor._containsAnyParam;
-            }
-
-            protected override Expression VisitParameter(ParameterExpression node)
-            {
-                if (_parameters.Contains(node))
-                {
-                    _containsAnyParam = true;
-                }
-
-                return base.VisitParameter(node);
-            }
-        }
-
-        private class SortVisitor<T> : ExpressionVisitor
+        internal class SortVisitor<T> : ExpressionVisitor
         {
             private readonly List<(LambdaExpression SortExpression, SortDirection SortDirection)> _sorters = new();
             private bool _stop;
 
-            public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters(Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> orderExpression)
+            public static IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetSorters(Expression orderExpression)
             {
                 var visitor = new SortVisitor<T>();
 
-                visitor.Visit(orderExpression.Body);
+                visitor.Visit(orderExpression);
 
                 visitor._sorters.Reverse();
                 return visitor._sorters;
@@ -589,6 +572,34 @@ namespace Epam.GraphQL.Extensions
 
                 _stop = stop;
                 return base.VisitMethodCall(node);
+            }
+        }
+
+        private class ParameterVisitor : ExpressionVisitor
+        {
+            private readonly ParameterExpression[] _parameters;
+            private bool _containsAnyParam;
+
+            private ParameterVisitor(ParameterExpression[] parameters)
+            {
+                _parameters = parameters;
+            }
+
+            public static bool ContainsAnyParameter(Expression expr, ParameterExpression[] parameters)
+            {
+                var visitor = new ParameterVisitor(parameters);
+                visitor.Visit(expr);
+                return visitor._containsAnyParam;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                if (_parameters.Contains(node))
+                {
+                    _containsAnyParam = true;
+                }
+
+                return base.VisitParameter(node);
             }
         }
     }

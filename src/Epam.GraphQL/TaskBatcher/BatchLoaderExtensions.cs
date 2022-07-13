@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -48,8 +48,8 @@ namespace Epam.GraphQL.TaskBatcher
 
             public FuncContinuation(IDataLoader<TParameter2, TResult> task, Func<TParameter1, TParameter2> func)
             {
-                _task = task ?? throw new ArgumentNullException(nameof(task));
-                _func = func ?? throw new ArgumentNullException(nameof(func));
+                _task = task;
+                _func = func;
             }
 
             public IDataLoader<TParameter1, T> Combine<T>(Func<TParameter1, TResult, T> continuation)
@@ -75,10 +75,10 @@ namespace Epam.GraphQL.TaskBatcher
 
             public FuncCondition(Func<TParameter1, TParameter2> func, Func<TParameter2, bool> condition, IDataLoader<TParameter2, TResult> trueTask, IDataLoader<TParameter2, TResult> falseTask)
             {
-                _func = func ?? throw new ArgumentNullException(nameof(func));
-                _condition = condition ?? throw new ArgumentNullException(nameof(condition));
-                _trueTask = trueTask ?? throw new ArgumentNullException(nameof(trueTask));
-                _falseTask = falseTask ?? throw new ArgumentNullException(nameof(falseTask));
+                _func = func;
+                _condition = condition;
+                _trueTask = trueTask;
+                _falseTask = falseTask;
             }
 
             public IDataLoader<TParameter1, T> Combine<T>(Func<TParameter1, TResult, T> continuation)

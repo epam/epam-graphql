@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -8,10 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Projection;
-using Epam.GraphQL.Builders.Projection.Implementations;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Configuration.Implementations.Fields;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
@@ -37,7 +37,7 @@ namespace Epam.GraphQL
         private readonly PropertyInfo _mutationResultDataPropInfo;
         private readonly Lazy<SubmitInputTypeRegistry<TExecutionContext>> _submitInputTypeRegistry;
 
-        private Type _submitOutputType;
+        private Type _submitOutputType = null!; // Initialized in AfterConfigure method
 
         protected Mutation()
         {
@@ -51,15 +51,15 @@ namespace Epam.GraphQL
             _submitInputTypeRegistry = new Lazy<SubmitInputTypeRegistry<TExecutionContext>>(() => Registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>());
         }
 
-        private SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
+        internal SubmitInputTypeRegistry<TExecutionContext> SubmitInputTypeRegistry => _submitInputTypeRegistry.Value;
 
-        internal async Task<IEnumerable<object>> DoAfterSave(GraphQLContext<TExecutionContext> context, IEnumerable<object> entities)
+        internal async Task<IEnumerable<object>> DoAfterSave(IResolveFieldContext context, IEnumerable<object> entities)
         {
-            var profiler = context.Profiler;
+            var profiler = context.GetProfiler();
 
             using (profiler.Step(nameof(DoAfterSave)))
             {
-                return await AfterSaveAsync(context.ExecutionContext, entities).ConfigureAwait(false);
+                return await AfterSaveAsync(context.GetUserContext<TExecutionContext>(), entities).ConfigureAwait(false);
             }
         }
 
@@ -84,41 +84,52 @@ namespace Epam.GraphQL
             return result;
         }
 
-        protected internal void SubmitField<TLoader, TEntity>(string fieldName)
-            where TLoader : Projection<TEntity, TExecutionContext>, IMutableLoader<TExecutionContext>
-            where TEntity : class
+        internal void SubmitField(Type loaderType, string fieldName)
+        {
+            Guards.ThrowIfNull(loaderType, nameof(loaderType));
+
+            var baseLoaderType = ReflectionHelpers.FindMatchingGenericBaseType(loaderType, typeof(MutableLoader<,,>));
+            SubmitInputTypeRegistry.Register(fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
+        }
+
+        protected internal void SubmitField<TLoader>(string fieldName)
+            where TLoader : IMutableLoader<TExecutionContext>
         {
             SubmitField(typeof(TLoader), fieldName);
         }
 
+        protected internal void SubmitField<TLoader, TEntity>(string fieldName)
+            where TLoader : Projection<TEntity, TExecutionContext>, IMutableLoader<TExecutionContext>
+            where TEntity : class
+        {
+            SubmitField<TLoader>(fieldName);
+        }
+
         protected internal void SubmitField<TLoader, TEntity, TId>(string fieldName)
-            where TLoader : MutableLoader<TEntity, TId, TExecutionContext>
+            where TLoader : MutableLoader<TEntity, TId, TExecutionContext>, new()
             where TEntity : class
             where TId : IEquatable<TId>
         {
-            SubmitInputTypeRegistry.Register<TLoader, TEntity, TId>(GetType(), fieldName);
+            SubmitInputTypeRegistry.Register<TLoader, TEntity, TId>(fieldName);
         }
 
-        protected internal void SubmitField(Type loaderType, string fieldName)
+        protected internal new IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(loaderType, typeof(MutableLoader<,,>));
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {loaderType}");
-            }
-
-            SubmitInputTypeRegistry.Register(GetType(), fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
-        }
-
-        protected internal new IMutationFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
-        {
-            var field = AddField(name, deprecationReason);
-            return new ProjectionFieldBuilder<object, TExecutionContext>(field);
+            ThrowIfIsNotConfiguring();
+            var field = Configurator.AddField(
+                new MutationField<TExecutionContext>(
+                    owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
+                        .Argument(name),
+                    this,
+                    Configurator,
+                    name),
+                deprecationReason);
+            return field;
         }
 
         protected override void AfterConfigure()
         {
-            var inputTypeMap = SubmitInputTypeRegistry.GetInputTypeMap(GetType());
+            var inputTypeMap = SubmitInputTypeRegistry.GetInputTypeMap();
             if (inputTypeMap.Any())
             {
                 _submitOutputType = inputTypeMap
@@ -128,9 +139,9 @@ namespace Epam.GraphQL
 
                 SubmitField(
                     SubmitName,
-                    GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<,>).MakeGenericType(GetType(), typeof(TExecutionContext))),
+                    GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<TExecutionContext>)),
                     PayloadName,
-                    typeof(SubmitInputGraphType<,>).MakeGenericType(GetType(), typeof(TExecutionContext)),
+                    typeof(SubmitInputGraphType<TExecutionContext>),
                     PerformResolve,
                     _submitOutputType);
             }
@@ -141,10 +152,22 @@ namespace Epam.GraphQL
             return Task.FromResult(Enumerable.Empty<object>());
         }
 
-        private void SubmitField(string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
+        private void SubmitField(
+            string name,
+            IGraphTypeDescriptor<TExecutionContext> returnGraphType,
+            string argName,
+            Type argGraphType,
+            Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
+            Type fieldType)
         {
             ThrowIfIsNotConfiguring();
-            Configurator.AddSubmitField(name, returnGraphType, argName, argGraphType, resolve, fieldType);
+            Configurator.AddSubmitField(
+                name,
+                returnGraphType,
+                argName,
+                argGraphType,
+                resolve,
+                fieldType);
         }
 
         private async Task<object> PerformResolve(IResolveFieldContext context, Dictionary<string, object> payload)
@@ -153,14 +176,14 @@ namespace Epam.GraphQL
 
             foreach (var kv in payload)
             {
-                var entityType = SubmitInputTypeRegistry.GetEntityTypeByFieldName(GetType(), kv.Key);
-                var loaderType = SubmitInputTypeRegistry.GetLoaderTypeByFieldName(GetType(), kv.Key);
+                var entityType = SubmitInputTypeRegistry.GetEntityTypeByFieldName(kv.Key);
+                var loaderType = SubmitInputTypeRegistry.GetLoaderTypeByFieldName(kv.Key);
                 var graphType = (IGraphType)Registry.GetRequiredService(Registry.GetInputEntityGraphType(loaderType, entityType));
 
                 inputItems.Add(
                     kv.Key,
                     (kv.Value as System.Collections.IEnumerable)
-                        .Cast<IDictionary<string, object>>()
+                        .Cast<IDictionary<string, object?>>()
                         .Select(entity => InputItem.Create(entityType, entity.ToObject(entityType, graphType), entity)));
             }
 

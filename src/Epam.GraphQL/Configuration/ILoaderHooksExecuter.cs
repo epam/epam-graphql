@@ -3,12 +3,13 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-#nullable enable
+using System;
+using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration
 {
     internal interface ILoaderHooksExecuter<TEntity>
     {
-        void Execute(TEntity entity);
+        IDataLoader<T, T> Execute<T>(Func<T, TEntity> key);
     }
 }

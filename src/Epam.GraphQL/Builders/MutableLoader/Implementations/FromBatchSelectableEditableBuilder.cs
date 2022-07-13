@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -18,19 +18,17 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelect<TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceTo<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
-        where TField : Field<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>
+        where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>
     {
         internal FromBatchSelectableEditableBuilder(RelationRegistry<TExecutionContext> registry, TField field)
-            : base(registry, ((IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>)field).EditSettings)
+            : base(registry, field)
         {
-            Field = field ?? throw new ArgumentNullException(nameof(field));
+            Field = field;
         }
 
-        protected TField Field { get; set; }
+        protected new TField Field { get; set; }
 
         public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType, TExecutionContext> ReferenceTo<TChildEntity, TChildEntityLoader>(Predicate<TReturnType> isFakePropValue)
-            where TChildEntity : class
             where TChildEntityLoader : Loader<TChildEntity, TExecutionContext>, IIdentifiableLoader, new()
         {
             Registry.RegisterRelationPostponedForSave<TSourceType, TChildEntity, TChildEntityLoader, TReturnType, TReturnType>(Field.Name, isFakePropValue);
@@ -38,27 +36,18 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             return this;
         }
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1> selector)
-            where TReturnType1 : struct
+        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, Field.ApplySelect(selector).EditSettings);
-        }
+            var select = Field.ApplySelect(
+                Field.ConfigurationContext.Chain<TReturnType>(nameof(Select))
+                    .Argument(selector)
+                    .OptionalArgument(build),
+                selector,
+                build);
 
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1?, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1?> selector)
-            where TReturnType1 : struct
-        {
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1?, TExecutionContext>(Registry, Field.ApplySelect(selector).EditSettings);
-        }
-
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, string, TExecutionContext> Select(Func<TReturnType, string> selector)
-        {
-            return new FromBatchEditableBuilder<TSourceType, string, TExecutionContext>(Registry, Field.ApplySelect(selector).EditSettings);
-        }
-
-        public IHasEditableAndOnWriteAndMandatoryForUpdate<TSourceType, TReturnType1, TExecutionContext> Select<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build = null)
-            where TReturnType1 : class
-        {
-            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, Field.ApplySelect(selector, build).EditSettings);
+            return new FromBatchEditableBuilder<TSourceType, TReturnType1, TExecutionContext>(Registry, select);
         }
     }
 }

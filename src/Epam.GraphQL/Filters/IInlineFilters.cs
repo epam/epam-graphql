@@ -8,17 +8,15 @@ using System.Linq.Expressions;
 
 namespace Epam.GraphQL.Filters
 {
-    internal interface IInlineFilters
+    internal interface IInlineFilters<TExecutionContext>
     {
         Type FilterType { get; }
 
-        LambdaExpression BuildExpression(object executionContext, object filter);
+        LambdaExpression BuildExpression(TExecutionContext executionContext, object? filter);
     }
 
-    internal interface IInlineFilters<TEntity, TExecutionContext> : IInlineFilters, IFilter<TEntity, TExecutionContext>
+    internal interface IInlineFilters<TEntity, TExecutionContext> : IInlineFilters<TExecutionContext>, IFilter<TEntity, TExecutionContext>
     {
-        bool IsEmpty { get; }
-
         new Type FilterType { get; }
     }
 }

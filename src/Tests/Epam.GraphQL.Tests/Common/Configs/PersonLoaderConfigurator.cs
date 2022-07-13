@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Globalization;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
 
@@ -29,12 +30,16 @@ namespace Epam.GraphQL.Tests.Common.Configs
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId);
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId);
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture));
+                loader
                     .Field(p => p.ManagerId);
                 loader
                     .Field(p => p.FullName);
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary));
@@ -55,6 +60,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Filterable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Filterable();
+                loader
                     .Field(p => p.ManagerId)
                     .Filterable();
                 loader
@@ -62,7 +73,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -88,6 +99,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Sortable();
                 loader
@@ -95,7 +112,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -123,6 +140,14 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable()
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Filterable()
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Filterable()
                     .Sortable();
@@ -132,7 +157,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -173,12 +198,16 @@ namespace Epam.GraphQL.Tests.Common.Configs
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId);
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId);
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture));
+                loader
                     .Field(p => p.ManagerId);
                 loader
                     .Field(p => p.FullName);
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary));
@@ -199,6 +228,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Filterable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Filterable();
+                loader
                     .Field(p => p.ManagerId)
                     .Filterable();
                 loader
@@ -206,7 +241,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -232,6 +267,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Sortable();
                 loader
@@ -239,7 +280,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -267,6 +308,14 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable()
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Filterable()
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Filterable()
                     .Sortable();
@@ -276,7 +325,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -317,12 +366,16 @@ namespace Epam.GraphQL.Tests.Common.Configs
                 loader
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId);
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId);
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture));
+                loader
                     .Field(p => p.ManagerId);
                 loader
                     .Field(p => p.FullName);
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary));
@@ -343,6 +396,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Filterable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Filterable();
+                loader
                     .Field(p => p.ManagerId)
                     .Filterable();
                 loader
@@ -350,7 +409,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -376,6 +435,12 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field("ctxId", (ctx, p) => p.Id + ctx.UserId)
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Sortable();
                 loader
@@ -383,7 +448,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -411,6 +476,14 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable()
                     .Sortable();
                 loader
+                    .Field("ctxManagerId", (ctx, p) => p.ManagerId + ctx.UserId)
+                    .Filterable()
+                    .Sortable();
+                loader
+                    .Field("ctxFullName", (ctx, p) => p.FullName + ctx.UserId.ToString(CultureInfo.InvariantCulture))
+                    .Filterable()
+                    .Sortable();
+                loader
                     .Field(p => p.ManagerId)
                     .Filterable()
                     .Sortable();
@@ -420,7 +493,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))

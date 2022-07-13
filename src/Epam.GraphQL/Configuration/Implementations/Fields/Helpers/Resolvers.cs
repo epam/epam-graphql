@@ -4,19 +4,18 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Relay;
 using GraphQL;
-using DataObjects = GraphQL.Types.Relay.DataObjects;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 {
     internal static class Resolvers
     {
-        public static Connection<Proxy<TReturnType>> Resolve<TReturnType>(IResolveFieldContext context, IOrderedQueryable<Proxy<TReturnType>> children)
+        public static Connection<TReturnType> Resolve<TReturnType>(IResolveFieldContext context, IQueryable<TReturnType> children)
         {
             var first = context.GetFirst();
             var last = context.GetLast();
@@ -30,6 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 
             var connection = ConnectionUtils.ToConnection(
                 children,
+                context.GetFieldConfigurationContext(),
                 () => context.GetPath(),
                 context.GetQueryExecuter(),
                 first,
@@ -44,82 +44,100 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return connection;
         }
 
-        public static Func<IResolveFieldContext, IOrderedQueryable<Proxy<TReturnType>>, Connection<Proxy<TReturnType>>> ToConnection<TChildEntity, TReturnType, TExecutionContext>(IProxyAccessor<TReturnType, TExecutionContext> proxyAccessor)
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, TReturnType> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
         {
-            return (context, children) =>
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                proxyAccessor.Rewrite(FuncConstants<TEntity>.IdentityExpression).Compile());
+
+            return Resolver;
+
+            TReturnType Resolver(IResolveFieldContext ctx)
             {
-                var connection = Resolve(context, children);
-
-                var executer = proxyAccessor.CreateHooksExecuter(context.GetUserContext<TExecutionContext>());
-
-                if (connection.Items != null)
+                try
                 {
-                    connection.Items = executer.ExecuteHooks(connection.Items);
+                    var context = ctx.GetUserContext<TExecutionContext>();
+                    var entity = ctx.Source is Proxy<TEntity> proxy
+                        ? converter.Value(proxy)
+                        : (TEntity)ctx.Source;
+
+                    return func(context, entity);
                 }
-                else if (connection.Edges != null)
+                catch (Exception e)
                 {
-                    connection.Edges = executer.ExecuteHooks(connection.Edges);
-                }
-
-                return connection;
-            };
-        }
-
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func, bool doesDependOnAllFields)
-            where TEntity : class
-        {
-            if (doesDependOnAllFields)
-            {
-                return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
-            }
-
-            return ctx => func(ctx.GetUserContext<TExecutionContext>(), null);
-        }
-
-        public static IEnumerable<T> ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, IEnumerable<T> items)
-        {
-            if (executer == null)
-            {
-                return items;
-            }
-
-            return Impl(executer, items);
-
-            static IEnumerable<T> Impl(ILoaderHooksExecuter<T> executer, IEnumerable<T> items)
-            {
-                foreach (var item in items)
-                {
-                    executer.Execute(item);
-                    yield return item;
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             }
         }
 
-        public static T ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, T item)
+        public static Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, Task<TReturnType>> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
         {
-            if (executer != null)
-            {
-                executer.Execute(item);
-            }
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                proxyAccessor.Rewrite(FuncConstants<TEntity>.IdentityExpression).Compile());
 
-            return item;
+            return Resolver;
+
+            async Task<TReturnType> Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    var context = ctx.GetUserContext<TExecutionContext>();
+                    var entity = ctx.Source is Proxy<TEntity> proxy
+                        ? converter.Value(proxy)
+                        : (TEntity)ctx.Source;
+
+                    return await func(context, entity).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    ctx.LogFieldExecutionError(e);
+                    throw;
+                }
+            }
         }
 
-        private static IEnumerable<DataObjects.Edge<T>> ExecuteHooks<T>(this ILoaderHooksExecuter<T> executer, IEnumerable<DataObjects.Edge<T>> items)
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(
+            Func<TExecutionContext, TReturnType> func)
         {
-            if (executer == null)
-            {
-                return items;
-            }
+            return Resolver;
 
-            return Impl(executer, items);
-
-            static IEnumerable<DataObjects.Edge<T>> Impl(ILoaderHooksExecuter<T> executer, IEnumerable<DataObjects.Edge<T>> items)
+            TReturnType Resolver(IResolveFieldContext ctx)
             {
-                foreach (var edge in items)
+                try
                 {
-                    executer.Execute(edge.Node);
-                    yield return edge;
+                    return func(ctx.GetUserContext<TExecutionContext>());
+                }
+                catch (Exception e)
+                {
+                    ctx.LogFieldExecutionError(e);
+                    throw;
+                }
+            }
+        }
+
+        public static Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType, TExecutionContext>(
+            Func<TExecutionContext, Task<TReturnType>> func)
+        {
+            return Resolver;
+
+            async Task<TReturnType> Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    return await func(ctx.GetUserContext<TExecutionContext>()).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
             }
         }

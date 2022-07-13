@@ -6,171 +6,129 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Common.Implementations;
-using Epam.GraphQL.Builders.Projection;
-using Epam.GraphQL.Builders.Projection.Implementations;
-using Epam.GraphQL.Configuration.Implementations;
+using System.Reflection;
+using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL
 {
-    public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>
+    public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>, IChainConfigurationContextOwner
     {
-        protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string deprecationReason = null)
+        private static MethodInfo? _connectionMethodInfo;
+        private static MethodInfo? _groupConnectionMethodInfo;
+
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; } = null!;
+
+        protected internal new IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
-            var field = AddField(name, deprecationReason);
-            return new ProjectionFieldBuilder<object, TExecutionContext>(field);
+            ThrowIfIsNotConfiguring();
+
+            var field = Configurator.AddField(
+                new QueryField<TExecutionContext>(
+                    owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
+                        .Argument(name),
+                    Configurator,
+                    name),
+                deprecationReason);
+
+            return field;
         }
 
-        protected internal IConnectionBuilder Connection<TChildLoader>(string name, string deprecationReason = null)
+        protected internal IRootLoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
+            where TLoader : Loader<TEntity, TExecutionContext>, new()
+        {
+            return Field(name, deprecationReason)
+                .FromLoader<TLoader, TEntity>();
+        }
+
+        protected internal IConnectionField Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            return Connection(typeof(TChildLoader), name, deprecationReason);
+            ThrowIfIsNotConfiguring();
+
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
+            {
+                // TODO Make Dummy IConnectionField implementation
+                var configurationContext = Configurator.ConfigurationContext.Chain<TChildLoader>(this, nameof(Connection))
+                    .Argument(name);
+
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+
+                throw new ConfigurationException(msg);
+            }
+
+            _connectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
+                Connection<DummyMutableLoader<TExecutionContext>, object>);
+
+            var field = _connectionMethodInfo
+                .MakeGenericMethod(typeof(TChildLoader), baseLoaderType.GenericTypeArguments[0])
+                .InvokeAndHoistBaseException<IConnectionField>(
+                    this,
+                    name,
+                    deprecationReason);
+
+            return field;
         }
 
-        protected internal IConnectionBuilder Connection(Type childLoaderType, string name, string deprecationReason = null)
+        protected internal IConnectionField Connection<TChildLoader, TChildEntity>(
+            string name,
+            Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order,
+            string? deprecationReason = null)
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(childLoaderType, typeof(Loader<,>));
-
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {childLoaderType}");
-            }
-
-            var childEntityType = baseLoaderType.GetGenericArguments().First();
-
-            if (IsConfiguringInputType)
-            {
-                var dummyBuilderType = typeof(DummyConnectionBuilder<,,>)
-                    .MakeGenericType(childLoaderType, childEntityType, typeof(TExecutionContext));
-
-                return (IConnectionBuilder)dummyBuilderType.CreateInstanceAndHoistBaseException();
-            }
-
-            var getGraphQLTypeDescriptorMethod = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.GetGraphQLTypeDescriptor),
-                new[] { childLoaderType, childEntityType },
-                Type.EmptyTypes);
-
-            var descriptor = getGraphQLTypeDescriptorMethod.InvokeAndHoistBaseException<IGraphTypeDescriptor<TExecutionContext>>(ObjectGraphTypeConfigurator);
-
-            var addConnectionLoaderFieldMethodInfo = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.AddConnectionLoaderField),
-                new[] { childLoaderType, childEntityType },
-                new[] { typeof(string), typeof(IGraphTypeDescriptor<,>).MakeGenericType(childEntityType, typeof(TExecutionContext)), typeof(string) });
-
-            var field = addConnectionLoaderFieldMethodInfo.InvokeAndHoistBaseException(
-                ObjectGraphTypeConfigurator,
-                name,
-                descriptor,
-                deprecationReason);
-
-            var projectionBuilder = typeof(ConnectionBuilder<,,>)
-                .MakeGenericType(typeof(object), childEntityType, typeof(TExecutionContext));
-
-            return (IConnectionBuilder)projectionBuilder.CreateInstanceAndHoistBaseException(field);
+            return (IConnectionField)Field(name, deprecationReason)
+                .FromLoader<TChildLoader, TChildEntity>()
+                .AsConnection(order);
         }
 
-        protected internal IConnectionBuilder Connection<TChildLoader, TEntity>(string name, Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order, string deprecationReason = null)
+        protected internal IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            return Connection(typeof(TChildLoader), name, order, deprecationReason);
+            ThrowIfIsNotConfiguring();
+
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
+            {
+                var configurationContext = Configurator.ConfigurationContext.Chain<TChildLoader>(this, nameof(GroupConnection))
+                    .Argument(name);
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+                throw new ConfigurationException(msg);
+            }
+
+            _groupConnectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
+                GroupConnection<DummyMutableLoader<TExecutionContext>, object>);
+
+            var field = _groupConnectionMethodInfo
+                .MakeGenericMethod(typeof(TChildLoader), baseLoaderType.GenericTypeArguments[0])
+                .InvokeAndHoistBaseException<IConnectionField>(
+                    this,
+                    name,
+                    deprecationReason);
+
+            return field;
         }
 
-        protected internal IConnectionBuilder Connection<TEntity>(Type childLoaderType, string name, Expression<Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>> order, string deprecationReason = null)
+        private IConnectionField Connection<TChildLoader, TChildEntity>(
+            string name,
+            string deprecationReason)
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(childLoaderType, typeof(Loader<,>));
-
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {childLoaderType}", nameof(childLoaderType));
-            }
-
-            var childEntityType = baseLoaderType.GetGenericArguments().First();
-
-            if (childEntityType != typeof(TEntity))
-            {
-                throw new ArgumentException($"Entity type mismatch: expected {typeof(TEntity)}, but found {childLoaderType}", nameof(childLoaderType));
-            }
-
-            if (IsConfiguringInputType)
-            {
-                var dummyBuilderType = typeof(DummyConnectionBuilder<,,>)
-                    .MakeGenericType(childLoaderType, childEntityType, typeof(TExecutionContext));
-
-                return (IConnectionBuilder)dummyBuilderType.CreateInstanceAndHoistBaseException();
-            }
-
-            var getGraphQLTypeDescriptorMethod = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.GetGraphQLTypeDescriptor),
-                new[] { childLoaderType, childEntityType },
-                Type.EmptyTypes);
-
-            var descriptor = getGraphQLTypeDescriptorMethod.InvokeAndHoistBaseException<IGraphTypeDescriptor<TExecutionContext>>(ObjectGraphTypeConfigurator);
-
-            var graphTypeDescriptorType = typeof(IGraphTypeDescriptor<,>).MakeGenericType(childEntityType, typeof(TExecutionContext));
-            var queryableType = typeof(IQueryable<>).MakeGenericType(childEntityType);
-            var orderedQueryableType = typeof(IOrderedQueryable<>).MakeGenericType(childEntityType);
-            var orderFuncType = typeof(Func<,>).MakeGenericType(queryableType, orderedQueryableType);
-            var orderType = typeof(Expression<>).MakeGenericType(orderFuncType);
-
-            var addConnectionLoaderFieldMethodInfo = ObjectGraphTypeConfigurator.GetType().GetPublicGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.AddConnectionLoaderField),
-                new[] { childLoaderType, childEntityType },
-                new[] { typeof(string), graphTypeDescriptorType, orderType, typeof(string) });
-
-            var field = addConnectionLoaderFieldMethodInfo.InvokeAndHoistBaseException(
-                ObjectGraphTypeConfigurator,
-                name,
-                descriptor,
-                order,
-                deprecationReason);
-
-            var projectionBuilder = typeof(ConnectionBuilder<,,>)
-                .MakeGenericType(typeof(object), childEntityType, typeof(TExecutionContext));
-
-            return (IConnectionBuilder)projectionBuilder.CreateInstanceAndHoistBaseException(field);
+            return (IConnectionField)Field(name, deprecationReason)
+                .FromLoader<TChildLoader, TChildEntity>()
+                .AsConnection();
         }
 
-        protected internal IConnectionBuilder GroupConnection<TChildLoader>(string name, string deprecationReason = null)
-            where TChildLoader : class => GroupConnection(typeof(TChildLoader), name, deprecationReason);
-
-        protected internal IConnectionBuilder GroupConnection(Type childLoaderType, string name, string deprecationReason = null)
+        private IConnectionField GroupConnection<TChildLoader, TChildEntity>(string name, string? deprecationReason)
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(childLoaderType, typeof(Loader<,>));
-
-            if (baseLoaderType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {childLoaderType}");
-            }
-
-            var childEntityType = baseLoaderType.GetGenericArguments().First();
-
-            if (IsConfiguringInputType)
-            {
-                var dummyBuilderType = typeof(DummyConnectionBuilder<,,>)
-                    .MakeGenericType(childLoaderType, childEntityType, typeof(TExecutionContext));
-
-                return (IConnectionBuilder)dummyBuilderType.CreateInstanceAndHoistBaseException();
-            }
-
-            var addGroupConnectionLoaderFieldMethodInfo = ObjectGraphTypeConfigurator.GetType().GetGenericMethod(
-                nameof(ObjectGraphTypeConfigurator.AddGroupLoaderField),
-                new[] { childLoaderType, childEntityType },
-                new[] { typeof(string), typeof(string) });
-
-            var field = addGroupConnectionLoaderFieldMethodInfo.InvokeAndHoistBaseException(
-                ObjectGraphTypeConfigurator,
-                name,
-                deprecationReason);
-
-            var projectionBuilder = typeof(ConnectionBuilder<,,>)
-                .MakeGenericType(typeof(object), childEntityType, typeof(TExecutionContext));
-
-            return (IConnectionBuilder)projectionBuilder.CreateInstanceAndHoistBaseException(field);
+            return (IConnectionField)Field(name, deprecationReason)
+                .FromLoader<TChildLoader, TChildEntity>()
+                .AsGroupConnection();
         }
     }
 }

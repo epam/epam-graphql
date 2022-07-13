@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -13,19 +13,31 @@ namespace Epam.GraphQL.Mutation
     internal class SubmitInputTypeRegistryRecord<TExecutionContext>
     {
         private readonly RelationRegistry<TExecutionContext> _registry;
+        private readonly Lazy<IMutableLoader<TExecutionContext>> _mutableLoader;
 
-        private SubmitInputTypeRegistryRecord(RelationRegistry<TExecutionContext> registry)
+        private SubmitInputTypeRegistryRecord(
+            RelationRegistry<TExecutionContext> registry,
+            Lazy<IMutableLoader<TExecutionContext>> mutableLoaderFactory,
+            Type configuratorType,
+            Type entityType,
+            string fieldName,
+            Type idType)
         {
-            _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _registry = registry;
+            _mutableLoader = mutableLoaderFactory;
+            ConfiguratorType = configuratorType;
+            EntityType = entityType;
+            FieldName = fieldName;
+            IdType = idType;
         }
 
-        public Type ConfiguratorType { get; private set; }
+        public Type ConfiguratorType { get; }
 
-        public Type EntityType { get; private set; }
+        public Type EntityType { get; }
 
-        public Type IdType { get; private set; }
+        public Type IdType { get; }
 
-        public string FieldName { get; set; }
+        public string FieldName { get; }
 
         public Type InputType
         {
@@ -45,22 +57,24 @@ namespace Epam.GraphQL.Mutation
             }
         }
 
+        public IMutableLoader<TExecutionContext> MutableLoader => _mutableLoader.Value;
+
         public static SubmitInputTypeRegistryRecord<TExecutionContext> Create<TConfigurator, TEntity, TId>(string fieldName, RelationRegistry<TExecutionContext> registry)
-            where TConfigurator : MutableLoader<TEntity, TId, TExecutionContext>
+            where TConfigurator : MutableLoader<TEntity, TId, TExecutionContext>, new()
             where TEntity : class
         {
-            return new SubmitInputTypeRegistryRecord<TExecutionContext>(registry)
-            {
-                ConfiguratorType = typeof(TConfigurator),
-                EntityType = typeof(TEntity),
-                FieldName = fieldName,
-                IdType = typeof(TId),
-            };
+            return new SubmitInputTypeRegistryRecord<TExecutionContext>(
+                registry: registry,
+                mutableLoaderFactory: new Lazy<IMutableLoader<TExecutionContext>>(() => registry.ResolveLoader<TConfigurator, TEntity>()),
+                configuratorType: typeof(TConfigurator),
+                entityType: typeof(TEntity),
+                fieldName: fieldName,
+                idType: typeof(TId));
         }
 
         public override bool Equals(object obj) => Equals(obj as SubmitInputTypeRegistryRecord<TExecutionContext>);
 
-        public bool Equals(SubmitInputTypeRegistryRecord<TExecutionContext> obj) => obj != null
+        public bool Equals(SubmitInputTypeRegistryRecord<TExecutionContext>? obj) => obj != null
             && obj.ConfiguratorType == ConfiguratorType
             && obj.EntityType == EntityType
             && obj.IdType == IdType

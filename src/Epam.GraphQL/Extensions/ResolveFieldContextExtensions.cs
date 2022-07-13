@@ -5,9 +5,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
@@ -22,33 +24,32 @@ namespace Epam.GraphQL.Extensions
     {
         public static IEnumerable<TEntity> ExecuteQuery<TEntity>(this IResolveFieldContext context, Func<IResolveFieldContext, IQueryable<TEntity>> queryFactory)
         {
-            return context.Bind(ctx => ctx.GetQueryExecuter().ToEnumerable(() => ctx.GetPath(), queryFactory(ctx)));
+            return context.Bind(ctx => ctx.GetQueryExecuter().ToEnumerable(context.GetFieldConfigurationContext(), () => ctx.GetPath(), queryFactory(ctx)));
         }
 
         public static TReturnType ExecuteQuery<TEntity, TReturnType>(this IResolveFieldContext context, Func<IResolveFieldContext, IQueryable<TEntity>> queryFactory, Func<IQueryable<TEntity>, TReturnType> transform, string transformName)
         {
-            return context.Bind(ctx => ctx.GetQueryExecuter().Execute(() => ctx.GetPath(), queryFactory(ctx), transform, transformName));
+            return context.Bind(ctx => ctx.GetQueryExecuter().Execute(context.GetFieldConfigurationContext(), () => ctx.GetPath(), queryFactory(ctx), transform, transformName));
         }
 
         public static TExecutionContext GetUserContext<TExecutionContext>(this IResolveFieldContext context) => ((GraphQLContext<TExecutionContext>)context.UserContext["ctx"]).ExecutionContext;
 
-        public static RelationRegistry<TExecutionContext> GetRegistry<TExecutionContext>(this IResolveFieldContext context) => ((GraphQLContext<TExecutionContext>)context.UserContext["ctx"]).Registry;
-
         public static ISchemaExecutionListener GetListener(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Listener;
-
-        public static ILogger GetLogger(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Logger;
 
         public static IQueryExecuter GetQueryExecuter(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).QueryExecuter;
 
-        public static TResult Bind<TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
+        public static ILogger GetLogger(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Logger;
 
-        public static Func<T, TResult> Bind<T, TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, T, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
+        public static TResult Bind<TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
 
         public static IBatcher GetBatcher(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Batcher;
 
         public static IProfiler GetProfiler(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Profiler;
 
-        public static IDataContext GetDataContext(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).DataContext;
+        public static IDataContext GetDataContext(this IResolveFieldContext context)
+        {
+            return ((GraphQLContext)context.UserContext["ctx"]).DataContext ?? throw new NotSupportedException();
+        }
 
         public static bool HasTotalCount(this IResolveFieldContext context) => context.SubFields.ContainsKey("totalCount");
 
@@ -68,9 +69,28 @@ namespace Epam.GraphQL.Extensions
 
         public static string GetPath(this IResolveFieldContext context) => string.Join(".", context.Path.SafeNull());
 
-        public static IEnumerable<string> GetFilterFieldNames(this IResolveFieldContext context) => GetArgument(context, "filter", new Dictionary<string, object>()).Keys;
+        public static IChainConfigurationContext GetFieldConfigurationContext(this IResolveFieldContext context) => (IChainConfigurationContext)context.FieldDefinition.Metadata["CONFIGURATION_CONTEXT"];
 
-        public static string GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
+        public static ExecutionError CreateFieldExecutionError(this IResolveFieldContext context, Exception innerException)
+        {
+            var configurationContext = context.GetFieldConfigurationContext();
+            var path = context.GetPath();
+            throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{path}`. See an inner exception for details.", configurationContext), innerException);
+        }
+
+        public static void LogFieldExecutionError(this IResolveFieldContext context, Exception innerException)
+        {
+            var configurationContext = context.GetFieldConfigurationContext();
+            var path = context.GetPath();
+            var logger = context.GetLogger();
+            logger.Log(
+                Constants.Logging.ExecutionError.Level,
+                Constants.Logging.ExecutionError.EventId,
+                innerException,
+                configurationContext.GetRuntimeError($"Error during resolving field `{path}`.", configurationContext));
+        }
+
+        public static string? GetSearch(this IResolveFieldContext context) => GetArgument<string>(context, "search");
 
         public static int? GetFirst(this IResolveFieldContext context) => GetArgument<int?>(context, "first");
 
@@ -136,6 +156,25 @@ namespace Epam.GraphQL.Extensions
             return items.GetSubFieldsNames(context.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Fragments, f => true)).Distinct();
         }
 
+        public static bool HasGroupConnectionItemField(this IResolveFieldContext context)
+        {
+            if (context.SubFields.TryGetValue("items", out var items))
+            {
+                items = GetSubField(context, items, "item");
+            }
+
+            if (context.SubFields.TryGetValue("edges", out var edges))
+            {
+                edges = GetSubField(context, edges, "node");
+                if (edges != null)
+                {
+                    edges = GetSubField(context, edges, "item");
+                }
+            }
+
+            return items != null || edges != null;
+        }
+
         public static IEnumerable<string> GetGroupConnectionAggregateQueriedFields(this IResolveFieldContext context)
         {
             context.SubFields.TryGetValue("items", out var items);
@@ -157,10 +196,11 @@ namespace Epam.GraphQL.Extensions
         public static IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>> Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
             this IResolveFieldContext context,
             Func<IResolveFieldContext, IQueryable<TInnerEntity>> queryFactory,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>>? sorters,
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,
-            ILoaderHooksExecuter<TTransformedInnerEntity> hooksExecuter)
+            ILoaderHooksExecuter<TTransformedInnerEntity>? hooksExecuter)
         {
             var batcher = context.GetBatcher();
 
@@ -168,6 +208,7 @@ namespace Epam.GraphQL.Extensions
                 .Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
                     context,
                     queryFactory,
+                    sorters,
                     transform,
                     outerExpression,
                     innerExpression,
@@ -176,7 +217,7 @@ namespace Epam.GraphQL.Extensions
             return result;
         }
 
-        private static Field GetSubField(IResolveFieldContext context, Field parent, string subFieldName)
+        private static Field? GetSubField(IResolveFieldContext context, Field parent, string subFieldName)
         {
             if (parent == null)
             {
@@ -197,12 +238,14 @@ namespace Epam.GraphQL.Extensions
                 .FirstOrDefault();
         }
 
-        private static TType GetArgument<TType>(IResolveFieldContext context, string name, TType defaultValue = default)
+        [return: NotNullIfNotNull("defaultValue")]
+        private static TType? GetArgument<TType>(IResolveFieldContext context, string name, TType? defaultValue = default)
         {
-            return (TType)GetArgument(context, typeof(TType), name, defaultValue);
+            return (TType?)GetArgument(context, typeof(TType), name, defaultValue);
         }
 
-        private static object GetArgument(IResolveFieldContext context, Type argumentType, string name, object defaultValue)
+        [return: NotNullIfNotNull("defaultValue")]
+        private static object? GetArgument(IResolveFieldContext context, Type argumentType, string name, object? defaultValue)
         {
             if (!HasArgument(context, name) || context.Arguments[name] == null)
             {

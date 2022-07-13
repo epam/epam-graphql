@@ -8,6 +8,7 @@ using System.Linq;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Connection
@@ -24,8 +25,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -72,8 +71,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Sortable().Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -120,8 +117,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -171,8 +166,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -222,8 +215,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Filterable().Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -273,8 +264,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -327,8 +316,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -384,8 +371,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -441,8 +426,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -498,8 +481,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -566,8 +547,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -640,8 +619,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field("unitId1", p => p.UnitId * 2).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -691,8 +668,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field("unitId", p => p.UnitId * 2).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -742,8 +717,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -795,8 +768,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -843,8 +814,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             void Builder(Query<TestUserContext> query)
@@ -934,8 +903,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             var filterType = GraphQLTypeBuilder.CreateLoaderFilterType<Person, PersonFilter, TestUserContext>((ctx, query, filter) => query.Where(p => filter.Ids.Contains(p.Id)));
@@ -990,8 +957,6 @@ namespace Epam.GraphQL.Tests.Connection
                     loader.Field(p => p.ManagerId).Groupable();
                     loader.Field(p => p.UnitId).Groupable();
                 },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.ThenBy(p => p.Id),
                 getBaseQuery: _ => FakeData.People.AsQueryable());
 
             var searchType = GraphQLTypeBuilder.CreateSearcherType<Person, TestUserContext>((query, ctx, search) => query.Where(p => p.FullName.Contains(search)));
@@ -1033,6 +998,167 @@ namespace Epam.GraphQL.Tests.Connection
                 }",
                 null,
                 null);
+        }
+
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/8.
+        /// </summary>
+        [Test]
+        public void TestGroupConnectionQueryWithCountOnly()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.ManagerId).Groupable();
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .GroupConnection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        people {
+                            items {
+                                count
+                            }
+                            totalCount
+                        }
+                    }",
+                @"{
+                    people: {
+                        items: [{
+                            count: 6
+                        }],
+                        totalCount: 1
+                    }
+                }");
+        }
+
+        [Test]
+        public void TestGroupConnectionQueryWithCountOnlyForInt()
+        {
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("id")
+                    .FromIQueryable(_ => FakeData.People.Select(p => p.ManagerId).AsQueryable())
+                    .AsGroupConnection();
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        id {
+                            items {
+                                count
+                            }
+                            totalCount
+                        }
+                    }",
+                @"{
+                    id: {
+                        items: [{
+                            count: 6
+                        }],
+                        totalCount: 1
+                    }
+                }");
+        }
+
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/7.
+        /// </summary>
+        [Test]
+        public void TestGroupConnectionQueryItemsWithSorting()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id).Sortable();
+                    loader.Field(p => p.ManagerId).Groupable();
+                    loader.Field(p => p.UnitId).Groupable();
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .GroupConnection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQueryError(
+                Builder,
+                typeof(ExecutionError),
+                "Cannot sort by the following fields: `id`. Consider making them groupable.",
+                @"
+                    query {
+                        people(sorting: {field: ""id"" }) {
+                            items {
+                                item {
+                                    unitId
+                                }
+                            }
+                        }
+                    }");
+        }
+
+        [Test]
+        public void TestGroupConnectionQueryItemsWithSortingContextedExpression()
+        {
+            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
+                onConfigure: loader =>
+                {
+                    loader.Field(p => p.Id);
+                    loader.Field("managerId", (ctx, p) => p.ManagerId + ctx.UserId).Sortable().Groupable();
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable());
+
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .GroupConnection(personLoaderType, "people");
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"
+                    query {
+                        people(sorting: {field: ""managerId"" }) {
+                            items {
+                                item {
+                                    managerId
+                                }
+                            }
+                        }
+                    }",
+                @"{
+                    people: {
+                        items: [{
+                            item: {
+                                managerId: null
+                            }
+                        },{
+                            item: {
+                                managerId: 6
+                            }
+                        },{
+                            item: {
+                                managerId: 7
+                            }
+                        },{
+                            item: {
+                                managerId: 10
+                            }
+                        }]
+                    }
+                }");
         }
 
         public class PersonFilter : Input

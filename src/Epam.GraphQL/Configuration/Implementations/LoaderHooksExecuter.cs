@@ -5,44 +5,46 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Epam.GraphQL.Helpers;
-
-#nullable enable
+using Epam.GraphQL.TaskBatcher;
+using GraphQL;
+using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class LoaderHooksExecuter<T, TExecutionContext> : ILoaderHooksExecuter<Proxy<T>>
     {
         private readonly IEnumerable<LoadEntityHook<T, TExecutionContext>> _hooks;
-        private readonly TExecutionContext _executionContext;
+        private readonly IResolveFieldContext _context;
 
-        public LoaderHooksExecuter(IEnumerable<LoadEntityHook<T, TExecutionContext>> hooks, TExecutionContext executionContext)
+        public LoaderHooksExecuter(IEnumerable<LoadEntityHook<T, TExecutionContext>> hooks, IResolveFieldContext context)
         {
             _hooks = hooks;
-            _executionContext = executionContext;
+            _context = context;
         }
 
-        public void Execute(Proxy<T> entity)
+        public IDataLoader<TKey, TKey> Execute<TKey>(Func<TKey, Proxy<T>> key)
         {
-            foreach (var hook in _hooks)
-            {
-                hook.Execute(_executionContext, entity);
-            }
+            return BatchLoader.WhenAll(_hooks.Select(hook => hook.ExecuteAsync(key, _context)))
+                .Then(all => all.First());
         }
     }
 
-    internal class LoaderHooksExecuter<T, TReturnType, TExecutionContext> : ILoaderHooksExecuter<Tuple<Proxy<T>, TReturnType>>
+    internal class LoaderHooksExecuter<T, TTransformed, TReturnType, TExecutionContext> : ILoaderHooksExecuter<Tuple<TTransformed, TReturnType>>
     {
-        private readonly ILoaderHooksExecuter<Proxy<T>>? _executer;
+        private readonly ILoaderHooksExecuter<TTransformed>? _executer;
 
-        public LoaderHooksExecuter(TExecutionContext context, IProxyAccessor<T, TExecutionContext> proxyAccessor)
+        public LoaderHooksExecuter(IResolveFieldContext context, IProxyAccessor<T, TTransformed, TExecutionContext> proxyAccessor)
         {
             _executer = proxyAccessor.CreateHooksExecuter(context);
         }
 
-        public void Execute(Tuple<Proxy<T>, TReturnType> entity)
+        public IDataLoader<TKey, TKey> Execute<TKey>(Func<TKey, Tuple<TTransformed, TReturnType>> key)
         {
-            _executer?.Execute(entity.Item1);
+            Guards.ThrowNotSupportedIf(_executer == null);
+
+            return _executer.Execute<TKey>(item => key(item).Item1);
         }
     }
 }

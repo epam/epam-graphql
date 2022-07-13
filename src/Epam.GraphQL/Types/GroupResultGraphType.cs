@@ -1,26 +1,33 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Configuration;
-using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Configuration.Implementations;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
 {
-    internal class GroupResultGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
-        where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TChildEntity : class
+    internal class GroupResultGraphType<TReturnType, TExecutionContext> : ObjectGraphType<object>
     {
-        public GroupResultGraphType(RelationRegistry<TExecutionContext> registry)
+        public GroupResultGraphType(IGraphTypeDescriptor<TReturnType, TExecutionContext> graphType)
         {
-            var typeName = registry.GetProjectionTypeName<TChildLoader, TChildEntity>(false);
+            var typeName = graphType.Name;
 
             Name = $"{typeName}GroupResult";
 
-            Field<NonNullGraphType<GroupGraphType<TChildLoader, TChildEntity, TExecutionContext>>>()
-                .Name("item");
+            if (graphType.Configurator == null)
+            {
+                Field(graphType.Type, "item");
+            }
+            else
+            {
+                AddField(new FieldType()
+                {
+                    Name = "item",
+                    ResolvedType = new NonNullGraphType(new GroupGraphType<TReturnType, TExecutionContext>(graphType.Configurator)),
+                });
+            }
 
             Field<NonNullGraphType<IntGraphType>>()
                 .Name("count");

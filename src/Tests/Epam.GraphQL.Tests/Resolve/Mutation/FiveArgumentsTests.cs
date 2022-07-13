@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Projection;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.EntityFrameworkCore;
 using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Tests.Helpers;
@@ -746,7 +746,7 @@ namespace Epam.GraphQL.Tests.Resolve.Mutation
             };
         }
 
-        private IMutationFieldBuilder<IMutationFieldBuilderBase<TArg1, TArg2, TArg3, TArg4, TArg5, TestUserContext>, TArg1, TArg2, TArg3, TArg4, TArg5, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TArg4, TArg5>(Mutation<TestUserContext> mutation)
+        private IResolvableMutationFieldMixin<TArg1, TArg2, TArg3, TArg4, TArg5, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TArg4, TArg5>(Mutation<TestUserContext> mutation)
         {
             return _argumentType switch
             {

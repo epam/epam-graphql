@@ -546,6 +546,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
             Test(
                 queryBuilder: query =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     query.Field("test")
                         .AsUnionOf<IEnumerable<Line>, Line>()
                             .And<IEnumerable<Circle>, Circle>()
@@ -556,6 +557,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     mutation.Field("test")
                         .AsUnionOf<IEnumerable<Line>, Line>()
                             .And<IEnumerable<Circle>, Circle>()
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 query: @"
@@ -595,6 +597,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
             Test(
                 queryBuilder: query =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     query.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
                             .And<IEnumerable<CustomObject<string, int>>, CustomObject<string, int>>()
@@ -605,6 +608,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     mutation.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
                             .And<IEnumerable<CustomObject<string, int>>, CustomObject<string, int>>()
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 query: @"
@@ -646,6 +650,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
             Test(
                 queryBuilder: query =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     query.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>(b =>
                         {
@@ -678,6 +683,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                                 b.Field(o => o.FirstField);
                                 b.Field(o => o.SecondField);
                             })
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 query: @"

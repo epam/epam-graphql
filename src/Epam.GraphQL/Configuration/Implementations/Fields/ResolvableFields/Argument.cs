@@ -6,15 +6,13 @@
 using System;
 using GraphQL;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class Argument<TArg> : IArgument<IResolveFieldContext>
     {
         public Argument(string name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
         }
 
         public string Name { get; }

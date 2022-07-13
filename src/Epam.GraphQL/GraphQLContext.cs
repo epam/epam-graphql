@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Adapters;
 using Epam.GraphQL.Configuration;
@@ -12,25 +11,23 @@ using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.TaskBatcher;
 using Microsoft.Extensions.Logging;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     internal class GraphQLContext
     {
         public GraphQLContext(
             IDataContext? dataContext,
-            IProfiler? profiler,
-            IBatcher? batcher,
-            IRegistry? registry,
-            ILogger? logger,
+            IProfiler profiler,
+            IBatcher batcher,
+            IRegistry registry,
+            ILogger logger,
             IEnumerable<ISchemaExecutionListener>? listeners)
         {
-            Batcher = batcher ?? throw new ArgumentNullException(nameof(batcher));
-            Profiler = profiler ?? throw new ArgumentNullException(nameof(profiler));
+            Batcher = batcher;
+            Profiler = profiler;
             DataContext = dataContext;
-            Registry = registry ?? throw new ArgumentNullException(nameof(registry));
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Registry = registry;
+            Logger = logger;
             ResolveFieldContextBinder = new ResolveFieldContextBinder();
             Listener = new CompoundSchemaExecutionListener(listeners);
             QueryExecuter = new QueryExecuter(Logger, DataContext, NullQueryableToAsyncEnumerableConverter.Instance);
@@ -67,15 +64,15 @@ namespace Epam.GraphQL
     {
         internal GraphQLContext(
             IDataContext? dataContext,
-            IProfiler? profiler,
-            IBatcher? batcher,
-            RelationRegistry<TExecutionContext>? registry,
-            ILogger? logger,
+            IProfiler profiler,
+            IBatcher batcher,
+            RelationRegistry<TExecutionContext> registry,
+            ILogger logger,
             IEnumerable<ISchemaExecutionListener>? listeners,
-            TExecutionContext executionContext) // TODO Mark it nullable
+            TExecutionContext executionContext)
             : base(dataContext, profiler, batcher, registry, logger, listeners)
         {
-            ExecutionContext = executionContext ?? throw new ArgumentNullException(nameof(executionContext));
+            ExecutionContext = executionContext;
         }
 
         public TExecutionContext ExecutionContext { get; }

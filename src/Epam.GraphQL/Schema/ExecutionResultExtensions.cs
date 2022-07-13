@@ -3,11 +3,9 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Threading.Tasks;
+using Epam.GraphQL.Helpers;
 using GraphQL;
-
-#nullable enable
 
 namespace Epam.GraphQL
 {
@@ -18,10 +16,8 @@ namespace Epam.GraphQL
     {
         public static async Task<string> WriteToStringAsync(this ExecutionResult executionResult, IDocumentWriter documentWriter)
         {
-            if (executionResult == null)
-            {
-                throw new ArgumentNullException(nameof(executionResult));
-            }
+            Guards.ThrowIfNull(executionResult, nameof(executionResult));
+            Guards.ThrowIfNull(documentWriter, nameof(documentWriter));
 
             var result = await documentWriter.WriteToStringAsync(executionResult).ConfigureAwait(false);
             return result;

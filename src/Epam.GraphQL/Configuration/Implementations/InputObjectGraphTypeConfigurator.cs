@@ -4,8 +4,10 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
@@ -13,38 +15,33 @@ using GraphQL.Types;
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
-        where TEntity : class
     {
-        public InputObjectGraphTypeConfigurator(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, bool isAuto, bool shouldSetNames = true)
-            : base(parent, registry, isAuto)
+        public InputObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IObjectConfigurationContext context, IRegistry<TExecutionContext> registry, bool isAuto)
+            : base(context, parent, registry, isAuto)
         {
-            if (shouldSetNames)
-            {
-                Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(true) : Registry.GetGraphQLTypeName<TEntity>(true, parent);
-            }
+            Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(true) : Registry.GetGraphQLTypeName<TEntity>(true, parent);
         }
 
-        public override string GetGraphQLTypeName(Type entityType, Type projectionType, IField<TExecutionContext> field)
+        protected InputObjectGraphTypeConfigurator(
+            IObjectConfigurationContext configurationContext,
+            IField<TExecutionContext>? parent,
+            IRegistry<TExecutionContext> registry)
+            : base(configurationContext, parent, registry, isAuto: false)
+        {
+        }
+
+        public override string GetGraphQLTypeName(Type entityType, Type? projectionType, IField<TExecutionContext> field)
         {
             return Registry.GetGraphQLTypeName(entityType, null, true, field);
         }
 
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>> build)
+        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(
+            IField<TExecutionContext> parent,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChainConfigurationContext configurationContext)
         {
-            return Registry.GetInputGraphTypeDescriptor(parent, build);
+            return Registry.GetInputGraphTypeDescriptor(parent, build, configurationContext);
         }
-
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TReturnType>(IField<TExecutionContext> parent)
-        {
-            return Registry.GetInputGraphTypeDescriptor<TReturnType>(parent);
-        }
-
-        public override IGraphTypeDescriptor<TReturnType, TExecutionContext> GetGraphQLTypeDescriptor<TProjection, TReturnType>()
-        {
-            return Registry.GetInputGraphTypeDescriptor<TProjection, TReturnType>();
-        }
-
-        public override Type GenerateGraphType() => Registry.GenerateInputGraphType(typeof(TEntity));
 
         public override void ConfigureGraphType(IComplexGraphType graphType)
         {
@@ -53,47 +50,32 @@ namespace Epam.GraphQL.Configuration.Implementations
                 throw new InvalidOperationException();
             }
 
-            ValidateFields();
-            ProxyAccessor.Configure();
-
             inputGraphType.Name = Name;
-            foreach (var field in Fields.Where(f => !f.EditSettings.IsReadOnly))
+            foreach (var field in Fields.Where(f => f.EditSettings != null && !f.EditSettings.IsReadOnly))
             {
                 inputGraphType.AddField(field.AsFieldType());
             }
         }
 
-        private protected override void ValidateFields()
+        private protected override void DoValidateFields()
         {
-            if (Fields.All(field => field.EditSettings.IsReadOnly))
+            base.DoValidateFields();
+
+            if (Fields.All(field => field.EditSettings != null && field.EditSettings.IsReadOnly))
             {
-                throw new InvalidOperationException($"Type `{typeof(TEntity).HumanizedName()}` should have one writable field at least. Consider to call Editable() or EditableIf(...) during fields' configuration one time at least or to inherit loader from {typeof(Loader<,>).HumanizedName()}, not from {typeof(MutableLoader<,,>).HumanizedName()}");
+                throw new InvalidOperationException($"{(IsAuto ? $"Type `{typeof(TEntity).HumanizedName()}`" : "OnConfigure() method")} must have one writable field at least. Consider calling Editable() or EditableIf(...) during fields' configuration one time at least --or-- consider inheriting loader from {typeof(Loader<,>).HumanizedName()}, not from {typeof(MutableLoader<,,>).HumanizedName()}");
             }
-
-            var duplicateName = Fields
-                .GroupBy(field => field.Name)
-                .Where(group => group.Count() > 1)
-                .Select(group => group.Key)
-                .FirstOrDefault();
-
-            if (duplicateName != null)
-            {
-                throw new InvalidOperationException($"A field with the name `{duplicateName}` is already registered.");
-            }
-
-            Fields.ForEach(f => f.ValidateField());
         }
     }
 
     internal class InputObjectGraphTypeConfigurator<TProjection, TEntity, TExecutionContext> : InputObjectGraphTypeConfigurator<TEntity, TExecutionContext>
         where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
-        private TProjection _projection;
-        private BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> _baseConfigurator;
+        private TProjection? _projection;
+        private IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? _baseConfigurator;
 
-        public InputObjectGraphTypeConfigurator(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry)
-            : base(parent, registry, isAuto: false, shouldSetNames: false)
+        public InputObjectGraphTypeConfigurator(IRegistry<TExecutionContext> registry)
+            : base(Diagnostics.ConfigurationContext.Create<TProjection>(), parent: null, registry)
         {
             Name = Registry.GetProjectionTypeName<TProjection, TEntity>(true);
         }
@@ -103,8 +85,6 @@ namespace Epam.GraphQL.Configuration.Implementations
             Configure();
             base.ConfigureGraphType(graphType);
         }
-
-        public override Type GenerateGraphType() => Registry.GetInputEntityGraphType<TProjection, TEntity>();
 
         protected override void OnConfigure()
         {
@@ -125,20 +105,20 @@ namespace Epam.GraphQL.Configuration.Implementations
             }
         }
 
-        protected override BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> GetBaseObjectGraphTypeConfiguratorForFilters()
+        protected override IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfiguratorForFilters()
         {
             return GetBaseObjectGraphTypeConfigurator((first, second) => first.FilterEquals(second));
         }
 
-        protected BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> GetBaseObjectGraphTypeConfigurator(Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> predicate)
+        protected IObjectGraphTypeConfigurator<TEntity, TExecutionContext>? GetBaseObjectGraphTypeConfigurator(Func<IObjectGraphTypeConfigurator<TExecutionContext>, IObjectGraphTypeConfigurator<TExecutionContext>, bool> predicate)
         {
             if (_baseConfigurator == null)
             {
-                var baseProjectionType = Registry.GetPropperBaseProjectionType(typeof(TProjection), typeof(TEntity), predicate);
+                var baseProjectionType = Registry.GetPropperBaseProjectionType<TProjection, TEntity>(predicate);
 
                 if (baseProjectionType != typeof(TProjection))
                 {
-                    _baseConfigurator = Registry.RegisterInput<TEntity>(baseProjectionType, null);
+                    _baseConfigurator = Registry.RegisterInput<TEntity>(baseProjectionType);
                     _baseConfigurator.Configure();
 
                     return _baseConfigurator;
@@ -148,19 +128,20 @@ namespace Epam.GraphQL.Configuration.Implementations
             return null;
         }
 
-        protected override void SetGraphQLTypeName(string oldName, string newName)
+        protected override void SetGraphQLTypeName(string? oldName, string newName)
         {
             Registry.SetGraphQLTypeName<TProjection, TEntity>(oldName, newName);
         }
 
-        private protected override void ValidateFields()
+        private protected override void DoValidateFields()
         {
             if (!typeof(Mutation<TExecutionContext>).IsAssignableFrom(typeof(TProjection)))
             {
-                base.ValidateFields();
+                base.DoValidateFields();
             }
         }
 
+        [MemberNotNull(nameof(_projection))]
         private TProjection GetProjection()
         {
             if (_projection == null)

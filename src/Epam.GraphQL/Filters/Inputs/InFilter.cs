@@ -5,8 +5,6 @@
 
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters.Inputs
 {
     internal class InFilter<TItemType, TListItemType> : EqFilter<TItemType>

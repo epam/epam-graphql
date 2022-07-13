@@ -5,26 +5,28 @@
 
 using System;
 using Epam.GraphQL.Filters;
-
-#nullable enable
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterPayloadField<TExecutionContext> : IArgument<PayloadFieldsContext<TExecutionContext>>
     {
-        private readonly Lazy<IInlineFilters> _inlineFilters;
+        private readonly Lazy<IInlineFilters<TExecutionContext>> _inlineFilters;
         private readonly Type _projectionType;
         private readonly Type _entityType;
 
-        public FilterPayloadField(RelationRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
+        public FilterPayloadField(IRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
             _projectionType = projectionType;
             _entityType = entityType;
 
-            _inlineFilters = new Lazy<IInlineFilters>(() =>
+            _inlineFilters = new Lazy<IInlineFilters<TExecutionContext>>(() =>
             {
                 var configurator = registry.GetObjectGraphTypeConfigurator(_entityType, _projectionType);
+
+                Guards.ThrowNotSupportedIf(configurator == null);
+
                 var inlineFilters = configurator.CreateInlineFilters();
                 return inlineFilters;
             });
@@ -37,7 +39,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public TOut GetValue<TOut>(PayloadFieldsContext<TExecutionContext> context)
         {
             var filter = context.GetPropertyValue(Name);
-            var predicate = (object)_inlineFilters.Value.BuildExpression(context.ExecutionContext, filter);
+            var executionContext = context.ExecutionContext;
+            var predicate = (object)_inlineFilters.Value.BuildExpression(executionContext, filter);
             return (TOut)predicate;
         }
     }

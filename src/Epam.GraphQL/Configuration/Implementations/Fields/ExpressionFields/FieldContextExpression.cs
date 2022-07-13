@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -6,6 +6,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Sorters;
@@ -15,77 +16,62 @@ using GraphQL.Resolvers;
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
     internal class FieldContextExpression<TEntity, TReturnType, TExecutionContext> : IFieldExpression<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
-        private Func<TExecutionContext, TEntity, TReturnType> _resolver;
+        private readonly Expression<Func<TExecutionContext, TEntity, TReturnType>> _expression;
+        private readonly Lazy<Func<TExecutionContext, TEntity, TReturnType>> _resolver;
+        private readonly Lazy<Func<object, object?>> _proxyResolver;
 
-        public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
+        public FieldContextExpression(ExpressionField<TEntity, TReturnType, TExecutionContext> field, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            _field = field ?? throw new ArgumentNullException(nameof(field));
-            Name = name;
+            _expression = expression;
+            _field = field;
+            _resolver = new Lazy<Func<TExecutionContext, TEntity, TReturnType>>(_expression.Compile);
+            _proxyResolver = new Lazy<Func<object, object?>>(() => _field.Parent.ProxyAccessor.BaseProxyType.GetPropertyDelegate(Name));
         }
 
-        public Expression<Func<TExecutionContext, TEntity, TReturnType>> Expression { get; }
+        public bool IsGroupable => _field.IsGroupable;
+
+        public LambdaExpression ContextedExpression => _expression;
+
+        public LambdaExpression OriginalExpression => _expression;
 
         public bool IsReadOnly => true;
 
-        public PropertyInfo PropertyInfo => null;
+        public PropertyInfo? PropertyInfo => null;
 
-        public string Name { get; }
+        public string Name => _field.Name;
+
+        public IChainConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         public void ValidateExpression()
         {
-            ExpressionValidator.Validate(Expression);
+            ExpressionValidator.Validate(_expression);
         }
 
-        public TReturnType Resolve(IResolveFieldContext context, object source)
+        public TReturnType? Resolve(IResolveFieldContext context)
         {
-            // TODO Check for input field (!_field.IsInputField && ...)
-            if (source is Proxy<TEntity> proxy)
+            try
             {
-                var name = _field.Name;
-                var func = proxy.GetType().GetPropertyDelegate(name);
-                return (TReturnType)func(proxy);
+                return context.Source is Proxy<TEntity> proxy
+                    ? (TReturnType?)_proxyResolver.Value(proxy)
+                    : _resolver.Value(context.GetUserContext<TExecutionContext>(), (TEntity)context.Source);
             }
-
-            if (_resolver == null)
+            catch (Exception e)
             {
-                _resolver = Expression.Compile();
+                throw context.CreateFieldExecutionError(e);
             }
-
-            return _resolver(context.GetUserContext<TExecutionContext>(), (TEntity)source);
         }
 
-        public TReturnType Resolve(IResolveFieldContext context)
-        {
-            return Resolve(context, context.Source);
-        }
+        public LambdaExpression BuildOriginalExpression(TExecutionContext context) => _expression;
 
-        object IFieldResolver.Resolve(IResolveFieldContext context)
+        object? IFieldResolver.Resolve(IResolveFieldContext context)
         {
             return Resolve(context);
         }
 
-        public bool Equals(ISorter<TExecutionContext> other)
-        {
-            if (other is FieldContextExpression<TEntity, TReturnType, TExecutionContext> fieldExpression)
-            {
-                return Name.Equals(fieldExpression.Name, StringComparison.Ordinal)
-                    && ExpressionEqualityComparer.Instance.Equals(Expression, fieldExpression.Expression);
-            }
-
-            return false;
-        }
-
-        LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => System.Linq.Expressions.Expression.Lambda<Func<TEntity, TReturnType>>(
-            Expression.Body.ReplaceParameter(Expression.Parameters[0], System.Linq.Expressions.Expression.Constant(context, typeof(TExecutionContext))),
-            Expression.Parameters[1]);
+        LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => Expression.Lambda<Func<TEntity, TReturnType>>(
+            _expression.Body.ReplaceParameter(_expression.Parameters[0], Expression.Constant(context, typeof(TExecutionContext))),
+            _expression.Parameters[1]);
     }
 }

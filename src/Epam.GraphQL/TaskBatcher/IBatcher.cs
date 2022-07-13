@@ -9,21 +9,23 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
-
-#nullable enable
 
 namespace Epam.GraphQL.TaskBatcher
 {
     internal interface IBatcher
     {
-        IDataLoader<TId, TItem> Get<TId, TItem, TExecutionContext>(
+        IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
+            IResolvedChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> loader);
 
-        IDataLoader<TId, TItem> Get<TId, TItem, TExecutionContext>(
+        IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
+            IResolvedChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>> loader);
@@ -31,10 +33,11 @@ namespace Epam.GraphQL.TaskBatcher
         IDataLoader<TOuterEntity, IGrouping<TOuterEntity, TTransformedInnerEntity>> Get<TOuterEntity, TInnerEntity, TTransformedInnerEntity>(
             IResolveFieldContext context,
             Func<IResolveFieldContext, IQueryable<TInnerEntity>> queryFactory,
+            Func<IResolveFieldContext, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>>? sort,
             Func<IResolveFieldContext, Expression<Func<TInnerEntity, TTransformedInnerEntity>>> transform,
             LambdaExpression outerExpression,
             LambdaExpression innerExpression,
-            ILoaderHooksExecuter<TTransformedInnerEntity> hooksExecuter);
+            ILoaderHooksExecuter<TTransformedInnerEntity>? hooksExecuter);
 
         void Reset();
     }

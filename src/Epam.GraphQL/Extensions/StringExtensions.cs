@@ -3,14 +3,14 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-#nullable enable
-
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Epam.GraphQL.Extensions
 {
     internal static class StringExtensions
     {
+        [return: NotNullIfNotNull("str")]
         public static string? CapitalizeFirstLetter(this string? str)
         {
             if (string.IsNullOrEmpty(str))
@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Extensions
                 return str;
             }
 
-            if (str!.Length == 1)
+            if (str.Length == 1)
             {
                 return str.ToUpperInvariant();
             }

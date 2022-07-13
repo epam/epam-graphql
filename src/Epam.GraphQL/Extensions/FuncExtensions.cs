@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Helpers;
 
-#nullable enable
-
 namespace Epam.GraphQL.Extensions
 {
     internal static class FuncExtensions

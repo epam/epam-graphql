@@ -19,7 +19,7 @@ namespace Epam.GraphQL.EntityFrameworkCore
 
         public DbContextAdapter(DbContext dbContext)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _dbContext = dbContext;
         }
 
         private static MethodInfo AsNoTracking => _asNoTracking ??= new Func<IQueryable<object>, IQueryable<object>>(EntityFrameworkQueryableExtensions.AsNoTracking).GetMethodInfo().GetGenericMethodDefinition();
@@ -42,9 +42,14 @@ namespace Epam.GraphQL.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        public IAsyncEnumerable<TEntity> QueryableToAsyncEnumerable<TEntity>(IQueryable<TEntity> query)
+        public IAsyncEnumerable<TEntity> Convert<TEntity>(IQueryable<TEntity> query)
         {
             return query.AsAsyncEnumerable();
+        }
+
+        public bool CanConvert<TEntity>(IQueryable<TEntity> query)
+        {
+            return query is IAsyncEnumerable<TEntity>;
         }
 
         public async Task SaveChangesAsync()

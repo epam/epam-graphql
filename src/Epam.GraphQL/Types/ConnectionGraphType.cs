@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 using GraphQL.Types.Relay;
@@ -12,7 +13,6 @@ namespace Epam.GraphQL.Types
 {
     internal class ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TChildEntity : class
     {
         private const string ItemsDescription = "A list of all of the objects returned in the connection. This is a convenience field provided " +
                 "for quickly exploring the API; rather than querying for \"{ edges { node } }\" when no edge data " +
@@ -60,10 +60,10 @@ namespace Epam.GraphQL.Types
                 "the \"cursor\" field on the edge to enable efficient pagination, this shortcut cannot be used, " +
                 "and the full \"{ edges { node } } \" version should be used instead.";
 
-        public ConnectionGraphType(IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
+        public ConnectionGraphType(IGraphTypeDescriptor<TReturnType, TExecutionContext> graphType)
         {
             // TODO Type name should be the same as an entity type name (e.g. for two loaders for the same entity and field set)
-            var typeName = configurator.Name;
+            var typeName = graphType.Name;
 
             Name = $"{typeName}Connection";
             Description = $"A connection from an object to a list of objects of type `{typeName}`.";
@@ -81,15 +81,22 @@ namespace Epam.GraphQL.Types
                 .Name("pageInfo")
                 .Description("Information to aid in pagination.");
 
-            Field(
-                typeof(ListGraphType<>).MakeGenericType(configurator.GenerateGraphType()),
-                "items",
-                ItemsDescription);
+            AddField(
+                new FieldType
+                {
+                    Name = "items",
+                    Description = ItemsDescription,
+                    Type = graphType.Type == null ? null : typeof(ListGraphType<>).MakeGenericType(graphType.Type),
+                    ResolvedType = graphType.GraphType == null ? null : new ListGraphType(graphType.GraphType),
+                });
 
-            Field(
-                typeof(ListGraphType<>).MakeGenericType(typeof(EdgeGraphType<>).MakeGenericType(configurator.GenerateGraphType())),
-                "edges",
-                "Information to aid in pagination.");
+            AddField(
+                new FieldType
+                {
+                    Name = "edges",
+                    Description = "Information to aid in pagination.",
+                    ResolvedType = new ListGraphType(new EdgeGraphType<TReturnType, TExecutionContext>(graphType)),
+                });
         }
     }
 }

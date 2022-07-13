@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Projection;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
@@ -518,6 +518,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 });
 
             Test(
+#pragma warning disable CS0618 // Type or member is obsolete
                 queryBuilder: query => CreateArgumentBuilder<int, int, int, int>(query)
                     .AsUnionOf<IEnumerable<Line>, Line>()
                         .And<IEnumerable<Circle>, Circle>()
@@ -525,6 +526,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<int, int, int, int>(mutation)
                     .AsUnionOf<IEnumerable<Line>, Line>()
                         .And<IEnumerable<Circle>, Circle>()
+#pragma warning restore CS0618 // Type or member is obsolete
                     .Resolve(resolver),
                 query: $@"
                     test({BuildArguments(arg1: 10, arg2: 20, arg3: 30, arg4: 40)}) {{
@@ -562,6 +564,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 });
 
             Test(
+#pragma warning disable CS0618 // Type or member is obsolete
                 queryBuilder: query => CreateArgumentBuilder<string, string, string, string>(query)
                     .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
                         .And<IEnumerable<CustomObject<string, int>>, CustomObject<string, int>>()
@@ -569,6 +572,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<string, string, string, string>(mutation)
                     .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
                         .And<IEnumerable<CustomObject<string, int>>, CustomObject<string, int>>()
+#pragma warning restore CS0618 // Type or member is obsolete
                     .Resolve(resolver),
                 query: $@"
                     test({BuildArguments(arg1: "test", arg2: "test2", arg3: "test3", arg4: "test4")}) {{
@@ -608,6 +612,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 });
 
             Test(
+#pragma warning disable CS0618 // Type or member is obsolete
                 queryBuilder: query => CreateArgumentBuilder<string, string, string, string>(query)
                     .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>(b =>
                     {
@@ -637,6 +642,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                         b.Field(o => o.FirstField);
                         b.Field(o => o.SecondField);
                     })
+#pragma warning restore CS0618 // Type or member is obsolete
                     .Resolve(resolver),
                 query: $@"
                     test({BuildArguments(arg1: "test", arg2: "test2", arg3: "test3", arg4: "test4")}) {{
@@ -880,7 +886,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
             };
         }
 
-        private IQueryFieldBuilder<IRootProjectionFieldBuilder<TArg1, TArg2, TArg3, TArg4, TestUserContext>, TArg1, TArg2, TArg3, TArg4, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TArg4>(Query<TestUserContext> query)
+        private IUnionableRootField<TArg1, TArg2, TArg3, TArg4, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TArg4>(Query<TestUserContext> query)
         {
             return _argumentType switch
             {
@@ -898,7 +904,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
             };
         }
 
-        private IMutationFieldBuilder<IMutationFieldBuilderBase<TArg1, TArg2, TArg3, TArg4, TestUserContext>, TArg1, TArg2, TArg3, TArg4, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TArg4>(Mutation<TestUserContext> mutation)
+        private IUnionableRootField<TArg1, TArg2, TArg3, TArg4, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TArg4>(Mutation<TestUserContext> mutation)
         {
             return _argumentType switch
             {
@@ -916,7 +922,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
             };
         }
 
-        private IQueryFieldBuilder<IRootProjectionFieldBuilder<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TestUserContext>, TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TEntity>(Type loaderType, Query<TestUserContext> query)
+        private IUnionableRootField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TEntity>(Type loaderType, Query<TestUserContext> query)
             where TEntity : class
         {
             return _argumentType switch
@@ -925,17 +931,17 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Argument<TArg1>("arg1")
                     .Argument<TArg2>("arg2")
                     .Argument<TArg3>("arg3")
-                    .FilterArgument<TEntity>(loaderType, "arg4"),
+                    .FilterArgument<TArg1, TArg2, TArg3, TEntity, TestUserContext>(loaderType, "arg4"),
                 ArgumentType.PayloadField => query.Field("test")
                     .PayloadField<TArg1>("arg1")
                     .PayloadField<TArg2>("arg2")
                     .PayloadField<TArg3>("arg3")
-                    .FilterPayloadField<TEntity>(loaderType, "arg4"),
+                    .FilterPayloadField<TArg1, TArg2, TArg3, TEntity, TestUserContext>(loaderType, "arg4"),
                 _ => throw new NotSupportedException(),
             };
         }
 
-        private IMutationFieldBuilder<IMutationFieldBuilderBase<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TestUserContext>, TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TEntity>(Type loaderType, Mutation<TestUserContext> mutation)
+        private IUnionableRootField<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TestUserContext> CreateArgumentBuilder<TArg1, TArg2, TArg3, TEntity>(Type loaderType, Mutation<TestUserContext> mutation)
             where TEntity : class
         {
             return _argumentType switch
@@ -944,12 +950,12 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Argument<TArg1>("arg1")
                     .Argument<TArg2>("arg2")
                     .Argument<TArg3>("arg3")
-                    .FilterArgument<TEntity>(loaderType, "arg4"),
+                    .FilterArgument<TArg1, TArg2, TArg3, TEntity, TestUserContext>(loaderType, "arg4"),
                 ArgumentType.PayloadField => mutation.Field("test")
                     .PayloadField<TArg1>("arg1")
                     .PayloadField<TArg2>("arg2")
                     .PayloadField<TArg3>("arg3")
-                    .FilterPayloadField<TEntity>(loaderType, "arg4"),
+                    .FilterPayloadField<TArg1, TArg2, TArg3, TEntity, TestUserContext>(loaderType, "arg4"),
                 _ => throw new NotSupportedException(),
             };
         }

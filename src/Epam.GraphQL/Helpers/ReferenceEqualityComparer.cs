@@ -6,8 +6,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class ReferenceEqualityComparer : IEqualityComparer<object?>

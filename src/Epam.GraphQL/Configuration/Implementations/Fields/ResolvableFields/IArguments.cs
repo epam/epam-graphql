@@ -5,10 +5,9 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Loaders;
 using GraphQL;
-
-#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
@@ -22,10 +21,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TExecutionContext> Add<TArg2>(string argName);
 
         IArguments<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, TExecutionContext> : IArguments
@@ -33,10 +33,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TArg3, TExecutionContext> Add<TArg3>(string argName);
 
         IArguments<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, out TArg3, TExecutionContext> : IArguments
@@ -44,10 +45,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TArg3, TArg4, TExecutionContext> Add<TArg4>(string argName);
 
         IArguments<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, out TArg3, out TArg4, TExecutionContext> : IArguments
@@ -55,14 +57,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         IArguments<TArg1, TArg2, TArg3, TArg4, TArg5, TExecutionContext> Add<TArg5>(string argName);
 
         IArguments<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
-            where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class;
+            where TProjection : Projection<TEntity, TExecutionContext>;
 
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, Task<TResult>> resolve);
     }
 
     internal interface IArguments<out TArg1, out TArg2, out TArg3, out TArg4, out TArg5, TExecutionContext> : IArguments
     {
         Func<IResolveFieldContext, TResult> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TArg5, TResult> resolve);
+
+        Func<IResolveFieldContext, Task<TResult>> GetResolver<TResult>(Func<TExecutionContext, TArg1, TArg2, TArg3, TArg4, TArg5, Task<TResult>> resolve);
     }
 }

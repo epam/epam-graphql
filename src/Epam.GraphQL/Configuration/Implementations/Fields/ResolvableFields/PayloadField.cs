@@ -5,15 +5,13 @@
 
 using System;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class PayloadField<TArg, TExecutionContext> : IArgument<PayloadFieldsContext<TExecutionContext>>
     {
         public PayloadField(string name)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
         }
 
         public string Name { get; }

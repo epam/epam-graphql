@@ -1,9 +1,8 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Infrastructure;
 using GraphQL.Validation;
@@ -22,11 +21,6 @@ namespace Epam.GraphQL.Options
 
         public CoreSchemaOptionsExtension(CoreSchemaOptionsExtension<TExecutionContext> copyFrom)
         {
-            if (copyFrom == null)
-            {
-                throw new ArgumentNullException(nameof(copyFrom));
-            }
-
             _validationRules.AddRange(copyFrom._validationRules);
             _listeners.AddRange(copyFrom._listeners);
             Profiler = copyFrom.Profiler;
@@ -35,11 +29,11 @@ namespace Epam.GraphQL.Options
 
         public IEnumerable<IValidationRule> ValidationRules => _validationRules;
 
-        public IProfiler Profiler { get; private set; }
+        public IProfiler? Profiler { get; private set; }
 
         public IEnumerable<ISchemaExecutionListener> Listeners => _listeners;
 
-        public ILoggerFactory LoggerFactory { get; private set; }
+        public ILoggerFactory? LoggerFactory { get; private set; }
 
         public CoreSchemaOptionsExtension<TExecutionContext> WithValidationRule(IValidationRule validationRule)
         {
@@ -54,7 +48,7 @@ namespace Epam.GraphQL.Options
         {
             return new CoreSchemaOptionsExtension<TExecutionContext>(this)
             {
-                Profiler = profiler ?? throw new ArgumentNullException(nameof(profiler)),
+                Profiler = profiler,
             };
         }
 

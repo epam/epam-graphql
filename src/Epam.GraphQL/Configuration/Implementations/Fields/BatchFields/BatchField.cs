@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -10,60 +10,61 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
-using GraphQL;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 {
-    internal class BatchField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
+    internal class BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
         IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>,
-        IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
+        IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>,
+        IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public BatchField(
-            RelationRegistry<TExecutionContext> registry,
+            IResolvedChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TReturnType>> batchFunc,
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
-                registry,
+                configurationContext,
                 parent,
                 name,
-                new BatchResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
+                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(configurationContext, name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }
 
         public BatchField(
-            RelationRegistry<TExecutionContext> registry,
+            IResolvedChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TReturnType>>> batchFunc,
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
             IGraphTypeDescriptor<TExecutionContext> graphType)
             : this(
-                registry,
+                configurationContext,
                 parent,
                 name,
-                new BatchTaskResolver<TEntity, TReturnType, TExecutionContext>(name, batchFunc, parent.ProxyAccessor),
+                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(configurationContext, name, keySelector, batchFunc, parent.ProxyAccessor),
                 graphType)
         {
         }
 
-        protected BatchField(
-            RelationRegistry<TExecutionContext> registry,
+        private BatchField(
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IBatchResolver<TEntity, TReturnType> resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(registry, parent, name)
+            : base(configurationContext, parent, name)
         {
             _graphType = graphType;
 
-            FieldResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            BatchFieldResolver = resolver;
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();
         }
 
@@ -73,7 +74,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             {
                 var graphType = _graphType;
 
-                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !EditSettings.IsMandatoryForUpdate)
+                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && EditSettings != null && !EditSettings.IsMandatoryForUpdate)
                 {
                     graphType = graphType.UnwrapIfNonNullable();
                 }
@@ -82,130 +83,92 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             }
         }
 
-        public override bool CanResolve => FieldResolver != null;
+        public override IFieldResolver Resolver => BatchFieldResolver;
 
-        protected IBatchResolver<TEntity, TReturnType> FieldResolver { get; }
+        protected IBatchResolver<TEntity, TReturnType> BatchFieldResolver { get; }
 
-        public override object Resolve(IResolveFieldContext context)
+        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            IInlinedChainConfigurationContext configurationContext,
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            return FieldResolver.Resolve(context);
+            return Parent.ApplySelect(configurationContext, this, BatchFieldResolver.Select(selector), build);
         }
 
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector)
+        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(
+            IInlinedChainConfigurationContext configurationContext,
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            return Parent.ApplySelect<TReturnType1>(this, FieldResolver.Select(selector));
+            return ApplySelect(configurationContext, selector, build);
         }
 
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build)
-            where TReturnType1 : class
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplySelect method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector)
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            return ApplySelect(selector);
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>.ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build)
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Expression<Func<TEntity, TKeyType1>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType1>, IDictionary<TKeyType1, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            return ApplySelect(selector, build);
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Expression<Func<TEntity, TKeyType1>> keySelector,
+            Func<IEnumerable<TKeyType1>, IDictionary<TKeyType1, TAnotherReturnType>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            throw new NotSupportedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            throw new NotSupportedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            throw new NotSupportedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Expression<Func<TEntity, TKeyType1>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType1>, Task<IDictionary<TKeyType1, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            throw new NotSupportedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
 
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
+            Expression<Func<TEntity, TKeyType1>> keySelector,
+            Func<IEnumerable<TKeyType1>, Task<IDictionary<TKeyType1, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override IFieldResolver GetResolver()
-        {
-            return FieldResolver;
-        }
-    }
-
-    internal class BatchField<TEntity, TKeyType, TReturnType, TExecutionContext> : BatchField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public BatchField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TKeyType>> keySelector,
-            Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TReturnType>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : this(
-                registry,
-                parent,
-                name,
-                new BatchKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
-                graphType)
-        {
-        }
-
-        public BatchField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TKeyType>> keySelector,
-            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TReturnType>>> batchFunc,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : this(
-                registry,
-                parent,
-                name,
-                new BatchTaskKeyResolver<TEntity, TKeyType, TReturnType, TExecutionContext>(name, keySelector, batchFunc, parent.ProxyAccessor),
-                graphType)
-        {
-        }
-
-        protected BatchField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            IBatchResolver<TEntity, TReturnType> resolver,
-            IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(registry, parent, name, resolver, graphType)
-        {
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
     }
 }

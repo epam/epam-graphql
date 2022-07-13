@@ -4,51 +4,164 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
-
-#nullable enable
+using Epam.GraphQL.TaskBatcher;
+using GraphQL;
+using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
-    internal abstract class LoadEntityHook<TEntity, TExecutionContext>
+    internal abstract class LoadEntityHook<TEntity, TExecutionContext> : IChainConfigurationContextOwner
     {
-        public abstract void Execute(TExecutionContext executionContext, Proxy<TEntity> proxy);
+        public IChainConfigurationContext ConfigurationContext { get; set; } = null!;
+
+        public abstract IDataLoader<TKey, TKey> ExecuteAsync<TKey>(Func<TKey, Proxy<TEntity>> key, IResolveFieldContext context);
     }
 
-    internal class LoadEntityHook<TEntity, TEntityProxy, TExecutionContext> : LoadEntityHook<TEntity, TExecutionContext>
+    internal class LoadEntityHook<TEntity, TEntityProxy, TExecutionContext> : LoadEntityHook<TEntity, TEntityProxy, TEntityProxy, TExecutionContext>
     {
-        private readonly ProxyAccessor<TEntity, TExecutionContext> _proxyAccessor;
-        private readonly Expression<Func<TEntity, TEntityProxy>> _proxyExpression;
-        private readonly Action<TExecutionContext, TEntityProxy> _hook;
-
-        public LoadEntityHook(ProxyAccessor<TEntity, TExecutionContext> proxyAccessor, Expression<Func<TEntity, TEntityProxy>> proxyExpression, Action<TExecutionContext, TEntityProxy> hook)
+        public LoadEntityHook(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
+            Expression<Func<TEntity, TEntityProxy>> proxyExpression,
+            Action<TExecutionContext, TEntityProxy> hook)
+            : base(
+                  owner => configurationContextFactory(owner).Argument<TExecutionContext, TEntityProxy, TEntityProxy>((ctx, items) => items.ToDictionary(item => item)),
+                  proxyAccessor,
+                  proxyExpression,
+                  hook,
+                  (ctx, items) => items.ToDictionary(item => item))
         {
-            _proxyAccessor = proxyAccessor;
-            _proxyExpression = proxyExpression;
-            _hook = hook;
+        }
+    }
+
+    internal class LoadEntityHook<TEntity, TKey, TEntityProxy, TExecutionContext> : LoadEntityHook<TEntity, TExecutionContext>
+    {
+        private readonly Expression<Func<TEntity, TKey>> _keyExpression;
+        private readonly ProxyAccessor<TEntity, TExecutionContext> _proxyAccessor;
+        private readonly Action<TExecutionContext, TEntityProxy> _hook;
+        private readonly Lazy<Func<Proxy<TEntity>, TKey>> _proxyKeyGetter;
+        private readonly Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> _resolver = null!;
+        private readonly Delegate _batchFunc;
+
+        public LoadEntityHook(
+            Func<IChainConfigurationContextOwner, IResolvedChainConfigurationContext> configurationContextFactory,
+            ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Action<TExecutionContext, TEntityProxy> hook,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TEntityProxy>> batchFunc)
+            : this(
+                  proxyAccessor,
+                  keyExpression,
+                  hook,
+                  batchFunc)
+        {
+            ConfigurationContext = configurationContextFactory(this);
+            _resolver = CreateResolver((IResolvedChainConfigurationContext)ConfigurationContext, batchFunc);
         }
 
-        public override void Execute(TExecutionContext executionContext, Proxy<TEntity> proxy)
+        public LoadEntityHook(
+            Func<IChainConfigurationContextOwner, IResolvedChainConfigurationContext> configurationContextFactory,
+            ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Action<TExecutionContext, TEntityProxy> hook,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, TEntityProxy>>> batchFunc)
+            : this(
+                  proxyAccessor,
+                  keyExpression,
+                  hook,
+                  batchFunc)
         {
-            var expr = (Expression<Func<Proxy<TEntity>, TEntityProxy>>)_proxyAccessor.GetProxyExpression(_proxyExpression);
-            var getter = expr.Compile();
-            _hook(executionContext, getter(proxy));
+            ConfigurationContext = configurationContextFactory(this);
+            _resolver = CreateResolver((IResolvedChainConfigurationContext)ConfigurationContext, batchFunc);
+        }
+
+        private LoadEntityHook(
+            ProxyAccessor<TEntity, TExecutionContext> proxyAccessor,
+            Expression<Func<TEntity, TKey>> keyExpression,
+            Action<TExecutionContext, TEntityProxy> hook,
+            Delegate batchFunc)
+        {
+            _proxyAccessor = proxyAccessor;
+            _keyExpression = keyExpression;
+            _hook = hook;
+            _batchFunc = batchFunc;
+            _proxyAccessor.AddMember(keyExpression);
+            _proxyKeyGetter = new Lazy<Func<Proxy<TEntity>, TKey>>(() => _proxyAccessor.Rewrite(_keyExpression).Compile());
+        }
+
+        private Func<Proxy<TEntity>, TKey> KeyGetter => _proxyKeyGetter.Value;
+
+        public override IDataLoader<T, T> ExecuteAsync<T>(Func<T, Proxy<TEntity>> key, IResolveFieldContext context)
+        {
+            var batcher = context.GetBatcher();
+
+            Func<(T, Proxy<TEntity>), TKey> getterFunc = item => KeyGetter(item.Item2);
+
+            var batchLoader = getterFunc
+                .Then(
+                    FuncConstants<TKey>.IsNull,
+                    BatchLoader.FromResult(FuncConstants<TKey, TEntityProxy?>.DefaultResultFunc),
+                    _resolver(context));
+
+            Func<T, (T, Proxy<TEntity>)> func = arg => (arg, key(arg));
+
+            var result = func.Then(batchLoader.Then((proxy, result) =>
+            {
+                if (result != null)
+                {
+                    _hook(context.GetUserContext<TExecutionContext>(), result);
+                }
+
+                return proxy.Item1;
+            }));
+
+            return result;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is LoadEntityHook<TEntity, TEntityProxy, TExecutionContext> loadEntityHook
-                && ExpressionEqualityComparer.Instance.Equals(_proxyExpression, loadEntityHook._proxyExpression)
-                && _hook == loadEntityHook._hook;
+            return obj is LoadEntityHook<TEntity, TKey, TEntityProxy, TExecutionContext> loadEntityHook
+                && ExpressionEqualityComparer.Instance.Equals(_keyExpression, loadEntityHook._keyExpression)
+                && _hook == loadEntityHook._hook
+                && _batchFunc == loadEntityHook._batchFunc;
         }
 
         public override int GetHashCode()
         {
             var hashCode = default(HashCode);
-            hashCode.Add(_proxyExpression, ExpressionEqualityComparer.Instance);
+            hashCode.Add(_keyExpression, ExpressionEqualityComparer.Instance);
             hashCode.Add(_hook);
+            hashCode.Add(_batchFunc);
             return hashCode.ToHashCode();
+        }
+
+        private static Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> CreateResolver(
+            IResolvedChainConfigurationContext configurationContext,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TEntityProxy>> batchFunc)
+        {
+            return context =>
+            {
+                var batcher = context.GetBatcher();
+                return batcher.Get(configurationContext, context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc);
+            };
+        }
+
+        private static Func<IResolveFieldContext, IDataLoader<TKey, TEntityProxy?>> CreateResolver(
+            IResolvedChainConfigurationContext configurationContext,
+            Func<TExecutionContext, IEnumerable<TKey>, Task<IDictionary<TKey, TEntityProxy>>> batchFunc)
+        {
+            return context =>
+            {
+                var batcher = context.GetBatcher();
+                return batcher.Get(configurationContext, context.GetPath, context.GetUserContext<TExecutionContext>(), batchFunc);
+            };
         }
     }
 }

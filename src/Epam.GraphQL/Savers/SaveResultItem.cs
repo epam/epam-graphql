@@ -11,38 +11,47 @@ namespace Epam.GraphQL.Savers
 {
     internal class SaveResultItem<TEntity, TId> : ISaveResultItem
     {
-        public TId Id { get; set; }
+        private readonly Func<TEntity, TId> _getId;
+
+        public SaveResultItem(
+            Func<TEntity, TId> getId,
+            TEntity payload,
+            bool isNew,
+            IDictionary<string, object?> properties)
+        {
+            _getId = getId;
+            Payload = payload;
+            IsNew = isNew;
+            Properties = properties;
+            Id = _getId(Payload);
+        }
+
+        public TId Id { get; private set; }
 
         public TEntity Payload { get; set; }
 
-        public bool IsNew { get; set; }
+        public bool IsNew { get; }
 
-        public IDictionary<string, object> Properties { get; set; }
+        public IDictionary<string, object?> Properties { get; }
 
-        object ISaveResultItem.Id
-        {
-            get => Id;
-            set => Id = (TId)value;
-        }
+        object? ISaveResultItem.Id => Id;
 
-        object ISaveResultItem.Payload => Payload;
+        object? ISaveResultItem.Payload => Payload;
 
         public SaveResultItem<TEntity, TId> Merge(SaveResultItem<TEntity, TId> item)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            return new SaveResultItem<TEntity, TId>()
-            {
-                Id = Id,
-                Payload = item.Payload,
-                IsNew = IsNew,
-                Properties = Properties.Concat(item.Properties)
+            return new SaveResultItem<TEntity, TId>(
+                getId: _getId,
+                payload: item.Payload,
+                isNew: IsNew,
+                properties: Properties.Concat(item.Properties)
                     .GroupBy(p => p.Key)
-                    .ToDictionary(g => g.Key, g => g.Last().Value),
-            };
+                    .ToDictionary(g => g.Key, g => g.Last().Value));
+        }
+
+        public void UpdateId()
+        {
+            Id = _getId(Payload);
         }
 
         ISaveResultItem ISaveResultItem.Merge(ISaveResultItem item) => Merge((SaveResultItem<TEntity, TId>)item);

@@ -6,19 +6,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-#nullable enable
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Infrastructure
 {
     internal interface IQueryExecuter
     {
-        IAsyncEnumerable<TEntity> ToAsyncEnumerable<TEntity>(Func<string> stepNameFactory, IQueryable<TEntity> query);
+        IAsyncEnumerable<TEntity> ToAsyncEnumerable<TEntity>(IConfigurationContext configurationContext, Func<string> stepNameFactory, IQueryable<TEntity> query);
 
-        IEnumerable<TEntity> ToEnumerable<TEntity>(Func<string> stepNameFactory, IQueryable<TEntity> query);
+        IEnumerable<TEntity> ToEnumerable<TEntity>(IConfigurationContext configurationContext, Func<string> stepNameFactory, IQueryable<TEntity> query);
 
-        List<TEntity> ToList<TEntity>(Func<string> stepNameFactory, IQueryable<TEntity> query);
+        List<TEntity> ToList<TEntity>(IConfigurationContext configurationContext, Func<string> stepNameFactory, IQueryable<TEntity> query);
 
-        TReturnType Execute<TEntity, TReturnType>(Func<string> stepNameFactory, IQueryable<TEntity> query, Func<IQueryable<TEntity>, TReturnType> transform, string transformName);
+        TReturnType Execute<TEntity, TReturnType>(
+            IConfigurationContext configurationContext,
+            Func<string> stepNameFactory,
+            IQueryable<TEntity> query,
+            Func<IQueryable<TEntity>, TReturnType> transform,
+            string transformName);
     }
 }

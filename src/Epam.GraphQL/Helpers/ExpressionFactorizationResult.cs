@@ -6,8 +6,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal class ExpressionFactorizationResult

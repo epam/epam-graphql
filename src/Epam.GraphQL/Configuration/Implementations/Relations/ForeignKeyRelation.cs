@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -15,23 +15,23 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
     {
         private readonly string _propName;
         private readonly Predicate<TPropertyType> _isFakePropValue;
-        private readonly Func<object, object> _idGetter;
+        private readonly Func<object, object?> _idGetter;
 
-        public ForeignKeyRelation(string propName, Predicate<TPropertyType> isFakePropValue, Func<object, object> idGetter)
+        public ForeignKeyRelation(string propName, Predicate<TPropertyType> isFakePropValue, Func<object, object?> idGetter)
         {
             _propName = propName;
-            _isFakePropValue = isFakePropValue ?? throw new ArgumentNullException(nameof(isFakePropValue));
-            _idGetter = idGetter ?? throw new ArgumentNullException(nameof(idGetter));
+            _isFakePropValue = isFakePropValue;
+            _idGetter = idGetter;
         }
 
-        public IDataLoaderResult<bool> CanViewParentAsync(object context, object entity) => new DataLoaderResult<bool>(true);
+        public IDataLoaderResult<bool> CanViewParentAsync(object context, object? entity) => new DataLoaderResult<bool>(true);
 
         public ForeignKeyMetadata GetForeignKeyMetadata(IComplexGraphType childGraphType)
         {
             throw new NotImplementedException();
         }
 
-        public bool HasFakePropertyValue(object childEntity, IDictionary<string, object> childPropertyValues)
+        public bool HasFakePropertyValue(object? childEntity, IDictionary<string, object?> childPropertyValues)
         {
             if (childPropertyValues.TryGetValue(_propName, out var val))
             {
@@ -46,11 +46,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
             return false;
         }
 
-        public void UpdateFakeProperties(object entity, object childEntity, IDictionary<string, object> childPropertyValues, object fakePropertyValue)
+        public void UpdateFakeProperties(object? entity, object? childEntity, IDictionary<string, object?> childPropertyValues, object? fakePropertyValue)
         {
             if (childPropertyValues.TryGetValue(_propName, out var val))
             {
-                if (val.Equals(fakePropertyValue))
+                if (entity != null && ((val == null && fakePropertyValue == null) || (val != null && val.Equals(fakePropertyValue))))
                 {
                     childPropertyValues[_propName] = _idGetter(entity);
                 }

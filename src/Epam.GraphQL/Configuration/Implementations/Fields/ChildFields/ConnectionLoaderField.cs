@@ -3,101 +3,72 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
-    internal class ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> : OrderedLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>
-#pragma warning restore CA1501
-        where TEntity : class
-        where TChildEntity : class
+    internal sealed class ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
+        ConnectionLoaderFieldBase<
+            ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
+            TEntity,
+            TChildLoader,
+            TChildEntity,
+            TExecutionContext>,
+        IConnectionField<TChildEntity, TExecutionContext>,
+        IConnectionField,
+        IVoid
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public ConnectionLoaderField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            LazyQueryArguments arguments,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
-            : this(
-                  registry,
-                  parent,
-                  name,
-                  condition,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
-                  arguments,
-                  orderBy,
-                  thenBy)
-        {
-        }
-
-        private ConnectionLoaderField(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            TChildLoader loader,
-            LazyQueryArguments arguments,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
+            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments,
+            ISearcher<TChildEntity, TExecutionContext>? searcher,
+            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
-                  condition,
-                  loader,
-                  null, // TODO elementGraphType was typeof(ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>),
-                  CreateResolver(name, parent, condition, loader, orderBy, thenBy),
+                  resolver,
+                  elementGraphType,
                   arguments,
-                  orderBy,
-                  thenBy)
+                  searcher,
+                  naturalSorters)
         {
             _graphType = GraphTypeDescriptor.Create<ConnectionGraphType<TChildLoader, TChildEntity, TExecutionContext>, TExecutionContext>();
-
-            Argument<string>(
-                "after",
-                "Only look at connected edges with cursors greater than the value of `after`.");
-
-            Argument<int?>(
-                "first",
-                "Specifies the number of edges to return starting from `after` or the first entry if `after` is not specified.");
-
-            Argument<string>(
-                "before",
-                "Only look at connected edges with cursors smaller than the value of `before`.");
-
-            Argument<int?>(
-                "last",
-                "Specifies the number of edges to return counting reversely from `before`, or the last entry if `before` is not specified.");
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        public override IResolver<TEntity> FieldResolver => OrderedQueryableFieldResolver.AsConnection();
+        public override IFieldResolver Resolver => QueryableFieldResolver.AsConnection();
 
-        private static IOrderedQueryableResolver<TEntity, TChildEntity, TExecutionContext> CreateResolver(
-            string fieldName,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            Expression<Func<TEntity, TChildEntity, bool>> condition,
-            TChildLoader loader,
-            Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> orderBy,
-            Func<IOrderedQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>> thenBy)
+        protected override ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
+            IChainConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
-            return condition == null
-                ? new ConnectionFuncResolver<TEntity, TChildEntity, TExecutionContext>(loader.ObjectGraphTypeConfigurator.ProxyAccessor, GetQuery(loader), (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query), ApplySort(loader, null, orderBy, thenBy))
-                : new ConnectionAsyncFuncResolver<TEntity, TChildEntity, TExecutionContext>(fieldName, GetQuery(loader), condition, (ctx, query) => loader.DoApplySecurityFilter(ctx.GetUserContext<TExecutionContext>(), query), ApplySort(loader, null, orderBy, thenBy), parent.ProxyAccessor, loader.ObjectGraphTypeConfigurator.ProxyAccessor);
+            return new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                resolver,
+                ElementGraphType,
+                Arguments,
+                Searcher,
+                NaturalSorters!);
         }
     }
 }

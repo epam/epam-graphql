@@ -42,6 +42,30 @@ namespace Epam.GraphQL.Tests.Helpers
             return (Dictionary<string, object>)ToObject(JToken.Parse(json));
         }
 
+        public static ISchemaExecuter<TExecutionContext> CreateSchemaExecuter<TExecutionContext>(
+            Type queryType,
+            Action<SchemaOptionsBuilder<TExecutionContext>> configure)
+        {
+            var createSchemaExecuterMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
+                nameof(CreateSchemaExecuter),
+                new[] { queryType, typeof(TExecutionContext) },
+                new[] { typeof(Action<SchemaOptionsBuilder<TExecutionContext>>) });
+
+            return createSchemaExecuterMethodInfo.InvokeAndHoistBaseException<ISchemaExecuter<TExecutionContext>>(null, configure);
+        }
+
+        private static ISchemaExecuter<TQuery, TExecutionContext> CreateSchemaExecuter<TQuery, TExecutionContext>(
+            Action<SchemaOptionsBuilder<TExecutionContext>> configure)
+            where TQuery : Query<TExecutionContext>, new()
+        {
+            var services = new ServiceCollection();
+            services.AddEpamGraphQLSchema<TQuery, TExecutionContext>(configure);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var schemaExecuter = serviceProvider.GetRequiredService<ISchemaExecuter<TQuery, TExecutionContext>>();
+            return schemaExecuter;
+        }
+
         private static ExecutionResult ExecuteQuery<TQuery, TMutation, TExecutionContext>(Action<SchemaOptionsBuilder<TExecutionContext>> configure, Action<SchemaExecutionOptionsBuilder<TExecutionContext>> configureExecutionOptions)
             where TQuery : Query<TExecutionContext>, new()
             where TMutation : Mutation<TExecutionContext>, new()
@@ -63,33 +87,36 @@ namespace Epam.GraphQL.Tests.Helpers
             {
                 dataContext = Substitute.For<IDataContext>();
 
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<Proxy<Person>>>())
+                dataContext.Convert(Arg.Any<IQueryable<Proxy<Person>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<Person>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<Proxy<Unit>>>())
+                dataContext.Convert(Arg.Any<IQueryable<Proxy<Unit>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<Unit>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<Proxy<Branch>>>())
+                dataContext.Convert(Arg.Any<IQueryable<Proxy<Branch>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<Branch>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Person>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Person>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Person>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Unit>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Unit>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Unit>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Branch>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Branch>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Branch>>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Person>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Person>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Person>>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<long, Proxy<Person>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<long, Proxy<Person>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<long, Proxy<Person>>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Unit>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Unit>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Proxy<Unit>>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<string, Proxy<Unit>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<string, Proxy<Unit>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<string, Proxy<Unit>>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, int>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, int>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, int>>>(0).ToAsyncEnumerable());
 
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, int>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, int>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, int>>>>(0).ToAsyncEnumerable());
-                dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, Proxy<Branch>>>>>())
+                dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, Proxy<Branch>>>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Tuple<Proxy<Unit>, Proxy<Branch>>>>>(0).ToAsyncEnumerable());
+
+                dataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<Proxy<int>>>())
+                    .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<int>>>(0));
 
                 dataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<Proxy<Person>>>())
                     .Returns(callInfo => callInfo.ArgAt<IQueryable<Proxy<Person>>>(0));

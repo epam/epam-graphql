@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Adapters;
 using Epam.GraphQL.Infrastructure;
 
-#nullable enable
-
 namespace Epam.GraphQL
 {
     [InternalApi]

@@ -11,14 +11,16 @@ namespace Epam.GraphQL.Savers
     [InternalApi]
     public interface ISaveResultItem
     {
-        object Id { get; set; }
+        object? Id { get; }
 
-        object Payload { get; }
+        object? Payload { get; }
 
         bool IsNew { get; }
 
-        IDictionary<string, object> Properties { get; }
+        IDictionary<string, object?> Properties { get; }
 
         ISaveResultItem Merge(ISaveResultItem item);
+
+        void UpdateId();
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -27,11 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public int Count => _items.Count;
 
-        public LazyQueryArgument this[int index]
-        {
-            get => _items[index];
-            set => _items[index] = value;
-        }
+        public LazyQueryArgument this[int index] => _items[index];
 
         public IEnumerator<LazyQueryArgument> GetEnumerator() => _items.GetEnumerator();
 

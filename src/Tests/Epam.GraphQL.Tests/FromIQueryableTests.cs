@@ -344,5 +344,38 @@ namespace Epam.GraphQL.Tests
                 .Received(1)
                 .Invoke(Arg.Any<TestUserContext>());
         }
+
+        /// <summary>
+        /// Test for https://github.com/epam/epam-graphql/issues/14.
+        /// </summary>
+        [Test]
+        public void Issue14()
+        {
+            void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("people")
+                        .FromIQueryable(
+                            _ => FakeData.People.Take(1).AsQueryable(),
+                            builder => builder.Field(d => d.Unit));
+            }
+
+            TestHelpers.TestQuery(
+                Builder,
+                @"query {
+                    people {
+                        unit {
+                            id
+                        }
+                    }
+                }",
+                @"{
+                    people: [{
+                        unit: {
+                            id: 1,
+                        }
+                    }]
+                }");
+        }
     }
 }

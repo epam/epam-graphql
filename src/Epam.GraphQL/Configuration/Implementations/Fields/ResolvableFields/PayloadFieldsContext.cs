@@ -6,8 +6,6 @@
 using System;
 using Epam.GraphQL.Extensions;
 
-#nullable enable
-
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class PayloadFieldsContext<TExecutionContext>

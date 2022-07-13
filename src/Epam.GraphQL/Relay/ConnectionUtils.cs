@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using GraphQL.Types.Relay.DataObjects;
 
@@ -15,7 +17,8 @@ namespace Epam.GraphQL.Relay
     internal static class ConnectionUtils
     {
         public static Connection<TSource> ToConnection<TSource>(
-            IOrderedQueryable<TSource> query,
+            IQueryable<TSource> query,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             IQueryExecuter executer,
             int? first,
@@ -27,15 +30,8 @@ namespace Epam.GraphQL.Relay
             bool shouldComputeEdges,
             bool shouldComputeItems)
         {
-            if (first < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(first), "`first` is out of range. Must be non-negative or null.");
-            }
-
-            if (last < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(last), "`last` is out of range. Must be non-negative or null.");
-            }
+            Guards.ThrowIfNegative(first, nameof(first));
+            Guards.ThrowIfNegative(last, nameof(last));
 
             if (first.HasValue && last.HasValue)
             {
@@ -52,7 +48,7 @@ namespace Epam.GraphQL.Relay
                 before = null;
             }
 
-            Paginatior<TSource> wrapper = Paginator.From(executer, stepNameFactory, query, shouldMaterialize: shouldComputeEndOffset || shouldComputeCount);
+            Paginatior<TSource> wrapper = Paginator.From(executer, configurationContext, stepNameFactory, query, shouldMaterialize: shouldComputeEndOffset || shouldComputeCount);
             PaginatorResult<TSource> result;
 
             if (after >= before)
@@ -91,12 +87,12 @@ namespace Epam.GraphQL.Relay
                 totalCount = result.TotalCount;
                 if (totalCount == null)
                 {
-                    totalCount = executer.Execute(stepNameFactory, query, query => query.Count(), nameof(Queryable.Count));
+                    totalCount = executer.Execute(configurationContext, stepNameFactory, query, query => query.Count(), nameof(Queryable.Count));
                 }
             }
 
-            IEnumerable<Edge<TSource>> edges = null;
-            IEnumerable<TSource> items = null;
+            IEnumerable<Edge<TSource>>? edges = null;
+            IEnumerable<TSource>? items = null;
 
             if (shouldComputeEdges && shouldComputeItems)
             {

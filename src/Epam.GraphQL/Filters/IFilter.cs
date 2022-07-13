@@ -4,17 +4,16 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Infrastructure;
 
 namespace Epam.GraphQL.Filters
 {
     [InternalApi]
-    public interface IFilter<TEntity, TExecutionContext> : IEquatable<IFilter<TEntity, TExecutionContext>>
+    public interface IFilter<TEntity, TExecutionContext>
     {
         Type FilterType { get; }
 
-        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter, IEnumerable<string> filterFieldNames);
+        IQueryable<TEntity> All(ISchemaExecutionListener listener, IQueryable<TEntity> query, TExecutionContext context, object filter);
     }
 }

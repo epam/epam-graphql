@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-#nullable enable
-
 namespace Epam.GraphQL.Helpers
 {
     internal static partial class CachedReflectionInfo
@@ -27,7 +25,8 @@ namespace Epam.GraphQL.Helpers
 
             public static MethodInfo Any(Type source)
             {
-                return (_any ??= new Func<IEnumerable<object>, bool>(Enumerable.Any).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source);
+                return (_any ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, bool>(Enumerable.Any<object>))
+                    .MakeGenericMethod(source);
             }
 
             public static MethodInfo Any<TSource>()
@@ -37,50 +36,54 @@ namespace Epam.GraphQL.Helpers
 
             public static MethodInfo Cast(Type result)
             {
-                return (_cast ??= new Func<IEnumerable<object>, IEnumerable<object>>(Enumerable.Cast<object>).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(result);
+                return (_cast ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, IEnumerable<object>>(Enumerable.Cast<object>))
+                    .MakeGenericMethod(result);
             }
 
             public static MethodInfo Count(Type source)
             {
-                return (_count ??= new Func<IEnumerable<object>, int>(Enumerable.Count).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source);
+                return (_count ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, int>(Enumerable.Count<object>))
+                    .MakeGenericMethod(source);
             }
 
             public static MethodInfo Contains(Type source)
             {
-                return (_contains ??= new Func<IEnumerable<object>, object, bool>(Enumerable.Contains).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source);
+                return (_contains ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, object, bool>(Enumerable.Contains<object>)).MakeGenericMethod(source);
+            }
+
+            public static MethodInfo Contains<TSource>()
+            {
+                return Contains(typeof(TSource));
             }
 
             public static MethodInfo Distinct(Type source)
             {
-                return (_distinct ??= new Func<IEnumerable<object>, IEnumerable<object>>(Enumerable.Distinct).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source);
+                return (_distinct ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, IEnumerable<object>>(Enumerable.Distinct<object>))
+                    .MakeGenericMethod(source);
             }
 
             public static MethodInfo Select(Type source, Type result)
             {
-                return (_select ??= new Func<IEnumerable<object>, Func<object, object>, IEnumerable<object>>(Enumerable.Select).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source, result);
+                return (_select ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, Func<object, object>, IEnumerable<object>>(Enumerable.Select<object, object>))
+                    .MakeGenericMethod(source, result);
             }
 
             public static MethodInfo ToArray(Type source)
             {
-                return (_toArray ??= new Func<IEnumerable<object>, object[]>(Enumerable.ToArray).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source);
+                return (_toArray ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, object[]>(Enumerable.ToArray<object>))
+                    .MakeGenericMethod(source);
             }
 
             public static MethodInfo Where(Type source)
             {
-                return (_where ??= new Func<IEnumerable<object>, Func<object, bool>, IEnumerable<object>>(Enumerable.Where).GetMethodInfo().GetGenericMethodDefinition()).MakeGenericMethod(source);
+                return (_where ??= ReflectionHelpers.GetMethodInfo<IEnumerable<object>, Func<object, bool>, IEnumerable<object>>(Enumerable.Where<object>))
+                    .MakeGenericMethod(source);
             }
 
             public static MethodInfo Where<TSource>()
             {
                 return Where(typeof(TSource));
             }
-        }
-
-        public static class ForEnumerable<TSource>
-        {
-            private static MethodInfo? _contains;
-
-            public static MethodInfo Contains => _contains ??= new Func<IEnumerable<TSource>, TSource, bool>(Enumerable.Contains).GetMethodInfo();
         }
     }
 }

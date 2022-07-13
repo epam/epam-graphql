@@ -6,27 +6,29 @@
 using System;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
+using Epam.GraphQL.Helpers;
 using GraphQL;
-
-#nullable enable
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class FilterArgument<TExecutionContext> : IArgument<IResolveFieldContext>
     {
-        private readonly Lazy<IInlineFilters> _inlineFilters;
+        private readonly Lazy<IInlineFilters<TExecutionContext>> _inlineFilters;
         private readonly Type _projectionType;
         private readonly Type _entityType;
 
-        public FilterArgument(RelationRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
+        public FilterArgument(IRegistry<TExecutionContext> registry, string name, Type projectionType, Type entityType)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
             _projectionType = projectionType;
             _entityType = entityType;
 
-            _inlineFilters = new Lazy<IInlineFilters>(() =>
+            _inlineFilters = new Lazy<IInlineFilters<TExecutionContext>>(() =>
             {
                 var configurator = registry.GetObjectGraphTypeConfigurator(_entityType, _projectionType);
+
+                Guards.ThrowNotSupportedIf(configurator == null);
+
                 var inlineFilters = configurator.CreateInlineFilters();
                 return inlineFilters;
             });

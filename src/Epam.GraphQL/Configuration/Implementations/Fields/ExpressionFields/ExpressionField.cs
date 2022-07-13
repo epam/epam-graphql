@@ -4,49 +4,56 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
+using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
+using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
-    internal class ExpressionField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
+    internal class ExpressionField<TEntity, TReturnType, TExecutionContext> :
+        TypedField<TEntity, TReturnType, TExecutionContext>,
+        IExpressionFieldConfiguration<TEntity, TExecutionContext>,
+        IExpressionField<TEntity, TReturnType, TExecutionContext>,
+        IInlineExpressionField<TEntity, TReturnType, TExecutionContext>,
+        IVoid
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
+        private bool _isGroupable;
 
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
+        public ExpressionField(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? name)
             : base(
-                  registry,
+                  configurationContextFactory,
                   parent,
-                  GenerateName(name, expression))
+                  configurationContext => GenerateName(configurationContext, name, expression))
         {
-            if (name == null && !expression.IsProperty())
-            {
-                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider to give a name to field explicitly.");
-            }
-
-            _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
+            _expression = new FieldExpression<TEntity, TReturnType, TExecutionContext>(this, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
 
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string name)
+        public ExpressionField(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
+            string name)
             : base(
-                  registry,
+                  configurationContextFactory,
                   parent,
-                  name)
+                  configurationContext => name)
         {
-            _expression = new FieldContextExpression<TEntity, TReturnType, TExecutionContext>(this, Name, expression);
+            _expression = new FieldContextExpression<TEntity, TReturnType, TExecutionContext>(this, expression);
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>(_expression);
         }
 
@@ -54,9 +61,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
             get
             {
-                IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this);
+                IGraphTypeDescriptor<TExecutionContext> graphType = Parent.GetGraphQLTypeDescriptor<TReturnType>(this, null, ConfigurationContext);
 
-                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !EditSettings.IsMandatoryForUpdate)
+                if (Parent is InputObjectGraphTypeConfigurator<TEntity, TExecutionContext> && !(EditSettings?.IsMandatoryForUpdate ?? false))
                 {
                     graphType = graphType.UnwrapIfNonNullable();
                 }
@@ -65,69 +72,105 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
         }
 
-        public override bool IsExpression => true;
+        public bool IsFilterable { get; set; }
 
-        public override bool IsFilterable { get; protected set; }
+        public bool IsGroupable => _isGroupable || Registry.IsSimpleType(typeof(TEntity));
 
-        public override bool IsGroupable { get; protected set; }
+        public PropertyInfo? PropertyInfo => _expression.PropertyInfo;
 
-        public override PropertyInfo PropertyInfo => _expression?.PropertyInfo;
+        public LambdaExpression ContextExpression => _expression.ContextedExpression;
 
-        public override bool CanResolve => true;
+        public LambdaExpression OriginalExpression => _expression.OriginalExpression;
 
-        public override LambdaExpression Expression => _expression.Expression;
+        public override IFieldResolver Resolver => _expression;
 
-        protected virtual bool IsSupportFiltering => false;
+        protected TReturnType[]? DefaultValues { get; private set; }
 
-        protected virtual bool IsSupportSorting => false;
+        protected NullOption? NullValue { get; private set; }
 
-        protected virtual bool IsSupportEditing => false;
-
-        protected virtual bool IsSupportGrouping => false;
-
-        public override object Resolve(IResolveFieldContext context)
+        public override void Validate()
         {
-            return _expression.Resolve(context, context.Source);
-        }
-
-        public override void ValidateField()
-        {
-            if (string.IsNullOrEmpty(Name))
+            try
             {
-                throw new InvalidOperationException("Field name cannot be null or empty.");
+                _expression.ValidateExpression();
+            }
+            catch (InvalidOperationException e)
+            {
+                ConfigurationContext.AddError(e.Message, ConfigurationContext);
             }
 
-            _expression.ValidateExpression();
+            base.Validate();
+        }
+
+        public ExpressionField<TEntity, TReturnType, TExecutionContext> Filterable(TReturnType[] defaultValues)
+        {
+            ConfigurationContext.Chain(nameof(Filterable))
+                .OptionalArgument(defaultValues);
+
+            if (defaultValues != null && defaultValues.Any(value => value == null))
+            {
+                throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider using .Filterable(NullValues).");
+            }
+
+            DefaultValues = defaultValues;
+            IsFilterable = true;
+
+            return this;
+        }
+
+        public void Filterable(NullOption nullValue)
+        {
+            ConfigurationContext.Chain(nameof(Filterable))
+                .Argument(nullValue.ToString());
+            NullValue = nullValue;
+            IsFilterable = true;
+        }
+
+        public void Filterable()
+        {
+            ConfigurationContext.Chain(nameof(Filterable));
+            IsFilterable = true;
         }
 
         public void Sortable()
         {
-            if (!IsSupportSorting)
-            {
-                throw new NotSupportedException($".Sortable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
-            Parent.AddSorter(_expression);
+            ConfigurationContext.Chain(nameof(Sortable));
+            Parent.Sorter(_expression);
         }
 
         public void Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
-            if (!IsSupportSorting)
-            {
-                throw new NotSupportedException($".Sortable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
+            ConfigurationContext.Chain(nameof(Sortable)).Argument(sorter);
+            Parent.Sorter(Name, sorter);
+        }
 
-            Parent.AddSorter(Name, sorter);
+        public void Sortable<TValue>(Func<TExecutionContext, Expression<Func<TEntity, TValue>>> sorterFactory)
+        {
+            ConfigurationContext.Chain(nameof(Sortable)).Argument(sorterFactory);
+            Parent.Sorter(Name, sorterFactory);
         }
 
         public void Groupable()
         {
-            if (!IsSupportGrouping)
-            {
-                throw new NotSupportedException($".Groupable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
+            ConfigurationContext.Chain(nameof(Groupable));
+            _isGroupable = true;
+        }
 
-            IsGroupable = true;
+        public override FieldType AsFieldType()
+        {
+            var result = base.AsFieldType();
+
+            // Hack against GraphQL.NET: ComplexGraphType<object>.ORIGINAL_EXPRESSION_PROPERTY_NAME is internal.
+            result.Metadata.Add("ORIGINAL_EXPRESSION_PROPERTY_NAME", PropertyInfo?.Name);
+
+            return result;
+        }
+
+        public IInlineFilter<TExecutionContext> CreateInlineFilter()
+        {
+            Guards.AssertType<TEntity>(!IsFilterable);
+
+            return OnCreateInlineFilter();
         }
 
         public override int GetHashCode()
@@ -150,127 +193,95 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             return base.Equals(other);
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        ISortableField<IVoid, TEntity, TExecutionContext> IFilterableField<ISortableField<IVoid, TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable()
         {
-            throw new NotSupportedException();
+            Filterable();
+            return this;
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        ISortableField<IVoid, TEntity, TExecutionContext> IFilterableField<ISortableField<IVoid, TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable(params TReturnType[] defaultValues)
         {
-            throw new NotSupportedException();
+            Filterable(defaultValues);
+            return this;
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, TReturnType1> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
+        ISortableField<IVoid, TEntity, TExecutionContext> IFilterableField<ISortableField<IVoid, TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable(NullOption nullValue)
         {
-            throw new NotSupportedException();
+            Filterable(nullValue);
+            return this;
         }
 
-        public override ResolvedField<TEntity, TReturnType1, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
+        IVoid ISortableField<IVoid, TEntity, TExecutionContext>.Sortable()
         {
-            throw new NotSupportedException();
+            Sortable();
+            return this;
         }
 
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        IVoid ISortableField<IVoid, TEntity, TExecutionContext>.Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
         {
-            throw new NotSupportedException();
+            Sortable(sorter);
+            return this;
         }
 
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
+        IVoid ISortableField<IVoid, TEntity, TExecutionContext>.Sortable<TValue>(Func<TExecutionContext, Expression<Func<TEntity, TValue>>> sorterFactory)
         {
-            throw new NotSupportedException();
+            Sortable(sorterFactory);
+            return this;
         }
 
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType1>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
+        ISortableGroupableField<TEntity, TExecutionContext> IFilterableField<ISortableGroupableField<TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable()
         {
-            throw new NotSupportedException();
+            Filterable();
+            return this;
         }
 
-        public override ResolvedField<TEntity, IEnumerable<TReturnType1>, TExecutionContext> ApplyResolve<TReturnType1>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType1>>> resolve, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>> build, bool doesDependOnAllFields, Action<ResolveOptionsBuilder> optionsBuilder)
-            where TReturnType1 : class
+        ISortableGroupableField<TEntity, TExecutionContext> IFilterableField<ISortableGroupableField<TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable(params TReturnType[] defaultValues)
         {
-            throw new NotSupportedException();
+            Filterable(defaultValues);
+            return this;
         }
 
-        protected override IFieldResolver GetResolver() => _expression;
-
-        private static string GenerateName(string name, Expression<Func<TEntity, TReturnType>> expression)
+        ISortableGroupableField<TEntity, TExecutionContext> IFilterableField<ISortableGroupableField<TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable(NullOption nullValue)
         {
-            if (expression == null)
+            Filterable(nullValue);
+            return this;
+        }
+
+        IGroupableField ISortableField<IGroupableField, TEntity, TExecutionContext>.Sortable()
+        {
+            Sortable();
+            return this;
+        }
+
+        IGroupableField ISortableField<IGroupableField, TEntity, TExecutionContext>.Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
+        {
+            Sortable(sorter);
+            return this;
+        }
+
+        IGroupableField ISortableField<IGroupableField, TEntity, TExecutionContext>.Sortable<TValue>(Func<TExecutionContext, Expression<Func<TEntity, TValue>>> sorterFactory)
+        {
+            Sortable(sorterFactory);
+            return this;
+        }
+
+        protected virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter() => throw new NotSupportedException();
+
+        private static string GenerateName(IChainConfigurationContext configurationContext, string? name, Expression<Func<TEntity, TReturnType>> expression)
+        {
+            if (name != null)
             {
-                throw new ArgumentNullException(nameof(expression));
+                return name;
             }
 
-            if (name == null && !expression.IsProperty())
+            if (expression.TryGetNameOfProperty(out var propName))
             {
-                throw new InvalidOperationException($"Expression ({expression}), provided for field is not a property. Consider to give a name to field explicitly.");
+                return propName.ToCamelCase();
             }
 
-            return name ?? expression.NameOf().ToCamelCase();
-        }
-    }
+            configurationContext.AddError($"Expression ({expression}), provided for field is not a property. Consider giving a name to the field explicitly.", configurationContext);
 
-    internal class ExpressionField<TEntity, TReturnType, TFilterValueType, TExecutionContext> : ExpressionField<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
-    {
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TEntity, TReturnType>> expression, string name)
-            : base(registry, parent, expression, name)
-        {
-        }
-
-        public ExpressionField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string name)
-            : base(registry, parent, expression, name)
-        {
-        }
-
-        protected override bool IsSupportFiltering => true;
-
-        protected TFilterValueType[] DefaultValues { get; private set; }
-
-        protected NullOption? NullValue { get; private set; }
-
-        public void Filterable(TFilterValueType[] defaultValues = null)
-        {
-            if (defaultValues != null && defaultValues.Any(value => value == null))
-            {
-                throw new ArgumentException(".Filterable() does not support nulls as parameters. Consider to use .Filterable(NullValues).");
-            }
-
-            if (!IsSupportFiltering)
-            {
-                throw new NotSupportedException($".Filterable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
-            DefaultValues = defaultValues;
-            IsFilterable = true;
-        }
-
-        public void Filterable(NullOption nullValue)
-        {
-            if (!IsSupportFiltering)
-            {
-                throw new NotSupportedException($".Filterable() call is not supported for field of type {typeof(TReturnType).Name}.");
-            }
-
-            NullValue = nullValue;
-            IsFilterable = true;
-        }
-
-        public override IInlineFilter<TExecutionContext> CreateInlineFilter()
-        {
-            if (IsFilterable)
-            {
-                return OnCreateInlineFilter();
-            }
-
-            throw new NotSupportedException();
-        }
-
-        public virtual IInlineFilter<TExecutionContext> OnCreateInlineFilter()
-        {
-            throw new NotSupportedException();
+            return string.Empty;
         }
     }
 }

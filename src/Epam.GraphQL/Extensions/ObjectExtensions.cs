@@ -8,8 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
-#nullable enable
+using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Extensions
 {
@@ -29,22 +28,12 @@ namespace Epam.GraphQL.Extensions
 
         public static void CopyProperties<T>(this T obj, T value, IEnumerable<PropertyInfo> properties)
         {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            Guards.ThrowIfNull(obj, nameof(obj));
+            Guards.ThrowIfNull(value, nameof(value));
 
             foreach (var propInfo in properties)
             {
-                if (!propInfo.CanRead || !propInfo.CanWrite)
-                {
-                    throw new ArgumentException($"Cannot read or write property {propInfo.Name}.");
-                }
+                Guards.ThrowInvalidOperationIf(!propInfo.CanRead || !propInfo.CanWrite, $"Cannot read or write property {propInfo.Name}.");
 
                 var val = value.GetPropertyValue(propInfo);
                 obj.SetPropertyValue(propInfo, val);
@@ -53,16 +42,6 @@ namespace Epam.GraphQL.Extensions
 
         public static object? GetPropertyValue(this object source, PropertyInfo propertyInfo)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (propertyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(propertyInfo));
-            }
-
             // We use reflection to create a delegate to access the property
             // Then cache the delegate
             // This is over 10x faster that just using reflection to get the property value
@@ -79,16 +58,6 @@ namespace Epam.GraphQL.Extensions
 
         public static void SetPropertyValue(this object source, PropertyInfo propertyInfo, object? value)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (propertyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(propertyInfo));
-            }
-
             // We use reflection to create a delegate to access the property
             // Then cache the delegate
             // This is over 10x faster that just using reflection to get the property value
@@ -107,7 +76,7 @@ namespace Epam.GraphQL.Extensions
             MethodInfo constructedHelper = _func2DelegateHelperMethod.MakeGenericMethod(
                 methodInfo.DeclaringType, methodInfo.ReturnType);
 
-            return constructedHelper.Invoke<Func<object, object?>>(null, methodInfo);
+            return constructedHelper.Invoke<Func<object, object>>(null, methodInfo);
         }
 
         private static Action<object, object?> CreateAction2Delegate(PropertyInfo propertyInfo)
@@ -119,27 +88,27 @@ namespace Epam.GraphQL.Extensions
             MethodInfo constructedHelper = _action2DelegateHelperMethod.MakeGenericMethod(
                 methodInfo.DeclaringType, methodInfo.GetParameters().First().ParameterType);
 
-            return constructedHelper.Invoke<Action<object?, object?>>(null, methodInfo);
+            return constructedHelper.Invoke<Action<object, object?>>(null, methodInfo);
         }
 
-        private static Func<object?, object?> Func2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
+        private static Func<object, object?> Func2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
         {
             // Convert the slow MethodInfo into a fast, strongly typed, open delegate
             Func<TTarget, TReturn> func = (Func<TTarget, TReturn>)Delegate.CreateDelegate(typeof(Func<TTarget, TReturn>), methodInfo);
 
             // Now create a more weakly typed delegate which will call the strongly typed one
-            return (object? target) => func((TTarget)target!);
+            return (object target) => func((TTarget)target);
         }
 
-        private static Action<object?, object?> Action2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
+        private static Action<object, object?> Action2DelegateHelper<TTarget, TReturn>(MethodInfo methodInfo)
         {
             // Convert the slow MethodInfo into a fast, strongly typed, open delegate
             Action<TTarget, TReturn> action = (Action<TTarget, TReturn>)Delegate.CreateDelegate(typeof(Action<TTarget, TReturn>), methodInfo);
 
             // Now create a more weakly typed delegate which will call the strongly typed one
-            return (object? target, object? value) =>
+            return (object target, object? value) =>
             {
-                action((TTarget)target!, (TReturn)value!);
+                action((TTarget)target, (TReturn)value!);
             };
         }
     }

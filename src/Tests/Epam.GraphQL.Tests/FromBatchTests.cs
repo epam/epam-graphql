@@ -337,6 +337,59 @@ namespace Epam.GraphQL.Tests
                 .Invoke(Arg.Any<IEnumerable<Unit>>());
         }
 
+        [Test(Description = "FromBatch(...)/IEnumerable<int>")]
+        public void BatchFuncFromUnitToUnitAndArrayOfIntTest()
+        {
+            var batchFunc = Substitute.For<Func<IEnumerable<Unit>, IDictionary<Unit, int[]>>>();
+            batchFunc
+                .Invoke(Arg.Any<IEnumerable<Unit>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Unit>>(0).ToDictionary(u => u, u => FakeData.People.Where(p => p.UnitId == u.Id).Select(p => p.Id).ToArray()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field("empIds")
+                        .FromBatch(batchFunc);
+                });
+
+            var mutableBuilder = CreateQueryMutableBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field("empIds")
+                        .FromBatch(batchFunc);
+                });
+
+            const string Query = @"
+                query {
+                    units {
+                        items {
+                            id
+                            empIds
+                        }
+                    }
+                }";
+
+            const string Expected = @"
+                {
+                    units: {
+                        items: [{
+                            id: 1,
+                            empIds: [1,2,3]
+                        }, {
+                            id: 2,
+                            empIds: [4,5,6]
+                        }]
+                    }
+                }";
+
+            TestHelpers.TestQuery(mutableBuilder, Query, Expected);
+            TestHelpers.TestQuery(builder, Query, Expected);
+            batchFunc.Received(2)
+                .Invoke(Arg.Any<IEnumerable<Unit>>());
+        }
+
         [Test(Description = "FromBatch(...)/IEnumerable<int> using key selector/context")]
         public void BatchFuncFromContextAndIntToIntAndEnumerableOfIntUsingKeySelectorTest()
         {
@@ -589,6 +642,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -659,6 +713,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -730,6 +785,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -802,6 +858,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -877,6 +934,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -962,6 +1020,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             batchFunc,
@@ -1049,6 +1108,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1136,6 +1196,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1446,6 +1507,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1568,6 +1630,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1689,6 +1752,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1811,7 +1875,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -1821,6 +1885,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1830,7 +1895,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -1937,7 +2002,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -1947,6 +2012,7 @@ namespace Epam.GraphQL.Tests
             var mutableBuilder = CreateQueryMutableBuilder(
                 loader =>
                 {
+                    loader.Field(x => x.Name).Editable();
                     loader.Field("unitInfo")
                         .FromBatch(
                             u => u.Id,
@@ -1956,7 +2022,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && p.Id > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2063,7 +2129,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2082,7 +2148,7 @@ namespace Epam.GraphQL.Tests
                                 b.Field("id", u => u.Item1);
                                 b.Field("peopleId", u => u.Item2);
                                 b.Field("manager")
-                                    .FromLoader<Person>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
+                                    .FromLoader<Tuple<int, int>, Person, TestUserContext>(personLoader, (t, p) => t.Item2 == p.Id && t.Item1 > 0)
                                     .Select(p => p.Manager)
                                     .FirstOrDefault();
                             });
@@ -2133,7 +2199,7 @@ namespace Epam.GraphQL.Tests
                 onConfigure: loader =>
                 {
                     loader.Field("branches")
-                        .FromLoader<Branch>(branchLoader, (u, b) => u.BranchId == b.Id);
+                        .FromLoader<Unit, Branch, TestUserContext>(branchLoader, (u, b) => u.BranchId == b.Id);
                 },
                 getBaseQuery: _ => FakeData.Units.AsQueryable(),
                 applyNaturalOrderBy: query => query.OrderBy(p => p.Id),
@@ -2144,7 +2210,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id);
                     loader.Field("subordinate")
                         .FromBatch(childrenBatchFunc, build => build.ConfigureFrom(loader.GetType()));
                 },

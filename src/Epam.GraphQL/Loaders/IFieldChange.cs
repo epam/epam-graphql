@@ -1,4 +1,4 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
@@ -9,22 +9,22 @@ namespace Epam.GraphQL.Loaders
     {
         TExecutionContext Context { get; }
 
-        object Entity { get; }
+        object? Entity { get; }
     }
 
     public interface IFieldChange<out TEntity, TExecutionContext> : IFieldChange<TExecutionContext>
     {
-        object PreviousValue { get; }
+        object? PreviousValue { get; }
 
-        object NextValue { get; }
+        object? NextValue { get; }
 
         new TEntity Entity { get; }
     }
 
     public interface IFieldChange<out TEntity, out T, TExecutionContext> : IFieldChange<TEntity, TExecutionContext>
     {
-        new T PreviousValue { get; }
+        new T? PreviousValue { get; }
 
-        new T NextValue { get; }
+        new T? NextValue { get; }
     }
 }

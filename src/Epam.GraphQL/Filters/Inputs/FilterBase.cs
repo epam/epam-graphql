@@ -5,8 +5,6 @@
 
 using Epam.GraphQL.Infrastructure;
 
-#nullable enable
-
 namespace Epam.GraphQL.Filters.Inputs
 {
     // TODO Come up with making both this and Proxy<> types internal

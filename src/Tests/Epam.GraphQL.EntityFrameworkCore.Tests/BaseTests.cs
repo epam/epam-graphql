@@ -6,6 +6,7 @@
 using System;
 using System.Data.Common;
 using System.Linq;
+using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using Microsoft.Data.Sqlite;
@@ -42,7 +43,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                 builder => builder
                     .ClearProviders()
                     .AddConsole()
-                    .AddFilter((category, logLevel) => category == DbLoggerCategory.Database.Command.Name && logLevel == LogLevel.Information));
+                    .AddFilter((category, logLevel) => (category == DbLoggerCategory.Database.Command.Name && logLevel == LogLevel.Information) || category == Constants.Logging.Category));
 
             var options = new DbContextOptionsBuilder<TestDbContext>()
                 .UseSqlite(_connection)
@@ -124,12 +125,12 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
             context.Add(alpha);
             context.Add(beta);
 
-            var linoelLivermore = new Person { FullName = "Linoel Livermore", Salary = 4015.69m, Unit = alpha, HireDate = new DateTime(2000, 1, 20) };
-            var sophieGandley = new Person { FullName = "Sophie Gandley", Salary = 2381.91m, Manager = linoelLivermore, Unit = alpha, HireDate = new DateTime(2010, 6, 14) };
-            var hannieEveritt = new Person { FullName = "Hannie Everitt", Salary = 1393.08m, Manager = linoelLivermore, Unit = alpha, HireDate = new DateTime(2015, 3, 1) };
-            var floranceGoodricke = new Person { FullName = "Florance Goodricke", Salary = 549.33m, Manager = sophieGandley, Unit = beta, HireDate = new DateTime(2013, 9, 19), TerminationDate = new DateTime(2019, 10, 1) };
-            var aldonExley = new Person { FullName = "Aldon Exley", Salary = 3389.21m, Manager = sophieGandley, Unit = beta, HireDate = new DateTime(2015, 3, 21), TerminationDate = new DateTime(2017, 2, 19) };
-            var waltonAlvarez = new Person { FullName = "Walton Alvarez", Salary = 3436.75m, Manager = aldonExley, Unit = beta, HireDate = new DateTime(2011, 7, 29), TerminationDate = new DateTime(2018, 5, 10) };
+            var linoelLivermore = new Person { Id = 1, FullName = "Linoel Livermore", Salary = 4015.69m, Unit = alpha, HireDate = new DateTime(2000, 1, 20) };
+            var sophieGandley = new Person { Id = 2, FullName = "Sophie Gandley", Salary = 2381.91m, Manager = linoelLivermore, Unit = alpha, HireDate = new DateTime(2010, 6, 14) };
+            var hannieEveritt = new Person { Id = 3, FullName = "Hannie Everitt", Salary = 1393.08m, Manager = linoelLivermore, Unit = alpha, HireDate = new DateTime(2015, 3, 1) };
+            var floranceGoodricke = new Person { Id = 4, FullName = "Florance Goodricke", Salary = 549.33m, Manager = sophieGandley, Unit = beta, HireDate = new DateTime(2013, 9, 19), TerminationDate = new DateTime(2019, 10, 1) };
+            var aldonExley = new Person { Id = 5, FullName = "Aldon Exley", Salary = 3389.21m, Manager = sophieGandley, Unit = beta, HireDate = new DateTime(2015, 3, 21), TerminationDate = new DateTime(2017, 2, 19) };
+            var waltonAlvarez = new Person { Id = 6, FullName = "Walton Alvarez", Salary = 3436.75m, Manager = aldonExley, Unit = beta, HireDate = new DateTime(2011, 7, 29), TerminationDate = new DateTime(2018, 5, 10) };
 
             context.Add(linoelLivermore);
             context.Add(sophieGandley);

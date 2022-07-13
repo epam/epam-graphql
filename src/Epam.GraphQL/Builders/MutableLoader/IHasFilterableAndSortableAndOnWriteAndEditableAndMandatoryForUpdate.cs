@@ -1,13 +1,13 @@
-﻿// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
+// Copyright © 2020 EPAM Systems, Inc. All Rights Reserved. All information contained herein is, and remains the
 // property of EPAM Systems, Inc. and/or its suppliers and is protected by international intellectual
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 namespace Epam.GraphQL.Builders.MutableLoader
 {
-    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> :
-        IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> :
+        IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext>
     {
-        IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TFilterValueType, TExecutionContext> MandatoryForUpdate();
+        IHasFilterableAndSortableAndOnWriteAndEditable<TEntity, TReturnType, TExecutionContext> MandatoryForUpdate();
     }
 }

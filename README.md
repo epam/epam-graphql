@@ -12,7 +12,7 @@
 
 ## Overview
 
-**Epam.GraphQL** is a set of .NET libraries which provides high-level way for building GraphQL APIs with a few lines of code, including (but not limited to) CRUD, batching, complex sorting and filtering, pagination.
+**Epam.GraphQL** is a set of .NET libraries which provides a high-level way for building GraphQL APIs with a few lines of code, including (but not limited to) CRUD, batching, complex sorting and filtering, pagination.
 We have built **Epam.GraphQL** on top of [GraphQL.NET](https://github.com/graphql-dotnet/graphql-dotnet/) to simplify developing GraphQL API layer:
   * It is used by a dozen internal EPAM applications, battle-tested on complex tasks
   * Highly declarative; can be seen as Low-Code platform done right
@@ -27,7 +27,7 @@ We have built **Epam.GraphQL** on top of [GraphQL.NET](https://github.com/graphq
 * [Relay connections](https://relay.dev/graphql/connections.htm) out-of-the-box
 * Declarative filtering and search
 * Declarative sorting
-* Entity automapping
+* Entity auto-mapping
 * Master-details relationship between entities with a few lines of code
 * Security
 * ... and many more
@@ -35,8 +35,21 @@ We have built **Epam.GraphQL** on top of [GraphQL.NET](https://github.com/graphq
 ## Documentation
 
 * [Get Started](docs/01-get-started.md)
+* [Core Concepts](docs/02-core-concepts.md)
+* Querying Data
+	* [Resolving Fields](docs/querying/01-resolvers.md)
+	* [`FromIQueryable`](docs/querying/02-fromiqueryable.md)
+	* [Loaders](docs/querying/03-loaders.md)
+	* [Filtering](docs/querying/04-filtering.md)
+	* [Sorting](docs/querying/05-sorting.md)
+	* [Pagination](docs/querying/06-pagination.md)
+	* [N+1 Problem](docs/querying/07-n+1-problem.md)
+		* [`FromIQueryable`](docs/querying/07-n+1-problem/01-fromiqueryable.md)
+		* [`FromLoader`](docs/querying/07-n+1-problem/02-fromloader.md)
+		* [`FromBatch`](docs/querying/07-n+1-problem/03-frombatch.md)
+	* [Grouping](docs/querying/08-grouping.md)
 * Entity Framework Core Usage
-  * [Automapping](docs/02-ef-core/01.automapping.md)
+  * [Auto-mapping](docs/ef-core/01-automapping.md)
 
 ## Packages
 

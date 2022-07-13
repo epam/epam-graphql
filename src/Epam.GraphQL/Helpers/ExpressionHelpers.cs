@@ -6,11 +6,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Epam.GraphQL.Extensions;
-
-#nullable enable
 
 namespace Epam.GraphQL.Helpers
 {
@@ -18,46 +18,93 @@ namespace Epam.GraphQL.Helpers
     {
         public static Expression<Func<T1, TResult>> Compose<T1, T2, TResult>(Expression<Func<T1, T2>> first, Expression<Func<T2, TResult>> second)
         {
-            return Expression.Lambda<Func<T1, TResult>>(ParameterRebinder.ReplaceParameter(second.Body, second.Parameters[0], first.Body), first.Parameters[0]);
+            var paramForReplace = first.Parameters[0];
+            var param = Expression.Parameter(paramForReplace.Type, paramForReplace.Name);
+            var body = ParameterRebinder<Expression, Expression>.ReplaceParameter(first.Body, paramForReplace, param);
+
+            return Expression.Lambda<Func<T1, TResult>>(ParameterRebinder<Expression, Expression>.ReplaceParameter(second.Body, second.Parameters[0], body), param);
         }
 
         public static LambdaExpression Compose(LambdaExpression first, LambdaExpression second)
         {
-            return Expression.Lambda(ParameterRebinder.ReplaceParameter(second.Body, second.Parameters[0], first.Body), first.Parameters[0]);
+            var paramForReplace = first.Parameters[0];
+            var param = Expression.Parameter(paramForReplace.Type, paramForReplace.Name);
+            var body = ParameterRebinder<Expression, Expression>.ReplaceParameter(first.Body, paramForReplace, param);
+
+            return Expression.Lambda(ParameterRebinder<Expression, Expression>.ReplaceParameter(second.Body, second.Parameters[0], body), param);
         }
 
         public static Expression<Func<T, T1, TResult>> Compose<T, T1, T2, TResult>(Expression<Func<T, T1, T2>> first, Expression<Func<T2, TResult>> second)
         {
-            return Expression.Lambda<Func<T, T1, TResult>>(ParameterRebinder.ReplaceParameter(second.Body, second.Parameters[0], first.Body), first.Parameters);
+            var paramForReplace1 = first.Parameters[0];
+            var param1 = Expression.Parameter(paramForReplace1.Type, paramForReplace1.Name);
+
+            var paramForReplace2 = first.Parameters[1];
+            var param2 = Expression.Parameter(paramForReplace2.Type, paramForReplace2.Name);
+
+            var body = ParameterRebinder<Expression, Expression>.ReplaceParameters(
+                new Dictionary<Expression, Expression>
+                {
+                    [paramForReplace1] = param1,
+                    [paramForReplace2] = param2,
+                },
+                first.Body);
+
+            return Expression.Lambda<Func<T, T1, TResult>>(ParameterRebinder<Expression, Expression>.ReplaceParameter(second.Body, second.Parameters[0], body), param1, param2);
         }
 
         public static Expression<Func<T, T1, TResult>> Compose<T, T1, T2, TResult>(Expression<Func<T, T1, T2>> first, Expression<Func<T, T2, TResult>> second)
         {
-            return Expression.Lambda<Func<T, T1, TResult>>(ParameterRebinder.ReplaceParameter(second.Body, second.Parameters[1], first.Body), first.Parameters);
+            var paramForReplace1 = first.Parameters[0];
+            var param1 = Expression.Parameter(paramForReplace1.Type, paramForReplace1.Name);
+
+            var paramForReplace2 = first.Parameters[1];
+            var param2 = Expression.Parameter(paramForReplace2.Type, paramForReplace2.Name);
+
+            var body = ParameterRebinder<Expression, Expression>.ReplaceParameters(
+                new Dictionary<Expression, Expression>
+                {
+                    [paramForReplace1] = param1,
+                    [paramForReplace2] = param2,
+                },
+                first.Body);
+
+            return Expression.Lambda<Func<T, T1, TResult>>(ParameterRebinder<Expression, Expression>.ReplaceParameter(second.Body, second.Parameters[1], body), param1, param2);
         }
 
         public static Expression<Func<T, T1, TResult>> SafeCompose<T, T1, T2, TResult>(Expression<Func<T, T1, T2>> first, Expression<Func<T, T2, TResult>> second)
         {
             if ((!typeof(T2).IsValueType || typeof(T2).IsNullable()) && (!typeof(TResult).IsValueType || typeof(TResult).IsNullable()))
             {
-                var testExpr = Expression.Equal(first.Body, Expression.Constant(null, first.Body.Type));
-                var ifFalseExpr = ParameterRebinder.ReplaceParameter(second.Body, second.Parameters[1], first.Body);
-                var conditionExpr = Expression.Condition(testExpr, Expression.Constant(null, ifFalseExpr.Type), ifFalseExpr);
+                var paramForReplace1 = first.Parameters[0];
+                var param1 = Expression.Parameter(paramForReplace1.Type, paramForReplace1.Name);
 
-                return Expression.Lambda<Func<T, T1, TResult>>(conditionExpr, first.Parameters);
+                var paramForReplace2 = first.Parameters[1];
+                var param2 = Expression.Parameter(paramForReplace2.Type, paramForReplace2.Name);
+
+                var body = ParameterRebinder<Expression, Expression>.ReplaceParameters(
+                    new Dictionary<Expression, Expression>
+                    {
+                        [paramForReplace1] = param1,
+                        [paramForReplace2] = param2,
+                    },
+                    first.Body);
+
+                var secondBody = ParameterRebinder<Expression, Expression>.ReplaceParameters(
+                    new Dictionary<Expression, Expression>(ExpressionEqualityComparer.Instance)
+                    {
+                        [body] = body,
+                        [second.Parameters[1]] = body,
+                    },
+                    second.Body);
+
+                var testExpr = Expression.Equal(body, Expression.Constant(null, body.Type));
+                var conditionExpr = Expression.Condition(testExpr, Expression.Constant(null, secondBody.Type), secondBody);
+
+                return Expression.Lambda<Func<T, T1, TResult>>(conditionExpr, param1, param2);
             }
 
             return Compose(first, second);
-        }
-
-        public static IEnumerable<LambdaExpression> GetMembers(LambdaExpression expression)
-        {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            return PropertiesVisitor.GetFirstParamMembers(expression);
         }
 
         public static Expression<Func<TItem, bool>> MakeContainsExpression<TItem, TId>(IEnumerable<TId> ids, Expression<Func<TItem, TId>> keySelector)
@@ -67,9 +114,9 @@ namespace Epam.GraphQL.Helpers
             var idExpression = Expression.Property(valueConstExpression, CachedReflectionInfo.ForTuple<IEnumerable<TId>>.Item1);
             var paramExpression = Expression.Parameter(typeof(TItem), keySelector.Parameters[0].Name);
 
-            var keySelectorExpression = ParameterRebinder.ReplaceParameter(keySelector.Body, keySelector.Parameters[0], paramExpression);
+            var keySelectorExpression = ParameterRebinder<Expression, ParameterExpression>.ReplaceParameter(keySelector.Body, keySelector.Parameters[0], paramExpression);
 
-            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable<TId>.Contains, idExpression, keySelectorExpression);
+            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable.Contains<TId>(), idExpression, keySelectorExpression);
             return Expression.Lambda<Func<TItem, bool>>(callExpression, paramExpression);
         }
 
@@ -81,11 +128,11 @@ namespace Epam.GraphQL.Helpers
             var idExpression = Expression.Property(valueConstExpression, CachedReflectionInfo.ForTuple<IEnumerable<TId>>.Item1);
             var paramExpression = Expression.Parameter(typeof(TItem), keySelector.Parameters[0].Name);
 
-            var keySelectorExpression = ParameterRebinder.ReplaceParameter(keySelector.Body, keySelector.Parameters[0], paramExpression);
+            var keySelectorExpression = ParameterRebinder<Expression, ParameterExpression>.ReplaceParameter(keySelector.Body, keySelector.Parameters[0], paramExpression);
 
             var valueAccessExpression = Expression.Property(keySelectorExpression, CachedReflectionInfo.ForNullable<TId>.Value);
             var hasValueAccessExpression = Expression.Property(keySelectorExpression, CachedReflectionInfo.ForNullable<TId>.HasValue);
-            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable<TId>.Contains, idExpression, valueAccessExpression);
+            var callExpression = Expression.Call(CachedReflectionInfo.ForEnumerable.Contains<TId>(), idExpression, valueAccessExpression);
             var andExpression = Expression.AndAlso(hasValueAccessExpression, callExpression);
             return Expression.Lambda<Func<TItem, bool>>(andExpression, paramExpression);
         }
@@ -96,29 +143,27 @@ namespace Epam.GraphQL.Helpers
             return ValueAccessExpressionCacher<TEntity, TProperty>.MakeValueAccessExpression(selector);
         }
 
-        public static Expression<Func<object, object>> MakeWeakLambdaExpression(LambdaExpression selector)
+        public static Expression<Func<object?, object?>> MakeWeakLambdaExpression(LambdaExpression selector)
         {
-            if (selector.Parameters.Count != 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(selector));
-            }
+            selector.ShouldHaveOnlyOneParameter(nameof(selector));
 
             var paramExpression = Expression.Parameter(typeof(object), selector.Parameters[0].Name);
             var convertParamExpression = Expression.Convert(paramExpression, selector.Parameters[0].Type);
-            var keySelectorExpression = ParameterRebinder.ReplaceParameter(selector.Body, selector.Parameters[0], convertParamExpression);
+            var keySelectorExpression = ParameterRebinder<Expression, UnaryExpression>.ReplaceParameter(selector.Body, selector.Parameters[0], convertParamExpression);
             var convertResultExpression = Expression.Convert(keySelectorExpression, typeof(object));
-            var result = Expression.Lambda<Func<object, object>>(convertResultExpression, paramExpression);
+            var result = Expression.Lambda<Func<object?, object?>>(convertResultExpression, paramExpression);
 
             return result;
         }
 
+        public static LambdaExpression MakeIdentity(Type type)
+        {
+            var param = Expression.Parameter(type);
+            return Expression.Lambda(param, param);
+        }
+
         public static ExpressionFactorizationResult Factorize<T1, T2, TResult>(Expression<Func<T1, T2, TResult>> expression)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             return FactorizationVisitor.Factorize(expression);
         }
 
@@ -132,7 +177,7 @@ namespace Epam.GraphQL.Helpers
             throw new ArgumentOutOfRangeException(nameof(condition), $"Cannot use expression {condition} as a relation between {typeof(T1).HumanizedName()} and {typeof(T2).HumanizedName()} types.");
         }
 
-        public static bool TryFactorizeCondition<T1, T2>(Expression<Func<T1, T2, bool>> expression, out ConditionFactorizationResult<T2>? result)
+        public static bool TryFactorizeCondition<T1, T2>(Expression<Func<T1, T2, bool>> expression, [NotNullWhen(true)] out ConditionFactorizationResult<T2>? result)
         {
             var factorizationResult = Factorize(expression);
 
@@ -170,7 +215,7 @@ namespace Epam.GraphQL.Helpers
                         {
                             if (i != index)
                             {
-                                var right = ParameterRebinder.ReplaceParameter(rightExpressions[i].Body, rightExpressions[i].Parameters[0], param);
+                                var right = ParameterRebinder<Expression, ParameterExpression>.ReplaceParameter(rightExpressions[i].Body, rightExpressions[i].Parameters[0], param);
 
                                 if (left == null)
                                 {
@@ -205,6 +250,11 @@ namespace Epam.GraphQL.Helpers
             return false;
         }
 
+        public static MemberInitBuilder<TResult> MakeMemberInit<TResult>(Type paramType)
+        {
+            return new MemberInitBuilder<TResult>(paramType);
+        }
+
         private static IReadOnlyList<Expression> GetAndAlsoExpressions(Expression expression)
         {
             var expressions = new List<Expression>();
@@ -221,33 +271,77 @@ namespace Epam.GraphQL.Helpers
             return expressions;
         }
 
-        public class ParameterRebinder : ExpressionVisitor
+        public class MemberInitBuilder<TResult>
         {
-            private readonly Dictionary<ParameterExpression, Expression> _map;
+            private readonly Dictionary<PropertyInfo, LambdaExpression> _assignments = new();
+            private readonly ParameterExpression _param;
 
-            private ParameterRebinder(Dictionary<ParameterExpression, Expression> map)
+            public MemberInitBuilder(Type paramType)
             {
-                _map = map ?? new Dictionary<ParameterExpression, Expression>();
+                _param = Expression.Parameter(paramType);
             }
 
-            public static Expression ReplaceParameters(Dictionary<ParameterExpression, Expression> map, Expression exp)
+            public MemberInitBuilder<TResult> Property(PropertyInfo property, LambdaExpression initializer)
             {
-                return new ParameterRebinder(map).Visit(exp);
+                if (_assignments.TryGetValue(property, out var existingInitializer))
+                {
+                    if (!ExpressionEqualityComparer.Instance.Equals(initializer, existingInitializer))
+                    {
+                        throw new InvalidOperationException($"Attempt to create two different initilizers ({existingInitializer} and {initializer})for a property {property.Name} of type {typeof(TResult)}.");
+                    }
+
+                    return this;
+                }
+
+                _assignments.Add(property, initializer);
+                return this;
+            }
+
+            public LambdaExpression Lambda()
+            {
+                var ctor = typeof(TResult).GetConstructors().Single(c => c.GetParameters().Length == 0);
+                var newExpr = Expression.New(ctor);
+                var memberAssignments = _assignments.Select(kv => Expression.Bind(kv.Key, kv.Value.Body.ReplaceParameter(kv.Value.Parameters[0], _param)));
+                var initExpr = Expression.MemberInit(newExpr, memberAssignments);
+
+                return Expression.Lambda(initExpr, _param);
+            }
+        }
+
+        public class ParameterRebinder<TKey, T> : ExpressionVisitor
+            where T : Expression
+            where TKey : Expression
+        {
+            private readonly IReadOnlyDictionary<TKey, T> _map;
+
+            protected ParameterRebinder(IReadOnlyDictionary<TKey, T> map)
+            {
+                _map = map;
+            }
+
+            public static Expression ReplaceParameters(IReadOnlyDictionary<TKey, T> map, Expression exp)
+            {
+                return new ParameterRebinder<TKey, T>(map).Visit(exp);
             }
 
             public static Expression ReplaceParameter(
                 Expression expression,
-                ParameterExpression parameterExpression,
-                Expression newExpression) => ReplaceParameters(new Dictionary<ParameterExpression, Expression> { { parameterExpression, newExpression } }, expression);
+                TKey parameterExpression,
+                T newExpression) => ReplaceParameters(
+                    new Dictionary<TKey, T>
+                    {
+                        [parameterExpression] = newExpression,
+                    },
+                    expression);
 
-            protected override Expression VisitParameter(ParameterExpression p)
+            public override Expression Visit(Expression p)
             {
-                if (_map.TryGetValue(p, out var replacement))
+                if (p is TKey key && _map.TryGetValue(key, out var replacement))
                 {
-                    return Visit(replacement);
+                    return replacement;
                 }
 
-                return base.VisitParameter(p);
+                return base.Visit(p);
             }
         }
 
@@ -262,7 +356,7 @@ namespace Epam.GraphQL.Helpers
                 return _cache.GetOrAdd(selector, selector =>
                 {
                     var paramExpression = Expression.Parameter(typeof(TEntity), selector.Parameters[0].Name);
-                    var selectorExpression = ParameterRebinder.ReplaceParameter(selector.Body, selector.Parameters[0], paramExpression);
+                    var selectorExpression = ParameterRebinder<Expression, Expression>.ReplaceParameter(selector.Body, selector.Parameters[0], paramExpression);
                     var valueAccessExpression = Expression.Property(selectorExpression, CachedReflectionInfo.ForNullable<TProperty>.Value);
                     var result = Expression.Lambda<Func<TEntity, TProperty>>(valueAccessExpression, paramExpression);
 
@@ -347,36 +441,6 @@ namespace Epam.GraphQL.Helpers
                 }
 
                 return base.VisitParameter(node);
-            }
-        }
-
-        private class PropertiesVisitor : ExpressionVisitor
-        {
-            private readonly List<MemberExpression> _members = new();
-
-            private readonly ParameterExpression _param;
-
-            public PropertiesVisitor(ParameterExpression param)
-            {
-                _param = param;
-            }
-
-            public static IEnumerable<LambdaExpression> GetFirstParamMembers(LambdaExpression condition)
-            {
-                var visitor = new PropertiesVisitor(condition.Parameters[0]);
-                visitor.Visit(condition);
-
-                return visitor._members.Select(m => Expression.Lambda(m, visitor._param));
-            }
-
-            protected override Expression VisitMember(MemberExpression node)
-            {
-                if (node.Expression == _param)
-                {
-                    _members.Add(node);
-                }
-
-                return base.VisitMember(node);
             }
         }
     }

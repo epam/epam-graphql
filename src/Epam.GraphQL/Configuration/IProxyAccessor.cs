@@ -5,38 +5,50 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
-
-#nullable enable
+using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Relay;
+using Epam.GraphQL.Sorters;
+using GraphQL;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal interface IProxyAccessor<TExecutionContext>
+    internal interface IProxyAccessor<TEntity, TTransformedEntity, TExecutionContext>
     {
         bool HasHooks { get; }
 
-        Type GetConcreteProxyType(IEnumerable<string> fieldNames);
+        Expression<Func<TTransformedEntity, T>> Rewrite<T>(Expression<Func<TEntity, T>> originalExpression);
 
-        LambdaExpression GetProxyExpression(LambdaExpression originalExpression);
+        LambdaExpression Rewrite(LambdaExpression expression, LambdaExpression originalExpression);
 
-        void Configure();
-    }
+        IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetGroupSort(
+            IResolveFieldContext context,
+            IEnumerable<ISorter<TExecutionContext>> sorters);
 
-    internal interface IProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TExecutionContext>
-    {
-        Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression(IEnumerable<string> fieldNames);
+        Expression<Func<TExecutionContext, TEntity, TTransformedEntity>> CreateSelectorExpression(IEnumerable<string> fieldNames);
 
-        ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(TExecutionContext executionContext);
+        IQueryable<IGroupResult<TTransformedEntity>> GroupBy(IResolveFieldContext context, IQueryable<TEntity> query);
 
-        void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member);
+        ILoaderHooksExecuter<TTransformedEntity>? CreateHooksExecuter(IResolveFieldContext context);
+
+        void AddMembers(IEnumerable<LambdaExpression> members);
 
         void AddMember<TResult>(Expression<Func<TEntity, TResult>> member);
 
         void RemoveMember<TResult>(Expression<Func<TEntity, TResult>> member);
+    }
 
-        void AddMembers<TChildEntity>(string childFieldName, IProxyAccessor<TChildEntity, TExecutionContext> childProxyAccessor, ExpressionFactorizationResult factorizationResult);
+    internal interface IProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TEntity, Proxy<TEntity>, TExecutionContext>
+    {
+        void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member);
 
-        void AddAllMembers(string childFieldName);
+        void AddMembers<TChildEntity, TTransformedChildEntity>(
+            string childFieldName,
+            IProxyAccessor<TChildEntity, TTransformedChildEntity, TExecutionContext>? childProxyAccessor,
+            ExpressionFactorizationResult factorizationResult);
+
+        void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members);
     }
 }

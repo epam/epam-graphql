@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System.Linq;
+using Epam.GraphQL.Tests;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
@@ -293,6 +294,56 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                             item: {
                                 empId: 4
                             }
+                        }]
+                    }
+                }");
+        }
+
+        [Test]
+        public void TestFromIQueryableGroupConnection()
+        {
+            static void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("peopleGroups")
+                    .FromIQueryable(
+                        ctx => Queryable.Select(ctx.DbContext.People, p => p.UnitId),
+                        builder =>
+                        {
+                            builder.Field("id", x => x);
+                            builder.Field("twice", x => 2 * x);
+                        })
+                        .AsGroupConnection();
+            }
+
+            TestQuery(
+                Builder,
+                @"
+                    query {
+                        peopleGroups {
+                            items {
+                                item {
+                                    id
+                                    twice
+                                }
+                                count
+                            }
+                        }
+                    }",
+                @"{
+                    peopleGroups: {
+                        items: [{
+                            item: {
+                                id: 1,
+                                twice: 2
+                            },
+                            count: 3
+                        },{
+                            item: {
+                                id: 2,
+                                twice: 4
+                            },
+                            count: 3
                         }]
                     }
                 }");
