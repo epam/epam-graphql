@@ -926,8 +926,11 @@ namespace Epam.GraphQL.Mutation
     {
         System.Collections.Generic.IEnumerable<object>? Payload { get; set; }
     }
-    public static class MutationResult
+    public class MutationResult
     {
+        public MutationResult() { }
+        public object? Data { get; set; }
+        public object Payload { get; set; }
         public static Epam.GraphQL.Mutation.MutationResult<TData> Create<TData>(System.Collections.Generic.IEnumerable<object> payload, TData data) { }
     }
     public class MutationResult<TData> : Epam.GraphQL.Mutation.IMutationResult

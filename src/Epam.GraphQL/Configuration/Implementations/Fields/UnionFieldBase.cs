@@ -4,10 +4,9 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Diagnostics;
-using Epam.GraphQL.Helpers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
@@ -19,8 +18,15 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory)
-            : this(configurationContext, parent, name, unionType, graphTypeFactory, new List<Type>(), new UnionGraphTypeDescriptor<TExecutionContext>())
+            : base(
+                    configurationContext,
+                    parent,
+                    name)
         {
+            UnionGraphType = new UnionGraphTypeDescriptor<TExecutionContext>(
+                this,
+                Enumerable.Repeat(graphTypeFactory(this), 1),
+                Enumerable.Repeat(unionType, 1));
         }
 
         protected UnionFieldBase(
@@ -29,43 +35,19 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory,
-            List<Type> unionTypes,
-            UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
-            : this(
-                configurationContext,
-                parent,
-                name,
-                new List<Type>(unionTypes)
-                {
-                    unionType,
-                },
-                unionGraphType)
-        {
-            UnionGraphType.Add(graphTypeFactory(this));
-        }
-
-        protected UnionFieldBase(
-            IChainConfigurationContext configurationContext,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : base(
-                  configurationContext,
-                  parent,
-                  name)
+                configurationContext,
+                parent,
+                name)
         {
-            UnionGraphType = unionGraphType;
-            UnionTypes = unionTypes;
-            UnionGraphType.Name = parent.GetGraphQLTypeName(ReflectionHelpers.GetTheBestCommonBaseType(unionTypes), null, this);
+            UnionGraphType = unionGraphType.Add(this, graphTypeFactory(this), unionType);
         }
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => UnionGraphType;
 
-        public override Type FieldType => ReflectionHelpers.GetTheBestCommonBaseType(UnionTypes);
+        public override Type FieldType => UnionGraphType.FieldType;
 
         public UnionGraphTypeDescriptor<TExecutionContext> UnionGraphType { get; }
-
-        protected List<Type> UnionTypes { get; }
     }
 }

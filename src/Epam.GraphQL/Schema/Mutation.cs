@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
@@ -27,27 +26,15 @@ namespace Epam.GraphQL
     public abstract class Mutation<TExecutionContext> : RootProjection<TExecutionContext>
     {
         private const string GeneratedSubmitOutputTypeName = "SubmitOutput";
-        private const string GeneratedMutationResultTypeName = "MutationResult";
         private const string SubmitName = "submit";
         private const string PayloadName = "payload";
 
-        // TODO Consider defining true .NET type for this; it seems like there is no nececity for using reflection anymore
-        private readonly Type _mutationResultType;
-        private readonly PropertyInfo _mutationResultPayloadPropInfo;
-        private readonly PropertyInfo _mutationResultDataPropInfo;
         private readonly Lazy<SubmitInputTypeRegistry<TExecutionContext>> _submitInputTypeRegistry;
 
         private Type _submitOutputType = null!; // Initialized in AfterConfigure method
 
         protected Mutation()
         {
-            _mutationResultType = new Dictionary<string, Type>
-            {
-                ["Payload"] = typeof(object),
-                ["Data"] = typeof(object),
-            }.MakeType(GeneratedMutationResultTypeName);
-            _mutationResultPayloadPropInfo = _mutationResultType.GetProperty("Payload");
-            _mutationResultDataPropInfo = _mutationResultType.GetProperty("Data");
             _submitInputTypeRegistry = new Lazy<SubmitInputTypeRegistry<TExecutionContext>>(() => Registry.GetRequiredService<SubmitInputTypeRegistry<TExecutionContext>>());
         }
 
@@ -70,17 +57,21 @@ namespace Epam.GraphQL
             foreach (var field in source)
             {
                 var prop = _submitOutputType.GetProperty(field.Key);
+                Guards.AssertIfNull(prop);
                 myObject.SetPropertyValue(prop, field.Value);
             }
 
             return myObject;
         }
 
-        internal object CreateSubmitOutput<TDataType>(IDictionary<string, IList<ISaveResultItem>> source, TDataType data)
+        internal object CreateSubmitOutput<TDataType>(IDictionary<string, IList<ISaveResultItem>> source, TDataType? data)
         {
-            var result = _mutationResultType.CreateInstanceAndHoistBaseException();
-            result.SetPropertyValue(_mutationResultPayloadPropInfo, CreateSubmitOutput(source));
-            result.SetPropertyValue(_mutationResultDataPropInfo, data);
+            var result = new MutationResult
+            {
+                Payload = CreateSubmitOutput(source),
+                Data = data,
+            };
+
             return result;
         }
 
@@ -92,6 +83,7 @@ namespace Epam.GraphQL
             SubmitInputTypeRegistry.Register(fieldName, loaderType, baseLoaderType.GetGenericArguments()[0], baseLoaderType.GetGenericArguments()[1]);
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         protected internal void SubmitField<TLoader>(string fieldName)
             where TLoader : IMutableLoader<TExecutionContext>
         {
@@ -130,21 +122,23 @@ namespace Epam.GraphQL
         protected override void AfterConfigure()
         {
             var inputTypeMap = SubmitInputTypeRegistry.GetInputTypeMap();
-            if (inputTypeMap.Any())
+            if (!inputTypeMap.Any())
             {
-                _submitOutputType = inputTypeMap
-                    .Keys
-                    .ToDictionary(key => key, value => typeof(object))
-                    .MakeType(GeneratedSubmitOutputTypeName, typeof(Input));
-
-                SubmitField(
-                    SubmitName,
-                    GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<TExecutionContext>)),
-                    PayloadName,
-                    typeof(SubmitInputGraphType<TExecutionContext>),
-                    PerformResolve,
-                    _submitOutputType);
+                return;
             }
+
+            _submitOutputType = inputTypeMap
+                .Keys
+                .ToDictionary(key => key, _ => typeof(object))
+                .MakeType(GeneratedSubmitOutputTypeName, typeof(Input));
+
+            SubmitField(
+                SubmitName,
+                GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<TExecutionContext>)),
+                PayloadName,
+                new SubmitInputGraphType<TExecutionContext>(SubmitInputTypeRegistry),
+                PerformResolve,
+                _submitOutputType);
         }
 
         protected virtual Task<IEnumerable<object>> AfterSaveAsync(TExecutionContext context, IEnumerable<object> entities)
@@ -156,7 +150,7 @@ namespace Epam.GraphQL
             string name,
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
             string argName,
-            Type argGraphType,
+            IInputObjectGraphType argGraphType,
             Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
             Type fieldType)
         {
@@ -182,7 +176,7 @@ namespace Epam.GraphQL
 
                 inputItems.Add(
                     kv.Key,
-                    (kv.Value as System.Collections.IEnumerable)
+                    ((System.Collections.IEnumerable)kv.Value)
                         .Cast<IDictionary<string, object?>>()
                         .Select(entity => InputItem.Create(entityType, entity.ToObject(entityType, graphType), entity)));
             }

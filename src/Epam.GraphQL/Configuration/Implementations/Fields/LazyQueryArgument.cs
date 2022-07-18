@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Factory = factory;
         }
 
-        public LazyQueryArgument(string name, Type graphType)
+        public LazyQueryArgument(string name, IInputObjectGraphType graphType)
             : this(name, () => new QueryArgument(graphType)
             {
                 Name = name,

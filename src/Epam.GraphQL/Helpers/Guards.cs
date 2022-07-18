@@ -55,6 +55,19 @@ namespace Epam.GraphQL.Helpers
             }
         }
 
+        public static void AssertIfNull<T>([NotNull] T? argument)
+        {
+            Assert(argument is null);
+        }
+
+        public static void Assert([DoesNotReturnIf(true)] bool shouldThrow)
+        {
+            if (shouldThrow)
+            {
+                throw new InvalidOperationException($"Internal error. This may indicate either a bug (you can create an issue https://epa.ms/gql-bug) or a limitation in Epam.GraphQL.");
+            }
+        }
+
         public static void AssertField([DoesNotReturnIf(true)] bool shouldThrow, IResolveFieldContext context)
         {
             if (shouldThrow)

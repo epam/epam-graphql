@@ -4,7 +4,6 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Diagnostics;
 
@@ -33,10 +32,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             TArguments arguments)
-            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType)
         {
             Arguments = arguments;
             Arguments.ApplyTo(this);
