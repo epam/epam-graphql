@@ -4,12 +4,11 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System.Collections.Generic;
-using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal interface IBatchCompoundResolver<TEntity, TExecutionContext> : IBatchResolver<TEntity, IEnumerable<object>>, IFieldResolver
+    internal interface IBatchCompoundResolver<TEntity, TExecutionContext> : IBatchResolver<TEntity, IEnumerable<object>>
     {
-        void Add(IBatchResolver<TEntity> resolver);
+        IBatchCompoundResolver<TEntity, TExecutionContext> Add(IBatchResolver<TEntity> resolver);
     }
 }

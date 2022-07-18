@@ -3,6 +3,7 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
+using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Sorters;
@@ -29,6 +30,8 @@ namespace Epam.GraphQL.Configuration
         IInlineFilters<TExecutionContext> CreateInlineFilters();
 
         bool FilterEquals(IObjectGraphTypeConfigurator<TExecutionContext> other);
+
+        string GetGraphQLTypeName(Type entityType, Type? projectionType, IField<TExecutionContext> field);
     }
 
     internal interface IObjectGraphTypeConfigurator<TEntity, TExecutionContext> : IObjectGraphTypeConfigurator<TExecutionContext>

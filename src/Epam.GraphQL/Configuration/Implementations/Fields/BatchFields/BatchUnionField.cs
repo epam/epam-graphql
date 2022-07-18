@@ -11,7 +11,6 @@ using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
 using Epam.GraphQL.Diagnostics;
-using Epam.GraphQL.Helpers;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
@@ -22,8 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         IFieldSupportsEditSettings<TEntity, IEnumerable<object>, TExecutionContext>
     {
         private readonly IBatchCompoundResolver<TEntity, TExecutionContext> _resolver;
-        private readonly UnionGraphTypeDescriptor<TExecutionContext> _unionGraphType = new();
-        private readonly Type _fieldType;
+        private readonly UnionGraphTypeDescriptor<TExecutionContext> _unionGraphType;
 
         // TODO Implement unions of more than two batches
         public BatchUnionField(
@@ -36,22 +34,34 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Type firstType,
             IGraphTypeDescriptor<TExecutionContext> secondGraphType,
             Type secondType)
-           : base(configurationContext, parent, name)
+           : this(
+               configurationContext,
+               parent,
+               name,
+               new BatchCompoundResolver<TEntity, TExecutionContext>(firstResolver, secondResolver),
+               field => new UnionGraphTypeDescriptor<TExecutionContext>(
+                   field,
+                   new[] { firstGraphType, secondGraphType },
+                   new[] { firstType, secondType }))
         {
-            _resolver = new BatchCompoundResolver<TEntity, TExecutionContext>();
+        }
 
-            _resolver.Add(firstResolver);
-            _resolver.Add(secondResolver);
+        private BatchUnionField(
+            IChainConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            IBatchCompoundResolver<TEntity, TExecutionContext> compoundResolver,
+            Func<IField<TExecutionContext>, UnionGraphTypeDescriptor<TExecutionContext>> descriptorFactory)
+            : base(configurationContext, parent, name)
+        {
+            _resolver = compoundResolver;
 
-            _fieldType = ReflectionHelpers.GetTheBestCommonBaseType(firstType, secondType);
-            _unionGraphType.Add(firstGraphType);
-            _unionGraphType.Add(secondGraphType);
-            _unionGraphType.Name = parent.GetGraphQLTypeName(_fieldType, null, this);
+            _unionGraphType = descriptorFactory(this);
 
             EditSettings = new FieldEditSettings<TEntity, IEnumerable<object>, TExecutionContext>();
         }
 
-        public override Type FieldType => _fieldType;
+        public override Type FieldType => _unionGraphType.FieldType;
 
         public new IFieldEditSettings<TEntity, IEnumerable<object>, TExecutionContext>? EditSettings
         {

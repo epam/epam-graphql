@@ -54,7 +54,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             string name,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> graphTypeFactory,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType)
             : base(
                 configurationContext,
@@ -62,7 +61,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 name,
                 unionType,
                 graphTypeFactory,
-                unionTypes,
                 unionGraphType)
         {
         }
@@ -135,7 +133,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                 Name,
                 typeof(TLastElementType),
                 UnionMutationField.CreateTypeResolver(build, configurationContext),
-                UnionTypes,
                 UnionGraphType);
             return ApplyField(unionField);
         }

@@ -5,15 +5,30 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal class UnionGraphTypeDescriptor<TExecutionContext> : IGraphTypeDescriptor<TExecutionContext>
     {
-        private readonly List<IGraphTypeDescriptor<TExecutionContext>> _types = new();
+        private readonly List<IGraphTypeDescriptor<TExecutionContext>> _graphTypes;
+        private readonly List<Type> _types;
+
+        public UnionGraphTypeDescriptor(
+            IField<TExecutionContext> field,
+            IEnumerable<IGraphTypeDescriptor<TExecutionContext>> graphTypes,
+            IEnumerable<Type> types)
+        {
+            _graphTypes = new List<IGraphTypeDescriptor<TExecutionContext>>(graphTypes);
+            _types = new List<Type>(types);
+            FieldType = ReflectionHelpers.GetTheBestCommonBaseType(_types);
+            Name = field.Parent.GetGraphQLTypeName(FieldType, null, field);
+        }
+
+        public Type FieldType { get; }
 
         public IGraphType GraphType
         {
@@ -24,7 +39,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
                     Name = Name,
                 };
 
-                foreach (var type in _types)
+                foreach (var type in _graphTypes)
                 {
                     if (type.GraphType != null)
                     {
@@ -44,17 +59,22 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => null;
 
-        [NotNull]
-        public string? Name { get; set; }
+        public string Name { get; }
 
-        public void Add(IGraphTypeDescriptor<TExecutionContext> graphType)
+        public UnionGraphTypeDescriptor<TExecutionContext> Add(
+            IField<TExecutionContext> field,
+            IGraphTypeDescriptor<TExecutionContext> graphType,
+            Type type)
         {
-            _types.Add(graphType);
+            return new UnionGraphTypeDescriptor<TExecutionContext>(
+                field,
+                _graphTypes.Concat(Enumerable.Repeat(graphType, 1)),
+                _types.Concat(Enumerable.Repeat(type, 1)));
         }
 
         public void Validate(IChainConfigurationContext configurationContext)
         {
-            foreach (var type in _types)
+            foreach (var type in _graphTypes)
             {
                 type.Validate(configurationContext);
             }

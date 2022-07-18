@@ -18,9 +18,20 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
     {
         private readonly List<IBatchResolver<TEntity>> _resolvers = new();
 
-        public void Add(IBatchResolver<TEntity> resolver)
+        public BatchCompoundResolver(params IBatchResolver<TEntity>[] resolvers)
+            : this(resolvers.AsEnumerable())
         {
-            _resolvers.Add(resolver);
+        }
+
+        private BatchCompoundResolver(IEnumerable<IBatchResolver<TEntity>> resolvers)
+        {
+            _resolvers.AddRange(resolvers);
+        }
+
+        public IBatchCompoundResolver<TEntity, TExecutionContext> Add(IBatchResolver<TEntity> resolver)
+        {
+            return new BatchCompoundResolver<TEntity, TExecutionContext>(
+                _resolvers.Concat(Enumerable.Repeat(resolver, 1)));
         }
 
         public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context) => GetBatchLoader<object?>(context);

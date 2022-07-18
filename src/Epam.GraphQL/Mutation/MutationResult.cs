@@ -7,8 +7,12 @@ using System.Collections.Generic;
 
 namespace Epam.GraphQL.Mutation
 {
-    public static class MutationResult
+    public class MutationResult
     {
+        public object Payload { get; set; }
+
+        public object? Data { get; set; }
+
         public static MutationResult<TData> Create<TData>(IEnumerable<object> payload, TData data)
         {
             return new MutationResult<TData>

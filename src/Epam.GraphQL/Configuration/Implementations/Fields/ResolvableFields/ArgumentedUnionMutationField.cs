@@ -35,10 +35,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             IArguments<TArgType, TExecutionContext> arguments)
-            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType, arguments)
         {
         }
 
@@ -107,7 +106,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 Name,
                 typeof(TLastElementType),
                 UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
-                UnionTypes,
                 UnionGraphType,
                 Arguments);
             return ApplyField(unionField);
@@ -157,10 +155,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             IArguments<TArgType1, TArgType2, TExecutionContext> arguments)
-            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType, arguments)
         {
         }
 
@@ -229,7 +226,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 Name,
                 typeof(TLastElementType),
                 UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
-                UnionTypes,
                 UnionGraphType,
                 Arguments);
             return ApplyField(unionField);
@@ -268,10 +264,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             IArguments<TArgType1, TArgType2, TArgType3, TExecutionContext> arguments)
-            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType, arguments)
         {
         }
 
@@ -351,7 +346,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 Name,
                 typeof(TLastElementType),
                 UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
-                UnionTypes,
                 UnionGraphType,
                 Arguments);
             return ApplyField(unionField);
@@ -390,10 +384,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TExecutionContext> arguments)
-            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType, arguments)
         {
         }
 
@@ -473,7 +466,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 Name,
                 typeof(TLastElementType),
                 UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
-                UnionTypes,
                 UnionGraphType,
                 Arguments);
             return ApplyField(unionField);
@@ -512,10 +504,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             string name,
             Type unionType,
             Func<UnionFieldBase<object, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             IArguments<TArgType1, TArgType2, TArgType3, TArgType4, TArgType5, TExecutionContext> arguments)
-            : base(configurationContext, parent, name, unionType, typeResolver, unionTypes, unionGraphType, arguments)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType, arguments)
         {
         }
 
@@ -595,7 +586,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 Name,
                 typeof(TLastElementType),
                 UnionField.CreateTypeResolver<object, TLastElementType, TExecutionContext>(build, configurationContext),
-                UnionTypes,
                 UnionGraphType,
                 Arguments);
             return ApplyField(unionField);

@@ -345,7 +345,7 @@ namespace Epam.GraphQL.Configuration.Implementations
             string name,
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
             string argName,
-            Type graphType,
+            IInputObjectGraphType graphType,
             Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
             Type fieldType,
             string? deprecationReason = null)

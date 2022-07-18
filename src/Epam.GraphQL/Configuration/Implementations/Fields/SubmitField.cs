@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Diagnostics;
 using GraphQL;
 using GraphQL.Resolvers;
+using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
@@ -20,7 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             string name,
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
             string argName,
-            Type argGraphType,
+            IInputObjectGraphType argGraphType,
             Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
             Type fieldType)
             : base(configurationContextFactory, parent, name)
@@ -29,9 +30,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             Resolver = new AsyncFieldResolver<object>(ctx => resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"]));
             FieldType = fieldType;
 
-            Arguments = new LazyQueryArguments
+            Arguments = new()
             {
-                new LazyQueryArgument(argName, argGraphType),
+                new(argName, argGraphType),
             };
         }
 
