@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Epam.Contracts.Models;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
@@ -32,6 +33,122 @@ namespace Epam.GraphQL.Tests
                         .FirstOrDefault()));
 
             var batchManagerFunc = Substitute.For<Func<TestUserContext, IEnumerable<Person>, IDictionary<Person, Person>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(1).ToDictionary(
+                    p => p,
+                    p => FakeData.People
+                        .AsQueryable()
+                        .Where(m => m.Id == p.ManagerId)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartment")
+                        .FromBatch(batchUnitFunc)
+                        .AndFromBatch(batchManagerFunc, build => build.ConfigureFrom(loader.GetType()));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartment {
+                                    ... on Unit {
+                                        id
+                                        name
+                                    }
+                                    ... on Person {
+                                        id
+                                        fullName
+                                    }
+                                }
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                }]
+                            },{
+                                id: 2,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 3,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 4,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 5,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 6,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 5,
+                                    fullName: ""Aldon Exley""
+                                }]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>());
+        }
+
+        [Test]
+        public void BatchUnionTaskFuncsFromContextAndPersonToUnitFromContextAndPersonToPerson()
+        {
+            var batchUnitFunc = Substitute.For<Func<TestUserContext, IEnumerable<Person>, Task<IDictionary<Person, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(1).ToDictionary(
+                    p => p,
+                    p => FakeData.Units
+                        .AsQueryable()
+                        .Where(u => u.Id == p.UnitId)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<TestUserContext, IEnumerable<Person>, Task<IDictionary<Person, Person>>>>();
             batchManagerFunc
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>())
                 .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(1).ToDictionary(
@@ -326,6 +443,81 @@ namespace Epam.GraphQL.Tests
         }
 
         [Test]
+        public void BatchUnionTaskFuncsFromContextAndPersonToUnitFromContextAndPersonToPersonAndSelectString()
+        {
+            var batchUnitFunc = Substitute.For<Func<TestUserContext, IEnumerable<Person>, Task<IDictionary<Person, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(1).ToDictionary(
+                    p => p,
+                    p => FakeData.Units
+                        .AsQueryable()
+                        .Where(u => u.Id == p.UnitId)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<TestUserContext, IEnumerable<Person>, Task<IDictionary<Person, Person>>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(1).ToDictionary(
+                    p => p,
+                    p => FakeData.People
+                        .AsQueryable()
+                        .Where(m => m.Id == p.ManagerId)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartmentIds")
+                        .FromBatch(batchUnitFunc)
+                        .AndFromBatch(batchManagerFunc)
+                        .Select(x => x.Cast<IHasId<int>>().Select(o => o.Id));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartmentIds
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartmentIds: [1]
+                            },{
+                                id: 2,
+                                managerOrDepartmentIds: [1, 1]
+                            },{
+                                id: 3,
+                                managerOrDepartmentIds: [1, 1]
+                            },{
+                                id: 4,
+                                managerOrDepartmentIds: [2, 2]
+                            },{
+                                id: 5,
+                                managerOrDepartmentIds: [2, 2]
+                            },{
+                                id: 6,
+                                managerOrDepartmentIds: [2, 5]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<Person>>());
+        }
+
+        [Test]
         public void BatchUnionMutableLoaderFuncsFromContextAndPersonToUnitFromContextAndPersonToPersonAndSelectString()
         {
             var batchUnitFunc = Substitute.For<Func<TestUserContext, IEnumerable<Person>, IDictionary<Person, Unit>>>();
@@ -414,6 +606,122 @@ namespace Epam.GraphQL.Tests
                         .FirstOrDefault()));
 
             var batchManagerFunc = Substitute.For<Func<IEnumerable<Person>, IDictionary<Person, Person>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(0).ToDictionary(
+                    p => p,
+                    p => FakeData.People
+                        .AsQueryable()
+                        .Where(m => m.Id == p.ManagerId)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartment")
+                        .FromBatch(batchUnitFunc)
+                        .AndFromBatch(batchManagerFunc, build => build.ConfigureFrom(loader.GetType()));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartment {
+                                    ... on Unit {
+                                        id
+                                        name
+                                    }
+                                    ... on Person {
+                                        id
+                                        fullName
+                                    }
+                                }
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                }]
+                            },{
+                                id: 2,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 3,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 4,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 5,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 6,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 5,
+                                    fullName: ""Aldon Exley""
+                                }]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<IEnumerable<Person>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<IEnumerable<Person>>());
+        }
+
+        [Test]
+        public void BatchUnionTaskFuncsFromPersonToUnitFromPersonToPerson()
+        {
+            var batchUnitFunc = Substitute.For<Func<IEnumerable<Person>, Task<IDictionary<Person, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(0).ToDictionary(
+                    p => p,
+                    p => FakeData.Units
+                        .AsQueryable()
+                        .Where(u => u.Id == p.UnitId)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<IEnumerable<Person>, Task<IDictionary<Person, Person>>>>();
             batchManagerFunc
                 .Invoke(Arg.Any<IEnumerable<Person>>())
                 .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(0).ToDictionary(
@@ -708,6 +1016,81 @@ namespace Epam.GraphQL.Tests
         }
 
         [Test]
+        public void BatchUnionTaskFuncsFromPersonToUnitFromPersonToPersonAndSelectString()
+        {
+            var batchUnitFunc = Substitute.For<Func<IEnumerable<Person>, Task<IDictionary<Person, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(0).ToDictionary(
+                    p => p,
+                    p => FakeData.Units
+                        .AsQueryable()
+                        .Where(u => u.Id == p.UnitId)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<IEnumerable<Person>, Task<IDictionary<Person, Person>>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<IEnumerable<Person>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<Person>>(0).ToDictionary(
+                    p => p,
+                    p => FakeData.People
+                        .AsQueryable()
+                        .Where(m => m.Id == p.ManagerId)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartmentIds")
+                        .FromBatch(batchUnitFunc)
+                        .AndFromBatch(batchManagerFunc)
+                        .Select(x => x.Cast<IHasId<int>>().Select(o => o.Id));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartmentIds
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartmentIds: [1]
+                            },{
+                                id: 2,
+                                managerOrDepartmentIds: [1, 1]
+                            },{
+                                id: 3,
+                                managerOrDepartmentIds: [1, 1]
+                            },{
+                                id: 4,
+                                managerOrDepartmentIds: [2, 2]
+                            },{
+                                id: 5,
+                                managerOrDepartmentIds: [2, 2]
+                            },{
+                                id: 6,
+                                managerOrDepartmentIds: [2, 5]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<IEnumerable<Person>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<IEnumerable<Person>>());
+        }
+
+        [Test]
         public void BatchUnionMutableLoaderFuncsFromPersonToUnitFromPersonToPersonAndSelectString()
         {
             var batchUnitFunc = Substitute.For<Func<IEnumerable<Person>, IDictionary<Person, Unit>>>();
@@ -797,6 +1180,124 @@ namespace Epam.GraphQL.Tests
                         .FirstOrDefault()));
 
             var batchManagerFunc = Substitute.For<Func<TestUserContext, IEnumerable<int>, IDictionary<int, Person>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(1).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Manager)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartment")
+                        .FromBatch(p => p.Id, batchUnitFunc)
+                        .AndFromBatch(p => p.Id, batchManagerFunc, build => build.ConfigureFrom(loader.GetType()));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartment {
+                                    ... on Unit {
+                                        id
+                                        name
+                                    }
+                                    ... on Person {
+                                        id
+                                        fullName
+                                    }
+                                }
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                }]
+                            },{
+                                id: 2,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 3,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 4,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 5,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 6,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 5,
+                                    fullName: ""Aldon Exley""
+                                }]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>());
+        }
+
+        [Test]
+        public void BatchUnionTaskFuncsFromContextAndPersonToUnitFromContextAndPersonToPersonUsingKeySelector()
+        {
+            var batchUnitFunc = Substitute.For<Func<TestUserContext, IEnumerable<int>, Task<IDictionary<int, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(1).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Unit)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<TestUserContext, IEnumerable<int>, Task<IDictionary<int, Person>>>>();
             batchManagerFunc
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>())
                 .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(1).ToDictionary(
@@ -1013,6 +1514,124 @@ namespace Epam.GraphQL.Tests
                     }";
 
             TestHelpers.TestQuery(mutableBuilder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>());
+        }
+
+        [Test]
+        public void BatchUnionLoaderTaskFuncsFromContextAndPersonToUnitFromContextAndPersonToPersonUsingKeySelector()
+        {
+            var batchUnitFunc = Substitute.For<Func<TestUserContext, IEnumerable<int>, Task<IDictionary<int, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(1).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Unit)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<TestUserContext, IEnumerable<int>, Task<IDictionary<int, Person>>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(1).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Manager)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartment")
+                        .FromBatch(p => p.Id, batchUnitFunc)
+                        .AndFromBatch(p => p.Id, batchManagerFunc, build => build.ConfigureFrom(loader.GetType()));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartment {
+                                    ... on Unit {
+                                        id
+                                        name
+                                    }
+                                    ... on Person {
+                                        id
+                                        fullName
+                                    }
+                                }
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                }]
+                            },{
+                                id: 2,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 3,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 4,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 5,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 6,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 5,
+                                    fullName: ""Aldon Exley""
+                                }]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
 
             batchUnitFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>());
             batchManagerFunc.Received(1).Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<int>>());
@@ -1291,6 +1910,124 @@ namespace Epam.GraphQL.Tests
         }
 
         [Test]
+        public void BatchUnionTaskFuncsFromPersonToUnitFromPersonToPersonUsingKeySelector()
+        {
+            var batchUnitFunc = Substitute.For<Func<IEnumerable<int>, Task<IDictionary<int, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(0).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Unit)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<IEnumerable<int>, Task<IDictionary<int, Person>>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(0).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Manager)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartment")
+                        .FromBatch(p => p.Id, batchUnitFunc)
+                        .AndFromBatch(p => p.Id, batchManagerFunc, build => build.ConfigureFrom(loader.GetType()));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartment {
+                                    ... on Unit {
+                                        id
+                                        name
+                                    }
+                                    ... on Person {
+                                        id
+                                        fullName
+                                    }
+                                }
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                }]
+                            },{
+                                id: 2,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 3,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 4,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 5,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 6,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 5,
+                                    fullName: ""Aldon Exley""
+                                }]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<IEnumerable<int>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<IEnumerable<int>>());
+        }
+
+        [Test]
         public void BatchUnionMutableLoaderFuncsFromPersonToUnitFromPersonToPersonUsingKeySelector()
         {
             var batchUnitFunc = Substitute.For<Func<IEnumerable<int>, IDictionary<int, Unit>>>();
@@ -1403,6 +2140,124 @@ namespace Epam.GraphQL.Tests
                     }";
 
             TestHelpers.TestQuery(mutableBuilder, Query, Expected);
+
+            batchUnitFunc.Received(1).Invoke(Arg.Any<IEnumerable<int>>());
+            batchManagerFunc.Received(1).Invoke(Arg.Any<IEnumerable<int>>());
+        }
+
+        [Test]
+        public void BatchUnionLoaderTaskFuncsFromPersonToUnitFromPersonToPersonUsingKeySelector()
+        {
+            var batchUnitFunc = Substitute.For<Func<IEnumerable<int>, Task<IDictionary<int, Unit>>>>();
+            batchUnitFunc
+                .Invoke(Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(0).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Unit)
+                        .FirstOrDefault()));
+
+            var batchManagerFunc = Substitute.For<Func<IEnumerable<int>, Task<IDictionary<int, Person>>>>();
+            batchManagerFunc
+                .Invoke(Arg.Any<IEnumerable<int>>())
+                .Returns(callInfo => callInfo.ArgAt<IEnumerable<int>>(0).ToDictionary(
+                    id => id,
+                    id => FakeData.People
+                        .AsQueryable()
+                        .Where(p => p.Id == id)
+                        .Select(p => p.Manager)
+                        .FirstOrDefault()));
+
+            var builder = CreateQueryBuilder(
+                loader =>
+                {
+                    loader.Field(u => u.Id);
+                    loader.Field(u => u.FullName);
+                    loader.Field("managerOrDepartment")
+                        .FromBatch(p => p.Id, batchUnitFunc)
+                        .AndFromBatch(p => p.Id, batchManagerFunc, build => build.ConfigureFrom(loader.GetType()));
+                });
+
+            const string Query = @"
+                    query {
+                        people {
+                            items {
+                                id
+                                managerOrDepartment {
+                                    ... on Unit {
+                                        id
+                                        name
+                                    }
+                                    ... on Person {
+                                        id
+                                        fullName
+                                    }
+                                }
+                            }
+                        }
+                    }";
+
+            const string Expected = @"
+                    {
+                        people: {
+                            items: [{
+                                id: 1,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                }]
+                            },{
+                                id: 2,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 3,
+                                managerOrDepartment: [{
+                                    id: 1,
+                                    name: ""Alpha""
+                                },{
+                                    id: 1,
+                                    fullName: ""Linoel Livermore""
+                                }]
+                            },{
+                                id: 4,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 5,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 2,
+                                    fullName: ""Sophie Gandley""
+                                }]
+                            },{
+                                id: 6,
+                                managerOrDepartment: [{
+                                    id: 2,
+                                    name: ""Beta""
+                                },{
+                                    id: 5,
+                                    fullName: ""Aldon Exley""
+                                }]
+                            }]
+                        }
+                    }";
+
+            TestHelpers.TestQuery(builder, Query, Expected);
 
             batchUnitFunc.Received(1).Invoke(Arg.Any<IEnumerable<int>>());
             batchManagerFunc.Received(1).Invoke(Arg.Any<IEnumerable<int>>());
