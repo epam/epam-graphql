@@ -38,6 +38,8 @@ namespace Epam.GraphQL.Tests.TestData
 
         public int UserId => 5;
 
+        public int One => 1;
+
         public IDataContext DataContext { get; }
     }
 }

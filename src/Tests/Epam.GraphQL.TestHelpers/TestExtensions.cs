@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Common;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Builders.MutableLoader;
@@ -375,6 +376,318 @@ namespace Epam.GraphQL.Tests
                 new[] { typeof(TExecutionContext), typeof(Dictionary<string, object>) });
 
             return methodInfo.InvokeAndHoistBaseException<Expression<Func<TEntity, bool>>>(schemaExecuter, executionContext, filterValue);
+        }
+
+        public static IHasSelectAndReferenceToAndAndFromBatch<TEntity, TResult, TExecutionContext> FromBatch<TEntity, TKey, TResult, TExecutionContext>(
+            this Builders.Loader.IHasFromBatch<TEntity, TExecutionContext> builder,
+            FromBatchType fromBatchType,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Func<TExecutionContext> contextFactory,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TResult>> batchFunc,
+            Action<IInlineObjectBuilder<TResult, TExecutionContext>> resultBuilder = null)
+        {
+            Guards.ThrowIfNull(builder, nameof(builder));
+
+            var result = fromBatchType switch
+            {
+                FromBatchType.KeyContext => builder.FromBatch(keySelector, batchFunc, resultBuilder),
+                FromBatchType.KeyContextTask => builder.FromBatch(
+                    keySelector,
+                    (ctx, items) => Task.FromResult(batchFunc(ctx, items)),
+                    resultBuilder),
+                FromBatchType.Key => builder.FromBatch(
+                    keySelector,
+                    items => batchFunc(contextFactory(), items),
+                    resultBuilder),
+                FromBatchType.KeyTask => builder.FromBatch(
+                    keySelector,
+                    items => Task.FromResult(batchFunc(contextFactory(), items)),
+                    resultBuilder),
+
+                FromBatchType.EntityContext => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(ctx, dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityContextTask => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, TResult>>(
+                            batchFunc(ctx, dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                FromBatchType.Entity => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(contextFactory(), dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityTask => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, TResult>>(
+                            batchFunc(contextFactory(), dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                _ => throw new NotImplementedException(),
+            };
+
+            return result;
+        }
+
+        public static IHasSelectAndAndFromBatch<TEntity, IEnumerable<TResult>, TExecutionContext> FromBatch<TEntity, TKey, TResult, TExecutionContext>(
+            this Builders.Loader.IHasFromBatch<TEntity, TExecutionContext> builder,
+            FromBatchType fromBatchType,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Func<TExecutionContext> contextFactory,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, IEnumerable<TResult>>> batchFunc,
+            Action<IInlineObjectBuilder<TResult, TExecutionContext>> resultBuilder = null)
+        {
+            Guards.ThrowIfNull(builder, nameof(builder));
+
+            var result = fromBatchType switch
+            {
+                FromBatchType.KeyContext => builder.FromBatch(keySelector, batchFunc, resultBuilder),
+                FromBatchType.KeyContextTask => builder.FromBatch(
+                    keySelector,
+                    (ctx, items) => Task.FromResult(batchFunc(ctx, items)),
+                    resultBuilder),
+                FromBatchType.Key => builder.FromBatch(
+                    keySelector,
+                    items => batchFunc(contextFactory(), items),
+                    resultBuilder),
+                FromBatchType.KeyTask => builder.FromBatch(
+                    keySelector,
+                    items => Task.FromResult(batchFunc(contextFactory(), items)),
+                    resultBuilder),
+
+                FromBatchType.EntityContext => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(ctx, dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityContextTask => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, IEnumerable<TResult>>>(
+                            batchFunc(ctx, dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                FromBatchType.Entity => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(contextFactory(), dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityTask => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, IEnumerable<TResult>>>(
+                            batchFunc(contextFactory(), dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                _ => throw new NotImplementedException(),
+            };
+
+            return result;
+        }
+
+        public static IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TEntity, TResult, TExecutionContext> FromBatch<TEntity, TKey, TResult, TExecutionContext>(
+            this IMutableLoaderFieldBuilder<TEntity, TExecutionContext> builder,
+            FromBatchType fromBatchType,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Func<TExecutionContext> contextFactory,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, TResult>> batchFunc,
+            Action<IInlineObjectBuilder<TResult, TExecutionContext>> resultBuilder = null)
+        {
+            Guards.ThrowIfNull(builder, nameof(builder));
+
+            var result = fromBatchType switch
+            {
+                FromBatchType.KeyContext => builder.FromBatch(keySelector, batchFunc, resultBuilder),
+                FromBatchType.KeyContextTask => builder.FromBatch(
+                    keySelector,
+                    (ctx, items) => Task.FromResult(batchFunc(ctx, items)),
+                    resultBuilder),
+                FromBatchType.Key => builder.FromBatch(
+                    keySelector,
+                    items => batchFunc(contextFactory(), items),
+                    resultBuilder),
+                FromBatchType.KeyTask => builder.FromBatch(
+                    keySelector,
+                    items => Task.FromResult(batchFunc(contextFactory(), items)),
+                    resultBuilder),
+
+                FromBatchType.EntityContext => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(ctx, dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityContextTask => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, TResult>>(
+                            batchFunc(ctx, dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                FromBatchType.Entity => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(contextFactory(), dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityTask => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, TResult>>(
+                            batchFunc(contextFactory(), dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                _ => throw new NotImplementedException(),
+            };
+
+            return result;
+        }
+
+        public static IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TEntity, IEnumerable<TResult>, TExecutionContext> FromBatch<TEntity, TKey, TResult, TExecutionContext>(
+            this IMutableLoaderFieldBuilder<TEntity, TExecutionContext> builder,
+            FromBatchType fromBatchType,
+            Expression<Func<TEntity, TKey>> keySelector,
+            Func<TExecutionContext> contextFactory,
+            Func<TExecutionContext, IEnumerable<TKey>, IDictionary<TKey, IEnumerable<TResult>>> batchFunc,
+            Action<IInlineObjectBuilder<TResult, TExecutionContext>> resultBuilder = null)
+        {
+            Guards.ThrowIfNull(builder, nameof(builder));
+
+            var result = fromBatchType switch
+            {
+                FromBatchType.KeyContext => builder.FromBatch(keySelector, batchFunc, resultBuilder),
+                FromBatchType.KeyContextTask => builder.FromBatch(
+                    keySelector,
+                    (ctx, items) => Task.FromResult(batchFunc(ctx, items)),
+                    resultBuilder),
+                FromBatchType.Key => builder.FromBatch(
+                    keySelector,
+                    items => batchFunc(contextFactory(), items),
+                    resultBuilder),
+                FromBatchType.KeyTask => builder.FromBatch(
+                    keySelector,
+                    items => Task.FromResult(batchFunc(contextFactory(), items)),
+                    resultBuilder),
+
+                FromBatchType.EntityContext => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(ctx, dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityContextTask => builder.FromBatch(
+                    (ctx, items) =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, IEnumerable<TResult>>>(
+                            batchFunc(ctx, dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                FromBatchType.Entity => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return batchFunc(contextFactory(), dict.Keys)
+                            .ToDictionary(
+                                pair => dict[pair.Key],
+                                pair => pair.Value);
+                    },
+                    resultBuilder),
+                FromBatchType.EntityTask => builder.FromBatch(
+                    items =>
+                    {
+                        var selector = keySelector.Compile();
+                        var dict = items.ToDictionary(selector);
+                        return Task.FromResult<IDictionary<TEntity, IEnumerable<TResult>>>(
+                            batchFunc(contextFactory(), dict.Keys)
+                                .ToDictionary(
+                                    pair => dict[pair.Key],
+                                    pair => pair.Value));
+                    },
+                    resultBuilder),
+                _ => throw new NotImplementedException(),
+            };
+
+            return result;
         }
 
         internal static ProjectionBase<TEntity, TExecutionContext> ResolveLoader<TEntity, TExecutionContext>(
