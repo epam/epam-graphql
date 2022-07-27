@@ -89,8 +89,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
@@ -98,8 +97,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
@@ -108,8 +106,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<TExecutionContext, IEnumerable<TKeyType1>, IDictionary<TKeyType1, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
@@ -118,8 +115,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<IEnumerable<TKeyType1>, IDictionary<TKeyType1, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
@@ -127,8 +123,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
@@ -136,8 +131,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
@@ -146,8 +140,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<TExecutionContext, IEnumerable<TKeyType1>, Task<IDictionary<TKeyType1, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType1>(
@@ -156,8 +149,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
             Func<IEnumerable<TKeyType1>, Task<IDictionary<TKeyType1, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            return Parent.ApplyBatchUnion(configurationContext, this, BatchFieldResolver, GraphType, keySelector, batchFunc, build);
         }
     }
 }
