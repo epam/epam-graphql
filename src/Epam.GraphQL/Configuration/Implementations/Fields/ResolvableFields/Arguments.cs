@@ -12,12 +12,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class Arguments<TArg1, TExecutionContext> : ArgumentsBase<TArg1, IResolveFieldContext, TExecutionContext>, IArguments<TArg1, TExecutionContext>
     {
-        public Arguments(RelationRegistry<TExecutionContext> registry, string argName)
+        public Arguments(IRegistry<TExecutionContext> registry, string argName)
             : base(registry, new Argument<TArg1>(argName))
         {
         }
 
-        public Arguments(RelationRegistry<TExecutionContext> registry, string argName, Type projectionType, Type entityType)
+        public Arguments(IRegistry<TExecutionContext> registry, string argName, Type projectionType, Type entityType)
             : base(registry, new FilterArgument<TExecutionContext>(registry, argName, projectionType, entityType))
         {
         }
@@ -29,7 +29,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new Arguments<TArg1, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }
@@ -64,7 +63,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new Arguments<TArg1, TArg2, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }
@@ -99,7 +97,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new Arguments<TArg1, TArg2, TArg3, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }
@@ -134,7 +131,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 
         public IArguments<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext> AddFilter<TProjection, TEntity>(string argName)
             where TProjection : Projection<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return new Arguments<TArg1, TArg2, TArg3, TArg4, Expression<Func<TEntity, bool>>, TExecutionContext>(this, argName, typeof(TProjection), typeof(TEntity));
         }

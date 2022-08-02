@@ -3,31 +3,17 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
 {
-    internal class GroupGraphType<TProjection, TEntity, TExecutionContext> : ObjectGraphType<Proxy<TEntity>>, IHasGetEntityType
-        where TProjection : ProjectionBase<TEntity, TExecutionContext>, new()
-        where TEntity : class
+    internal class GroupGraphType<TEntity, TExecutionContext> : ObjectGraphType<Proxy<TEntity>>
     {
-        public GroupGraphType(RelationRegistry<TExecutionContext> registry)
+        public GroupGraphType(IObjectGraphTypeConfigurator<TEntity, TExecutionContext> configurator)
         {
-            registry.ConfigureGroupGraphType<TProjection, TEntity>(this);
-        }
-
-        public Type GetEntityType()
-        {
-            return typeof(TEntity);
-        }
-
-        public Type GetProjectionType()
-        {
-            return typeof(TProjection);
+            configurator.ConfigureGroupGraphType(this);
         }
     }
 }

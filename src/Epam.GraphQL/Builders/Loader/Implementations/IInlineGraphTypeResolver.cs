@@ -5,6 +5,7 @@
 
 using System;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Builders.Loader.Implementations
@@ -12,6 +13,8 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
     internal interface IInlineGraphTypeResolver<TExecutionContext>
     {
         (IGraphType? GraphType, Type? Type) Resolve();
+
+        void Validate(IConfigurationContext configurationContext);
     }
 
     internal interface IInlineGraphTypeResolver<TReturnType, TExecutionContext> : IInlineGraphTypeResolver<TExecutionContext>

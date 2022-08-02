@@ -36,7 +36,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),
@@ -91,7 +91,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitStringId == u.StringId);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitStringId == u.StringId);
                     loader.Field(p => p.UnitStringId);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -152,7 +152,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .Where(u => u.HeadId.HasValue);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -208,7 +208,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id && u.HeadId.HasValue);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id && u.HeadId.HasValue);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),
@@ -263,7 +263,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id && p.Id > 0);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id && p.Id > 0);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),
@@ -309,7 +309,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(u => u.Id);
                     loader.Field("people")
-                        .FromLoader<Person>(personLoaderType, (u, p) => u.Id == p.UnitId)
+                        .FromLoader<Unit, Person, TestUserContext>(personLoaderType, (u, p) => u.Id == p.UnitId)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -373,7 +373,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("twin")
-                        .FromLoader<Person>(personLoaderType, (p1, p2) => p1.Id == p2.Id);
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p1, p2) => p1.Id == p2.Id);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.OrderBy(p => p.Id),
@@ -422,7 +422,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("subordinates")
-                        .FromLoader<Person>(personLoaderType, (p1, p2) => p1.Id == p2.ManagerId);
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p1, p2) => p1.Id == p2.ManagerId);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.OrderBy(p => p.Id),
@@ -484,7 +484,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -538,7 +538,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("twin")
-                        .FromLoader<Person>(personLoaderType, (p1, p2) => p1.Id == p2.Id)
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p1, p2) => p1.Id == p2.Id)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -592,7 +592,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("subordinates")
-                        .FromLoader<Person>(personLoaderType, (p1, p2) => p1.Id == p2.ManagerId)
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p1, p2) => p1.Id == p2.ManagerId)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -660,7 +660,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .AsConnection()
                         .WithFilter(personFilter);
                 },
@@ -753,7 +753,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName).Filterable();
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .AsConnection()
                         .WithFilter(personFilter);
                 },
@@ -810,7 +810,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .AsConnection()
                         .WithFilter(personFilter)
                         .WithSearch(personSearch);
@@ -908,7 +908,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id).Sortable();
                     loader.Field(p => p.FullName);
                     loader.Field("subordinates")
-                        .FromLoader<Person>(loader.GetType(), (m, p) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (m, p) => p.ManagerId == m.Id)
                         .AsConnection()
                         .WithFilter(personFilter);
                 },
@@ -1012,7 +1012,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id).Sortable();
                     loader.Field(p => p.FullName);
                     loader.Field("subordinates")
-                        .FromLoader<Person>(loader.GetType(), (m, p) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (m, p) => p.ManagerId == m.Id)
                         .AsConnection()
                         .WithFilter(personFilter)
                         .WithSearch(personSearch);
@@ -1113,7 +1113,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1203,7 +1203,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(u => u.Id);
                     loader.Field("people")
-                        .FromLoader<Person>(personLoaderType, (u, p) => u.Id == p.UnitId)
+                        .FromLoader<Unit, Person, TestUserContext>(personLoaderType, (u, p) => u.Id == p.UnitId)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1278,7 +1278,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(u => u.Id);
                     loader.Field("people")
-                        .FromLoader<Person>(personLoaderType, (u, p) => u.Id == p.UnitId);
+                        .FromLoader<Unit, Person, TestUserContext>(personLoaderType, (u, p) => u.Id == p.UnitId);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),
@@ -1339,7 +1339,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("twin")
-                        .FromLoader<Person>(personLoaderType, (p1, p2) => p1.Id == p2.Id)
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p1, p2) => p1.Id == p2.Id)
                         .AsConnection()
                         .WithFilter(personFilter);
                 },
@@ -1406,7 +1406,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.FullName);
                     loader.Field("subordinates")
-                        .FromLoader<Person>(personLoaderType, (p1, p2) => p1.Id == p2.ManagerId)
+                        .FromLoader<Person, Person, TestUserContext>(personLoaderType, (p1, p2) => p1.Id == p2.ManagerId)
                         .AsConnection()
                         .WithFilter(personFilter);
                 },
@@ -1481,7 +1481,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .SingleOrDefault();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1515,7 +1515,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .SingleOrDefault(u => u.Id > 0);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1549,7 +1549,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .FirstOrDefault();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1583,7 +1583,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .FirstOrDefault(u => u.Id > 0);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1607,7 +1607,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .SingleOrDefault();
                 },
                 _ => FakeData.People.AsQueryable().Where(p => p.Id <= 2),
@@ -1658,7 +1658,7 @@ namespace Epam.GraphQL.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.LongManagerId == m.LongId)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.LongManagerId == m.LongId)
                         .SingleOrDefault();
                 },
                 _ => FakeData.People.AsQueryable().Where(p => p.Id <= 2),
@@ -1720,7 +1720,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.UnitId);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .FirstOrDefault();
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable(),
@@ -1798,7 +1798,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.UnitId);
                     loader.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .FirstOrDefault();
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable(),
@@ -1867,7 +1867,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.ManagerId);
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .FirstOrDefault();
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable(),
@@ -1936,7 +1936,7 @@ namespace Epam.GraphQL.Tests
                     loader.Field(p => p.Id);
                     loader.Field(p => p.ManagerId);
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .FirstOrDefault();
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable(),

@@ -5,31 +5,32 @@
 
 using System;
 using System.Linq.Expressions;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 
 namespace Epam.GraphQL.Filters.Implementations
 {
-    internal class CustomInlineFilter<TEntity, TValueType, TExecutionContext> : IInlineFilter<TExecutionContext>
-        where TEntity : class
+    internal class CustomInlineFilter<TEntity, TValueType, TExecutionContext> : IInlineFilter<TExecutionContext>, IChainConfigurationContextOwner
     {
         private readonly Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> _filterPredicateFactory;
 
-        public CustomInlineFilter(string name, Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+        public CustomInlineFilter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Func<TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+            : this(configurationContextFactory, name, (context, value) => filterPredicateFactory(value))
         {
-            if (filterPredicateFactory == null)
-            {
-                throw new ArgumentNullException(nameof(filterPredicateFactory));
-            }
-
-            FieldName = name?.ToCamelCase() ?? throw new ArgumentNullException(nameof(name));
-            _filterPredicateFactory = (context, value) => filterPredicateFactory(value);
         }
 
-        public CustomInlineFilter(string name, Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
+        public CustomInlineFilter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Func<TExecutionContext, TValueType, Expression<Func<TEntity, bool>>> filterPredicateFactory)
         {
-            FieldName = name?.ToCamelCase() ?? throw new ArgumentNullException(nameof(name));
-            _filterPredicateFactory = filterPredicateFactory ?? throw new ArgumentNullException(nameof(filterPredicateFactory));
+            ConfigurationContext = configurationContextFactory(this);
+            FieldName = name.ToCamelCase();
+            _filterPredicateFactory = filterPredicateFactory;
         }
 
         public Type FieldType => typeof(TValueType);
@@ -37,6 +38,8 @@ namespace Epam.GraphQL.Filters.Implementations
         public string FieldName { get; }
 
         public Type FilterType => typeof(TValueType);
+
+        public IChainConfigurationContext ConfigurationContext { get; set; }
 
         LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {

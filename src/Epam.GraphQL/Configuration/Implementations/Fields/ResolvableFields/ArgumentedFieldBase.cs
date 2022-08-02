@@ -3,22 +3,21 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedFieldBase<TArguments, TEntity, TExecutionContext> : Field<TEntity, TExecutionContext>
         where TArguments : IArguments
-        where TEntity : class
     {
         protected ArgumentedFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             TArguments arguments)
-            : base(registry, parent, name)
+            : base(configurationContext, parent, name)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 

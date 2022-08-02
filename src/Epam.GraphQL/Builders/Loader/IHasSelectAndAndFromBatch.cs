@@ -6,33 +6,47 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IHasSelectAndAndFromBatch<TEntity, TReturnType, TExecutionContext> :
         IHasSelect<TReturnType, TExecutionContext>
-        where TEntity : class
     {
         IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
 
         IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
-            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class;
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
+
+        IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
+
+        IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
+
+        IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
+            Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
+
+        IHasSelectAndAndFromBatch<TEntity, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType, TKeyType>(
+            Expression<Func<TEntity, TKeyType>> keySelector,
+            Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
+            Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null);
     }
 }

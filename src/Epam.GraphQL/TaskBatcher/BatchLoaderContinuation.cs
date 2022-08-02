@@ -17,19 +17,14 @@ namespace Epam.GraphQL.TaskBatcher
 
         public BatchLoaderContinuation(IDataLoader<TParameter, TItem> batchTask, Func<TParameter, TItem, TResult> continuation)
         {
-            _continuation = continuation ?? throw new ArgumentNullException(nameof(continuation));
-            _batchTask = batchTask ?? throw new ArgumentNullException(nameof(batchTask));
+            _continuation = continuation;
+            _batchTask = batchTask;
         }
 
         public BatchLoaderContinuation(IDataLoader<TParameter, TItem> batchTask, Func<TItem, TResult> continuation)
         {
-            if (continuation == null)
-            {
-                throw new ArgumentNullException(nameof(continuation));
-            }
-
             _continuation = (param, item) => continuation(item);
-            _batchTask = batchTask ?? throw new ArgumentNullException(nameof(batchTask));
+            _batchTask = batchTask;
         }
 
         public IDataLoader<TParameter, T> Combine<T>(Func<TResult, T> continuation)

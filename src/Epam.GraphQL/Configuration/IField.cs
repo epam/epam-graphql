@@ -4,41 +4,35 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal interface IField
+    internal interface IField<TExecutionContext> : IChainConfigurationContextOwner
     {
+        IObjectGraphTypeConfigurator<TExecutionContext> Parent { get; }
+
         string Name { get; }
 
         Type FieldType { get; }
 
-        bool CanResolve { get; }
+        IFieldResolver Resolver { get; }
+
+        new IChainConfigurationContext ConfigurationContext { get; }
 
         FieldType AsFieldType();
 
-        void ValidateField();
-
-        string GetGraphQLTypePrefix();
-
-        object? Resolve(IResolveFieldContext context);
-    }
-
-    internal interface IField<TExecutionContext> : IField
-    {
-        IFieldEditSettings<TExecutionContext>? EditSettings { get; }
-
-        IGraphTypeDescriptor<TExecutionContext> GraphType { get; }
+        void Validate();
     }
 
     internal interface IField<TEntity, TExecutionContext> : IField<TExecutionContext>
     {
-        new IFieldEditSettings<TEntity, TExecutionContext>? EditSettings { get; }
+        IFieldEditSettings<TEntity, TExecutionContext>? EditSettings { get; }
 
         IDataLoader<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)> CanEdit(IResolveFieldContext context);
     }

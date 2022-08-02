@@ -5,8 +5,7 @@
 
 using System;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
+using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Relay;
@@ -16,7 +15,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 {
     internal static class Resolvers
     {
-        public static Connection<Proxy<TReturnType>> Resolve<TReturnType>(IResolveFieldContext context, IQueryable<Proxy<TReturnType>> children)
+        public static Connection<TReturnType> Resolve<TReturnType>(IResolveFieldContext context, IQueryable<TReturnType> children)
         {
             var first = context.GetFirst();
             var last = context.GetLast();
@@ -30,6 +29,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
 
             var connection = ConnectionUtils.ToConnection(
                 children,
+                context.GetFieldConfigurationContext(),
                 () => context.GetPath(),
                 context.GetQueryExecuter(),
                 first,
@@ -44,72 +44,102 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
             return connection;
         }
 
-        public static Func<IResolveFieldContext, IQueryable<Proxy<TChildEntity>>, Connection<object>> ToGroupConnection<TChildEntity, TExecutionContext>()
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, TReturnType> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
         {
-            return (context, children) =>
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                proxyAccessor.Rewrite(FuncConstants<TEntity>.IdentityExpression).Compile());
+
+            return Resolver;
+
+            TReturnType Resolver(IResolveFieldContext ctx)
             {
-                var subFields = context.GetGroupConnectionQueriedFields();
-                var aggregateQueriedFields = context.GetGroupConnectionAggregateQueriedFields().Select(name => $"<>${name}");
-
-                var sourceType = children.ElementType;
-
-                var first = context.GetFirst();
-                var last = context.GetLast();
-                var after = context.GetAfter();
-                var before = context.GetBefore();
-
-                var shouldComputeCount = context.HasTotalCount();
-                var shouldComputeEndOffset = context.HasEndCursor();
-                var shouldComputeEdges = context.HasEdges();
-                var shouldComputeItems = context.HasItems();
-
-                IQueryable<object> items;
-                if (aggregateQueriedFields.Contains("<>$count"))
+                try
                 {
-                    var param = Expression.Parameter(sourceType);
-                    var member = Expression.Property(param, sourceType.GetProperty("<>$count", BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase));
-                    var result = Expression.Lambda(member, param);
+                    var context = ctx.GetUserContext<TExecutionContext>();
+                    var entity = ctx.Source is Proxy<TEntity> proxy
+                        ? converter.Value(proxy)
+                        : (TEntity)ctx.Source;
 
-                    var lambda = ExpressionHelpers.MakeMemberInit<GroupResult<Proxy<TChildEntity>>>(sourceType)
-                        .Property(result => result.Item, ExpressionHelpers.MakeIdentity(sourceType))
-                        .Property(result => result.Count, result)
-                        .Lambda();
-
-                    // TODO Get rid of cast
-                    items = (IQueryable<object>)children.SafeNull().AsQueryable().ApplySelect(lambda);
+                    return func(context, entity);
                 }
-                else
+                catch (Exception e)
                 {
-                    items = children.SafeNull().AsQueryable().Select(entity => new GroupResult<Proxy<TChildEntity>>
-                    {
-                        Item = entity,
-                    });
+                    ctx.LogFieldExecutionError(e);
+                    throw;
                 }
-
-                return ConnectionUtils.ToConnection(
-                    items,
-                    () => context.GetPath(),
-                    context.GetQueryExecuter(),
-                    first,
-                    last,
-                    before,
-                    after,
-                    shouldComputeCount,
-                    shouldComputeEndOffset,
-                    shouldComputeEdges,
-                    shouldComputeItems);
-            };
+            }
         }
 
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(Func<TExecutionContext, TEntity, TReturnType> func)
-            where TEntity : class
+        public static Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TEntity, TReturnType, TExecutionContext>(
+            string fieldName,
+            Func<TExecutionContext, TEntity, Task<TReturnType>> func,
+            IProxyAccessor<TEntity, TExecutionContext> proxyAccessor)
         {
-            return ctx => func(ctx.GetUserContext<TExecutionContext>(), ctx.Source is Proxy<TEntity> proxy ? proxy.GetOriginal() : (TEntity)ctx.Source);
+            proxyAccessor.AddMember(fieldName, FuncConstants<TEntity>.IdentityExpression);
+            var converter = new Lazy<Func<Proxy<TEntity>, TEntity>>(() =>
+                proxyAccessor.Rewrite(FuncConstants<TEntity>.IdentityExpression).Compile());
+
+            return Resolver;
+
+            async Task<TReturnType> Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    var context = ctx.GetUserContext<TExecutionContext>();
+                    var entity = ctx.Source is Proxy<TEntity> proxy
+                        ? converter.Value(proxy)
+                        : (TEntity)ctx.Source;
+
+                    return await func(context, entity).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    ctx.LogFieldExecutionError(e);
+                    throw;
+                }
+            }
         }
 
-        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(Func<TExecutionContext, TReturnType> func)
+        public static Func<IResolveFieldContext, TReturnType> ConvertFieldResolver<TReturnType, TExecutionContext>(
+            Func<TExecutionContext, TReturnType> func)
         {
-            return ctx => func(ctx.GetUserContext<TExecutionContext>());
+            return Resolver;
+
+            TReturnType Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    return func(ctx.GetUserContext<TExecutionContext>());
+                }
+                catch (Exception e)
+                {
+                    ctx.LogFieldExecutionError(e);
+                    throw;
+                }
+            }
+        }
+
+        public static Func<IResolveFieldContext, Task<TReturnType>> ConvertFieldResolver<TReturnType, TExecutionContext>(
+            Func<TExecutionContext, Task<TReturnType>> func)
+        {
+            return Resolver;
+
+            async Task<TReturnType> Resolver(IResolveFieldContext ctx)
+            {
+                try
+                {
+                    return await func(ctx.GetUserContext<TExecutionContext>()).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    ctx.LogFieldExecutionError(e);
+                    throw;
+                }
+            }
         }
     }
 }

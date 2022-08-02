@@ -4,40 +4,37 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.TaskBatcher;
 using GraphQL;
-using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class FuncResolver<TEntity, TReturnType> : IResolver<TEntity>
-        where TEntity : class
+    internal class FuncResolver<TReturnType, TTransformedReturnType, TExecutionContext> : IFieldResolver
     {
-        public FuncResolver(Func<IResolveFieldContext, TEntity, TReturnType> resolver)
-        {
-            Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-        }
+        private readonly IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> _proxyAccessor;
+        private readonly Func<IResolveFieldContext, TTransformedReturnType> _resolver;
 
-        protected Func<IResolveFieldContext, TEntity, TReturnType> Resolver { get; }
-
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
+        public FuncResolver(
+            IProxyAccessor<TReturnType, TTransformedReturnType, TExecutionContext> proxyAccessor,
+            Func<IResolveFieldContext, TTransformedReturnType> resolver)
         {
-            return BatchLoader.FromResult<TEntity, object?>(Resolver(context, (TEntity)context.Source));
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return BatchLoader.FromResult<Proxy<TEntity>, object?>(Resolver(context, ((Proxy<TEntity>)context.Source).GetOriginal()));
+            _proxyAccessor = proxyAccessor;
+            _resolver = resolver;
         }
 
         public object? Resolve(IResolveFieldContext context)
         {
-            var boundResolver = context.Bind(Resolver);
-            return context.Source is Proxy<TEntity> proxy
-                ? boundResolver(proxy.GetOriginal())
-                : boundResolver((TEntity)context.Source);
+            var executer = _proxyAccessor.CreateHooksExecuter(context);
+
+            if (executer != null)
+            {
+                return executer
+                    .Execute(FuncConstants<TTransformedReturnType>.Identity)
+                    .LoadAsync(_resolver(context));
+            }
+
+            return _resolver(context);
         }
     }
 }

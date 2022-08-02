@@ -10,7 +10,6 @@ using GraphQL.Types;
 namespace Epam.GraphQL.Types
 {
     internal class InputAutoObjectGraphType<TSourceType, TExecutionContext> : InputObjectGraphType<TSourceType>
-        where TSourceType : class
     {
         public InputAutoObjectGraphType(RelationRegistry<TExecutionContext> registry)
         {

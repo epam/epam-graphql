@@ -15,7 +15,6 @@ using Epam.GraphQL.Helpers;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class StringInlineFilter<TEntity, TExecutionContext> : BaseInlineFilter<TEntity, string?, string?, string?, TExecutionContext>
-        where TEntity : class
     {
         public StringInlineFilter(ExpressionField<TEntity, string, TExecutionContext> field, string[]? defaultValues, NullOption? nullValue)
             : base(field, defaultValues, nullValue)
@@ -40,10 +39,10 @@ namespace Epam.GraphQL.Filters.Implementations
 
         protected override Expression<Func<TEntity, bool>> BuildComparisonExpression(TExecutionContext context, ComparisonType comparisonType, string? value)
         {
-            if (comparisonType is not ComparisonType.Eq and not ComparisonType.Neq)
-            {
-                throw new ArgumentException($"Value should be either {nameof(ComparisonType)}.{nameof(ComparisonType.Eq)} or {nameof(ComparisonType)}.{nameof(ComparisonType.Neq)}.", nameof(comparisonType));
-            }
+            Guards.ThrowArgumentExceptionIf(
+                comparisonType is not ComparisonType.Eq and not ComparisonType.Neq,
+                $"Value should be either {nameof(ComparisonType)}.{nameof(ComparisonType.Eq)} or {nameof(ComparisonType)}.{nameof(ComparisonType.Neq)}.",
+                nameof(comparisonType));
 
             return BuildExpression(context).MakeComparisonExpression(comparisonType, value);
         }

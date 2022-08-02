@@ -4,30 +4,94 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Builders.Loader.Implementations;
-using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
+using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
+using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL.Builders.Projection.Implementations
 {
     internal class ProjectionFieldBuilder<TField, TEntity, TExecutionContext> :
-        ProjectionFieldBuilderBase<TField, TEntity, TExecutionContext>,
-        IProjectionFieldBuilder<TEntity, TExecutionContext>
-        where TEntity : class
+        IProjectionField<TEntity, TExecutionContext>
         where TField : FieldBase<TEntity, TExecutionContext>, IUnionableField<TEntity, TExecutionContext>
     {
         public ProjectionFieldBuilder(TField field)
-            : base(field)
         {
+            Field = field;
         }
 
-        public IFromIQueryableBuilder<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        protected TField Field { get; }
+
+        public IQueryableField<TEntity, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
             Expression<Func<TEntity, TReturnType, bool>> condition,
             Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
-            where TReturnType : class => FromIQueryableBuilder.Create(Field, query, condition, build);
+        {
+            var configurationContext = Field.ConfigurationContext.Chain<TReturnType>(nameof(FromIQueryable))
+                .Argument(query)
+                .Argument(condition)
+                .OptionalArgument(build);
+
+            var graphType = Field.Parent.GetGraphQLTypeDescriptor(Field, build, configurationContext);
+
+            var result = new QueryableField<TEntity, TReturnType, TExecutionContext>(
+                configurationContext,
+                Field.Parent,
+                Field.Name,
+                query,
+                condition,
+                graphType,
+                searcher: null,
+                naturalSorters: SortingHelpers.Empty);
+
+            return Field.Parent.ReplaceField(Field, result);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, TReturnType> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        {
+            Field.Resolve(resolve, build);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        {
+            Field.Resolve(resolve, build);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, IEnumerable<TReturnType>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        {
+            Field.Resolve(resolve, build);
+        }
+
+        public void Resolve<TReturnType>(Func<TExecutionContext, TEntity, Task<IEnumerable<TReturnType>>> resolve, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build)
+        {
+            Field.Resolve(resolve, build);
+        }
+
+        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+        {
+            return Field.AsUnionOf(build);
+        }
+
+        public IUnionableField<TEntity, TExecutionContext> AsUnionOf<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : IEnumerable<TElementType>
+        {
+            return Field.AsUnionOf(build);
+        }
+
+        public IUnionableField<TEntity, TExecutionContext> And<TType>(Action<IInlineObjectBuilder<TType, TExecutionContext>>? build)
+        {
+            return Field.And(build);
+        }
+
+        public IUnionableField<TEntity, TExecutionContext> And<TEnumerable, TElementType>(Action<IInlineObjectBuilder<TElementType, TExecutionContext>>? build)
+            where TEnumerable : IEnumerable<TElementType>
+        {
+            return Field.And(build);
+        }
     }
 }

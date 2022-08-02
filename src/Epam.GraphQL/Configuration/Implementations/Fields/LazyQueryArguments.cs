@@ -27,11 +27,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         public int Count => _items.Count;
 
-        public LazyQueryArgument this[int index]
-        {
-            get => _items[index];
-            set => _items[index] = value;
-        }
+        public LazyQueryArgument this[int index] => _items[index];
 
         public IEnumerator<LazyQueryArgument> GetEnumerator() => _items.GetEnumerator();
 

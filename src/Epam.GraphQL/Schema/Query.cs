@@ -7,33 +7,39 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Epam.GraphQL.Builders.Query;
-using Epam.GraphQL.Builders.Query.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations.Fields;
-using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
-using Epam.GraphQL.Sorters.Implementations;
 
 namespace Epam.GraphQL
 {
-    public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>
+    public abstract class Query<TExecutionContext> : RootProjection<TExecutionContext>, IChainConfigurationContextOwner
     {
         private static MethodInfo? _connectionMethodInfo;
         private static MethodInfo? _groupConnectionMethodInfo;
 
-        protected internal new IQueryFieldBuilder<TExecutionContext> Field(string name, string? deprecationReason = null)
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; } = null!;
+
+        protected internal new IQueryField<TExecutionContext> Field(string name, string? deprecationReason = null)
         {
             ThrowIfIsNotConfiguring();
-            var field = Configurator.AddField(new QueryField<TExecutionContext>(Registry, Configurator, name), deprecationReason);
-            return new QueryFieldBuilder<QueryField<TExecutionContext>, TExecutionContext>(field);
+
+            var field = Configurator.AddField(
+                new QueryField<TExecutionContext>(
+                    owner => Configurator.ConfigurationContext.Chain(owner, nameof(Field))
+                        .Argument(name),
+                    Configurator,
+                    name),
+                deprecationReason);
+
+            return field;
         }
 
-        protected internal ILoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
+        protected internal IRootLoaderField<TEntity, TExecutionContext> Field<TLoader, TEntity>(string name, string? deprecationReason = null)
             where TLoader : Loader<TEntity, TExecutionContext>, new()
-            where TEntity : class
         {
             return Field(name, deprecationReason)
                 .FromLoader<TLoader, TEntity>();
@@ -42,17 +48,22 @@ namespace Epam.GraphQL
         protected internal IConnectionField Connection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
-            if (baseLoaderType == null)
+            ThrowIfIsNotConfiguring();
+
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
             {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {typeof(TChildLoader)}");
+                // TODO Make Dummy IConnectionField implementation
+                var configurationContext = Configurator.ConfigurationContext.Chain<TChildLoader>(this, nameof(Connection))
+                    .Argument(name);
+
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+
+                throw new ConfigurationException(msg);
             }
 
-            _connectionMethodInfo ??= typeof(Query<TExecutionContext>).GetNonPublicGenericMethod(method => method
-                .HasName(nameof(Connection))
-                .HasTwoGenericTypeParameters()
-                .Parameter<string>()
-                .Parameter<string?>());
+            _connectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
+                Connection<DummyMutableLoader<TExecutionContext>, object>);
 
             var field = _connectionMethodInfo
                 .MakeGenericMethod(typeof(TChildLoader), baseLoaderType.GenericTypeArguments[0])
@@ -69,7 +80,6 @@ namespace Epam.GraphQL
             Expression<Func<IQueryable<TChildEntity>, IOrderedQueryable<TChildEntity>>> order,
             string? deprecationReason = null)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             return (IConnectionField)Field(name, deprecationReason)
                 .FromLoader<TChildLoader, TChildEntity>()
@@ -79,18 +89,19 @@ namespace Epam.GraphQL
         protected internal IConnectionField GroupConnection<TChildLoader>(string name, string? deprecationReason = null)
             where TChildLoader : class
         {
-            var baseLoaderType = TypeHelpers.FindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>));
+            ThrowIfIsNotConfiguring();
 
-            if (baseLoaderType == null)
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TChildLoader), typeof(Loader<,>), out var baseLoaderType))
             {
-                throw new ArgumentException($"Cannot find the corresponding base type for loader: {typeof(TChildLoader)}");
+                var configurationContext = Configurator.ConfigurationContext.Chain<TChildLoader>(this, nameof(GroupConnection))
+                    .Argument(name);
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Loader<,>).HumanizedName()}` for type `{typeof(TChildLoader).HumanizedName()}`.", configurationContext);
+                throw new ConfigurationException(msg);
             }
 
-            _groupConnectionMethodInfo ??= typeof(Query<TExecutionContext>).GetNonPublicGenericMethod(method => method
-                .HasName(nameof(GroupConnection))
-                .HasTwoGenericTypeParameters()
-                .Parameter<string>()
-                .Parameter<string?>());
+            _groupConnectionMethodInfo ??= ReflectionHelpers.GetMethodInfo<string, string, IConnectionField>(
+                GroupConnection<DummyMutableLoader<TExecutionContext>, object>);
 
             var field = _groupConnectionMethodInfo
                 .MakeGenericMethod(typeof(TChildLoader), baseLoaderType.GenericTypeArguments[0])
@@ -106,7 +117,6 @@ namespace Epam.GraphQL
             string name,
             string deprecationReason)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
             return (IConnectionField)Field(name, deprecationReason)
                 .FromLoader<TChildLoader, TChildEntity>()
@@ -115,19 +125,10 @@ namespace Epam.GraphQL
 
         private IConnectionField GroupConnection<TChildLoader, TChildEntity>(string name, string? deprecationReason)
             where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class
         {
-            ThrowIfIsNotConfiguring();
-            var graphResultType = Configurator.GetGraphQLTypeDescriptor<TChildLoader, TChildEntity>();
-            var field = new GroupLoaderField<object, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
-                Configurator,
-                name,
-                graphResultType,
-                arguments: null,
-                naturalSorters: SortingHelpers.Empty);
-
-            return Configurator.AddField(field, deprecationReason);
+            return (IConnectionField)Field(name, deprecationReason)
+                .FromLoader<TChildLoader, TChildEntity>()
+                .AsGroupConnection();
         }
     }
 }

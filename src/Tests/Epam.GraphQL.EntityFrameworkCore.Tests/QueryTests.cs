@@ -73,7 +73,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                 {
                     loader.Field(p => p.Id);
                     loader.Field("people")
-                        .FromLoader<Person>(personLoaderType, (u, p) => u.Id == p.UnitId);
+                        .FromLoader<Unit, Person, TestUserContext>(personLoaderType, (u, p) => u.Id == p.UnitId);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),

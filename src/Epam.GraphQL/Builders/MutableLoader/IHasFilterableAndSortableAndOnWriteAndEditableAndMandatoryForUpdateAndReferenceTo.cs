@@ -10,14 +10,10 @@ using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.MutableLoader
 {
-    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TFilterValueType, TExecutionContext> :
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext>
+    public interface IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceTo<TEntity, TReturnType, TExecutionContext> :
+        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext>
     {
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(Expression<Func<TParentEntity, TReturnType>> parentProperty, Expression<Func<TEntity, TParentEntity>> navigationProperty, RelationType relationType)
-            where TParentEntity : class
+        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TExecutionContext> ReferencesTo<TParentEntity, TParentEntityLoader>(Expression<Func<TParentEntity, TReturnType>> parentProperty, Expression<Func<TEntity, TParentEntity>> navigationProperty, RelationType relationType)
             where TParentEntityLoader : Loader<TParentEntity, TExecutionContext>, IIdentifiableLoader, new();
-
-        IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdate<TEntity, TReturnType, TFilterValueType, TExecutionContext> ReferencesTo<TParentEntity>(Type parentLoaderType, Expression<Func<TParentEntity, TReturnType>> parentProperty, Expression<Func<TEntity, TParentEntity>> navigationProperty, RelationType relationType)
-            where TParentEntity : class;
     }
 }

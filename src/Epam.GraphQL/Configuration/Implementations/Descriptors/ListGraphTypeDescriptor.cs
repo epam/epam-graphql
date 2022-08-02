@@ -4,6 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
+using Epam.GraphQL.Diagnostics;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -16,7 +18,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public ListGraphTypeDescriptor(IGraphTypeDescriptor<TExecutionContext> elementDescriptor)
         {
-            _elementDescriptor = elementDescriptor ?? throw new ArgumentNullException(nameof(elementDescriptor));
+            _elementDescriptor = elementDescriptor;
             _graphType = new Lazy<IGraphType?>(() => elementDescriptor.GraphType != null ? new ListGraphType(elementDescriptor.GraphType) : null);
             _type = new Lazy<Type?>(() => elementDescriptor.Type != null ? typeof(ListGraphType<>).MakeGenericType(elementDescriptor.Type) : null);
         }
@@ -25,11 +27,24 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         public Type? Type => _type.Value;
 
-        public IObjectGraphTypeConfigurator<TExecutionContext> Configurator => throw new NotImplementedException();
+        public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => _elementDescriptor.Configurator;
 
-        public void Validate()
+        public void Validate(IChainConfigurationContext configurationContext)
         {
-            _elementDescriptor.Validate();
+            _elementDescriptor.Validate(configurationContext);
         }
+    }
+
+    internal class ListGraphTypeDescriptor<TReturnType, TEnumerable, TExecutionContext> : ListGraphTypeDescriptor<TExecutionContext>, IGraphTypeDescriptor<TEnumerable, TExecutionContext>
+        where TEnumerable : IEnumerable<TReturnType>
+    {
+        public ListGraphTypeDescriptor(IGraphTypeDescriptor<TReturnType, TExecutionContext> elementDescriptor)
+            : base(elementDescriptor)
+        {
+        }
+
+        IObjectGraphTypeConfigurator<TEnumerable, TExecutionContext>? IGraphTypeDescriptor<TEnumerable, TExecutionContext>.Configurator => throw new NotImplementedException();
+
+        public string Name => throw new NotSupportedException();
     }
 }

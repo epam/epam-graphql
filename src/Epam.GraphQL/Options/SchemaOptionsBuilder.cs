@@ -17,7 +17,8 @@ namespace Epam.GraphQL
     {
         public SchemaOptionsBuilder(IServiceCollection services)
         {
-            Services = services ?? throw new ArgumentNullException(nameof(services));
+            Guards.ThrowIfNull(services, nameof(services));
+            Services = services;
         }
 
         public IServiceCollection Services { get; }

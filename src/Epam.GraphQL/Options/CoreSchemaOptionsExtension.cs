@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using Epam.GraphQL.Infrastructure;
 using GraphQL.Validation;
@@ -22,11 +21,6 @@ namespace Epam.GraphQL.Options
 
         public CoreSchemaOptionsExtension(CoreSchemaOptionsExtension<TExecutionContext> copyFrom)
         {
-            if (copyFrom == null)
-            {
-                throw new ArgumentNullException(nameof(copyFrom));
-            }
-
             _validationRules.AddRange(copyFrom._validationRules);
             _listeners.AddRange(copyFrom._listeners);
             Profiler = copyFrom.Profiler;
@@ -54,7 +48,7 @@ namespace Epam.GraphQL.Options
         {
             return new CoreSchemaOptionsExtension<TExecutionContext>(this)
             {
-                Profiler = profiler ?? throw new ArgumentNullException(nameof(profiler)),
+                Profiler = profiler,
             };
         }
 

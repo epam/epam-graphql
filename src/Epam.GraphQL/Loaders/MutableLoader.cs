@@ -13,6 +13,7 @@ using Epam.GraphQL.Builders.MutableLoader.Implementations;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Savers;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
@@ -24,19 +25,17 @@ namespace Epam.GraphQL.Loaders
     public abstract class MutableLoader<TEntity, TId, TExecutionContext> : IdentifiableLoader<TEntity, TId, TExecutionContext>, IMutableLoader<TExecutionContext>
         where TEntity : class
     {
-        public Type EntityType => typeof(TEntity);
-
         internal override bool ShouldConfigureInputType => true;
 
         private Action<TEntity, TId> IdSetter => IdExpression.GetSetter();
 
         public abstract bool IsFakeId(TId id);
 
-        ISaveResult<TExecutionContext> IMutableLoader<TExecutionContext>.CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<IInputItem> values) =>
-            CreateSaveResultFromValues(mutationType, fieldName, values.Cast<InputItem<TEntity>>());
+        ISaveResult<TExecutionContext> IMutableLoader<TExecutionContext>.CreateSaveResultFromValues(string fieldName, IEnumerable<IInputItem> values) =>
+            CreateSaveResultFromValues(fieldName, values.Cast<InputItem<TEntity>>());
 
-        ISaveResult<TExecutionContext> IMutableLoader<TExecutionContext>.CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<object> values) =>
-            CreateSaveResultFromValues(mutationType, fieldName, values.Cast<TEntity>());
+        ISaveResult<TExecutionContext> IMutableLoader<TExecutionContext>.CreateSaveResultFromValues(string fieldName, IEnumerable<object> values) =>
+            CreateSaveResultFromValues(fieldName, values.Cast<TEntity>());
 
         Task<IEnumerable<ISaveResult<TExecutionContext>>> IMutableLoader<TExecutionContext>.MutateAsync(IResolveFieldContext context, ISaveResult<TExecutionContext> previousSaveResult) => MutateAsync(context, (SaveResult<TEntity, TId, TExecutionContext>)previousSaveResult);
 
@@ -44,64 +43,30 @@ namespace Epam.GraphQL.Loaders
 
         Task IMutableLoader<TExecutionContext>.ReloadAsync(IResolveFieldContext context, ISaveResult<TExecutionContext> saveResult, IEnumerable<string> fieldNames) => ReloadAsync(context, (SaveResult<TEntity, TId, TExecutionContext>)saveResult, fieldNames);
 
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct
+        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? deprecationReason = null)
         {
-            var field = AddField(null, expression, deprecationReason);
-            return new FieldBuilder<TEntity, TReturnType, TReturnType, TExecutionContext>(Registry, GetType(), field);
+            var field = AddField(expression, deprecationReason);
+            return new FieldBuilder<TEntity, TReturnType, TExecutionContext>(Registry, GetType(), field);
         }
 
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct
+        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(
+            string name,
+            Expression<Func<TEntity, TReturnType>> expression,
+            string? deprecationReason = null)
         {
             var field = AddField(name, expression, deprecationReason);
-            return new FieldBuilder<TEntity, TReturnType, TReturnType, TExecutionContext>(Registry, GetType(), field);
+            return new FieldBuilder<TEntity, TReturnType, TExecutionContext>(Registry, GetType(), field);
         }
 
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct
+        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType, TExecutionContext> Field<TReturnType>(
+            string name,
+            Expression<Func<TExecutionContext, TEntity, TReturnType>> expression,
+            string? deprecationReason = null)
         {
             var field = AddField(name, expression, deprecationReason);
-            return new FieldBuilder<TEntity, TReturnType, TReturnType, TExecutionContext>(Registry, GetType(), field);
-        }
-
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType?, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct
-        {
-            var field = AddField(null, expression, deprecationReason);
-            return new FieldBuilder<TEntity, TReturnType?, TReturnType, TExecutionContext>(Registry, GetType(), field);
-        }
-
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType?, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct
-        {
-            var field = AddField(name, expression, deprecationReason);
-            return new FieldBuilder<TEntity, TReturnType?, TReturnType, TExecutionContext>(Registry, GetType(), field);
-        }
-
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, TReturnType?, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TEntity, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct
-        {
-            var field = AddField(name, expression, deprecationReason);
-            return new FieldBuilder<TEntity, TReturnType?, TReturnType, TExecutionContext>(Registry, GetType(), field);
-        }
-
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, string, string, TExecutionContext> Field(Expression<Func<TEntity, string>> expression, string? deprecationReason = null)
-        {
-            var field = AddField(null, expression, deprecationReason);
-            return new FieldBuilder<TEntity, string, string, TExecutionContext>(Registry, GetType(), field);
-        }
-
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, string, string, TExecutionContext> Field(string name, Expression<Func<TEntity, string>> expression, string? deprecationReason = null)
-        {
-            var field = AddField(name, expression, deprecationReason);
-            return new FieldBuilder<TEntity, string, string, TExecutionContext>(Registry, GetType(), field);
-        }
-
-        protected internal new IHasFilterableAndSortableAndOnWriteAndEditableAndMandatoryForUpdateAndReferenceToAndDefault<TEntity, string, string, TExecutionContext> Field(string name, Expression<Func<TExecutionContext, TEntity, string>> expression, string? deprecationReason = null)
-        {
-            var field = AddField(name, expression, deprecationReason);
-            return new FieldBuilder<TEntity, string, string, TExecutionContext>(Registry, GetType(), field);
+            return new FieldBuilder<TEntity, TReturnType, TExecutionContext>(Registry, GetType(), field);
         }
 
         protected internal new IMutableLoaderFieldBuilder<TEntity, TExecutionContext> Field(string name, string? deprecationReason = null)
@@ -124,10 +89,7 @@ namespace Epam.GraphQL.Loaders
             TEntity entity,
             bool isNew)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+            Guards.ThrowIfNull(context, nameof(context));
 
             if (!await CanViewAsync((GraphQLContext<TExecutionContext>)context, entity).GetResultAsync().ConfigureAwait(false))
             {
@@ -145,7 +107,7 @@ namespace Epam.GraphQL.Loaders
         {
         }
 
-        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<InputItem<TEntity>> entities) => new(
+        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(string fieldName, IEnumerable<InputItem<TEntity>> entities) => new(
             pendingItems: entities
                 .Select(entity =>
                     new SaveResultItem<TEntity, TId>(
@@ -157,10 +119,9 @@ namespace Epam.GraphQL.Loaders
             processedItems: new List<SaveResultItem<TEntity?, TId>>(),
             postponedItems: new List<SaveResultItem<TEntity, TId>>(),
             loader: this,
-            fieldName: fieldName,
-            mutationType: mutationType);
+            fieldName: fieldName);
 
-        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<TEntity> entities) => new(
+        private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(string fieldName, IEnumerable<TEntity> entities) => new(
             processedItems: entities
                 .Select(entity =>
                     new SaveResultItem<TEntity?, TId>(
@@ -172,8 +133,7 @@ namespace Epam.GraphQL.Loaders
             pendingItems: new List<SaveResultItem<TEntity, TId>>(),
             postponedItems: new List<SaveResultItem<TEntity, TId>>(),
             loader: this,
-            fieldName: fieldName,
-            mutationType: mutationType);
+            fieldName: fieldName);
 
         private async Task<IEnumerable<ISaveResult<TExecutionContext>>> MutateAsync(IResolveFieldContext context, SaveResult<TEntity, TId, TExecutionContext> previousSaveResult)
         {
@@ -224,8 +184,7 @@ namespace Epam.GraphQL.Loaders
                             processedItems: processedItems,
                             postponedItems: postponedForSaveItems.ToList(),
                             loader: this,
-                            fieldName: previousSaveResult.FieldName,
-                            mutationType: previousSaveResult.MutationType),
+                            fieldName: previousSaveResult.FieldName),
                     };
 
                     return result;
@@ -292,10 +251,9 @@ namespace Epam.GraphQL.Loaders
                             var prevEntity = items.Single(i => EqualityComparer<TId>.Default.Equals(GetId(i), nextItemToUpdate.Id));
                             var prevEntityProxy = prevEntity; // TODO transform by calling InputObjectGraphTypeConfigurator.ProxyAccessor.CreateSelectorExpression(context.UserContext, nextItemToUpdate.Properties.Keys).Compile()
                             var fieldsAndNextValues = nextItemToUpdate.Properties
-                                .Select(kv => (InputObjectGraphTypeConfigurator.FindFieldByName(kv.Key), kv.Value))
-                                .Where(fieldAndValue => fieldAndValue.Item1.CanResolve);
+                                .Select(kv => (InputObjectGraphTypeConfigurator.FindFieldByName(kv.Key), kv.Value));
 
-                            var resolveFieldTasks = fieldsAndNextValues.Select(fieldAndValue => (fieldAndValue.Item1, fieldAndValue.Item1.Resolve(
+                            var resolveFieldTasks = fieldsAndNextValues.Select(fieldAndValue => (fieldAndValue.Item1, fieldAndValue.Item1.Resolver.Resolve(
                                 new ResolveFieldContext
                                 {
                                     // TODO Don't create another IResolveFieldContext; reuse existing one
@@ -353,7 +311,7 @@ namespace Epam.GraphQL.Loaders
                             prevEntity.CopyProperties(
                                 nextEntity.Payload,
                                 fieldTask.Select(fv => fv.Item1)
-                                    .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                                    .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                                     .Where(field => field.PropertyInfo != null && field.EditSettings.OnWrite == null && field.EditSettings.OnWriteAsync == null)
                                     .Select(field => field.PropertyInfo!));
                         }
@@ -392,7 +350,7 @@ namespace Epam.GraphQL.Loaders
                                 item.Payload,
                                 item.Properties.Keys
                                     .Select(fieldName => InputObjectGraphTypeConfigurator.FindFieldByName(fieldName))
-                                    .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                                    .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                                     .Where(field => field.PropertyInfo != null && field.EditSettings.OnWrite == null && field.EditSettings.OnWriteAsync == null)
                                     .Select(field => field.PropertyInfo!));
                             itemsToCheck.Add(payload);
@@ -410,7 +368,7 @@ namespace Epam.GraphQL.Loaders
 
                         if (!canUpdate)
                         {
-                            throw new ExecutionError("Cannot update entity: Unauthorized.");
+                            throw new ExecutionError($"Cannot update entity (type: {typeof(TEntity).HumanizedName()}): Unauthorized.");
                         }
                     }
 
@@ -460,7 +418,7 @@ namespace Epam.GraphQL.Loaders
 
                         if (!canCreate)
                         {
-                            throw new ExecutionError("Cannot create entity: Unauthorized.");
+                            throw new ExecutionError($"Cannot create entity (type: {typeof(TEntity).HumanizedName()}): Unauthorized.");
                         }
                     }
 
@@ -470,7 +428,7 @@ namespace Epam.GraphQL.Loaders
                     {
                         foreach (var field in InputObjectGraphTypeConfigurator.Fields
                             .Where(f => f.EditSettings != null && f.EditSettings.GetDefaultValue != null)
-                            .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                            .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                             .Where(f => f.PropertyInfo != null))
                         {
                             var defaultValue = field.EditSettings!.GetDefaultValue!(context, item.Payload);
@@ -492,14 +450,14 @@ namespace Epam.GraphQL.Loaders
                         {
                             var fieldTypes = item.Properties.Keys
                                 .Select(propName => InputObjectGraphTypeConfigurator.FindFieldByName(propName))
-                                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                                .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                                 .Where(field => field.PropertyInfo != null)
                                 .Select(field => field.PropertyInfo!.PropertyType)
                                 .Where(propertyType => propertyType.IsValueType && !TypeExtensions.IsNullable(propertyType))
                                 .ToList();
 
                             var fields = InputObjectGraphTypeConfigurator.Fields
-                                .OfType<IExpressionField<TEntity, TExecutionContext>>()
+                                .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                                 .Where(field => field.PropertyInfo != null && field.PropertyInfo.PropertyType.IsValueType && !TypeExtensions.IsNullable(field.PropertyInfo.PropertyType)
                                     && fieldTypes.All(fieldType => fieldType != field.PropertyInfo.PropertyType))
                                 .Where(field => field.EditSettings?.GetDefaultValue == null);
@@ -607,7 +565,7 @@ namespace Epam.GraphQL.Loaders
 
                     if (!result.Any())
                     {
-                        entity.Payload = null;
+                        entity.Payload = default;
                     }
                     else if (result.Count > 1)
                     {
@@ -618,7 +576,7 @@ namespace Epam.GraphQL.Loaders
                         var group = result.Single().ToList();
                         if (!group.Any())
                         {
-                            entity.Payload = null;
+                            entity.Payload = default;
                         }
                         else if (group.Count > 1)
                         {

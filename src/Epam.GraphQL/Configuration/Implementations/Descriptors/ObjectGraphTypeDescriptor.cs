@@ -5,22 +5,29 @@
 
 using System;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Builders.Loader.Implementations;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 {
     internal class ObjectGraphTypeDescriptor<TReturnType, TExecutionContext> : IGraphTypeDescriptor<TReturnType, TExecutionContext>
-        where TReturnType : class
     {
         private readonly Lazy<(IGraphType? GraphType, Type? Type)> _type;
+        private readonly IInlineGraphTypeResolver<TReturnType, TExecutionContext> _resolver;
 
-        public ObjectGraphTypeDescriptor(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, bool isInput)
+        public ObjectGraphTypeDescriptor(
+            IField<TExecutionContext> parent,
+            RelationRegistry<TExecutionContext> registry,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            IChainConfigurationContext configurationContext,
+            bool isInput)
         {
-            var resolver = registry.Register(parent, build, isInput);
-            Configurator = resolver.ResolveConfigurator();
+            _resolver = registry.Register(parent, build, configurationContext, isInput);
+            Configurator = _resolver.ResolveConfigurator();
 
-            _type = new Lazy<(IGraphType?, Type?)>(() => ResolveType(parent, registry, build, isInput));
+            _type = new Lazy<(IGraphType?, Type?)>(() => ResolveType(registry, build, isInput));
         }
 
         public IGraphType? GraphType => _type.Value.GraphType;
@@ -31,20 +38,26 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
 
         IObjectGraphTypeConfigurator<TExecutionContext> IGraphTypeDescriptor<TExecutionContext>.Configurator => Configurator;
 
-        public void Validate()
+        public string Name => Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
+
+        public void Validate(IChainConfigurationContext configurationContext)
         {
-            if (Type == null && GraphType == null)
-            {
-                throw new InvalidOperationException($"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type");
-            }
+            _resolver.Validate(configurationContext);
+
+            configurationContext.AddErrorIf(
+                Type == null && GraphType == null,
+                $"The type: {typeof(TReturnType).HumanizedName()} cannot be coerced effectively to a GraphQL type",
+                configurationContext);
         }
 
-        private static (IGraphType? GraphType, Type? Type) ResolveType(IField<TExecutionContext> parent, RelationRegistry<TExecutionContext> registry, Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build, bool isInputField)
+        private (IGraphType? GraphType, Type? Type) ResolveType(
+            RelationRegistry<TExecutionContext> registry,
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? build,
+            bool isInputField)
         {
             if (build != null)
             {
-                var resolver = registry.Register(parent, build, isInputField);
-                return resolver.Resolve();
+                return _resolver.Resolve();
             }
 
             return (null, registry.GenerateGraphType<TReturnType>(isInputField));

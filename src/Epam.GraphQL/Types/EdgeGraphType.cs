@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Configuration.Implementations;
 using Epam.GraphQL.Loaders;
 using GraphQL.Types;
 
@@ -11,7 +12,6 @@ namespace Epam.GraphQL.Types
 {
     internal class EdgeGraphType<TChildLoader, TChildEntity, TExecutionContext> : ObjectGraphType<object>
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-        where TChildEntity : class
     {
         public EdgeGraphType(RelationRegistry<TExecutionContext> registry)
         {
@@ -29,10 +29,9 @@ namespace Epam.GraphQL.Types
         }
     }
 
-    internal class EdgeGraphType<TReturnGraphType> : ObjectGraphType<object>
-        where TReturnGraphType : IGraphType
+    internal class EdgeGraphType<TReturnType, TExecutionContext> : ObjectGraphType<object>
     {
-        public EdgeGraphType(TReturnGraphType graphType)
+        public EdgeGraphType(IGraphTypeDescriptor<TReturnType, TExecutionContext> graphType)
         {
             var typeName = graphType.Name;
 
@@ -44,7 +43,13 @@ namespace Epam.GraphQL.Types
                 .Name("cursor")
                 .Description("A cursor for use in pagination");
 
-            Field(typeof(TReturnGraphType), "node", "The item at the end of the edge");
+            AddField(new FieldType
+            {
+                Type = graphType.Type,
+                ResolvedType = graphType.GraphType,
+                Name = "node",
+                Description = "The item at the end of the edge",
+            });
         }
     }
 }

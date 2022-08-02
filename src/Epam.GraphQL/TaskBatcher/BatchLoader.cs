@@ -8,15 +8,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
+using GraphQL;
 using GraphQL.DataLoader;
 
 namespace Epam.GraphQL.TaskBatcher
 {
     internal class BatchLoader
     {
-        public static IDataLoader<TParameter, TResult> FromResult<TParameter, TResult>(TResult result) => new ResolvedBatchTask<TParameter, TResult>(result);
-
         public static IDataLoader<TParameter, TResult> FromResult<TParameter, TResult>(Func<TParameter, TResult> transform) => new ParameterizedBatchTask<TParameter, TResult>(transform);
 
         public static IDataLoader<TParameter, TResult[]> WhenAll<TParameter, TResult>(params IDataLoader<TParameter, TResult>[] tasks)
@@ -37,7 +37,7 @@ namespace Epam.GraphQL.TaskBatcher
 
             public WhenAllBatchTask(IDataLoader<TParameter, TResult>[] tasks)
             {
-                _batchTasks = tasks ?? throw new ArgumentNullException(nameof(tasks));
+                _batchTasks = tasks;
             }
 
             public IDataLoader<TParameter, T> Combine<T>(Func<TParameter, TResult[], T> continuation)
@@ -59,11 +59,6 @@ namespace Epam.GraphQL.TaskBatcher
 
             public WhenAllDataLoaderResult(TParameter source, IEnumerable<IDataLoader<TParameter, TResult>> tasks)
             {
-                if (tasks == null)
-                {
-                    throw new ArgumentNullException(nameof(tasks));
-                }
-
                 _results = tasks.Select(task => task.LoadAsync(source)).ToArray();
             }
 
@@ -92,7 +87,7 @@ namespace Epam.GraphQL.TaskBatcher
 
             public ParameterizedBatchTask(Func<TParameter, TResult> transform)
             {
-                _transform = transform ?? throw new ArgumentNullException(nameof(transform));
+                _transform = transform;
             }
 
             public IDataLoader<TParameter, T> Combine<T>(Func<TResult, T> continuation)
@@ -107,29 +102,6 @@ namespace Epam.GraphQL.TaskBatcher
 
             public IDataLoaderResult<TResult> LoadAsync(TParameter param) => new DataLoaderResult<TResult>(_transform(param));
         }
-
-        private class ResolvedBatchTask<TParameter, TResult> : IDataLoader<TParameter, TResult>,
-            IBatchLoaderContinuation<TParameter, TResult>
-        {
-            private readonly TResult _result;
-
-            public ResolvedBatchTask(TResult result)
-            {
-                _result = result;
-            }
-
-            public IDataLoader<TParameter, T> Combine<T>(Func<TResult, T> continuation)
-            {
-                return new ResolvedBatchTask<TParameter, T>(continuation(_result));
-            }
-
-            public IDataLoader<TParameter, T> Combine<T>(Func<TParameter, TResult, T> continuation)
-            {
-                return new ParameterizedBatchTask<TParameter, T>(param => continuation(param, _result));
-            }
-
-            public IDataLoaderResult<TResult> LoadAsync(TParameter param) => new DataLoaderResult<TResult>(_result);
-        }
     }
 
     internal class BatchLoader<TId, TItem> : DataLoaderBase<TId, TItem?>, IDataLoader<TId, TItem?>, IBatchLoaderContinuation<TId, TItem?>
@@ -138,21 +110,37 @@ namespace Epam.GraphQL.TaskBatcher
         private readonly Func<string> _stepNameFactory;
         private readonly IProfiler _profiler;
 
-        public BatchLoader(Func<IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> batchLoad, Func<string> stepNameFactory, IProfiler profiler)
+        public BatchLoader(
+            Func<IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> batchLoad,
+            IResolvedChainConfigurationContext configurationContext,
+            Func<string> stepNameFactory,
+            IProfiler profiler)
             : base()
         {
-            if (batchLoad == null)
-            {
-                throw new ArgumentNullException(nameof(batchLoad));
-            }
-
             _loader = keys =>
             {
-                var ret = batchLoad(keys);
+                IEnumerable<KeyValuePair<TId, TItem>>? ret = null;
+
+                try
+                {
+                    ret = batchLoad(keys);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext.Resolver), e);
+                }
+
+                if (ret == null)
+                {
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null.", configurationContext.Resolver));
+                }
+
                 return ret.ToDictionary(r => r.Key, r => r.Value);
             };
 
-            _stepNameFactory = stepNameFactory ?? throw new ArgumentNullException(nameof(stepNameFactory));
+            _stepNameFactory = stepNameFactory;
             _profiler = profiler;
         }
 
@@ -194,22 +182,21 @@ namespace Epam.GraphQL.TaskBatcher
         private readonly IProfiler _profiler;
         private readonly Func<TId, TItem?> _defaultFactory;
 
-        public AsyncBatchLoader(Func<IEnumerable<TId>, IAsyncEnumerable<KeyValuePair<TId, TItem>>> batchLoad, Func<TId, TItem?> defaultFactory, Func<string> stepNameFactory, IProfiler profiler)
+        public AsyncBatchLoader(
+            Func<IEnumerable<TId>, IAsyncEnumerable<KeyValuePair<TId, TItem>>> batchLoad,
+            Func<TId, TItem?> defaultFactory,
+            Func<string> stepNameFactory,
+            IProfiler profiler)
             : base()
         {
-            if (batchLoad == null)
-            {
-                throw new ArgumentNullException(nameof(batchLoad));
-            }
-
             _loader = async keys =>
             {
                 var ret = batchLoad(keys);
                 return await ret.ToDictionaryAsync(r => r.Key, r => r.Value, null).ConfigureAwait(false);
             };
 
-            _defaultFactory = defaultFactory ?? throw new ArgumentNullException(nameof(defaultFactory));
-            _stepNameFactory = stepNameFactory ?? throw new ArgumentNullException(nameof(stepNameFactory));
+            _defaultFactory = defaultFactory;
+            _stepNameFactory = stepNameFactory;
             _profiler = profiler;
         }
 
@@ -250,11 +237,54 @@ namespace Epam.GraphQL.TaskBatcher
         private readonly Func<string> _stepNameFactory;
         private readonly IProfiler _profiler;
 
-        public TaskBatchLoader(Func<IEnumerable<TId>, Task<IDictionary<TId, TItem>>> batchLoad, Func<string> stepNameFactory, IProfiler profiler)
+        public TaskBatchLoader(
+            Func<IEnumerable<TId>, Task<IDictionary<TId, TItem>>> batchLoad,
+            IResolvedChainConfigurationContext configurationContext,
+            Func<string> stepNameFactory,
+            IProfiler profiler)
             : base()
         {
-            _loader = batchLoad ?? throw new ArgumentNullException(nameof(batchLoad));
-            _stepNameFactory = stepNameFactory ?? throw new ArgumentNullException(nameof(stepNameFactory));
+            _loader = async keys =>
+            {
+                Task<IDictionary<TId, TItem>>? task = null;
+                IDictionary<TId, TItem>? ret = null;
+
+                try
+                {
+                    task = batchLoad(keys);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext.Resolver), e);
+                }
+
+                if (task == null)
+                {
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null.", configurationContext.Resolver));
+                }
+
+                try
+                {
+                    ret = await task.ConfigureAwait(false);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception e)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has thrown an exception. See an inner exception for details.", configurationContext.Resolver), e);
+                }
+
+                if (ret == null)
+                {
+                    throw new ExecutionError(configurationContext.GetRuntimeError($"Error during resolving field `{stepNameFactory()}`. Batch delegate has returned null dictionary.", configurationContext.Resolver));
+                }
+
+                return ret;
+            };
+
+            _stepNameFactory = stepNameFactory;
             _profiler = profiler;
         }
 

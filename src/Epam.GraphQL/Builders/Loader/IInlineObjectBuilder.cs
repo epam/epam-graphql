@@ -7,63 +7,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Common;
+using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface IInlineObjectBuilder<TSourceType, TExecutionContext>
-        where TSourceType : class
     {
         string Name { get; set; }
 
-        IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
+        IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
 
-        IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
+        IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
 
-        IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
+        IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null);
 
-        IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(Expression<Func<TSourceType, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
+        IVoid Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
 
-        IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
+        IVoid Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
 
-        IHasFilterableAndSortable<TSourceType, TReturnType> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType?>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        IHasFilterableAndSortable<TSourceType, string> Field(Expression<Func<TSourceType, string>> expression, string? deprecationReason = null);
-
-        IHasFilterableAndSortable<TSourceType, string> Field(string name, Expression<Func<TSourceType, string>> expression, string? deprecationReason = null);
-
-        IHasFilterableAndSortable<TSourceType, string> Field(string name, Expression<Func<TExecutionContext, TSourceType, string>> expression, string? deprecationReason = null);
-
-        void Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        void Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        void Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        void Field<TReturnType>(Expression<Func<TSourceType, IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        void Field<TReturnType>(string name, Expression<Func<TSourceType, IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        void Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType?>>> expression, string? deprecationReason = null)
-            where TReturnType : struct;
-
-        void Field(Expression<Func<TSourceType, IEnumerable<string>>> expression, string? deprecationReason = null);
-
-        void Field(string name, Expression<Func<TSourceType, IEnumerable<string>>> expression, string? deprecationReason = null);
-
-        void Field(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<string>>> expression, string? deprecationReason = null);
+        IVoid Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
 
         IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null);
 
@@ -83,7 +47,5 @@ namespace Epam.GraphQL.Builders.Loader
 
         void ConfigureFrom<TProjection>()
             where TProjection : Projection<TSourceType, TExecutionContext>;
-
-        void ConfigureFrom(Type loaderType);
     }
 }

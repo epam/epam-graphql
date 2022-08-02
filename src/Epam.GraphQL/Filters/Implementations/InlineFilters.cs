@@ -16,7 +16,6 @@ using Epam.GraphQL.Infrastructure;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal sealed class InlineFilters<TEntity, TExecutionContext> : IInlineFilters<TEntity, TExecutionContext>
-        where TEntity : class
     {
         private readonly List<IInlineFilter<TExecutionContext>> _inlineFilters = new();
         private readonly string _name;
@@ -25,15 +24,8 @@ namespace Epam.GraphQL.Filters.Implementations
         public InlineFilters(IEnumerable<IInlineFilter<TExecutionContext>> filters, string name)
         {
             _name = name;
-            if (filters == null)
-            {
-                throw new ArgumentNullException(nameof(filters));
-            }
-
             _inlineFilters.AddRange(filters);
         }
-
-        public bool IsEmpty => _inlineFilters.Count == 0;
 
         public Type FilterType
         {

@@ -16,7 +16,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
 {
     internal class FromBatchEnumerableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext> : FromBatchSelectableEditableBuilder<TField, TSourceType, TReturnType, TExecutionContext>,
         IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndReferenceToAndAndFromBatch<TSourceType, TReturnType, TExecutionContext>
-        where TSourceType : class
         where TField : FieldBase<TSourceType, TExecutionContext>, IFieldSupportsApplySelect<TSourceType, TReturnType, TExecutionContext>, IFieldSupportsEditSettings<TSourceType, TReturnType, TExecutionContext>
     {
         internal FromBatchEnumerableEditableBuilder(RelationRegistry<TExecutionContext> registry, TField field)
@@ -27,7 +26,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -36,7 +34,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<IEnumerable<TSourceType>, IDictionary<TSourceType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -46,7 +43,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -56,7 +52,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -65,7 +60,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<TExecutionContext, IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -74,7 +68,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
         public IHasEditableAndOnWriteAndMandatoryForUpdateAndSelectAndAndFromBatch<TSourceType, IEnumerable<object>, TExecutionContext> AndFromBatch<TAnotherReturnType>(
             Func<IEnumerable<TSourceType>, Task<IDictionary<TSourceType, TAnotherReturnType>>>? batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -84,7 +77,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();
@@ -94,7 +86,6 @@ namespace Epam.GraphQL.Builders.MutableLoader.Implementations
             Expression<Func<TSourceType, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build)
-            where TAnotherReturnType : class
         {
             // TODO Implement AndFromBatch method
             throw new NotImplementedException();

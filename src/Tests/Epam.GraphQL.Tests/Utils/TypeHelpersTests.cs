@@ -33,7 +33,7 @@ namespace Epam.GraphQL.Tests.Utils
         [TestCase(typeof(Class6), typeof(Class5), ExpectedResult = typeof(IHasIntId))]
         public Type TestGetTheBestCommonBaseType(Type type1, Type type2)
         {
-            return TypeHelpers.GetTheBestCommonBaseType(type1, type2);
+            return ReflectionHelpers.GetTheBestCommonBaseType(type1, type2);
         }
 
         private class Class1

@@ -4,41 +4,39 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
-using System.Collections.Generic;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
 {
     internal class ArgumentedUnionFieldBase<TArguments, TEntity, TExecutionContext> :
         UnionFieldBase<TEntity, TExecutionContext>
         where TArguments : IArguments
-        where TEntity : class
     {
         protected ArgumentedUnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver)
+            : base(configurationContext, parent, name, unionType, typeResolver)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 
         protected ArgumentedUnionFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             Type unionType,
             Func<UnionFieldBase<TEntity, TExecutionContext>, IGraphTypeDescriptor<TExecutionContext>> typeResolver,
-            List<Type> unionTypes,
             UnionGraphTypeDescriptor<TExecutionContext> unionGraphType,
             TArguments arguments)
-            : base(registry, parent, name, unionType, typeResolver, unionTypes, unionGraphType)
+            : base(configurationContext, parent, name, unionType, typeResolver, unionGraphType)
         {
-            Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Arguments = arguments;
             Arguments.ApplyTo(this);
         }
 

@@ -3,7 +3,7 @@
     <LangVersion>9.0</LangVersion>
     <Company>EPAM Systems</Company>
     <Copyright>EPAM Systems 2019-2021</Copyright>
-    <VersionPrefix>2.3.0</VersionPrefix>
+    <VersionPrefix>2.4.0</VersionPrefix>
     <Deterministic>true</Deterministic>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>

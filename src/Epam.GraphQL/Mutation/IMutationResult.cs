@@ -10,7 +10,5 @@ namespace Epam.GraphQL.Mutation
     public interface IMutationResult
     {
         IEnumerable<object>? Payload { get; set; }
-
-        object? Data { get; set; }
     }
 }

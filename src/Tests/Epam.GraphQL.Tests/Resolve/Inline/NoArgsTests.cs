@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NSubstitute;
@@ -17,7 +18,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
     [TestFixture]
     public class NoArgsTests : BaseTests
     {
-        [Test(Description = "Field<int>(...).Resolve(_ => 10)")]
+        [Test]
         public void ShouldResolveIntFieldWithTypeParam()
         {
             var resolver = Substitute.For<Func<TestUserContext, Person, int>>();
@@ -25,7 +26,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => callInfo.ArgAt<Person>(1).Id + 10);
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -33,31 +34,66 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test
-                            }
+                            id
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: 11
-                            },{
-                                id: 2,
-                                test: 12
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: 11
+                        },{
+                            id: 2,
+                            test: 12
+                        }]
                     }");
 
             resolver.Received(2)
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+        }
+
+        [Test]
+        public void ShouldResolveIntFieldWithTypeParamNoContext()
+        {
+            var resolver = Substitute.For<Func<Person, int>>();
+            resolver
+                .Invoke(Arg.Any<Person>())
+                .Returns(callInfo => callInfo.ArgAt<Person>(0).Id);
+
+            TestHelpers.TestInlineBuilder(
+                builder: builder =>
+                {
+                    builder.Field(p => p.Id);
+                    builder.Field("test")
+                        .Resolve(resolver);
+                },
+                getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
+                fieldName: "people",
+                query: @"
+                    query {
+                        people {
+                            id
+                            test
+                        }
+                    }",
+                expected: @"
+                    {
+                        people: [{
+                            id: 1,
+                            test: 1
+                        },{
+                            id: 2,
+                            test: 2
+                        }]
+                    }");
+
+            resolver.Received(2)
+                .Invoke(Arg.Any<Person>());
         }
 
         [Test(Description = "Field<int>(...).Resolve(_ => Task 10)")]
@@ -68,7 +104,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => Task<int>.Factory.StartNew(() => callInfo.ArgAt<Person>(1).Id + 10));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -76,27 +112,23 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test
-                            }
+                            id
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: 11
-                            },{
-                                id: 2,
-                                test: 12
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: 11
+                        },{
+                            id: 2,
+                            test: 12
+                        }]
                     }");
 
             resolver.Received(2)
@@ -111,7 +143,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => callInfo.ArgAt<Person>(1).Id + 10);
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -119,27 +151,23 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test
-                            }
+                            id
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: 11
-                            },{
-                                id: 2,
-                                test: 12
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: 11
+                        },{
+                            id: 2,
+                            test: 12
+                        }]
                     }");
 
             resolver.Received(2)
@@ -154,7 +182,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => callInfo.ArgAt<Person>(1).ManagerId + 10);
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -162,27 +190,23 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test
-                            }
+                            id
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: null
-                            },{
-                                id: 2,
-                                test: 11
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: null
+                        },{
+                            id: 2,
+                            test: 11
+                        }]
                     }");
 
             resolver.Received(2)
@@ -197,7 +221,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => callInfo.ArgAt<Person>(1).FullName + " Foo");
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -205,27 +229,23 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test
-                            }
+                            id
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: ""Linoel Livermore Foo""
-                            },{
-                                id: 2,
-                                test: ""Sophie Gandley Foo""
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: ""Linoel Livermore Foo""
+                        },{
+                            id: 2,
+                            test: ""Sophie Gandley Foo""
+                        }]
                     }");
 
             resolver.Received(2)
@@ -240,7 +260,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create(callInfo.ArgAt<Person>(1).Id + 10));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -248,33 +268,29 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test { 
-                                    testField
-                                }
+                            id
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: {
-                                    testField: 11
-                                }
-                            },{
-                                id: 2,
-                                test: {
-                                    testField: 12
-                                }
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: {
+                                testField: 11
+                            }
+                        },{
+                            id: 2,
+                            test: {
+                                testField: 12
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -289,7 +305,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create<int?>(callInfo.ArgAt<Person>(1).Id + 10));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -297,33 +313,29 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test { 
-                                    testField
-                                }
+                            id
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: {
-                                    testField: 11
-                                }
-                            },{
-                                id: 2,
-                                test: {
-                                    testField: 12
-                                }
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: {
+                                testField: 11
+                            }
+                        },{
+                            id: 2,
+                            test: {
+                                testField: 12
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -338,7 +350,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create(callInfo.ArgAt<Person>(1).ManagerId + 10));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -346,33 +358,29 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test { 
-                                    testField
-                                }
+                            id
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: {
-                                    testField: null
-                                }
-                            },{
-                                id: 2,
-                                test: {
-                                    testField: 11
-                                }
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: {
+                                testField: null
+                            }
+                        },{
+                            id: 2,
+                            test: {
+                                testField: 11
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -387,7 +395,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create(callInfo.ArgAt<Person>(1).FullName + " test"));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field(p => p.Id);
@@ -395,33 +403,29 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                id
-                                test { 
-                                    testField
-                                }
+                            id
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                id: 1,
-                                test: {
-                                    testField: ""Linoel Livermore test""
-                                }
-                            },{
-                                id: 2,
-                                test: {
-                                    testField: ""Sophie Gandley test""
-                                }
-                            }]
-                        }
+                        people: [{
+                            id: 1,
+                            test: {
+                                testField: ""Linoel Livermore test""
+                            }
+                        },{
+                            id: 2,
+                            test: {
+                                testField: ""Sophie Gandley test""
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -436,37 +440,33 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create(new[] { callInfo.ArgAt<Person>(1).Id + 10, 20 }));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test { 
-                                    testField
-                                }
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: {
-                                    testField: [11, 20]
-                                }
-                            },{
-                                test: {
-                                    testField: [12, 20]
-                                }
-                            }]
-                        }
+                        people: [{
+                            test: {
+                                testField: [11, 20]
+                            }
+                        },{
+                            test: {
+                                testField: [12, 20]
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -481,37 +481,33 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create(new List<int> { callInfo.ArgAt<Person>(1).Id + 10, 20 }));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test { 
-                                    testField
-                                }
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: {
-                                    testField: [11, 20]
-                                }
-                            },{
-                                test: {
-                                    testField: [12, 20]
-                                }
-                            }]
-                        }
+                        people: [{
+                            test: {
+                                testField: [11, 20]
+                            }
+                        },{
+                            test: {
+                                testField: [12, 20]
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -526,49 +522,45 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => new[] { 1, 2, 100500, 10 }.Select(n => new CustomObject<int> { TestField = callInfo.ArgAt<Person>(1).Id + n }));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test { 
-                                    testField
-                                }
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    testField: 2
-                                },{
-                                    testField: 3
-                                },{
-                                    testField: 100501
-                                }, {
-                                    testField: 11
-                                }]
+                        people: [{
+                            test: [{
+                                testField: 2
                             },{
-                                test: [{
-                                    testField: 3
-                                },{
-                                    testField: 4
-                                },{
-                                    testField: 100502
-                                }, {
-                                    testField: 12
-                                }]
+                                testField: 3
+                            },{
+                                testField: 100501
+                            }, {
+                                testField: 11
                             }]
-                        }
+                        },{
+                            test: [{
+                                testField: 3
+                            },{
+                                testField: 4
+                            },{
+                                testField: 100502
+                            }, {
+                                testField: 12
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -587,49 +579,45 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     return new[] { 1, 2, 100500, 10 }.Select(n => new CustomObject<int> { TestField = callInfo.ArgAt<Person>(1).Id + n });
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test { 
-                                    testField
-                                }
+                            test { 
+                                testField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    testField: 2
-                                },{
-                                    testField: 3
-                                },{
-                                    testField: 100501
-                                }, {
-                                    testField: 11
-                                }]
+                        people: [{
+                            test: [{
+                                testField: 2
                             },{
-                                test: [{
-                                    testField: 3
-                                },{
-                                    testField: 4
-                                },{
-                                    testField: 100502
-                                }, {
-                                    testField: 12
-                                }]
+                                testField: 3
+                            },{
+                                testField: 100501
+                            }, {
+                                testField: 11
                             }]
-                        }
+                        },{
+                            test: [{
+                                testField: 3
+                            },{
+                                testField: 4
+                            },{
+                                testField: 100502
+                            }, {
+                                testField: 12
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -646,67 +634,63 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     .Select(n => new CustomObject<int> { TestField = callInfo.ArgAt<Person>(1).Id + n })
                     .Select(obj => new CustomObject<CustomObject<int>> { TestField = obj }));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test { 
-                                    testField {
-                                        testField
-                                    }
+                            test { 
+                                testField {
+                                    testField
                                 }
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    testField: {
-                                        testField: 2
-                                    }
-                                },{
-                                    testField: {
-                                        testField: 3
-                                    }
-                                },{
-                                    testField: {
-                                        testField: 100501
-                                    }
-                                }, {
-                                    testField: {
-                                        testField: 11
-                                    }
-                                },]
+                        people: [{
+                            test: [{
+                                testField: {
+                                    testField: 2
+                                }
                             },{
-                                test: [{
-                                    testField: {
-                                        testField: 3
-                                    }
-                                },{
-                                    testField: {
-                                        testField: 4
-                                    }
-                                },{
-                                    testField: {
-                                        testField: 100502
-                                    }
-                                }, {
-                                    testField: {
-                                        testField: 12
-                                    }
-                                },]
-                            }]
-                        }
+                                testField: {
+                                    testField: 3
+                                }
+                            },{
+                                testField: {
+                                    testField: 100501
+                                }
+                            }, {
+                                testField: {
+                                    testField: 11
+                                }
+                            },]
+                        },{
+                            test: [{
+                                testField: {
+                                    testField: 3
+                                }
+                            },{
+                                testField: {
+                                    testField: 4
+                                }
+                            },{
+                                testField: {
+                                    testField: 100502
+                                }
+                            }, {
+                                testField: {
+                                    testField: 12
+                                }
+                            },]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -721,31 +705,27 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => new[] { 1, 2, 100500, callInfo.ArgAt<Person>(1).Id + 10 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test
-                            }
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [1, 2, 100500, 11]
-                            },{
-                                test: [1, 2, 100500, 12]
-                            }]
-                        }
+                        people: [{
+                            test: [1, 2, 100500, 11]
+                        },{
+                            test: [1, 2, 100500, 12]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -764,31 +744,27 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     return new[] { 1, 2, 100500, callInfo.ArgAt<Person>(1).Id + 10 }.AsEnumerable();
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test
-                            }
+                            test
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [1, 2, 100500, 11]
-                            },{
-                                test: [1, 2, 100500, 12]
-                            }]
-                        }
+                        people: [{
+                            test: [1, 2, 100500, 11]
+                        },{
+                            test: [1, 2, 100500, 12]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -807,7 +783,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     Length = 10,
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
@@ -816,35 +792,31 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    ... on Line {
-                                        id
-                                        length
-                                    }
+                            test {
+                                ... on Line {
+                                    id
+                                    length
                                 }
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: {
-                                    id: 1,
-                                    length: 10.0
-                                }
-                            },{
-                                test: {
-                                    id: 2,
-                                    length: 10.0
-                                }
-                            }]
-                        }
+                        people: [{
+                            test: {
+                                id: 1,
+                                length: 10.0
+                            }
+                        },{
+                            test: {
+                                id: 2,
+                                length: 10.0
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -859,7 +831,7 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => CustomObject.Create(callInfo.ArgAt<Person>(1).FullName + " test"));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
@@ -868,32 +840,28 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    ... on CustomObjectOfString {
-                                        testField
-                                    }
+                            test {
+                                ... on CustomObjectOfString {
+                                    testField
                                 }
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: {
-                                    testField: ""Linoel Livermore test""
-                                }
-                            },{
-                                test: {
-                                    testField: ""Sophie Gandley test""
-                                }
-                            }]
-                        }
+                        people: [{
+                            test: {
+                                testField: ""Linoel Livermore test""
+                            }
+                        },{
+                            test: {
+                                testField: ""Sophie Gandley test""
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -920,54 +888,52 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     },
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<Line>, Line>()
                             .And<IEnumerable<Circle>, Circle>()
                         .Resolve(resolver);
+#pragma warning restore CS0618 // Type or member is obsolete
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    ... on Line {
-                                        id
-                                        length
-                                    }
-                                    ... on Circle {
-                                        id
-                                        radius
-                                    }
+                            test {
+                                ... on Line {
+                                    id
+                                    length
+                                }
+                                ... on Circle {
+                                    id
+                                    radius
                                 }
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    id: 1,
-                                    length: 10.0
-                                },{
-                                    id: 1,
-                                    radius: 5.0
-                                }]
+                        people: [{
+                            test: [{
+                                id: 1,
+                                length: 10.0
                             },{
-                                test: [{
-                                    id: 2,
-                                    length: 10.0
-                                },{
-                                    id: 2,
-                                    radius: 5.0
-                                }]
+                                id: 1,
+                                radius: 5.0
                             }]
-                        }
+                        },{
+                            test: [{
+                                id: 2,
+                                length: 10.0
+                            },{
+                                id: 2,
+                                radius: 5.0
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -986,57 +952,55 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     CustomObject.Create("test", callInfo.ArgAt<Person>(1).Id),
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
                             .And<IEnumerable<CustomObject<string, int>>, CustomObject<string, int>>()
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    ... on CustomObjectOfString {
-                                        id
-                                        testField
-                                    }
-                                    ... on CustomObjectOfStringAndInt {
-                                        id
-                                        firstField
-                                        secondField
-                                    }
+                            test {
+                                ... on CustomObjectOfString {
+                                    id
+                                    testField
+                                }
+                                ... on CustomObjectOfStringAndInt {
+                                    id
+                                    firstField
+                                    secondField
                                 }
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    id: 0,
-                                    testField: ""test""
-                                },{
-                                    id: 0,
-                                    firstField: ""test"",
-                                    secondField: 1
-                                }]
+                        people: [{
+                            test: [{
+                                id: 0,
+                                testField: ""test""
                             },{
-                                test: [{
-                                    id: 0,
-                                    testField: ""test""
-                                },{
-                                    id: 0,
-                                    firstField: ""test"",
-                                    secondField: 2
-                                }]
+                                id: 0,
+                                firstField: ""test"",
+                                secondField: 1
                             }]
-                        }
+                        },{
+                            test: [{
+                                id: 0,
+                                testField: ""test""
+                            },{
+                                id: 0,
+                                firstField: ""test"",
+                                secondField: 2
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -1055,9 +1019,10 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     CustomObject.Create("test", callInfo.ArgAt<Person>(1).Id + 1),
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>(b =>
                         {
@@ -1072,51 +1037,48 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                                 b.Field(o => o.FirstField);
                                 b.Field(o => o.SecondField);
                             })
+#pragma warning restore CS0618 // Type or member is obsolete
                         .Resolve(resolver);
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    ... on CustomObject1 {
-                                        id
-                                        myField
-                                    }
-                                    ... on CustomObject2 {
-                                        id
-                                        firstField
-                                        secondField
-                                    }
+                            test {
+                                ... on CustomObject1 {
+                                    id
+                                    myField
+                                }
+                                ... on CustomObject2 {
+                                    id
+                                    firstField
+                                    secondField
                                 }
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    id: 0,
-                                    myField: ""test""
-                                },{
-                                    id: 0,
-                                    firstField: ""test"",
-                                    secondField: 2
-                                }]
+                        people: [{
+                            test: [{
+                                id: 0,
+                                myField: ""test""
                             },{
-                                test: [{
-                                    id: 0,
-                                    myField: ""test""
-                                },{
-                                    id: 0,
-                                    firstField: ""test"",
-                                    secondField: 3
-                                }]
+                                id: 0,
+                                firstField: ""test"",
+                                secondField: 2
                             }]
-                        }
+                        },{
+                            test: [{
+                                id: 0,
+                                myField: ""test""
+                            },{
+                                id: 0,
+                                firstField: ""test"",
+                                secondField: 3
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -1131,37 +1093,33 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => new CustomObject<int> { TestField = callInfo.ArgAt<Person>(1).Id + 100500 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    myField
-                                }
+                            test {
+                                myField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: {
-                                    myField: 100501
-                                }
-                            },{
-                                test: {
-                                    myField: 100502
-                                }
-                            }]
-                        }
+                        people: [{
+                            test: {
+                                myField: 100501
+                            }
+                        },{
+                            test: {
+                                myField: 100502
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -1180,37 +1138,33 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     return new CustomObject<int> { TestField = callInfo.ArgAt<Person>(1).Id + 100500 };
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    myField
-                                }
+                            test {
+                                myField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: {
-                                    myField: 100501
-                                }
-                            },{
-                                test: {
-                                    myField: 100502
-                                }
-                            }]
-                        }
+                        people: [{
+                            test: {
+                                myField: 100501
+                            }
+                        },{
+                            test: {
+                                myField: 100502
+                            }
+                        }]
                     }");
 
             resolver.Received(2)
@@ -1225,49 +1179,45 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                 .Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>())
                 .Returns(callInfo => new[] { 1, 2, 100500, callInfo.ArgAt<Person>(1).Id + 10 }.Select(n => new CustomObject<int> { TestField = n }));
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    myField
-                                }
+                            test {
+                                myField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    myField: 1
-                                },{
-                                    myField: 2
-                                },{
-                                    myField: 100500
-                                }, {
-                                    myField: 11
-                                }]
+                        people: [{
+                            test: [{
+                                myField: 1
                             },{
-                                test: [{
-                                    myField: 1
-                                },{
-                                    myField: 2
-                                },{
-                                    myField: 100500
-                                }, {
-                                    myField: 12
-                                }]
+                                myField: 2
+                            },{
+                                myField: 100500
+                            }, {
+                                myField: 11
                             }]
-                        }
+                        },{
+                            test: [{
+                                myField: 1
+                            },{
+                                myField: 2
+                            },{
+                                myField: 100500
+                            }, {
+                                myField: 12
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)
@@ -1286,49 +1236,45 @@ namespace Epam.GraphQL.Tests.Resolve.Inline
                     return new[] { 1, 2, 100500, callInfo.ArgAt<Person>(1).Id + 10 }.Select(n => new CustomObject<int> { TestField = n });
                 });
 
-            TestHelpers.TestLoader(
+            TestHelpers.TestInlineBuilder(
                 builder: builder =>
                 {
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
                 getBaseQuery: _ => FakeData.People.AsQueryable().Take(2),
-                connectionName: "people",
+                fieldName: "people",
                 query: @"
                     query {
                         people {
-                            items {
-                                test {
-                                    myField
-                                }
+                            test {
+                                myField
                             }
                         }
                     }",
                 expected: @"
                     {
-                        people: {
-                            items: [{
-                                test: [{
-                                    myField: 1
-                                },{
-                                    myField: 2
-                                },{
-                                    myField: 100500
-                                }, {
-                                    myField: 11
-                                }]
+                        people: [{
+                            test: [{
+                                myField: 1
                             },{
-                                test: [{
-                                    myField: 1
-                                },{
-                                    myField: 2
-                                },{
-                                    myField: 100500
-                                }, {
-                                    myField: 12
-                                }]
+                                myField: 2
+                            },{
+                                myField: 100500
+                            }, {
+                                myField: 11
                             }]
-                        }
+                        },{
+                            test: [{
+                                myField: 1
+                            },{
+                                myField: 2
+                            },{
+                                myField: 100500
+                            }, {
+                                myField: 12
+                            }]
+                        }]
                     }");
 
             resolver.Received(2)

@@ -256,7 +256,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                     builder.Field(p => p.Id);
                     builder.Field(p => p.Name);
                     builder.Field("people")
-                        .FromLoader<Person>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Aggregation, p => p.Unit);
+                        .FromLoader<Unit, Person, TestUserContext>(personLoader, (u, p) => u.Id == p.UnitId, RelationType.Aggregation, p => p.Unit);
                 },
                 getBaseQuery: context => context.DbContext.Units);
 
@@ -267,7 +267,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                     builder.Field(p => p.FullName);
                     builder.Field(p => p.UnitId).ReferencesTo(unitLoader, u => u.Id, p => p.Unit, RelationType.Aggregation);
                     builder.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id, RelationType.Aggregation);
                 },
                 getBaseQuery: context => context.DbContext.People);
 
@@ -396,7 +396,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                     builder.Field(p => p.Id);
                     builder.Field(p => p.FullName);
                     builder.Field("settings")
-                        .FromLoader<PersonSettings>(peopleSettingsLoader, (p, s) => p.Id == s.Id, RelationType.Association, s => s.Person);
+                        .FromLoader<Person, PersonSettings, TestUserContext>(peopleSettingsLoader, (p, s) => p.Id == s.Id, RelationType.Association, s => s.Person);
                 },
                 getBaseQuery: context => context.DbContext.People);
 
@@ -466,7 +466,7 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                     builder.Field(p => p.Id);
                     builder.Field(p => p.FullName);
                     builder.Field("settings")
-                        .FromLoader<PersonSettings>(
+                        .FromLoader<Person, PersonSettings, TestUserContext>(
                             peopleSettingsLoader,
                             (p, s) => p.Id == s.Id,
                             RelationType.Association,

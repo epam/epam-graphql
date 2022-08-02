@@ -3,7 +3,6 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Epam.GraphQL.Infrastructure;
@@ -15,11 +14,9 @@ namespace Epam.GraphQL.Loaders
     [InternalApi]
     public interface IMutableLoader<TExecutionContext> : IIdentifiableLoader
     {
-        Type EntityType { get; }
+        ISaveResult<TExecutionContext> CreateSaveResultFromValues(string fieldName, IEnumerable<IInputItem> values);
 
-        ISaveResult<TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<IInputItem> values);
-
-        ISaveResult<TExecutionContext> CreateSaveResultFromValues(Type mutationType, string fieldName, IEnumerable<object> values);
+        ISaveResult<TExecutionContext> CreateSaveResultFromValues(string fieldName, IEnumerable<object> values);
 
         Task<IEnumerable<ISaveResult<TExecutionContext>>> MutateAsync(IResolveFieldContext context, ISaveResult<TExecutionContext> previousSaveResult);
 

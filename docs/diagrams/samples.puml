@@ -1,0 +1,66 @@
+@startuml
+
+hide circle
+hide methods
+
+entity Continent {
+  * Code: string <<PK>>
+  ---
+    Name: string
+}
+
+entity Language {
+  * Code: string <<PK>>
+  ---
+    Name: string
+    NativeName: string
+    RightToLeft: bool
+}
+
+entity Currency {
+  * AlphabeticCode: string <<PK>>
+  ---
+  Name: string
+  NumericCode: string
+  MinorUnit: int?
+}
+
+entity Country {
+  * Code: string <<PK>>
+  * ContinentCode: string <<FK>>
+    CurrencyAlphabeticCode: string <<FK>>
+  ---
+  Name: string
+  NativeName: string
+  Phone: string
+}
+
+entity City {
+  * Id: int <<PK>>
+  * CountryCode: string <<FK>>
+  ---
+  Name: string
+  Latitude: decimal
+  Longitude: decimal
+  IsCapital: bool
+}
+
+entity CountryLanguage {
+  * CountryCode: string <<PK>>, <<FK>>
+  * LanguageCode: string <<PK>>, <<FK>>
+}
+
+entity Department {
+  * Id: int <<PK>>
+    ParentId: int? <<FK>>
+  ---
+    Name: string
+}
+
+Department }o-- Department
+Country::ContinentCode }o-- Continent::Code
+Country::CurrencyAlphabeticCode }o-- Currency::AlphabeticCode
+City::CountryCode }-- Country::Code
+CountryLanguage::CountryCode }o-- Country::Code
+CountryLanguage::LanguageCode }o-- Language::Code
+@enduml

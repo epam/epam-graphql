@@ -15,7 +15,6 @@ using Epam.GraphQL.Helpers;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal class StructInlineFilter<TEntity, TReturnType, TExecutionContext> : BaseInlineFilter<TEntity, TReturnType, TReturnType?, TReturnType, TExecutionContext>
-        where TEntity : class
         where TReturnType : struct
     {
         public StructInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TReturnType[]? defaultValues, NullOption? nullValue)

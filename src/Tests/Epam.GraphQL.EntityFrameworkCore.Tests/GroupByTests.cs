@@ -298,5 +298,55 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                     }
                 }");
         }
+
+        [Test]
+        public void TestFromIQueryableGroupConnection()
+        {
+            static void Builder(Query<TestUserContext> query)
+            {
+                query
+                    .Field("peopleGroups")
+                    .FromIQueryable(
+                        ctx => Queryable.Select(ctx.DbContext.People, p => p.UnitId),
+                        builder =>
+                        {
+                            builder.Field("id", x => x).Groupable();
+                            builder.Field("twice", x => 2 * x).Groupable();
+                        })
+                        .AsGroupConnection();
+            }
+
+            TestQuery(
+                Builder,
+                @"
+                    query {
+                        peopleGroups {
+                            items {
+                                item {
+                                    id
+                                    twice
+                                }
+                                count
+                            }
+                        }
+                    }",
+                @"{
+                    peopleGroups: {
+                        items: [{
+                            item: {
+                                id: 1,
+                                twice: 2
+                            },
+                            count: 3
+                        },{
+                            item: {
+                                id: 2,
+                                twice: 4
+                            },
+                            count: 3
+                        }]
+                    }
+                }");
+        }
     }
 }

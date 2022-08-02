@@ -6,8 +6,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Epam.Contracts.Models;
+using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.TestData;
 using GraphQL.Execution;
@@ -19,7 +22,14 @@ namespace Epam.GraphQL.Tests.Helpers
 {
     public static class TestHelpers
     {
-        public static void TestQuery(Action<Query<TestUserContext>> builder, string query, string expected, IDataContext dataContext = null, Action checks = null, Action beforeExecute = null, Action<SchemaOptionsBuilder<TestUserContext>> optionsBuilder = null)
+        public static void TestQuery(
+            Action<Query<TestUserContext>> builder,
+            string query,
+            string expected,
+            IDataContext dataContext = null,
+            Action checks = null,
+            Action beforeExecute = null,
+            Action<SchemaOptionsBuilder<TestUserContext>> optionsBuilder = null)
         {
             beforeExecute?.Invoke();
 
@@ -46,8 +56,34 @@ namespace Epam.GraphQL.Tests.Helpers
             checks?.Invoke();
         }
 
+        public static void TestQuery(
+            Action<Query<TestUserContext>> builder,
+            string query,
+            string expected,
+            Action<SchemaExecutionOptionsBuilder<TestUserContext>> executionOptionsBuilder)
+        {
+            var expectedResult = ExecuteHelpers.Deserialize(expected);
+            var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
+
+            using var loggerFactory = CreateLoggerFactory();
+            var actualResult = ExecuteHelpers.ExecuteQuery<TestUserContext>(
+                queryType,
+                configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory),
+                configureExecutionOptions: schemaExecutionOptionsBuilder =>
+                {
+                    schemaExecutionOptionsBuilder.Query(query);
+                    executionOptionsBuilder(schemaExecutionOptionsBuilder);
+                });
+
+            Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
+
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
+            Assert.AreEqual(expectedJson, actualJson);
+        }
+
         public static void TestLoader<TEntity>(Action<Loader<TEntity, TestUserContext>> builder, Func<TestUserContext, IQueryable<TEntity>> getBaseQuery, string connectionName, string query, string expected)
-            where TEntity : class, IHasId<int>
+            where TEntity : IHasId<int>
         {
             var loaderType = GraphQLTypeBuilder.CreateLoaderType(
                     onConfigure: builder,
@@ -57,6 +93,60 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
+
+            using var loggerFactory = CreateLoggerFactory();
+            var actualResult = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                query,
+                configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
+
+            Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
+
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
+            Assert.AreEqual(expectedJson, actualJson);
+        }
+
+        public static void TestMutableLoader<TEntity>(
+            Action<MutableLoader<TEntity, int, TestUserContext>> builder,
+            Func<TestUserContext, IQueryable<TEntity>> getBaseQuery,
+            string connectionName,
+            string query,
+            string expected)
+            where TEntity : class, IHasId<int>
+        {
+            var loaderType = GraphQLTypeBuilder.CreateMutableLoaderType(
+                    onConfigure: builder,
+                    getBaseQuery: getBaseQuery);
+
+            var expectedResult = ExecuteHelpers.Deserialize(expected);
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(m => m.SubmitField(loaderType, "test"));
+
+            using var loggerFactory = CreateLoggerFactory();
+            var actualResult = ExecuteHelpers.ExecuteQuery(
+                queryType,
+                mutationType,
+                query,
+                configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
+
+            Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
+
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
+            Assert.AreEqual(expectedJson, actualJson);
+        }
+
+        public static void TestInlineBuilder<TEntity>(
+            Action<IInlineObjectBuilder<TEntity, TestUserContext>> builder,
+            Func<TestUserContext, IQueryable<TEntity>> getBaseQuery,
+            string fieldName,
+            string query,
+            string expected)
+            where TEntity : IHasId<int>
+        {
+            var expectedResult = ExecuteHelpers.Deserialize(expected);
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Field(fieldName).Resolve(ctx => getBaseQuery(ctx), builder));
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
@@ -116,6 +206,25 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke(dataContext);
+        }
+
+        public static string ConcatLines(params string[] lines)
+        {
+            Guards.ThrowIfNull(lines, nameof(lines));
+
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (i > 0)
+                {
+                    sb.AppendLine();
+                }
+
+                sb.Append(lines[i]);
+            }
+
+            return sb.ToString();
         }
 
         private static ILoggerFactory CreateLoggerFactory() => LoggerFactory.Create(

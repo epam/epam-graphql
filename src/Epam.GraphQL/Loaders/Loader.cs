@@ -19,7 +19,6 @@ using GraphQL.DataLoader;
 namespace Epam.GraphQL.Loaders
 {
     public abstract class Loader<TEntity, TExecutionContext> : Projection<TEntity, TExecutionContext>, ILoader<TEntity, TExecutionContext>
-        where TEntity : class
     {
         protected internal NullOption NullValues => NullOption.NullValues;
 
@@ -32,11 +31,13 @@ namespace Epam.GraphQL.Loaders
             return query;
         }
 
+        [Obsolete("Pass an order expression as a parameter of a Connection()/AsConnection() call. See https://github.com/epam/epam-graphql/issues/5#issuecomment-1150973474 for details.")]
         public virtual IOrderedQueryable<TEntity> ApplyNaturalOrderBy(IQueryable<TEntity> query)
         {
             throw new NotImplementedException($"You must override {nameof(ApplyNaturalOrderBy)} method or pass order expression to Connection()/AsConnection() call.");
         }
 
+        [Obsolete("The method is not used anymore. You can remove the overridden method ApplyNaturalThenBy safely.")]
         public virtual IOrderedQueryable<TEntity> ApplyNaturalThenBy(IOrderedQueryable<TEntity> query)
         {
             throw new NotImplementedException($"You must override {nameof(ApplyNaturalThenBy)} method or pass order expression to Connection()/AsConnection() call.");

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
@@ -23,13 +24,14 @@ namespace Epam.GraphQL.Extensions
             IEnumerable<TProperty> propValues,
             Expression<Func<TEntity, TProperty>> propSelector,
             Expression<Func<TEntity, TTransformedEntity>> transform,
+            IConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
             ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>? sorters)
         {
             var filtered = query.Where(ExpressionHelpers.MakeContainsExpression(propValues, propSelector));
-            return GroupBy(filtered, propSelector, transform, stepNameFactory, queryExecuter, hooksExecuter, sorters);
+            return GroupBy(filtered, propSelector, transform, configurationContext, stepNameFactory, queryExecuter, hooksExecuter, sorters);
         }
 
         public static IAsyncEnumerable<IGrouping<TProperty, TTransformedEntity>> GroupByValues<TEntity, TTransformedEntity, TProperty>(
@@ -37,6 +39,7 @@ namespace Epam.GraphQL.Extensions
             IEnumerable<TProperty> propValues,
             Expression<Func<TEntity, TProperty?>> propSelector,
             Expression<Func<TEntity, TTransformedEntity>> transform,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
             ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter,
@@ -45,7 +48,7 @@ namespace Epam.GraphQL.Extensions
         {
             var keySelector = ExpressionHelpers.MakeValueAccessExpression(propSelector);
             var filtered = query.Where(ExpressionHelpers.MakeContainsExpression(propValues, propSelector));
-            return GroupBy(filtered, keySelector, transform, stepNameFactory, queryExecuter, hooksExecuter, sorters);
+            return GroupBy(filtered, keySelector, transform, configurationContext, stepNameFactory, queryExecuter, hooksExecuter, sorters);
         }
 
         public static IQueryable<T> SafeWhere<T>(this IQueryable<T> query, Expression<Func<T, bool>>? condition) =>
@@ -71,10 +74,7 @@ namespace Epam.GraphQL.Extensions
                     : orderedQuery.ApplyThenBy(sorter.SortExpression, sorter.SortDirection);
             }
 
-            if (orderedQuery == null)
-            {
-                throw new ArgumentException("The list of sorters must contain one element at least.", nameof(sorters));
-            }
+            Guards.ThrowArgumentExceptionIf(orderedQuery == null, "The list of sorters must contain one element at least.", nameof(sorters));
 
             return orderedQuery;
         }
@@ -94,11 +94,12 @@ namespace Epam.GraphQL.Extensions
                 : CachedReflectionInfo.ForQueryable.ThenByDescending(sourceType, resultType).InvokeAndHoistBaseException<IOrderedQueryable<TChildEntity>>(null, query, expression);
         }
 
-        public static IQueryable ApplyGroupBy(this IQueryable query, LambdaExpression expression)
+        public static IQueryable ApplyGroupBy(this IQueryable query, LambdaExpression keyExpression, LambdaExpression resultExpression)
         {
             var sourceType = query.ElementType;
-            var resultType = expression.GetResultType();
-            return CachedReflectionInfo.ForQueryable.GroupBy(sourceType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, expression);
+            var keyType = keyExpression.GetResultType();
+            var resultType = resultExpression.GetResultType();
+            return CachedReflectionInfo.ForQueryable.GroupBy(sourceType, keyType, resultType).InvokeAndHoistBaseException<IQueryable>(null, query, keyExpression, resultExpression);
         }
 
         public static IQueryable ApplySelect(this IQueryable query, LambdaExpression expression)
@@ -137,6 +138,7 @@ namespace Epam.GraphQL.Extensions
             IQueryable<TEntity> query,
             Expression<Func<TEntity, TProperty>> propSelector,
             Expression<Func<TEntity, TTransformedEntity>> transform,
+            IConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             IQueryExecuter queryExecuter,
             ILoaderHooksExecuter<TTransformedEntity>? hooksExecuter,
@@ -156,7 +158,7 @@ namespace Epam.GraphQL.Extensions
 
             if (hooksExecuter == null)
             {
-                var orderedItems = queryExecuter.ToAsyncEnumerable(stepNameFactory, resultQuery);
+                var orderedItems = queryExecuter.ToAsyncEnumerable(configurationContext, stepNameFactory, resultQuery);
 
                 await foreach (var item in orderedItems)
                 {
@@ -184,7 +186,7 @@ namespace Epam.GraphQL.Extensions
             {
                 var orderedItems = await hooksExecuter
                     .Execute<KeyValue<TProperty, TTransformedEntity>>(keyValue => keyValue.Value)
-                    .LoadAsync(queryExecuter.ToEnumerable(stepNameFactory, resultQuery))
+                    .LoadAsync(queryExecuter.ToEnumerable(configurationContext, stepNameFactory, resultQuery))
                     .GetResultAsync()
                     .ConfigureAwait(false);
 

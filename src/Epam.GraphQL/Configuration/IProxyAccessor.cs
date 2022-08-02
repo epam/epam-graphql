@@ -5,47 +5,50 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Relay;
+using Epam.GraphQL.Sorters;
 using GraphQL;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal interface IProxyAccessor<TExecutionContext>
+    internal interface IProxyAccessor<TEntity, TTransformedEntity, TExecutionContext>
     {
         bool HasHooks { get; }
 
-        Type ProxyType { get; }
+        Expression<Func<TTransformedEntity, T>> Rewrite<T>(Expression<Func<TEntity, T>> originalExpression);
 
-        Type GetConcreteProxyType(IEnumerable<string> fieldNames);
+        LambdaExpression Rewrite(LambdaExpression expression, LambdaExpression originalExpression);
 
-        LambdaExpression GetProxyExpression(LambdaExpression originalExpression);
+        IReadOnlyList<(LambdaExpression SortExpression, SortDirection SortDirection)> GetGroupSort(
+            IResolveFieldContext context,
+            IEnumerable<ISorter<TExecutionContext>> sorters);
 
-        void Configure();
+        Expression<Func<TExecutionContext, TEntity, TTransformedEntity>> CreateSelectorExpression(IEnumerable<string> fieldNames);
 
-        LambdaExpression CreateGroupSelectorExpression(Type entityType, IEnumerable<string> fieldNames);
+        IQueryable<IGroupResult<TTransformedEntity>> GroupBy(IResolveFieldContext context, IQueryable<TEntity> query);
 
-        LambdaExpression CreateGroupKeySelectorExpression(IEnumerable<string> subFields, IEnumerable<string> aggregateQueriedFields);
-    }
+        ILoaderHooksExecuter<TTransformedEntity>? CreateHooksExecuter(IResolveFieldContext context);
 
-    internal interface IProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TExecutionContext>
-    {
-        IReadOnlyList<IField<TEntity, TExecutionContext>> Fields { get; }
-
-        Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>> CreateSelectorExpression(IEnumerable<string> fieldNames);
-
-        ILoaderHooksExecuter<Proxy<TEntity>>? CreateHooksExecuter(IResolveFieldContext context);
-
-        void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member);
+        void AddMembers(IEnumerable<LambdaExpression> members);
 
         void AddMember<TResult>(Expression<Func<TEntity, TResult>> member);
 
         void RemoveMember<TResult>(Expression<Func<TEntity, TResult>> member);
+    }
 
-        void AddMembers<TChildEntity>(string childFieldName, IProxyAccessor<TChildEntity, TExecutionContext> childProxyAccessor, ExpressionFactorizationResult factorizationResult);
+    internal interface IProxyAccessor<TEntity, TExecutionContext> : IProxyAccessor<TEntity, Proxy<TEntity>, TExecutionContext>
+    {
+        void AddMember<TResult>(string childFieldName, Expression<Func<TEntity, TResult>> member);
 
-        void AddAllMembers(string childFieldName);
+        void AddMembers<TChildEntity, TTransformedChildEntity>(
+            string childFieldName,
+            IProxyAccessor<TChildEntity, TTransformedChildEntity, TExecutionContext>? childProxyAccessor,
+            ExpressionFactorizationResult factorizationResult);
 
-        void AddMembers(IEnumerable<LambdaExpression> members);
+        void AddMembers(string childFieldName, IEnumerable<LambdaExpression> members);
     }
 }

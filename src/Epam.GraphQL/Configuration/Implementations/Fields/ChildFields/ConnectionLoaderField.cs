@@ -7,16 +7,16 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
     internal sealed class ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> :
-#pragma warning restore CA1501
         ConnectionLoaderFieldBase<
             ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>,
             TEntity,
@@ -26,14 +26,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IConnectionField<TChildEntity, TExecutionContext>,
         IConnectionField,
         IVoid
-        where TEntity : class
-        where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public ConnectionLoaderField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -42,7 +40,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -56,12 +54,14 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        public override IResolver<TEntity> FieldResolver => QueryableFieldResolver.AsConnection();
+        public override IFieldResolver Resolver => QueryableFieldResolver.AsConnection();
 
-        protected override ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
+        protected override ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext> ReplaceResolver(
+            IChainConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver)
         {
             return new ConnectionLoaderField<TEntity, TChildLoader, TChildEntity, TExecutionContext>(
-                Registry,
+                configurationContext,
                 Parent,
                 Name,
                 resolver,

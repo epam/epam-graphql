@@ -4,14 +4,22 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class TypedField<TEntity, TReturnType, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
-        where TEntity : class
     {
-        protected TypedField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
-            : base(registry, parent, name)
+        public TypedField(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : base(configurationContext, parent, name)
+        {
+        }
+
+        public TypedField(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Func<IChainConfigurationContext, string> nameFactory)
+            : base(configurationContextFactory, parent, nameFactory)
         {
         }
 

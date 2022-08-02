@@ -6,40 +6,40 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Epam.GraphQL.Diagnostics;
 using GraphQL;
 using GraphQL.Resolvers;
+using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class SubmitField<TEntity, TExecutionContext> : FieldBase<TEntity, TExecutionContext>
-        where TEntity : class
     {
-        private readonly Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> _resolve;
-        private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
-        private readonly Type _fieldType;
-
-        public SubmitField(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name, IGraphTypeDescriptor<TExecutionContext> returnGraphType, string argName, Type argGraphType, Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve, Type fieldType)
-            : base(registry, parent, name)
+        public SubmitField(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            IGraphTypeDescriptor<TExecutionContext> returnGraphType,
+            string argName,
+            IInputObjectGraphType argGraphType,
+            Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
+            Type fieldType)
+            : base(configurationContextFactory, parent, name)
         {
-            _graphType = returnGraphType ?? throw new ArgumentNullException(nameof(returnGraphType));
-            _resolve = resolve ?? throw new ArgumentNullException(nameof(resolve));
-            _fieldType = fieldType;
+            GraphType = returnGraphType;
+            Resolver = new AsyncFieldResolver<object>(ctx => resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"].Value));
+            FieldType = fieldType;
 
-            Arguments = new LazyQueryArguments
+            Arguments = new()
             {
-                new LazyQueryArgument(argName, argGraphType),
+                new(argName, argGraphType),
             };
-
-            parent.ProxyAccessor.AddAllMembers(Name);
         }
 
-        public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
+        public override IGraphTypeDescriptor<TExecutionContext> GraphType { get; }
 
-        public override Type FieldType => _fieldType;
+        public override Type FieldType { get; }
 
-        protected override IFieldResolver GetResolver()
-        {
-            return new AsyncFieldResolver<object>(ctx => _resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"].Value));
-        }
+        public override IFieldResolver Resolver { get; }
     }
 }

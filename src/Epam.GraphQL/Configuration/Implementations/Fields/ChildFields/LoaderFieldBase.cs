@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
@@ -20,25 +21,23 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TEntity,
             TChildEntity,
             TExecutionContext>
-        where TEntity : class
-        where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TThis : LoaderFieldBase<TThis, TThisIntf, TEntity, TChildLoader, TChildEntity, TExecutionContext>, TThisIntf
     {
         protected LoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
+            Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
+                  parent.Registry.ResolveLoader<TChildLoader, TChildEntity>(),
                   condition,
                   elementGraphType,
                   arguments,
@@ -48,7 +47,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected LoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -57,12 +56,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : this(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
                   elementGraphType,
-                  registry.ResolveLoader<TChildLoader, TChildEntity>(),
+                  parent.Registry.ResolveLoader<TChildLoader, TChildEntity>(),
                   arguments,
                   searcher,
                   naturalSorters)
@@ -70,7 +69,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         protected LoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -80,7 +79,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -94,17 +93,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         }
 
         private LoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             TChildLoader loader,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
+            Expression<Func<TEntity, TChildEntity, bool>> condition,
             IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
             LazyQueryArguments? arguments,
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   query: context => loader.DoGetBaseQuery(context.GetUserContext<TExecutionContext>()),

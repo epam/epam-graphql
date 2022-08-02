@@ -765,7 +765,7 @@ namespace Epam.GraphQL.Tests.Mutation
                     builder.Field(p => p.UnitId)
                         .Editable();
                     builder.Field("unit")
-                        .FromLoader<Unit>(unitLoader, (p, u) => p.UnitId == u.Id)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoader, (p, u) => p.UnitId == u.Id)
                         .SingleOrDefault();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>());

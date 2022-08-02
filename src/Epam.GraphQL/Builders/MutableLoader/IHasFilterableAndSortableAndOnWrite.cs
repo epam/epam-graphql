@@ -5,14 +5,14 @@
 
 using System;
 using System.Threading.Tasks;
-using Epam.GraphQL.Builders.Common;
+using Epam.GraphQL.Configuration;
 
 namespace Epam.GraphQL.Builders.MutableLoader
 {
-    public interface IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TFilterValueType, TExecutionContext> : IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType>
+    public interface IHasFilterableAndSortableAndOnWrite<TEntity, TReturnType, TExecutionContext> : IExpressionField<TEntity, TReturnType, TExecutionContext>
     {
-        IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save);
+        IExpressionField<TEntity, TReturnType, TExecutionContext> OnWrite(Action<TExecutionContext, TEntity, TReturnType> save);
 
-        IHasFilterableAndSortableAndGroupable<TEntity, TFilterValueType> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save);
+        IExpressionField<TEntity, TReturnType, TExecutionContext> OnWrite(Func<TExecutionContext, TEntity, TReturnType, Task> save);
     }
 }

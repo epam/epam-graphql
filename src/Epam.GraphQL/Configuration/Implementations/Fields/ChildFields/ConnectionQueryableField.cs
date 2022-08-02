@@ -7,15 +7,16 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Types;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
-    internal class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> :
+    internal sealed class ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> :
         QueryableFieldBase<
             ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>,
             IConnectionField<TReturnType, TExecutionContext>,
@@ -24,23 +25,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             TExecutionContext>,
         IConnectionField<TReturnType, TExecutionContext>,
         IVoid
-#pragma warning restore CA1501
-        where TEntity : class
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
 
         public ConnectionQueryableField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver,
             IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
-            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator,
+            IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator,
             LazyQueryArguments? arguments,
             ISearcher<TReturnType, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -52,7 +51,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         {
             _graphType = new GraphTypeDescriptor<TReturnType, TExecutionContext>(
                 type: typeof(ConnectionGraphType<TReturnType, TExecutionContext>),
-                graphTypeFactory: () => new ConnectionGraphType<TReturnType, TExecutionContext>(configurator),
+                graphTypeFactory: () => new ConnectionGraphType<TReturnType, TExecutionContext>(elementGraphType),
                 configurator);
 
             Argument<string>(
@@ -74,20 +73,22 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _graphType;
 
-        public override IResolver<TEntity> FieldResolver => QueryableFieldResolver.AsConnection();
+        public override IFieldResolver Resolver => QueryableFieldResolver.AsConnection();
 
-        protected override ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
+        protected override ConnectionQueryableField<TEntity, TReturnType, TExecutionContext> ReplaceResolver(
+            IChainConfigurationContext configurationContext,
+            IQueryableResolver<TEntity, TReturnType, TExecutionContext> resolver)
         {
             return new ConnectionQueryableField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
+                configurationContext,
                 Parent,
                 Name,
                 resolver,
                 ElementGraphType,
-                ObjectGraphTypeConfigurator!,
+                ObjectGraphTypeConfigurator,
                 Arguments,
                 Searcher,
-                NaturalSorters!);
+                NaturalSorters);
         }
     }
 }

@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Epam.Contracts.Models;
 
@@ -86,9 +87,13 @@ namespace Epam.GraphQL.Tests.TestData
 
         public Person Manager { get; set; }
 
+        public ICollection<Person> Subordinates { get; set; }
+
         public bool IsDeleted { get; set; }
 
         public int CountryId { get; set; }
+
+        public int? NullableCountryId => CountryId;
 
         public PersonSettings Settings { get; set; }
 

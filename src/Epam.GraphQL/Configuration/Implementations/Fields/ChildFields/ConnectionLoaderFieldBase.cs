@@ -3,12 +3,12 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Helpers;
@@ -17,9 +17,7 @@ using Epam.GraphQL.Search;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-#pragma warning disable CA1501
     internal abstract class ConnectionLoaderFieldBase<TThis, TEntity, TChildLoader, TChildEntity, TExecutionContext> :
-#pragma warning restore CA1501
         LoaderFieldBase<
             TThis,
             IConnectionField<TChildEntity, TExecutionContext>,
@@ -30,8 +28,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         IConnectionField<TChildEntity, TExecutionContext>,
         IConnectionField,
         IVoid
-        where TEntity : class
-        where TChildEntity : class
         where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
         where TThis : ConnectionLoaderFieldBase<TThis, TEntity, TChildLoader, TChildEntity, TExecutionContext>
     {
@@ -39,7 +35,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
         private static MethodInfo? _withSearchMethodInfo;
 
         protected ConnectionLoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IQueryableResolver<TEntity, TChildEntity, TExecutionContext> resolver,
@@ -48,7 +44,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             ISearcher<TChildEntity, TExecutionContext>? searcher,
             IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
@@ -60,43 +56,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
             Initialize();
         }
 
-        protected ConnectionLoaderFieldBase(
-            RelationRegistry<TExecutionContext> registry,
-            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
-            string name,
-            Expression<Func<TEntity, TChildEntity, bool>>? condition,
-            IGraphTypeDescriptor<TChildEntity, TExecutionContext> elementGraphType,
-            LazyQueryArguments? arguments,
-            ISearcher<TChildEntity, TExecutionContext>? searcher,
-            IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)> naturalSorters)
-            : base(
-                  registry,
-                  parent,
-                  name,
-                  condition,
-                  elementGraphType,
-                  arguments,
-                  searcher,
-                  naturalSorters)
-        {
-            Initialize();
-        }
-
         public IConnectionField WithFilter<TFilter>()
         {
-            var filterBaseType = TypeHelpers.FindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>));
-
-            if (filterBaseType == null)
+            if (!ReflectionHelpers.TryFindMatchingGenericBaseType(typeof(TFilter), typeof(Filter<,,>), out var filterBaseType))
             {
-                throw new ArgumentException($"Cannot find the corresponding base type for filter: {typeof(TFilter)}");
+                // TODO Make Dummy IConnectionField implementation
+                var configurationContext = ConfigurationContext.Chain<TFilter>(nameof(WithFilter));
+                var msg = configurationContext
+                    .GetError($"Cannot find the corresponding generic base type `{typeof(Filter<,,>).HumanizedName()}` for type `{typeof(TFilter).HumanizedName()}`.", configurationContext);
+                throw new ConfigurationException(msg);
             }
 
             var filterArgument = filterBaseType.GetGenericArguments().Single(type => typeof(Input).IsAssignableFrom(type));
 
-            _withFilterMethodInfo ??= typeof(IConnectionField<TChildEntity, TExecutionContext>).GetPublicGenericMethod(method =>
-                method
-                    .HasName(nameof(IConnectionField<TChildEntity, TExecutionContext>.WithFilter))
-                    .HasTwoGenericTypeParameters());
+            _withFilterMethodInfo ??= ReflectionHelpers.GetMethodInfo(
+                WithFilter<Filter<TChildEntity, Input, TExecutionContext>, Input>);
 
             var withFilter = _withFilterMethodInfo.MakeGenericMethod(typeof(TFilter), filterArgument);
             return withFilter.InvokeAndHoistBaseException<IConnectionField>(this);
@@ -104,17 +78,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 
         IConnectionField IConnectionField.WithSearch<TSearcher>()
         {
-            var baseType = TypeHelpers.FindMatchingGenericBaseType(typeof(TSearcher), typeof(ISearcher<,>));
+            var baseType = ReflectionHelpers.FindMatchingGenericBaseType(typeof(TSearcher), typeof(ISearcher<,>));
 
-            if (baseType == null)
-            {
-                throw new ArgumentException($"Cannot find the corresponding base type for searcher: {typeof(TSearcher)}");
-            }
-
-            _withSearchMethodInfo ??= typeof(IConnectionField<TChildEntity, TExecutionContext>).GetPublicGenericMethod(method =>
-                method
-                    .HasName(nameof(IConnectionField<TChildEntity, TExecutionContext>.WithSearch))
-                    .HasOneGenericTypeParameter());
+            _withSearchMethodInfo ??= ReflectionHelpers.GetMethodInfo(
+                WithSearch<ISearcher<TChildEntity, TExecutionContext>>);
 
             var withSearcher = _withSearchMethodInfo.MakeGenericMethod(typeof(TSearcher));
             return withSearcher.InvokeAndHoistBaseException<IConnectionField>(this);

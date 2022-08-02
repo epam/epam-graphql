@@ -18,6 +18,12 @@ namespace Epam.GraphQL.Infrastructure
                 public const LogLevel Level = LogLevel.Trace;
                 public const int EventId = 1;
             }
+
+            public static class ExecutionError
+            {
+                public const LogLevel Level = LogLevel.Error;
+                public const int EventId = 2;
+            }
         }
     }
 }

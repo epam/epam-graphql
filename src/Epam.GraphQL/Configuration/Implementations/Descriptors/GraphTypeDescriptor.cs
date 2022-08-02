@@ -4,6 +4,8 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Extensions;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Configuration.Implementations.Descriptors
@@ -45,32 +47,44 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
             _graphType = new Lazy<IGraphType?>(graphTypeFactory);
         }
 
+        public static IGraphTypeDescriptor<TExecutionContext> NullInstance { get; } = new NullGraphTypeDescriptor<TExecutionContext>();
+
         public IGraphType? GraphType => _graphType.Value;
 
         public Type? Type => _type.Value;
 
         public IObjectGraphTypeConfigurator<TExecutionContext>? Configurator => _configurator.Value;
 
-        public void Validate()
+        public void Validate(IChainConfigurationContext configurationContext)
         {
-            if (Type == null && GraphType == null)
+            try
             {
-                throw new InvalidOperationException($"Type cannot be coerced effectively to a GraphQL type");
+                var hasErrors = Type == null && GraphType == null;
+                configurationContext.AddErrorIf(hasErrors, $"Type cannot be coerced effectively to a GraphQL type", configurationContext);
+            }
+            catch (InvalidOperationException e)
+            {
+                configurationContext.AddError(e.Message, configurationContext);
             }
         }
     }
 
     internal class GraphTypeDescriptor<TReturnType, TExecutionContext> : GraphTypeDescriptor<TExecutionContext>, IGraphTypeDescriptor<TReturnType, TExecutionContext>
     {
-        public GraphTypeDescriptor(Type type, Func<IGraphType> graphTypeFactory, IObjectGraphTypeConfigurator<TReturnType, TExecutionContext> configurator)
+        public GraphTypeDescriptor(Type type, Func<IGraphType> graphTypeFactory, IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? configurator)
             : base(type, graphTypeFactory, configurator)
         {
         }
 
         public GraphTypeDescriptor(RelationRegistry<TExecutionContext> registry, bool isInput)
-            : base(() => registry.GenerateGraphType<TReturnType>(isInput), () => null, () => registry.GetObjectGraphTypeConfigurator(typeof(TReturnType), null))
+            : base(
+                  () => registry.GenerateGraphType<TReturnType>(isInput),
+                  () => null,
+                  () => registry.GetObjectGraphTypeConfigurator(typeof(TReturnType), null))
         {
         }
+
+        public string Name => Configurator?.Name ?? typeof(TReturnType).GraphQLTypeName(false);
 
         IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>? IGraphTypeDescriptor<TReturnType, TExecutionContext>.Configurator => Configurator as IObjectGraphTypeConfigurator<TReturnType, TExecutionContext>;
     }

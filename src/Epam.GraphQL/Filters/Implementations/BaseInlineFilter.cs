@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Enums;
 using Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Enums;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Filters.Inputs;
@@ -16,26 +17,27 @@ using Epam.GraphQL.Filters.Inputs;
 namespace Epam.GraphQL.Filters.Implementations
 {
     internal abstract class BaseInlineFilter<TEntity, TReturnType, TItemType, TListItemType, TExecutionContext> : IInlineFilter<TExecutionContext>
-        where TEntity : class
     {
         private readonly ExpressionField<TEntity, TReturnType, TExecutionContext> _field;
-        private readonly TListItemType[]? _defaultValues;
+        private readonly TReturnType[]? _defaultValues;
         private readonly NullOption? _nullValue;
 
-        protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TListItemType[]? defaultValues, NullOption? nullValue)
+        protected BaseInlineFilter(ExpressionField<TEntity, TReturnType, TExecutionContext> field, TReturnType[]? defaultValues, NullOption? nullValue)
         {
-            _field = field ?? throw new ArgumentNullException(nameof(field));
+            _field = field;
             _defaultValues = defaultValues;
             _nullValue = nullValue;
         }
 
-        public Type FieldType => _field.FieldType ?? throw new NotSupportedException();
+        public Type FieldType => _field.FieldType;
 
         public string FieldName => _field.Name;
 
         public Type FilterType => FieldType.IsSupportComparisons()
             ? typeof(ComparisonsFilter<TItemType, TListItemType>)
             : typeof(InFilter<TItemType, TListItemType>);
+
+        public IChainConfigurationContext ConfigurationContext => _field.ConfigurationContext;
 
         LambdaExpression IInlineFilter<TExecutionContext>.BuildExpression(TExecutionContext context, object? filter)
         {
@@ -87,12 +89,12 @@ namespace Epam.GraphQL.Filters.Implementations
                 {
                     if (inFilter.In != null && inFilter.In.Any())
                     {
-                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.In));
+                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.In.Cast<TReturnType>()));
                     }
 
                     if (inFilter.Nin != null && inFilter.Nin.Any())
                     {
-                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.Nin).Not());
+                        result = result.SafeAnd(BuildContainsAsExpression(context, inFilter.Nin.Cast<TReturnType>()).Not());
                     }
                 }
 
@@ -146,7 +148,7 @@ namespace Epam.GraphQL.Filters.Implementations
             return result;
         }
 
-        protected abstract Expression<Func<TEntity, bool>> BuildContainsAsExpression(TExecutionContext context, IEnumerable<TListItemType> list);
+        protected abstract Expression<Func<TEntity, bool>> BuildContainsAsExpression(TExecutionContext context, IEnumerable<TReturnType> list);
 
         protected abstract Expression<Func<TEntity, bool>> BuildIsNullExpression(TExecutionContext context, bool isNull);
 

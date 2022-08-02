@@ -6,47 +6,48 @@
 using System;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ChildFields
 {
-    internal class EnumerableField<TEntity, TReturnType, TExecutionContext> : EnumerableFieldBase<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
+    internal sealed class EnumerableField<TEntity, TReturnType, TExecutionContext> :
+        EnumerableFieldBase<
+            EnumerableField<TEntity, TReturnType, TExecutionContext>,
+            IEnumerableField<TEntity, TReturnType, TExecutionContext>,
+            IEnumerableResolver<TEntity, TReturnType, TExecutionContext>,
+            TEntity,
+            TReturnType,
+            TExecutionContext>,
+        IEnumerableField<TEntity, TReturnType, TExecutionContext>
     {
         public EnumerableField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
             IEnumerableResolver<TEntity, TReturnType, TExecutionContext> resolver,
-            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType)
+            IGraphTypeDescriptor<TReturnType, TExecutionContext> elementGraphType,
+            LazyQueryArguments? arguments)
             : base(
-                  registry,
+                  configurationContext,
                   parent,
                   name,
                   resolver,
-                  elementGraphType)
+                  elementGraphType,
+                  arguments)
         {
         }
 
-        protected override EnumerableFieldBase<TEntity, TReturnType, TExecutionContext> CreateWhere(Expression<Func<TReturnType, bool>> predicate)
+        protected override EnumerableField<TEntity, TReturnType, TExecutionContext> CreateWhere(
+            IChainConfigurationContext configurationContext,
+            Expression<Func<TReturnType, bool>> predicate)
         {
             var enumerableField = new EnumerableField<TEntity, TReturnType, TExecutionContext>(
-                Registry,
+                configurationContext,
                 Parent,
                 Name,
                 EnumerableFieldResolver.Where(predicate),
-                ElementGraphType);
-
-            return enumerableField;
-        }
-
-        protected override EnumerableFieldBase<TEntity, TReturnType1, TExecutionContext> CreateSelect<TReturnType1>(Expression<Func<TReturnType, TReturnType1>> selector, IGraphTypeDescriptor<TReturnType1, TExecutionContext> graphType)
-        {
-            var enumerableField = new EnumerableField<TEntity, TReturnType1, TExecutionContext>(
-                Registry,
-                Parent,
-                Name,
-                EnumerableFieldResolver.Select(selector, graphType.Configurator?.ProxyAccessor),
-                graphType);
+                ElementGraphType,
+                Arguments);
 
             return enumerableField;
         }

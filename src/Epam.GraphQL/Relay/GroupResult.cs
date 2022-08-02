@@ -5,7 +5,7 @@
 
 namespace Epam.GraphQL.Relay
 {
-    internal class GroupResult<T>
+    internal class GroupResult<T> : IGroupResult<T>
     {
         public T? Item { get; set; }
 

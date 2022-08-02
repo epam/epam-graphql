@@ -4,15 +4,14 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Builders.Common;
-using Epam.GraphQL.Builders.Projection;
+using Epam.GraphQL.Configuration;
 
 namespace Epam.GraphQL.Builders.Loader
 {
     public interface ILoaderFieldBuilder<TEntity, TExecutionContext> :
-        IProjectionFieldBuilder<TEntity, TExecutionContext>,
+        IProjectionField<TEntity, TExecutionContext>,
         IHasFromBatch<TEntity, TExecutionContext>,
         IHasFromLoader<TEntity, TExecutionContext>
-        where TEntity : class
     {
     }
 }

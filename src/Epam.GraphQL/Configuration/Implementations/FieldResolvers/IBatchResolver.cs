@@ -4,14 +4,22 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using Epam.GraphQL.Helpers;
+using GraphQL;
+using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal interface IBatchResolver<TEntity, TReturnType> : IResolver<TEntity>
-        where TEntity : class
+    internal interface IBatchResolver<TEntity> : IFieldResolver
     {
-        IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, TReturnType, TSelectType> selector);
+        IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context);
 
+        IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context);
+    }
+
+    internal interface IBatchResolver<TEntity, TReturnType> : IBatchResolver<TEntity>
+    {
         IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TReturnType, TSelectType> selector);
     }
 }

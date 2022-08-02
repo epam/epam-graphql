@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Adapters;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Relay;
 using Microsoft.Extensions.Logging;
@@ -16,7 +17,7 @@ using NUnit.Framework;
 namespace Epam.GraphQL.Tests.Infrastructure
 {
     [TestFixture]
-    public class ConnectionUtilsTests
+    public class ConnectionUtilsTests : IChainConfigurationContextOwner
     {
         private QueryExecuter _executer;
 
@@ -421,6 +422,8 @@ namespace Epam.GraphQL.Tests.Infrastructure
             }
         }
 
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get; set; }
+
         [SetUp]
         public void SetUp()
         {
@@ -444,6 +447,7 @@ namespace Epam.GraphQL.Tests.Infrastructure
 
             var connection = ConnectionUtils.ToConnection(
                 arguments.Data.AsQueryable().OrderBy(p => p),
+                ConfigurationContext.Create().Chain(this, "Op"),
                 () => string.Empty,
                 _executer,
                 arguments.First,
@@ -466,6 +470,7 @@ namespace Epam.GraphQL.Tests.Infrastructure
                 Is.TypeOf(expectedExceptionType).And.Message.EqualTo(expectedMessage),
                 () => ConnectionUtils.ToConnection(
                     dummyQuery.AsQueryable().OrderBy(p => p),
+                    ConfigurationContext.Create().Chain(this, "Op"),
                     () => string.Empty,
                     _executer,
                     arguments.First,

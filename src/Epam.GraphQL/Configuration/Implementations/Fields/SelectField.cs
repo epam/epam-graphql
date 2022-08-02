@@ -3,35 +3,31 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using System;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
-using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
-using GraphQL;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     internal class SelectField<TEntity, TReturnType, TExecutionContext> : TypedField<TEntity, TReturnType, TExecutionContext>,
+        IVoid,
         IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
         private readonly IGraphTypeDescriptor<TExecutionContext> _graphType;
-        private readonly IResolver<TEntity> _resolver;
 
         public SelectField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            IResolver<TEntity> resolver,
+            IFieldResolver resolver,
             IGraphTypeDescriptor<TExecutionContext> graphType)
-            : base(registry, parent, name)
+            : base(configurationContext, parent, name)
         {
-            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            Resolver = resolver;
             EditSettings = new FieldEditSettings<TEntity, TReturnType, TExecutionContext>();
             _graphType = graphType;
         }
-
-        public override bool CanResolve => true;
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType
         {
@@ -50,14 +46,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
         IFieldEditSettings<TEntity, TReturnType, TExecutionContext>? IFieldSupportsEditSettings<TEntity, TReturnType, TExecutionContext>.EditSettings => EditSettings;
 
-        public override object Resolve(IResolveFieldContext context)
-        {
-            return _resolver.Resolve(context);
-        }
-
-        protected override IFieldResolver GetResolver()
-        {
-            return _resolver;
-        }
+        public override IFieldResolver Resolver { get; }
     }
 }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -18,11 +19,13 @@ namespace Epam.GraphQL.TaskBatcher
     internal interface IBatcher
     {
         IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
+            IResolvedChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, IEnumerable<KeyValuePair<TId, TItem>>> loader);
 
         IDataLoader<TId, TItem?> Get<TId, TItem, TExecutionContext>(
+            IResolvedChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             TExecutionContext context,
             Func<TExecutionContext, IEnumerable<TId>, Task<IDictionary<TId, TItem>>> loader);

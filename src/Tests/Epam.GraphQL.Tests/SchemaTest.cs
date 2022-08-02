@@ -9,7 +9,6 @@ using System.Linq;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
-using GraphQL;
 using GraphQL.Execution;
 using NUnit.Framework;
 
@@ -152,260 +151,6 @@ namespace Epam.GraphQL.Tests
 
             Assert.AreEqual(expectedErrorsCount, actualErrorsCount);
             Assert.AreEqual(GraphiqlRequest, actualQuery);
-        }
-
-        [Test(Description = "Empty config")]
-        public void ShouldThrowOnQueryEmptyConfig()
-        {
-            // TODO message should be "Query should have one field at least"
-            TestHelpers.TestQueryError(
-                query => { },
-                typeof(InvalidOperationException),
-                "Type `object` should have one readable field at least.",
-                string.Empty);
-        }
-
-        [Test(Description = "Query:Field<int>(...) without resolver")]
-        public void ShouldThrowOnQueryFieldWithoutResolver()
-        {
-            TestHelpers.TestQueryError(
-                query => query
-                    .Field("test"),
-                typeof(InvalidOperationException),
-                "Field `test` must have resolver.",
-                string.Empty);
-        }
-
-        [Test(Description = "Query:Field<int>(null)/Resolve(...)")]
-        public void ShouldThrowOnNullQueryFieldName()
-        {
-            TestHelpers.TestQueryError(
-                query => query
-                    .Field(null)
-                    .Resolve(_ => 0),
-                typeof(InvalidOperationException),
-                "Field name cannot be null or empty.",
-                string.Empty);
-        }
-
-        [Test(Description = "Query:Field<int>(\"\")/Resolve(...)")]
-        public void ShouldThrowOnEmptyQueryFieldName()
-        {
-            TestHelpers.TestQueryError(
-                query => query
-                    .Field(string.Empty)
-                    .Resolve(_ => 0),
-                typeof(InvalidOperationException),
-                "Field name cannot be null or empty.",
-                string.Empty);
-        }
-
-        [Test(Description = "Query:Duplicate field")]
-        public void ShouldThrowOnDuplicateQueryField()
-        {
-            static void Builder(Query<TestUserContext> query)
-            {
-                query.Field("test")
-                    .Resolve(_ => 0);
-                query.Field("test")
-                    .Resolve(_ => 0);
-            }
-
-            TestHelpers.TestQueryError(
-                Builder,
-                typeof(InvalidOperationException),
-                "A field with the name `test` is already registered.",
-                string.Empty);
-        }
-
-        [Test(Description = "Query:Connection<object>(...)")]
-        public void ShouldThrowOnQueryConnectionFromNonLoader()
-        {
-            TestHelpers.TestQueryError(
-                query => query
-                    .Connection<object>("test"),
-                typeof(ArgumentException),
-                "Cannot find the corresponding base type for loader: System.Object",
-                string.Empty);
-        }
-
-        [Test(Description = "Loader:Field<int>(...) without resolver")]
-        public void ShouldThrowOnLoaderFieldWithoutResolver()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader => loader.Field("test"),
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable());
-
-            void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Connection(personLoaderType, "people");
-            }
-
-            TestHelpers.TestQueryError(
-                Builder,
-                typeof(InvalidOperationException),
-                "Field `test` must have resolver.",
-                string.Empty);
-        }
-
-        [Test(Description = "Loader:Field(p => 2 * p.Id)")]
-        public void ShouldThrowOnLoaderFieldWithExpressionAndNoName()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader => loader.Field(p => 2 * p.Id),
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable());
-
-            void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Connection(personLoaderType, "people");
-            }
-
-            TestHelpers.TestQueryError(
-                Builder,
-                typeof(InvalidOperationException),
-                "Expression (p => (2 * p.Id)), provided for field is not a property. Consider to give a name to field explicitly.",
-                string.Empty);
-        }
-
-        [Test]
-        public void ShouldThrowOnFieldReturningValueTypeWithoutConfig()
-        {
-            static void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Field("people")
-                    .Resolve(_ => ("abc", "abc"));
-            }
-
-            TestHelpers.TestQueryError(
-                Builder,
-                typeof(ArgumentOutOfRangeException),
-                "The type: ValueTuple`2 cannot be coerced effectively to a GraphQL type (Parameter 'type')",
-                string.Empty);
-        }
-
-        /// <summary>
-        /// Test for https://git.epam.com/epm-ppa/epam-graphql/-/issues/22 (EF Query fails for loaders having instance methods in field expressions).
-        /// </summary>
-        [Test]
-        public void ShouldThrowOnFieldThatUsesInstanceMember()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader => loader.Field("instance", p => GetPersonName(p)),
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable());
-
-            void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Connection(personLoaderType, "people");
-            }
-
-            TestHelpers.TestQueryError(
-                Builder,
-                typeof(InvalidOperationException),
-                "Client projection (value(Epam.GraphQL.Tests.SchemaTest).GetPersonName(p)) contains a call of instance method 'GetPersonName' of type 'SchemaTest'. This could potentially cause memory leak. Consider making the method static so that it does not capture constant in the instance.",
-                string.Empty);
-        }
-
-        [Test(Description = "Query:Connection(...)/WithFilter<object>()")]
-        public void ShouldThrowOnQueryConnectionWithFilterFromNonFilter()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader => loader.Field(p => p.Id),
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable());
-
-            void Builder(Query<TestUserContext> query)
-            {
-                query
-                    .Connection(personLoaderType, "people")
-                    .WithFilter<object>();
-            }
-
-            TestHelpers.TestQueryError(
-                Builder,
-                typeof(ArgumentException),
-                "Cannot find the corresponding base type for filter: System.Object",
-                string.Empty);
-        }
-
-        [Test(Description = "ApplySecurityFilter() based on another query")]
-        public void ShouldThrowIfApplySecurityFilterReturnsQueryNotBasedPassedQuery()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader => loader.Field(p => p.Id),
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable(),
-                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
-
-            TestHelpers.TestQueryError(
-                query => query
-                    .Connection(personLoaderType, "people"),
-                typeof(ExecutionError),
-                "PersonLoader.ApplySecurityFilter:  You cannot query data from anywhere (e.g. using context), please use passed `query` parameter.",
-                @"
-                query {
-                    people {
-                        items {
-                            id
-                        }
-                    }
-                }
-                ");
-        }
-
-        [Test]
-        public void ShouldThrowIfFromBatchSourceTypeDoesNotContainFields()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field("error")
-                        .FromBatch(people => people.ToDictionary(p => p, p => new Empty()), null);
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable(),
-                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
-
-            TestHelpers.TestQueryError(
-                query => query
-                    .Connection(personLoaderType, "people"),
-                typeof(InvalidOperationException),
-                "Type `Empty` should have one readable field at least.",
-                string.Empty);
-        }
-
-        [Test]
-        public void ShouldNotExposeIndexedFieldFromBatch()
-        {
-            var personLoaderType = GraphQLTypeBuilder.CreateLoaderType<Person, TestUserContext>(
-                onConfigure: loader =>
-                {
-                    loader.Field("error")
-                        .FromBatch(people => people.ToDictionary(p => p, p => new WithIndexedProperty()), null);
-                },
-                applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
-                applyNaturalThenBy: q => q.OrderBy(p => p.Id),
-                getBaseQuery: _ => FakeData.People.AsQueryable(),
-                applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
-
-            TestHelpers.TestQueryError(
-                query => query
-                    .Connection(personLoaderType, "people"),
-                typeof(InvalidOperationException),
-                "Type `WithIndexedProperty` should have one readable field at least.",
-                string.Empty);
         }
 
         [Test]
@@ -655,7 +400,7 @@ namespace Epam.GraphQL.Tests
                 onConfigure: loader =>
                 {
                     loader.Field("manager")
-                        .FromLoader<Person>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
+                        .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, m) => p.ManagerId == m.Id)
                         .FirstOrDefault();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -861,6 +606,55 @@ namespace Epam.GraphQL.Tests
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("UserEdge", loaderEntityTypeName);
+        }
+
+        [Test]
+        public void ShouldExposeTheRightTypeForNullableIntConnection()
+        {
+            var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q =>
+            {
+                q.Field("people")
+                    .FromIQueryable(_ => Enumerable.Empty<int?>().AsQueryable())
+                    .AsConnection(query => query.OrderBy(x => x));
+            });
+
+            const string query1 = @"
+                query {
+                    __type(name: ""NullableOfIntConnection"") {
+                        name
+                        fields {
+                            type {
+                                name
+                            }
+                            name
+                        }
+                    }
+                }
+            ";
+
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
+            var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
+
+            Assert.AreEqual("NullableOfIntConnection", loaderEntityTypeName);
+
+            const string query3 = @"
+                query {
+                    __type(name: ""NullableOfIntEdge"") {
+                        name
+                        fields {
+                            type {
+                                name
+                            }
+                            name
+                        }
+                    }
+                }
+            ";
+
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query3);
+            loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
+
+            Assert.AreEqual("NullableOfIntEdge", loaderEntityTypeName);
         }
 
         [Test]
@@ -1923,24 +1717,9 @@ namespace Epam.GraphQL.Tests
             return GetFieldValue(fieldValue, fieldNames.Skip(1).ToArray());
         }
 
-#pragma warning disable CA1822 // Mark members as static
-        private string GetPersonName(Person person) => person.FullName;
-#pragma warning restore CA1822 // Mark members as static
-
-        public class Empty
-        {
-        }
-
         public class WithId
         {
             public int Id { get; set; }
-        }
-
-        public class WithIndexedProperty
-        {
-#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
-            public int this[int index] => throw new NotImplementedException();
-#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
         }
 
         public class PersonFilter : Input

@@ -5,15 +5,15 @@
 
 using System;
 using Epam.GraphQL.Builders.Loader;
+using Epam.GraphQL.Diagnostics;
 
 namespace Epam.GraphQL.Configuration.Implementations
 {
     internal interface IFieldSupportsApplySelect<TEntity, TReturnType, TExecutionContext>
-        where TEntity : class
     {
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector);
-
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<TReturnType, TReturnType1> selector, Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
-            where TReturnType1 : class;
+        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            IInlinedChainConfigurationContext configurationContext,
+            Func<TReturnType, TReturnType1> selector,
+            Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build);
     }
 }

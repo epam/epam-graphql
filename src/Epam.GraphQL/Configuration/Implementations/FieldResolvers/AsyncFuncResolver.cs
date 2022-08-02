@@ -5,36 +5,25 @@
 
 using System;
 using Epam.GraphQL.Helpers;
-using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
-    internal class AsyncFuncResolver<TEntity, TReturnType> : IResolver<TEntity>
-        where TEntity : class
+    internal class AsyncFuncResolver<TEntity, TReturnType> : IFieldResolver
     {
         public AsyncFuncResolver(
             Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType>> resolver,
             Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType>> proxiedResolver)
         {
-            Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            ProxiedResolver = proxiedResolver ?? throw new ArgumentNullException(nameof(proxiedResolver));
+            Resolver = resolver;
+            ProxiedResolver = proxiedResolver;
         }
 
         protected Func<IResolveFieldContext, IDataLoader<TEntity, TReturnType>> Resolver { get; }
 
         protected Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType>> ProxiedResolver { get; }
-
-        public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context)
-        {
-            return Resolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
-        }
-
-        public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context)
-        {
-            return ProxiedResolver(context).Then(FuncConstants<TReturnType?>.WeakIdentity);
-        }
 
         public object Resolve(IResolveFieldContext context)
         {

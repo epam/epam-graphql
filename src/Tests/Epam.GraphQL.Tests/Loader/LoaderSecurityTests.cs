@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
@@ -37,7 +38,7 @@ namespace Epam.GraphQL.Tests.Loader
             var profiler = Substitute.For<IProfiler>();
             _batcher = new Batcher(profiler);
             _dataContext = Substitute.For<IDataContext>();
-            _dataContext.QueryableToAsyncEnumerable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Person>>>())
+            _dataContext.Convert(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Person>>>())
                 .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Person>>>(0).ToAsyncEnumerable());
             _dataContext.QueryableToAsNoTrackingQueryable(Arg.Any<IQueryable<QueryableExtensions.KeyValue<int, Person>>>())
                 .Returns(callInfo => callInfo.ArgAt<IQueryable<QueryableExtensions.KeyValue<int, Person>>>(0));
@@ -62,7 +63,7 @@ namespace Epam.GraphQL.Tests.Loader
             var ids = new[] { 1 };
             var people = await loader
                 .All(_context.ExecutionContext)
-                .GroupByValues(ids, person => person.Id, FuncConstants<Person>.IdentityExpression, () => string.Empty, _queryExecuter, null, null)
+                .GroupByValues(ids, person => person.Id, FuncConstants<Person>.IdentityExpression, ConfigurationContext.Create(), () => string.Empty, _queryExecuter, null, null)
                 .ToListAsync()
                 .ConfigureAwait(false);
 
@@ -76,7 +77,7 @@ namespace Epam.GraphQL.Tests.Loader
             var ids = new[] { 2 };
             var people = await loader
                 .All(_context.ExecutionContext)
-                .GroupByValues(ids, person => person.Id, FuncConstants<Person>.IdentityExpression, () => string.Empty, _queryExecuter, null, null)
+                .GroupByValues(ids, person => person.Id, FuncConstants<Person>.IdentityExpression, ConfigurationContext.Create(), () => string.Empty, _queryExecuter, null, null)
                 .ToListAsync()
                 .ConfigureAwait(false);
 
@@ -102,7 +103,7 @@ namespace Epam.GraphQL.Tests.Loader
                 applyNaturalThenBy: q => q.OrderBy(p => p.Id),
                 applySecurityFilter: (_, q) => filter(q));
 
-            var result = (Loader<Person, TestUserContext>)_registry.ResolveLoader<Person>(loaderType);
+            var result = (Loader<Person, TestUserContext>)_registry.ResolveLoader<Person, TestUserContext>(loaderType);
             return result;
         }
     }

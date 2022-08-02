@@ -12,7 +12,6 @@ namespace Epam.GraphQL.Types
 {
     internal class SubmitOutputItemGraphType<TProjection, TEntity, TId, TExecutionContext> : ObjectGraphType<SaveResultItem<TEntity, TId>>
         where TProjection : Projection<TEntity, TExecutionContext>, new()
-        where TEntity : class
     {
         public SubmitOutputItemGraphType(RelationRegistry<TExecutionContext> registry)
         {

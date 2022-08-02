@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Configuration.Implementations.Descriptors;
 using Epam.GraphQL.Configuration.Implementations.FieldResolvers;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Helpers;
 using GraphQL.Resolvers;
 
@@ -19,39 +20,48 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
         IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>,
         IFieldSupportsApplyBatchUnion<TEntity, TExecutionContext>,
         IFieldSupportsEditSettings<TEntity, IEnumerable<object>, TExecutionContext>
-        where TEntity : class
     {
         private readonly IBatchCompoundResolver<TEntity, TExecutionContext> _resolver;
-        private readonly UnionGraphTypeDescriptor<TExecutionContext> _unionGraphType = new();
-        private readonly Type _fieldType;
+        private readonly UnionGraphTypeDescriptor<TExecutionContext> _unionGraphType;
 
-        // TODO Implement unions of more than two batches
         public BatchUnionField(
-            RelationRegistry<TExecutionContext> registry,
+            IChainConfigurationContext configurationContext,
             BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
             string name,
-            IResolver<TEntity> firstResolver,
-            IResolver<TEntity> secondResolver,
+            IBatchResolver<TEntity> firstResolver,
+            IBatchResolver<TEntity> secondResolver,
             IGraphTypeDescriptor<TExecutionContext> firstGraphType,
             Type firstType,
             IGraphTypeDescriptor<TExecutionContext> secondGraphType,
             Type secondType)
-           : base(registry, parent, name)
+           : this(
+               configurationContext,
+               parent,
+               name,
+               new BatchCompoundResolver<TEntity, TExecutionContext>(firstResolver, secondResolver),
+               field => new UnionGraphTypeDescriptor<TExecutionContext>(
+                   field,
+                   new[] { firstGraphType, secondGraphType },
+                   new[] { firstType, secondType }))
         {
-            _resolver = new BatchCompoundResolver<TEntity, TExecutionContext>();
+        }
 
-            _resolver.Add(firstResolver);
-            _resolver.Add(secondResolver);
+        private BatchUnionField(
+            IChainConfigurationContext configurationContext,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name,
+            IBatchCompoundResolver<TEntity, TExecutionContext> compoundResolver,
+            Func<IField<TExecutionContext>, UnionGraphTypeDescriptor<TExecutionContext>> descriptorFactory)
+            : base(configurationContext, parent, name)
+        {
+            _resolver = compoundResolver;
 
-            _fieldType = TypeHelpers.GetTheBestCommonBaseType(firstType, secondType);
-            _unionGraphType.Add(firstGraphType);
-            _unionGraphType.Add(secondGraphType);
-            _unionGraphType.Name = parent.GetGraphQLTypeName(_fieldType, null, this);
+            _unionGraphType = descriptorFactory(this);
 
             EditSettings = new FieldEditSettings<TEntity, IEnumerable<object>, TExecutionContext>();
         }
 
-        public override Type FieldType => _fieldType;
+        public override Type FieldType => _unionGraphType.FieldType;
 
         public new IFieldEditSettings<TEntity, IEnumerable<object>, TExecutionContext>? EditSettings
         {
@@ -61,110 +71,226 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.BatchFields
 
         public override IGraphTypeDescriptor<TExecutionContext> GraphType => _unionGraphType.MakeListDescriptor();
 
+        public override IFieldResolver Resolver => _resolver;
+
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                FuncConstants<TEntity>.IdentityExpression,
+                batchFunc,
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, IDictionary<TEntity, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                FuncConstants<TEntity>.IdentityExpression,
+                (ctx, e) => batchFunc(e),
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                keySelector,
+                batchFunc,
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, IDictionary<TKeyType, TAnotherReturnType>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                keySelector,
+                (ctx, e) => batchFunc(e),
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Func<TExecutionContext, IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                FuncConstants<TEntity>.IdentityExpression,
+                batchFunc,
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Func<IEnumerable<TEntity>, Task<IDictionary<TEntity, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchTaskKeyResolver<TEntity, TEntity, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                FuncConstants<TEntity>.IdentityExpression,
+                (ctx, e) => batchFunc(e),
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<TExecutionContext, IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
+            var resolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                keySelector,
+                batchFunc,
+                Parent.ProxyAccessor);
+
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public BatchUnionField<TEntity, TExecutionContext> ApplyBatchUnion<TAnotherReturnType, TKeyType>(
+            IInlinedResolvedChainConfigurationContext configurationContext,
             Expression<Func<TEntity, TKeyType>> keySelector,
             Func<IEnumerable<TKeyType>, Task<IDictionary<TKeyType, TAnotherReturnType>>> batchFunc,
             Action<IInlineObjectBuilder<TAnotherReturnType, TExecutionContext>>? build = null)
-            where TAnotherReturnType : class
         {
-            // TODO Implement ApplyBatchUnion method
-            throw new NotImplementedException();
-        }
+            var resolver = new BatchTaskKeyResolver<TEntity, TKeyType, TAnotherReturnType, TExecutionContext>(
+                configurationContext,
+                Name,
+                keySelector,
+                (ctx, e) => batchFunc(e),
+                Parent.ProxyAccessor);
 
-        public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(Func<IEnumerable<object>, TReturnType1> selector)
-        {
-            return Parent.ApplySelect<TReturnType1>(this, _resolver.Select(selector));
+            var field = new BatchUnionField<TEntity, TExecutionContext>(
+                configurationContext,
+                Parent,
+                Name,
+                _resolver.Add(resolver),
+                field => _unionGraphType.Add(
+                    field,
+                    Parent.GetGraphQLTypeDescriptor(field, build, configurationContext),
+                    typeof(TAnotherReturnType)));
+
+            return Parent.ReplaceField(this, field);
         }
 
         public SelectField<TEntity, TReturnType1, TExecutionContext> ApplySelect<TReturnType1>(
+            IInlinedChainConfigurationContext configurationContext,
             Func<IEnumerable<object>, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
-            where TReturnType1 : class
         {
-            return Parent.ApplySelect(this, _resolver.Select(selector), build);
-        }
-
-        IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(Func<IEnumerable<object>, TReturnType1> selector)
-        {
-            return ApplySelect(selector);
+            return Parent.ApplySelect(configurationContext, this, _resolver.Select(selector), build);
         }
 
         IFieldSupportsEditSettings<TEntity, TReturnType1, TExecutionContext> IFieldSupportsApplySelect<TEntity, IEnumerable<object>, TExecutionContext>.ApplySelect<TReturnType1>(
+            IInlinedChainConfigurationContext configurationContext,
             Func<IEnumerable<object>, TReturnType1> selector,
             Action<IInlineObjectBuilder<TReturnType1, TExecutionContext>>? build)
         {
-            return ApplySelect(selector, build);
-        }
-
-        protected override IFieldResolver GetResolver()
-        {
-            return _resolver;
+            return ApplySelect(configurationContext, selector, build);
         }
     }
 }

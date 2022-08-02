@@ -19,29 +19,24 @@ namespace Epam.GraphQL.Extensions
     internal static class DictionaryExtensions
     {
         private static readonly Type _proxyType = typeof(Proxy<>);
-        private static readonly Type _proxyTypeGenericParameter = _proxyType.GetTypeInfo().GenericTypeParameters[0];
 
         private static readonly ConcurrentDictionary<(Type? BaseType, string TypeName, ICollection<KeyValuePair<string, Type>> Properties), Type> _typeCache = new(
             new ValueTupleEqualityComparer<Type?, string, ICollection<KeyValuePair<string, Type>>>(EqualityComparer<Type?>.Default, EqualityComparer<string>.Default, new CollectionEqualityComparer<KeyValuePair<string, Type>>()));
 
-        private static readonly ConcurrentDictionary<ICollection<KeyValuePair<string, Type>>, Type> _proxyTypeCache = new(
+        private static readonly ConcurrentDictionary<ICollection<KeyValuePair<string, Type>>, Type> _baseProxyTypeCache = new(
             new CollectionEqualityComparer<KeyValuePair<string, Type>>());
+
+        private static readonly ConcurrentDictionary<(Type BaseType, ICollection<KeyValuePair<string, Type>> Properties), Type> _proxyTypeCache = new(
+            new ValueTupleEqualityComparer<Type, ICollection<KeyValuePair<string, Type>>>(EqualityComparer<Type>.Default, new CollectionEqualityComparer<KeyValuePair<string, Type>>()));
 
         private static long _typeCacheCount;
 
         private static long _proxyTypeCacheCount;
+        private static long _baseProxyTypeCacheCount;
 
-        public static Type MakeType(this IDictionary<string, Type>? properties, string? typeName, Type? parent = null)
+        public static Type MakeType(this IDictionary<string, Type> properties, string typeName, Type? parent = null)
         {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
-
-            if (string.IsNullOrEmpty(typeName))
-            {
-                throw new ArgumentNullException(nameof(typeName));
-            }
+            Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
 
             return _typeCache.GetOrAdd((parent, typeName, properties), key =>
             {
@@ -103,35 +98,48 @@ namespace Epam.GraphQL.Extensions
 
                 var objectType = tb.CreateTypeInfo();
 
-                if (objectType == null)
-                {
-                    // According to its signature, tb.CreateTypeInfo() can return null
-                    throw new NotSupportedException();
-                }
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
 
                 return objectType!;
             });
         }
 
-        public static Type MakeProxyType(this IDictionary<string, Type> properties, string typeName)
+        public static Type MakeProxyType(this IDictionary<string, Type> properties, Type baseType, string typeName)
         {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
+            Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
 
-            if (string.IsNullOrEmpty(typeName))
-            {
-                throw new ArgumentNullException(nameof(typeName));
-            }
-
-            return _proxyTypeCache.GetOrAdd(properties, properties =>
+            return _proxyTypeCache.GetOrAdd((baseType, properties), key =>
             {
                 Interlocked.Increment(ref _proxyTypeCacheCount);
 
-                var tb = ILUtils.DefineType($"<{typeName}>__Proxy`{_proxyTypeCacheCount}", _proxyType);
+                var tb = ILUtils.DefineType($"<{typeName}>__Proxy`{_proxyTypeCacheCount}", key.BaseType);
 
-                tb.DefineNotImplementedVirtualProperty("$original", _proxyTypeGenericParameter).MakeDebuggerBrowsableNever();
+                foreach (var prop in key.Properties)
+                {
+                    tb.DefineNotImplementedVirtualProperty(prop.Key, prop.Value).MakeDebuggerBrowsableNever();
+                }
+
+                tb.MakeCompilerGenerated();
+
+                var objectType = tb.CreateTypeInfo();
+
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
+
+                return objectType;
+            });
+        }
+
+        public static Type MakeBaseProxyType(this IDictionary<string, Type> properties, string typeName)
+        {
+            Guards.ThrowIfNullOrEmpty(typeName, nameof(typeName));
+
+            return _baseProxyTypeCache.GetOrAdd(properties, properties =>
+            {
+                Interlocked.Increment(ref _baseProxyTypeCacheCount);
+
+                var tb = ILUtils.DefineType($"<{typeName}>__BaseProxy`{_baseProxyTypeCacheCount}", _proxyType);
 
                 foreach (var prop in properties)
                 {
@@ -142,11 +150,8 @@ namespace Epam.GraphQL.Extensions
 
                 var objectType = tb.CreateTypeInfo();
 
-                if (objectType == null)
-                {
-                    // According to its signature, tb.CreateTypeInfo() can return null
-                    throw new NotSupportedException();
-                }
+                // According to its signature, tb.CreateTypeInfo() can return null
+                Guards.ThrowNotSupportedIf(objectType == null);
 
                 return objectType;
             });

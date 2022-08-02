@@ -27,10 +27,10 @@ namespace Epam.GraphQL
 
         public ComplexityConfiguration? ComplexityConfiguration { get; set; }
 
-        public TExecutionContext? ExecutionContext { get; set; }
+        public TExecutionContext ExecutionContext { get; set; } = default!;
 
         [Obsolete("UserContext has been renamed to ExecutionContext. Use ExecutionContext instead")]
-        public TExecutionContext? UserContext { get => ExecutionContext; set => ExecutionContext = value; }
+        public TExecutionContext UserContext { get => ExecutionContext; set => ExecutionContext = value; }
 
         public IEnumerable<IValidationRule>? ValidationRules { get; set; }
 
@@ -50,11 +50,6 @@ namespace Epam.GraphQL
 
         internal ExecutionOptions ToExecutionOptions(SchemaExecuter<TExecutionContext> schema)
         {
-            if (schema == null)
-            {
-                throw new ArgumentNullException(nameof(schema));
-            }
-
             var coreOptionsExtension = schema.Options.FindExtension<CoreSchemaOptionsExtension<TExecutionContext>>();
             var profiler = coreOptionsExtension?.Profiler ?? NullProfiler.Instance;
             var batcher = new Batcher(profiler);

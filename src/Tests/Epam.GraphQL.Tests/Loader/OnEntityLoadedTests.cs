@@ -353,7 +353,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .FirstOrDefault();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -419,7 +419,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Where(u => u.Id == 1);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -485,7 +485,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Where(u => u.Id == 1)
                         .FirstOrDefault();
                 },
@@ -552,7 +552,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unitIds")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Select(u => u.Id);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -612,7 +612,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unitIds")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Select(u => u.Id)
                         .FirstOrDefault();
                 },
@@ -673,7 +673,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unitIds")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Select(u => u.Id)
                         .Where(id => id == 1);
                 },
@@ -734,7 +734,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("unitIds")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Select(u => u.Id)
                         .Where(id => id == 1)
                         .FirstOrDefault();
@@ -796,7 +796,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Select(u => new Branch
                         {
                             Id = u.Id,
@@ -865,7 +865,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .Select(u => new Branch
                         {
                             Id = u.Id,
@@ -927,6 +927,17 @@ namespace Epam.GraphQL.Tests.Loader
         {
             var batchFunc = FuncSubstitute.For<TestUserContext, IEnumerable<int>, IDictionary<int, ShouldCallHookProxy>>(
                 (context, ids) => ids.ToDictionary(id => id, id => new ShouldCallHookProxy { Id = id }));
+
+            ShouldCallHookForQueryable((builder, hook) => builder.OnEntityLoaded(p => p.Id, batchFunc, hook));
+
+            batchFunc.HasBeenCalledOnce();
+        }
+
+        [Test]
+        public void ShouldCallBatchTaskHookForQueryable()
+        {
+            var batchFunc = FuncSubstitute.For<TestUserContext, IEnumerable<int>, Task<IDictionary<int, ShouldCallHookProxy>>>(
+                (context, ids) => Task.FromResult<IDictionary<int, ShouldCallHookProxy>>(ids.ToDictionary(id => id, id => new ShouldCallHookProxy { Id = id })));
 
             ShouldCallHookForQueryable((builder, hook) => builder.OnEntityLoaded(p => p.Id, batchFunc, hook));
 
@@ -1143,7 +1154,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId)
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId)
                         .AsConnection();
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
@@ -1213,7 +1224,7 @@ namespace Epam.GraphQL.Tests.Loader
                 {
                     loader.Field(p => p.Id);
                     loader.Field("units")
-                        .FromLoader<Unit>(unitLoaderType, (p, u) => u.Id == p.UnitId);
+                        .FromLoader<Person, Unit, TestUserContext>(unitLoaderType, (p, u) => u.Id == p.UnitId);
                 },
                 applyNaturalOrderBy: q => q.OrderBy(p => p.Id),
                 applyNaturalThenBy: q => q.ThenBy(p => p.Id),

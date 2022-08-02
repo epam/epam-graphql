@@ -19,7 +19,7 @@ namespace Epam.GraphQL.Types
         {
             // TODO Type name should be taken from registry?
             Name = $"{typeName}FieldName";
-            _fieldNames = fieldNames ?? throw new ArgumentNullException(nameof(fieldNames));
+            _fieldNames = fieldNames;
         }
 
         public override object? ParseValue(object? value)

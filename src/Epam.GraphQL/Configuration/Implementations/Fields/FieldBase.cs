@@ -6,7 +6,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Epam.GraphQL.Extensions;
+using Epam.GraphQL.Configuration.Implementations.Descriptors;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
@@ -18,53 +19,89 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal class FieldBase<TEntity, TExecutionContext> : IField<TEntity, TExecutionContext>, IArgumentCollection
-        where TEntity : class
     {
-        public FieldBase(RelationRegistry<TExecutionContext> registry, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+        protected FieldBase(IChainConfigurationContext configurationContext, BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : this(parent)
         {
-            Registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            ConfigurationContext = configurationContext;
             Name = name.ToCamelCase();
-            Parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        }
+
+        protected FieldBase(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            Func<IChainConfigurationContext, string> nameFactory)
+            : this(parent)
+        {
+            ConfigurationContext = configurationContextFactory(this);
+            Name = nameFactory(ConfigurationContext);
+        }
+
+        protected FieldBase(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent,
+            string name)
+            : this(parent, name)
+        {
+            ConfigurationContext = configurationContextFactory(this);
+        }
+
+        private FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent)
+        {
+            Parent = parent;
+        }
+
+        private FieldBase(BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> parent, string name)
+            : this(parent)
+        {
+            Name = name.ToCamelCase();
         }
 
         public LazyQueryArguments? Arguments { get; set; }
 
-        public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => throw new NotImplementedException();
+        public IChainConfigurationContext ConfigurationContext { get; private set; } = null!;
 
-        public string Name { get; set; }
+        IChainConfigurationContext IChainConfigurationContextOwner.ConfigurationContext { get => ConfigurationContext; set => ConfigurationContext = value; }
+
+        public virtual IGraphTypeDescriptor<TExecutionContext> GraphType => GraphTypeDescriptor<TExecutionContext>.NullInstance;
+
+        public string Name { get; set; } = null!;
 
         public string? DeprecationReason { get; set; }
 
-        public virtual Type FieldType => throw new NotImplementedException();
+        public virtual IFieldResolver Resolver => throw new InvalidOperationException($"Field `{Name}` must have resolver.");
 
-        public virtual bool CanResolve => false;
+        public virtual Type FieldType => throw new NotImplementedException();
 
         public IFieldEditSettings<TEntity, TExecutionContext>? EditSettings { get; protected set; }
 
-        IFieldEditSettings<TExecutionContext>? IField<TExecutionContext>.EditSettings => EditSettings;
+        IObjectGraphTypeConfigurator<TExecutionContext> IField<TExecutionContext>.Parent => Parent;
 
-        internal RelationRegistry<TExecutionContext> Registry { get; }
+        internal IRegistry<TExecutionContext> Registry => Parent.Registry;
 
         internal BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext> Parent { get; }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay => $"{GetType().GetGenericTypeDefinition().Name}({FieldType.Name} {typeof(TEntity).Name}.{Name})";
 
+        public override string ToString()
+        {
+            return ConfigurationContext.ToString();
+        }
+
         public virtual FieldType AsFieldType()
         {
-            var resolver = GetResolver();
-
-            GraphType.Validate();
-
             var fieldType = new FieldType
             {
                 Type = GraphType.Type,
                 Arguments = Arguments?.ToQueryArguments(),
-                Resolver = resolver,
+                Resolver = Resolver,
                 Name = Name,
                 ResolvedType = GraphType.GraphType,
                 DeprecationReason = DeprecationReason,
             };
+
+            fieldType.Metadata.Add("CONFIGURATION_CONTEXT", ConfigurationContext);
 
             return fieldType;
         }
@@ -105,8 +142,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
         }
 
-        public virtual object? Resolve(IResolveFieldContext context) => throw new NotSupportedException();
-
         public IDataLoader<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)> CanEdit(IResolveFieldContext context)
         {
             if (EditSettings != null)
@@ -125,17 +160,21 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             return BatchLoader.FromResult<IFieldChange<TEntity, TExecutionContext>, (bool CanEdit, string DisableReason)>(change => (false, "The field is not editable. Consider to use `Editable()` or `EditableIf(...)` methods."));
         }
 
-        public virtual void ValidateField()
+        public virtual void Validate()
         {
-            if (string.IsNullOrEmpty(Name))
+            ConfigurationContext.AddErrorIf(string.IsNullOrEmpty(Name), "Field name cannot be null or empty.", ConfigurationContext);
+
+            // Force resolver; FieldBase throws exception if Resolver field is not overriden.
+            try
             {
-                throw new InvalidOperationException("Field name cannot be null or empty.");
+                _ = Resolver;
+            }
+            catch (InvalidOperationException e)
+            {
+                ConfigurationContext.AddError(e.Message, ConfigurationContext);
             }
 
-            if (GetResolver() == null)
-            {
-                throw new InvalidOperationException($"Field `{Name}` must have resolver.");
-            }
+            GraphType.Validate(ConfigurationContext);
         }
 
         public TField ApplyField<TField>(TField field)
@@ -154,11 +193,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             return hash.ToHashCode();
         }
 
-        public string GetGraphQLTypePrefix()
-        {
-            return $"{Parent.GetGraphQLTypePrefix()}{Name.CapitalizeFirstLetter()}";
-        }
-
         public override bool Equals(object other)
         {
             if (other == null)
@@ -172,12 +206,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             }
 
             return false;
-        }
-
-        // TODO make it property
-        protected virtual IFieldResolver? GetResolver()
-        {
-            return null;
         }
     }
 }

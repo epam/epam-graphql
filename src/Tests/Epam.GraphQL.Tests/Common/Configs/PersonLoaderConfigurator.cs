@@ -39,7 +39,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field(p => p.FullName);
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary));
@@ -73,7 +73,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -112,7 +112,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -157,7 +157,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -207,7 +207,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field(p => p.FullName);
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary));
@@ -241,7 +241,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -280,7 +280,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -325,7 +325,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -375,7 +375,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Field(p => p.FullName);
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary));
@@ -409,7 +409,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Filterable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -448,7 +448,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))
@@ -493,7 +493,7 @@ namespace Epam.GraphQL.Tests.Common.Configs
                     .Sortable();
                 loader
                     .Field("loaderManagerName")
-                    .FromLoader<Person>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
+                    .FromLoader<Person, Person, TestUserContext>(loader.GetType(), (p, c) => p.ManagerId == c.Id)
                     .Select(c => c.FullName);
                 loader
                     .Field("roundedSalary", p => Convert.ToInt32(p.Salary))

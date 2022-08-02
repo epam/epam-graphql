@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Epam.GraphQL.Configuration;
+using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
@@ -29,23 +30,31 @@ namespace Epam.GraphQL.TaskBatcher
         private static readonly ConcurrentDictionary<(Func<string> StepNameFactory, LambdaExpression KeySelector, Delegate? DefaultFactory, Delegate Transform), Delegate> _groupByValuesCache = new(
             new ValueTupleEqualityComparer<Func<string>, LambdaExpression, Delegate?, Delegate>(secondItemComparer: ExpressionEqualityComparer.Instance));
 
+        private static MethodInfo? _makeGetHelperMethodInfo;
+        private static MethodInfo? _makeGetNullableHelperMethodInfo;
+
         public static Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>> GetLoaderQueryFactory<TLoader, TEntity, TProperty, TExecutionContext>(
             Func<string> stepNameFactory,
             TLoader loader,
             Expression<Func<TEntity, TProperty>> propSelector)
             where TLoader : Loader<TEntity, TExecutionContext>
-            where TEntity : class
         {
             return (Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>>)_loaderQueriesCache.GetOrAdd(loader, key =>
             {
                 var loader = (TLoader)key;
-                var factory = Get<TEntity, TEntity, TProperty, TExecutionContext>(stepNameFactory, propSelector, id => new EmptyGrouping<TProperty, TEntity>(id), ctx => FuncConstants<TEntity>.IdentityExpression);
+                var factory = Get<TEntity, TEntity, TProperty, TExecutionContext>(
+                    loader.ObjectGraphTypeConfigurator.ConfigurationContext,
+                    stepNameFactory,
+                    propSelector,
+                    id => new EmptyGrouping<TProperty, TEntity>(id),
+                    ctx => FuncConstants<TEntity>.IdentityExpression);
                 Func<IProfiler, IQueryExecuter, ILoaderHooksExecuter<TEntity>?, TExecutionContext, IDataLoader<TProperty, IGrouping<TProperty, TEntity>?>> result = (profiler, queryExecuter, hooksExecuter, context) => factory(context, profiler, queryExecuter, hooksExecuter, loader.All(context), null);
                 return result;
             });
         }
 
         public static Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedChildEntity>?, IQueryable<TChildEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TEntity, IGrouping<TEntity, TTransformedChildEntity>>> GetQueryJoinFactory<TEntity, TChildEntity, TTransformedChildEntity, TExecutionContext>(
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>> transform,
             LambdaExpression parentPropExpression,
@@ -79,7 +88,7 @@ namespace Epam.GraphQL.TaskBatcher
                     convert = value => value == null ? null : Convert.ChangeType(value, unwrappedParentPropType, CultureInfo.InvariantCulture);
                 }
 
-                if (parentPropType.IsValueType && childPropType.IsNullable() && childPropType.UnwrapIfNullable() == parentPropType)
+                if (parentPropType.IsValueType && childPropType.IsNullable() && childPropType.UnwrapIfNullable() == parentPropType.UnwrapIfNullable())
                 {
                     groupingType = typeof(IGrouping<,>).MakeGenericType(parentPropType, typeof(TChildEntity));
                     get = MakeGetNullable<TEntity, TChildEntity, TTransformedChildEntity, TExecutionContext>(
@@ -87,6 +96,7 @@ namespace Epam.GraphQL.TaskBatcher
                         source => convert(leftPropertyGetter(source)),
                         transform,
                         childPropExpression,
+                        configurationContext,
                         stepNameFactory);
                 }
                 else
@@ -97,6 +107,7 @@ namespace Epam.GraphQL.TaskBatcher
                         source => convert(leftPropertyGetter(source)),
                         transform,
                         childPropExpression,
+                        configurationContext,
                         stepNameFactory);
                 }
 
@@ -115,16 +126,12 @@ namespace Epam.GraphQL.TaskBatcher
         }
 
         private static Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedEntity>?, IQueryable<TEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TProperty, IGrouping<TProperty, TTransformedEntity>?>> Get<TEntity, TTransformedEntity, TProperty, TExecutionContext>(
+            IConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             Expression<Func<TEntity, TProperty>> propSelector,
             Func<TProperty, IGrouping<TProperty, TTransformedEntity>>? defaultFactory,
             Func<TExecutionContext, Expression<Func<TEntity, TTransformedEntity>>> transform)
         {
-            if (propSelector == null)
-            {
-                throw new ArgumentNullException(nameof(propSelector));
-            }
-
             Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedEntity>?, IQueryable<TEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TProperty, IGrouping<TProperty, TTransformedEntity>?>> Factory((Func<string> StepNameFactory, LambdaExpression KeySelector, Delegate? DefaultFactory, Delegate Transform) key)
             {
                 var transform = (Func<TExecutionContext, Expression<Func<TEntity, TTransformedEntity>>>)key.Transform;
@@ -133,7 +140,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var stepNameFactory = key.StepNameFactory;
                 return (context, profiler, queryExecuter, hooksExecuter, query, sortings) => Get(
                     stepNameFactory,
-                    ids => query.GroupByValues(ids, propSelector, transform(context), stepNameFactory, queryExecuter, hooksExecuter, sortings),
+                    ids => query.GroupByValues(ids, propSelector, transform(context), configurationContext, stepNameFactory, queryExecuter, hooksExecuter, sortings),
                     g => g.Key,
                     defaultFactory)(profiler);
             }
@@ -142,17 +149,13 @@ namespace Epam.GraphQL.TaskBatcher
         }
 
         private static Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedEntity>?, IQueryable<TEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TProperty, IGrouping<TProperty, TTransformedEntity>?>> GetNullable<TEntity, TTransformedEntity, TProperty, TExecutionContext>(
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory,
             Expression<Func<TEntity, TProperty?>> propSelector,
             Func<TProperty, IGrouping<TProperty, TTransformedEntity>>? defaultFactory,
             Func<TExecutionContext, Expression<Func<TEntity, TTransformedEntity>>> transform)
             where TProperty : struct
         {
-            if (propSelector == null)
-            {
-                throw new ArgumentNullException(nameof(propSelector));
-            }
-
             Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedEntity>?, IQueryable<TEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TProperty, IGrouping<TProperty, TTransformedEntity>?>> Factory((Func<string> StepNameFactory, LambdaExpression KeySelector, Delegate? DefaultFactory, Delegate Transform) key)
             {
                 var transform = (Func<TExecutionContext, Expression<Func<TEntity, TTransformedEntity>>>)key.Transform;
@@ -161,7 +164,7 @@ namespace Epam.GraphQL.TaskBatcher
                 var stepNameFactory = key.StepNameFactory;
                 return (context, profiler, queryExecuter, hooksExecuter, query, sortings) => Get(
                     stepNameFactory,
-                    ids => query.GroupByValues(ids, propSelector, transform(context), stepNameFactory, queryExecuter, hooksExecuter, sortings),
+                    ids => query.GroupByValues(ids, propSelector, transform(context), configurationContext, stepNameFactory, queryExecuter, hooksExecuter, sortings),
                     g => g.Key,
                     defaultFactory)(profiler);
             }
@@ -174,22 +177,29 @@ namespace Epam.GraphQL.TaskBatcher
             Func<TEntity, object?> propGetter,
             Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>> transform,
             LambdaExpression propertyExpression,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory)
         {
             if (childPropertyType == typeof(string))
             {
-                return MakeGetHelper(propGetter, transform, propertyExpression, stepNameFactory);
+                return MakeGetHelper(propGetter, transform, propertyExpression, configurationContext, stepNameFactory);
             }
 
             // First fetch the generic form
-            var helper = typeof(BatchHelpers).GetGenericMethod(
-                nameof(MakeGetHelper),
-                new Type[] { typeof(TEntity), typeof(TChildEntity), typeof(TTransformedChildEntity), childPropertyType, typeof(TExecutionContext) },
-                new Type[] { typeof(Func<TEntity, object?>), typeof(Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>>), typeof(LambdaExpression), typeof(Func<string>) },
-                BindingFlags.Static | BindingFlags.NonPublic);
+            _makeGetHelperMethodInfo ??= ReflectionHelpers.GetMethodInfo<
+                Func<TEntity, object?>,
+                Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>>,
+                LambdaExpression,
+                IChainConfigurationContext,
+                Func<string>,
+                Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedChildEntity>?, IQueryable<TChildEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TEntity, IEnumerable<TTransformedChildEntity>?>>
+           >(MakeGetHelper<TEntity, TChildEntity, TTransformedChildEntity, int, TExecutionContext>);
+
+            var helper = _makeGetHelperMethodInfo.MakeGenericMethod(
+                typeof(TEntity), typeof(TChildEntity), typeof(TTransformedChildEntity), childPropertyType, typeof(TExecutionContext));
 
             // Now call it. The null argument is because it’s a static method.
-            var ret = helper.Invoke(null, new object[] { propGetter, transform, propertyExpression, stepNameFactory });
+            var ret = helper.Invoke(null, new object[] { propGetter, transform, propertyExpression, configurationContext, stepNameFactory });
 
             // Cast the result to the right kind of delegate and return it
             return (Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedChildEntity>?, IQueryable<TChildEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TEntity, IEnumerable<TTransformedChildEntity>?>>)ret;
@@ -199,14 +209,17 @@ namespace Epam.GraphQL.TaskBatcher
             Func<TEntity, object?> propGetter,
             Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>> transform,
             LambdaExpression propertyExpression,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory)
             where TProperty : struct
         {
             var param = Expression.Parameter(typeof(TChildEntity));
-            var convertedParam = Expression.Convert(param, propertyExpression.Parameters[0].Type);
+            Expression convertedParam = typeof(TChildEntity) == propertyExpression.Parameters[0].Type
+                ? param
+                : Expression.Convert(param, propertyExpression.Parameters[0].Type);
             var exprBody = propertyExpression.Body.ReplaceParameter(propertyExpression.Parameters[0], convertedParam);
             var expr = Expression.Lambda<Func<TChildEntity, TProperty>>(exprBody, param);
-            var task = Get(stepNameFactory, expr, null, transform);
+            var task = Get(configurationContext, stepNameFactory, expr, null, transform);
             Func<TEntity, TProperty?> strictPropGetter = e => (TProperty?)propGetter(e);
             Func<TProperty?, TProperty> propTransform = p => p!.Value;
 
@@ -225,13 +238,17 @@ namespace Epam.GraphQL.TaskBatcher
             Func<TEntity, object?> propGetter,
             Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>> transform,
             LambdaExpression propertyExpression,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory)
         {
             var param = Expression.Parameter(typeof(TChildEntity));
-            var convertedParam = Expression.Convert(param, propertyExpression.Parameters[0].Type);
+            Expression convertedParam = typeof(TChildEntity) == propertyExpression.Parameters[0].Type
+                ? param
+                : Expression.Convert(param, propertyExpression.Parameters[0].Type);
+
             var exprBody = propertyExpression.Body.ReplaceParameter(propertyExpression.Parameters[0], convertedParam);
             var expr = Expression.Lambda<Func<TChildEntity, string>>(exprBody, param);
-            var task = Get(stepNameFactory, expr, null, transform);
+            var task = Get(configurationContext, stepNameFactory, expr, null, transform);
             Func<TEntity, string?> strictPropGetter = e => (string?)propGetter(e);
             Func<string?, string> propTransform = p => p!;
 
@@ -251,17 +268,24 @@ namespace Epam.GraphQL.TaskBatcher
             Func<TEntity, object?> propGetter,
             Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>> transform,
             LambdaExpression propertyExpression,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory)
         {
+            _makeGetNullableHelperMethodInfo ??= ReflectionHelpers.GetMethodInfo<
+                Func<TEntity, object?>,
+                Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>>,
+                LambdaExpression,
+                IChainConfigurationContext,
+                Func<string>,
+                Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedChildEntity>?, IQueryable<TChildEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TEntity, IEnumerable<TTransformedChildEntity>?>>
+            >(MakeGetNullableHelper<TEntity, TChildEntity, TTransformedChildEntity, int, TExecutionContext>);
+
             // First fetch the generic form
-            var helper = typeof(BatchHelpers).GetGenericMethod(
-                nameof(MakeGetNullableHelper),
-                new Type[] { typeof(TEntity), typeof(TChildEntity), typeof(TTransformedChildEntity), propertyType, typeof(TExecutionContext) },
-                new Type[] { typeof(Func<TEntity, object?>), typeof(Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>>), typeof(LambdaExpression), typeof(Func<string>) },
-                BindingFlags.Static | BindingFlags.NonPublic);
+            var helper = _makeGetNullableHelperMethodInfo.MakeGenericMethod(
+                typeof(TEntity), typeof(TChildEntity), typeof(TTransformedChildEntity), propertyType, typeof(TExecutionContext));
 
             // Now call it. The null argument is because it’s a static method.
-            var ret = helper.Invoke(null, new object[] { propGetter, transform, propertyExpression, stepNameFactory });
+            var ret = helper.Invoke(null, new object[] { propGetter, transform, propertyExpression, configurationContext, stepNameFactory });
 
             // Cast the result to the right kind of delegate and return it
             return (Func<TExecutionContext, IProfiler, IQueryExecuter, ILoaderHooksExecuter<TTransformedChildEntity>?, IQueryable<TChildEntity>, IEnumerable<(LambdaExpression SortExpression, SortDirection SortDirection)>?, IDataLoader<TEntity, IEnumerable<TTransformedChildEntity>?>>)ret;
@@ -271,14 +295,18 @@ namespace Epam.GraphQL.TaskBatcher
             Func<TEntity, object?> propGetter,
             Func<TExecutionContext, Expression<Func<TChildEntity, TTransformedChildEntity>>> transform,
             LambdaExpression propertyExpression,
+            IChainConfigurationContext configurationContext,
             Func<string> stepNameFactory)
             where TProperty : struct
         {
             var param = Expression.Parameter(typeof(TChildEntity));
-            var convertedParam = Expression.Convert(param, propertyExpression.Parameters[0].Type);
+            Expression convertedParam = typeof(TChildEntity) == propertyExpression.Parameters[0].Type
+                ? param
+                : Expression.Convert(param, propertyExpression.Parameters[0].Type);
+
             var exprBody = propertyExpression.Body.ReplaceParameter(propertyExpression.Parameters[0], convertedParam);
             var expr = Expression.Lambda<Func<TChildEntity, TProperty?>>(exprBody, param);
-            var task = GetNullable(stepNameFactory, expr, null, transform);
+            var task = GetNullable(configurationContext, stepNameFactory, expr, null, transform);
             Func<TEntity, TProperty?> strictPropGetter = e => (TProperty?)propGetter(e);
             Func<TProperty?, TProperty> propTransform = p => p!.Value;
 

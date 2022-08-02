@@ -5,50 +5,41 @@
 
 using System;
 using System.Linq.Expressions;
-using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Diagnostics;
 using GraphQL;
 
 namespace Epam.GraphQL.Sorters.Implementations
 {
-    internal class CustomSorter<TEntity, TValueType, TExecutionContext> : ISorter<TExecutionContext>
+    internal class CustomSorter<TEntity, TValueType, TExecutionContext> : ISorter<TExecutionContext>, IChainConfigurationContextOwner
     {
-        private readonly Expression<Func<TEntity, TValueType>> _selector;
+        private readonly Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> _selectorFactory;
 
-        public CustomSorter(string name, Expression<Func<TEntity, TValueType>> selector)
+        public CustomSorter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Expression<Func<TEntity, TValueType>> selector)
+            : this(configurationContextFactory, name, _ => selector)
         {
-            Name = name?.ToCamelCase() ?? throw new ArgumentNullException(nameof(name));
-            _selector = selector ?? throw new ArgumentNullException(nameof(selector));
         }
+
+        public CustomSorter(
+            Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
+            string name,
+            Func<TExecutionContext, Expression<Func<TEntity, TValueType>>> selectorFactory)
+        {
+            ConfigurationContext = configurationContextFactory(this);
+            Name = name.ToCamelCase();
+            _selectorFactory = selectorFactory;
+        }
+
+        public IChainConfigurationContext ConfigurationContext { get; set; }
 
         public string Name { get; }
 
         public bool IsGroupable => false;
 
-        public LambdaExpression OriginalExpression => _selector;
+        public LambdaExpression BuildExpression(TExecutionContext context) => _selectorFactory(context);
 
-        public LambdaExpression BuildExpression(TExecutionContext context) => _selector;
-
-        public bool Equals(CustomSorter<TEntity, TValueType, TExecutionContext>? other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Name.Equals(other.Name, StringComparison.Ordinal)
-                && ExpressionEqualityComparer.Instance.Equals(_selector, other._selector);
-        }
-
-        public bool Equals(ISorter<TExecutionContext> other) => Equals(other as CustomSorter<TEntity, TValueType, TExecutionContext>);
-
-        public override bool Equals(object obj) => Equals(obj as CustomSorter<TEntity, TValueType, TExecutionContext>);
-
-        public override int GetHashCode()
-        {
-            var hashCode = default(HashCode);
-            hashCode.Add(Name, StringComparer.Ordinal);
-            hashCode.Add(_selector, ExpressionEqualityComparer.Instance);
-            return hashCode.ToHashCode();
-        }
+        public LambdaExpression BuildOriginalExpression(TExecutionContext context) => _selectorFactory(context);
     }
 }

@@ -15,29 +15,32 @@ using GraphQL.DataLoader;
 namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 {
     internal class BatchCompoundResolver<TEntity, TExecutionContext> : IBatchCompoundResolver<TEntity, TExecutionContext>
-        where TEntity : class
     {
-        private readonly List<IResolver<TEntity>> _resolvers = new();
+        private readonly List<IBatchResolver<TEntity>> _resolvers = new();
 
-        public void Add(IResolver<TEntity> resolver)
+        public BatchCompoundResolver(params IBatchResolver<TEntity>[] resolvers)
+            : this(resolvers.AsEnumerable())
         {
-            _resolvers.Add(resolver);
+        }
+
+        private BatchCompoundResolver(IEnumerable<IBatchResolver<TEntity>> resolvers)
+        {
+            _resolvers.AddRange(resolvers);
+        }
+
+        public IBatchCompoundResolver<TEntity, TExecutionContext> Add(IBatchResolver<TEntity> resolver)
+        {
+            return new BatchCompoundResolver<TEntity, TExecutionContext>(
+                _resolvers.Concat(Enumerable.Repeat(resolver, 1)));
         }
 
         public IDataLoader<TEntity, object?> GetBatchLoader(IResolveFieldContext context) => GetBatchLoader<object?>(context);
 
         public IDataLoader<Proxy<TEntity>, object?> GetProxiedBatchLoader(IResolveFieldContext context) => GetProxiedBatchLoader<object?>(context);
 
-        public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<TEntity, IEnumerable<object>, TSelectType> selector)
-        {
-            return new AsyncBatchResolver<TEntity, TSelectType>(
-                context => GetBatchLoader<IEnumerable<object>>(context).Then(selector),
-                context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then((e, r) => selector(e.GetOriginal(), r)));
-        }
-
         public IBatchResolver<TEntity, TSelectType> Select<TSelectType>(Func<IEnumerable<object>, TSelectType> selector)
         {
-            return new AsyncBatchResolver<TEntity, TSelectType>(
+            return new BatchResolverBase<TEntity, TSelectType>(
                 context => GetBatchLoader<IEnumerable<object>>(context).Then(selector),
                 context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then(selector));
         }

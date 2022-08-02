@@ -34,10 +34,10 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             optionsBuilder?.Invoke(builder);
             var options = builder.Options;
 
-            var graphType = GraphTypeDescriptor.Create<TExecutionContext>(typeof(MutationResultGraphType<,,>).MakeGenericType(mutationField.Mutation.GetType(), typeof(TExecutionContext), typeof(TReturnType)));
+            var graphType = GraphTypeDescriptor.Create<TExecutionContext>(typeof(MutationResultGraphType<TExecutionContext, TReturnType>));
             var fieldResolver = new AsyncFieldResolver<object>(context =>
             {
-                return DbContextSaver.PerformManualMutationAndGetResult(mutationField.Registry, resolver(context), mutationField.Mutation, context, options);
+                return DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, resolver(context), mutationField.Mutation, context, options);
             });
 
             return (fieldResolver, graphType);
@@ -59,11 +59,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             optionsBuilder?.Invoke(builder);
             var options = builder.Options;
 
-            var graphType = GraphTypeDescriptor.Create<TExecutionContext>(typeof(MutationResultGraphType<,,>).MakeGenericType(mutationField.Mutation.GetType(), typeof(TExecutionContext), typeof(TReturnType)));
+            var graphType = GraphTypeDescriptor.Create<MutationResultGraphType<TExecutionContext, TReturnType>, TExecutionContext>();
             var fieldResolver = new AsyncFieldResolver<object>(async context =>
             {
                 var mutationResult = await resolver(context).ConfigureAwait(false);
-                return await DbContextSaver.PerformManualMutationAndGetResult(mutationField.Registry, mutationResult, mutationField.Mutation, context, options).ConfigureAwait(false);
+                return await DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, mutationResult, mutationField.Mutation, context, options).ConfigureAwait(false);
             });
 
             return (fieldResolver, graphType);
@@ -75,17 +75,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             Func<IResolveFieldContext, IEnumerable<TReturnType>> resolver,
             Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            if (typeof(TReturnType) == typeof(object) || mutationField.Mutation.SubmitInputTypeRegistry.IsRegistered(mutationField.Mutation.GetType(), typeof(TReturnType)))
+            if (typeof(TReturnType) == typeof(object) || mutationField.Mutation.SubmitInputTypeRegistry.IsRegistered<TReturnType>())
             {
                 var builder = new ResolveOptionsBuilder();
                 optionsBuilder?.Invoke(builder);
                 var options = builder.Options;
 
-                graphType = GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<,>).MakeGenericType(mutationField.Mutation.GetType(), typeof(TExecutionContext)));
+                graphType = GraphTypeDescriptor.Create<SubmitOutputGraphType<TExecutionContext>, TExecutionContext>();
                 var fieldResolver = new AsyncFieldResolver<object>(context =>
                 {
                     var result = resolver(context).Cast<object>();
-                    return DbContextSaver.PerformManualMutationAndGetResult(mutationField.Registry, result, mutationField.Mutation, context, options);
+                    return DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, result, mutationField.Mutation, context, options);
                 });
 
                 return (fieldResolver, graphType);
@@ -100,17 +100,17 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             Func<IResolveFieldContext, Task<IEnumerable<TReturnType>>> resolver,
             Action<ResolveOptionsBuilder>? optionsBuilder)
         {
-            if (typeof(TReturnType) == typeof(object) || mutationField.Mutation.SubmitInputTypeRegistry.IsRegistered(mutationField.Mutation.GetType(), typeof(TReturnType)))
+            if (typeof(TReturnType) == typeof(object) || mutationField.Mutation.SubmitInputTypeRegistry.IsRegistered<TReturnType>())
             {
                 var builder = new ResolveOptionsBuilder();
                 optionsBuilder?.Invoke(builder);
                 var options = builder.Options;
 
-                graphType = GraphTypeDescriptor.Create<TExecutionContext>(typeof(SubmitOutputGraphType<,>).MakeGenericType(mutationField.Mutation.GetType(), typeof(TExecutionContext)));
+                graphType = GraphTypeDescriptor.Create<SubmitOutputGraphType<TExecutionContext>, TExecutionContext>();
                 var fieldResolver = new AsyncFieldResolver<object>(async context =>
                 {
                     var result = (await resolver(context).ConfigureAwait(false)).Cast<object>();
-                    return await DbContextSaver.PerformManualMutationAndGetResult(mutationField.Registry, result, mutationField.Mutation, context, options)
+                    return await DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, result, mutationField.Mutation, context, options)
                         .ConfigureAwait(false);
                 });
 

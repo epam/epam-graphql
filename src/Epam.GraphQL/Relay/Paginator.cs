@@ -5,21 +5,24 @@
 
 using System;
 using System.Linq;
+using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 
 namespace Epam.GraphQL.Relay
 {
     internal static class Paginator
     {
-        public static Paginatior<TSource> From<TSource>(IQueryExecuter executer, Func<string> stepNameFactory, IQueryable<TSource> query, bool shouldMaterialize)
+        public static Paginatior<TSource> From<TSource>(IQueryExecuter executer, IChainConfigurationContext configurationContext, Func<string> stepNameFactory, IQueryable<TSource> query, bool shouldMaterialize)
         {
-            return new Paginatior<TSource>(executer, stepNameFactory, query, shouldMaterialize);
+            return new Paginatior<TSource>(executer, configurationContext, stepNameFactory, query, shouldMaterialize);
         }
     }
 
     internal class Paginatior<TSource> : IPaginatorWithoutSkip<TSource>
     {
         private readonly IQueryExecuter _executer;
+        private readonly IChainConfigurationContext _configurationContext;
         private readonly Func<string> _stepNameFactory;
         private readonly IQueryable<TSource> _query;
         private readonly bool _shouldMaterialize;
@@ -32,22 +35,20 @@ namespace Epam.GraphQL.Relay
         private bool _shouldTakeLast;
         private bool _shouldTakeBefore;
 
-        public Paginatior(IQueryExecuter executer, Func<string> stepNameFactory, IQueryable<TSource> query, bool shouldMaterialize)
+        public Paginatior(IQueryExecuter executer, IChainConfigurationContext configurationContext, Func<string> stepNameFactory, IQueryable<TSource> query, bool shouldMaterialize)
         {
             _query = query;
             _executer = executer;
             _stepNameFactory = stepNameFactory;
             _shouldMaterialize = shouldMaterialize;
+            _configurationContext = configurationContext;
         }
 
         public IPaginatorWithoutSkip<TSource> SkipIncluding(int? index)
         {
             if (index.HasValue)
             {
-                if (_shouldTake)
-                {
-                    throw new InvalidOperationException("Cannot perform skip after take.");
-                }
+                Guards.ThrowInvalidOperationIf(_shouldTake, "Cannot perform skip after take.");
 
                 _skipCount += index.Value + 1;
                 _shouldSkip = true;
@@ -121,7 +122,7 @@ namespace Epam.GraphQL.Relay
                 return new PaginatorResult<TSource>
                 {
                     StartOffset = 0,
-                    Page = _executer.ToEnumerable(_stepNameFactory, query),
+                    Page = _executer.ToEnumerable(_configurationContext, _stepNameFactory, query),
                 };
             }
 
@@ -142,7 +143,7 @@ namespace Epam.GraphQL.Relay
                 query = query.Take(liveTakeCount);
             }
 
-            var sample = _executer.ToList(_stepNameFactory, query);
+            var sample = _executer.ToList(_configurationContext, _stepNameFactory, query);
             var shouldRemoveLast = false;
             var skipCanceled = false;
             var hasNextPage = false;
@@ -177,7 +178,7 @@ namespace Epam.GraphQL.Relay
                     // 2) the sequence is initially empty. This case should not be handled here.
 
                     // Again, we apply the same technique (take one more item from data sequence) to ensure that we have items after the current page.
-                    sample = _executer.ToList(_stepNameFactory, _query.Take(_takeCount + 1));
+                    sample = _executer.ToList(_configurationContext, _stepNameFactory, _query.Take(_takeCount + 1));
 
                     skipCanceled = true;
 
@@ -220,7 +221,7 @@ namespace Epam.GraphQL.Relay
                 if (_shouldSkip && !_shouldTake)
                 {
                     // If there is no items after skipping (and we did not perform taking), try to materialize query again.
-                    sample = _executer.ToList(_stepNameFactory, _query);
+                    sample = _executer.ToList(_configurationContext, _stepNameFactory, _query);
                 }
 
                 if (sample.Count == 0)

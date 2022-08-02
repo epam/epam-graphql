@@ -5,22 +5,29 @@
 
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using Epam.GraphQL.Builders.Loader;
-using Epam.GraphQL.Configuration.Implementations.Fields.ChildFields;
-using Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields;
 using Epam.GraphQL.Loaders;
 
 namespace Epam.GraphQL.Configuration
 {
-    internal interface IQueryField<TExecutionContext> : IArgumentedField<object, TExecutionContext>
+    public interface IQueryField<TExecutionContext> : IUnionableRootField<TExecutionContext>
     {
-        QueryableField<object, TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
+        IRootQueryableField<TReturnType, TExecutionContext> FromIQueryable<TReturnType>(
             Func<TExecutionContext, IQueryable<TReturnType>> query,
-            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure)
-            where TReturnType : class;
+            Action<IInlineObjectBuilder<TReturnType, TExecutionContext>>? configure = null);
 
-        ILoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
-            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new()
-            where TChildEntity : class;
+        IRootLoaderField<TChildEntity, TExecutionContext> FromLoader<TChildLoader, TChildEntity>()
+            where TChildLoader : Loader<TChildEntity, TExecutionContext>, new();
+
+        IArgumentedQueryField<TArgType, TExecutionContext> Argument<TArgType>(string argName);
+
+        IArgumentedQueryField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterArgument<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>;
+
+        IPayloadFieldedQueryField<TArgType, TExecutionContext> PayloadField<TArgType>(string argName);
+
+        IPayloadFieldedQueryField<Expression<Func<TEntity1, bool>>, TExecutionContext> FilterPayloadField<TProjection, TEntity1>(string argName)
+            where TProjection : Projection<TEntity1, TExecutionContext>;
     }
 }
