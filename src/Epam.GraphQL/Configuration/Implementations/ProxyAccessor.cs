@@ -30,11 +30,12 @@ namespace Epam.GraphQL.Configuration.Implementations
         private readonly Dictionary<LambdaExpression, string> _expressionNames = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<string, FieldDependencies<TExecutionContext>> _conditionMembers = new(StringComparer.Ordinal);
         private readonly HashSet<LoadEntityHook<TEntity, TExecutionContext>> _loadEntityHooks = new();
+        private readonly object _configureSync = new();
 
         private readonly ConcurrentDictionary<ICollection<string>, Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>> _createSelectorExpressionCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
         private readonly ConcurrentDictionary<ICollection<string>, Type> _concreteProxyTypeCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
         private Type? _baseProxyGenericType;
-        private Type? _proxyGenericType;
+        private volatile Type? _proxyGenericType;
         private Type? _proxyType;
         private Type? _baseProxyType;
 
@@ -99,63 +100,71 @@ namespace Epam.GraphQL.Configuration.Implementations
                 return;
             }
 
-            var fieldTypes = new Dictionary<string, Type>();
-            var i = 1;
-
-            foreach (var dep in _conditionMembers)
+            lock (_configureSync)
             {
-                foreach (var depExpr in dep.Value.DependentOn)
+                if (_proxyGenericType != null)
                 {
-                    AddNewField(dep.Key, depExpr);
+                    return;
                 }
-            }
 
-            foreach (var e in _members)
-            {
-                AddNewField(string.Empty, e);
-            }
+                var fieldTypes = new Dictionary<string, Type>();
+                var i = 1;
 
-            _proxyGenericType = fieldTypes.MakeProxyType(BaseProxyGenericType, typeof(TEntity).Name);
-
-            void AddNewField(string fieldPrefix, LambdaExpression depExpr)
-            {
-                if (!_expressionNames.ContainsKey(depExpr))
+                foreach (var dep in _conditionMembers)
                 {
-                    // Try to look up for existing expression field with the same lambda expression
-                    var existingField = Fields
-                        .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
-                        .FirstOrDefault(existing => ExpressionEqualityComparer.Instance.Equals(existing.OriginalExpression, depExpr));
-
-                    string? newName = null;
-
-                    if (existingField != null)
+                    foreach (var depExpr in dep.Value.DependentOn)
                     {
-                        // The expression field exists. Use its name
-                        newName = existingField.Name.ToCamelCase();
+                        AddNewField(dep.Key, depExpr);
                     }
-                    else if (depExpr.IsProperty())
-                    {
-                        // This is the case when expression field doesn't exist, but expression itself is a property,
-                        // so try to use a name of that property.
-                        var propName = depExpr.GetPropertyInfo().Name.ToCamelCase();
+                }
 
-                        // Try to lookup for existing non-expression field with the property name
-                        if (!Fields.Any(field => field.Name.ToCamelCase().Equals(propName, StringComparison.Ordinal)))
+                foreach (var e in _members)
+                {
+                    AddNewField(string.Empty, e);
+                }
+
+                _proxyGenericType = fieldTypes.MakeProxyType(BaseProxyGenericType, typeof(TEntity).Name);
+
+                void AddNewField(string fieldPrefix, LambdaExpression depExpr)
+                {
+                    if (!_expressionNames.ContainsKey(depExpr))
+                    {
+                        // Try to look up for existing expression field with the same lambda expression
+                        var existingField = Fields
+                            .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
+                            .FirstOrDefault(existing => ExpressionEqualityComparer.Instance.Equals(existing.OriginalExpression, depExpr));
+
+                        string? newName = null;
+
+                        if (existingField != null)
                         {
-                            // Field with the property name doesn't exist. Use a name of the property
-                            newName = propName;
+                            // The expression field exists. Use its name
+                            newName = existingField.Name.ToCamelCase();
+                        }
+                        else if (depExpr.IsProperty())
+                        {
+                            // This is the case when expression field doesn't exist, but expression itself is a property,
+                            // so try to use a name of that property.
+                            var propName = depExpr.GetPropertyInfo().Name.ToCamelCase();
+
+                            // Try to lookup for existing non-expression field with the property name
+                            if (!Fields.Any(field => field.Name.ToCamelCase().Equals(propName, StringComparison.Ordinal)))
+                            {
+                                // Field with the property name doesn't exist. Use a name of the property
+                                newName = propName;
+                                fieldTypes.Add(newName, depExpr.Body.Type);
+                            }
+                        }
+
+                        if (newName == null)
+                        {
+                            // No match with existing names. Use generic name
+                            newName = $"{fieldPrefix}${i++}";
                             fieldTypes.Add(newName, depExpr.Body.Type);
                         }
-                    }
 
-                    if (newName == null)
-                    {
-                        // No match with existing names. Use generic name
-                        newName = $"{fieldPrefix}${i++}";
-                        fieldTypes.Add(newName, depExpr.Body.Type);
+                        _expressionNames.Add(depExpr, newName);
                     }
-
-                    _expressionNames.Add(depExpr, newName);
                 }
             }
         }
