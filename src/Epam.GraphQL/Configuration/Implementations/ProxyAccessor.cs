@@ -30,7 +30,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         private readonly Dictionary<LambdaExpression, string> _expressionNames = new(ExpressionEqualityComparer.Instance);
         private readonly Dictionary<string, FieldDependencies<TExecutionContext>> _conditionMembers = new(StringComparer.Ordinal);
         private readonly HashSet<LoadEntityHook<TEntity, TExecutionContext>> _loadEntityHooks = new();
-        private readonly object _lock = new();
+        private readonly object _configureLock = new();
 
         private readonly ConcurrentDictionary<ICollection<string>, Expression<Func<TExecutionContext, TEntity, Proxy<TEntity>>>> _createSelectorExpressionCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
         private readonly ConcurrentDictionary<ICollection<string>, Type> _concreteProxyTypeCache = new(new CollectionEqualityComparer<string>(StringComparer.Ordinal));
@@ -95,7 +95,7 @@ namespace Epam.GraphQL.Configuration.Implementations
         [MemberNotNull(nameof(_proxyGenericType))]
         public void Configure()
         {
-            lock (_lock)
+            lock (_configureLock)
             {
                 if (_proxyGenericType != null)
                 {
