@@ -198,6 +198,9 @@ namespace Epam.GraphQL.Loaders
 #pragma warning restore CA1506
 #pragma warning restore CA1502
         {
+            var graphqlContext = (GraphQLContext<TExecutionContext>?)context.UserContext["ctx"];
+            Guards.AssertIfNull(graphqlContext);
+
             if (itemsToUpdate.Any())
             {
                 using (profiler.Step($"Update"))
@@ -253,18 +256,27 @@ namespace Epam.GraphQL.Loaders
                             var fieldsAndNextValues = nextItemToUpdate.Properties
                                 .Select(kv => (InputObjectGraphTypeConfigurator.FindFieldByName(kv.Key), kv.Value));
 
-                            var resolveFieldTasks = fieldsAndNextValues.Select(fieldAndValue => (fieldAndValue.Item1, fieldAndValue.Item1.Resolver.Resolve(
-                                new ResolveFieldContext
+                            List<(IField<TEntity, TExecutionContext> Field, ValueTask<object?> Result, object? Value)>
+                                resolveFieldTasks = new();
+
+                            foreach (var prop in nextItemToUpdate.Properties)
+                            {
+                                var field = InputObjectGraphTypeConfigurator.FindFieldByName(prop.Key);
+                                var result = field.Resolver.ResolveAsync(new ResolveFieldContext
                                 {
                                     // TODO Don't create another IResolveFieldContext; reuse existing one
                                     UserContext = context.UserContext,
                                     Source = prevEntityProxy,
-                                }), fieldAndValue.Value)).ToArray();
+                                });
+
+                                resolveFieldTasks.Add((field, result, prop.Value));
+                            }
+
                             return (nextItemToUpdate, prevEntity, resolveFieldTasks);
                         }).ToArray();
 
                         var tasksForWait = resolvedEntities
-                            .Select(resolvedEntity => resolvedEntity.resolveFieldTasks.Select(t => t.Item2).ToArray());
+                            .Select(resolvedEntity => resolvedEntity.resolveFieldTasks.Select(t => t.Result).ToArray());
 
                         var resolvedTasks = new List<object?[]>();
                         foreach (var taskForWait in tasksForWait)
@@ -273,9 +285,10 @@ namespace Epam.GraphQL.Loaders
 
                             for (int i = 0; i < taskForWait.Length; i++)
                             {
-                                resolved[i] = taskForWait[i] is IDataLoaderResult dataLoaderResult
+                                var result = await taskForWait[i].ConfigureAwait(false);
+                                resolved[i] = result is IDataLoaderResult dataLoaderResult
                                     ? await dataLoaderResult.GetResultAsync().ConfigureAwait(false)
-                                    : taskForWait[i];
+                                    : result;
                             }
 
                             resolvedTasks.Add(resolved);
@@ -285,10 +298,12 @@ namespace Epam.GraphQL.Loaders
 
                         for (int i = 0; i < resolvedEntities.Length; i++)
                         {
-                            var (nextEntity, prevEntity, fieldTask) = resolvedEntities[i];
-                            for (int j = 0; j < fieldTask.Length; j++)
+                            var nextEntity = resolvedEntities[i].nextItemToUpdate;
+                            var prevEntity = resolvedEntities[i].prevEntity;
+
+                            for (int j = 0; j < resolvedEntities[i].resolveFieldTasks.Count; j++)
                             {
-                                var (field, _, next) = fieldTask[j];
+                                var (field, _, next) = resolvedEntities[i].resolveFieldTasks[j];
                                 var prevValue = resolvedTasks[i][j];
                                 var nextValue = next;
                                 if (nextValue != null)
@@ -310,7 +325,7 @@ namespace Epam.GraphQL.Loaders
 
                             prevEntity.CopyProperties(
                                 nextEntity.Payload,
-                                fieldTask.Select(fv => fv.Item1)
+                                resolvedEntities[i].resolveFieldTasks.Select(fv => fv.Field)
                                     .OfType<IExpressionFieldConfiguration<TEntity, TExecutionContext>>()
                                     .Where(field => field.PropertyInfo != null && field.EditSettings.OnWrite == null && field.EditSettings.OnWriteAsync == null)
                                     .Select(field => field.PropertyInfo!));
@@ -356,7 +371,7 @@ namespace Epam.GraphQL.Loaders
                             itemsToCheck.Add(payload);
                         }
 
-                        var canUpdateItemTasks = itemsToCheck.Select(item => CanSaveAsync((GraphQLContext<TExecutionContext>)context.UserContext["ctx"], item, false));
+                        var canUpdateItemTasks = itemsToCheck.Select(item => CanSaveAsync(graphqlContext, item, false));
                         var canUpdate = true;
                         foreach (var canUpdateItemTask in canUpdateItemTasks)
                         {
@@ -398,13 +413,16 @@ namespace Epam.GraphQL.Loaders
 
         private async Task CreateNewItemsAsync(IResolveFieldContext context, IProfiler profiler, IDataContext dbContext, IEnumerable<SaveResultItem<TEntity, TId>> itemsToCreate)
         {
+            var graphqlContext = (GraphQLContext<TExecutionContext>?)context.UserContext["ctx"];
+            Guards.AssertIfNull(graphqlContext);
+
             if (itemsToCreate.Any())
             {
                 using (profiler.Step($"Create"))
                 {
                     using (profiler.Step($"CanCreate"))
                     {
-                        var canCreateTasks = itemsToCreate.Select(item => CanSaveAsync((GraphQLContext<TExecutionContext>)context.UserContext["ctx"], item.Payload, true));
+                        var canCreateTasks = itemsToCreate.Select(item => CanSaveAsync(graphqlContext, item.Payload, true));
 
                         var canCreate = true;
                         foreach (var canCreateTask in canCreateTasks)

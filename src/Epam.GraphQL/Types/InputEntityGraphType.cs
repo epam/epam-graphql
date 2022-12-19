@@ -18,7 +18,7 @@ namespace Epam.GraphQL.Types
             registry.ConfigureInputGraphType<TProjection, TEntity>(this);
         }
 
-        public override object ParseDictionary(IDictionary<string, object> value)
+        public override object ParseDictionary(IDictionary<string, object?> value)
         {
             return value;
         }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.TaskBatcher;
@@ -39,11 +40,13 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         protected abstract Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, IEnumerable<TTransformedReturnType>>> ProxiedResolver { get; }
 
-        public object Resolve(IResolveFieldContext context)
+        public ValueTask<object?> ResolveAsync(IResolveFieldContext context)
         {
+            Guards.AssertIfNull(context.Source);
+
             return context.Source is Proxy<TEntity> proxy
-                ? ProxiedResolver(context).LoadAsync(proxy)
-                : Resolver(context).LoadAsync((TEntity)context.Source);
+                ? new ValueTask<object?>(ProxiedResolver(context).LoadAsync(proxy))
+                : new ValueTask<object?>(Resolver(context).LoadAsync((TEntity)context.Source));
         }
 
         public abstract IEnumerableResolver<TEntity, TSelectType, TExecutionContext> Select<TSelectType>(

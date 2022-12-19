@@ -60,6 +60,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 try
                 {
                     var context = ctx.GetUserContext<TExecutionContext>();
+                    Guards.AssertIfNull(ctx.Source);
+
                     var entity = ctx.Source is Proxy<TEntity> proxy
                         ? converter.Value(proxy)
                         : (TEntity)ctx.Source;
@@ -90,6 +92,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.Helpers
                 try
                 {
                     var context = ctx.GetUserContext<TExecutionContext>();
+                    Guards.AssertIfNull(ctx.Source);
+
                     var entity = ctx.Source is Proxy<TEntity> proxy
                         ? converter.Value(proxy)
                         : (TEntity)ctx.Source;

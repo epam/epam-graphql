@@ -169,14 +169,14 @@ namespace Epam.GraphQL.Extensions
             return value;
         }
 
-        public static string ToFriendlyString(this IReadOnlyDictionary<string, object> dictionary)
+        public static string ToFriendlyString(this IReadOnlyDictionary<string, object?>? dictionary)
         {
             var builder = new StringBuilder();
             ToFriendlyStringImpl(dictionary, builder, 0);
             return builder.ToString();
         }
 
-        private static void ToFriendlyStringImpl(object obj, StringBuilder builder, int indent)
+        private static void ToFriendlyStringImpl(object? obj, StringBuilder builder, int indent)
         {
             if (obj == null)
             {
@@ -184,7 +184,7 @@ namespace Epam.GraphQL.Extensions
                 return;
             }
 
-            if (obj is IReadOnlyDictionary<string, object> dictionary)
+            if (obj is IReadOnlyDictionary<string, object?> dictionary)
             {
                 builder.AppendLine("{");
 

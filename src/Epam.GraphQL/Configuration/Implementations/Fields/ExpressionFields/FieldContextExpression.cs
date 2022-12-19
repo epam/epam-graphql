@@ -6,12 +6,12 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using Epam.GraphQL.Diagnostics;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Sorters;
 using GraphQL;
-using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 {
@@ -53,6 +53,8 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         {
             try
             {
+                Guards.AssertIfNull(context.Source);
+
                 return context.Source is Proxy<TEntity> proxy
                     ? (TReturnType?)_proxyResolver.Value(proxy)
                     : _resolver.Value(context.GetUserContext<TExecutionContext>(), (TEntity)context.Source);
@@ -65,9 +67,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public LambdaExpression BuildOriginalExpression(TExecutionContext context) => _expression;
 
-        object? IFieldResolver.Resolve(IResolveFieldContext context)
+        public ValueTask<object?> ResolveAsync(IResolveFieldContext context)
         {
-            return Resolve(context);
+            return new ValueTask<object?>(Resolve(context));
         }
 
         LambdaExpression ISorter<TExecutionContext>.BuildExpression(TExecutionContext context) => Expression.Lambda<Func<TEntity, TReturnType>>(

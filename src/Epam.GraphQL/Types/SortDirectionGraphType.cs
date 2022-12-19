@@ -5,8 +5,9 @@
 
 using System;
 using Epam.GraphQL.Loaders;
-using GraphQL.Language.AST;
 using GraphQL.Types;
+using GraphQLParser;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.Types
 {
@@ -17,14 +18,14 @@ namespace Epam.GraphQL.Types
             Name = nameof(SortDirection);
         }
 
-        public override object? ParseLiteral(IValue value)
+        public override object? ParseLiteral(GraphQLValue value)
         {
-            if (value is EnumValue enumValue)
+            if (value is GraphQLEnumValue enumValue)
             {
                 return ParseValue(enumValue.Name);
             }
 
-            if (value is StringValue stringValue)
+            if (value is GraphQLStringValue stringValue)
             {
                 return ParseValue(stringValue.Value);
             }
@@ -34,6 +35,16 @@ namespace Epam.GraphQL.Types
 
         public override object ParseValue(object? value)
         {
+            if (value is GraphQLName name)
+            {
+                value = name.StringValue;
+            }
+
+            if (value is ROM rom)
+            {
+                value = rom.ToString();
+            }
+
             if (value is string stringValue)
             {
                 if (stringValue.Equals("ASC", StringComparison.Ordinal) || stringValue.Equals("asc", StringComparison.Ordinal))

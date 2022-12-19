@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -54,9 +55,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
                 return (ctx, e, value) =>
                 {
-                    value = value is IDictionary<string, object> dict
+                    value = value is IDictionary<string, object?> dict
                         ? dict.ToObject(typeof(TReturnType))
                         : value?.GetPropertyValue(typeof(TReturnType));
+
+                    Guards.AssertIfNull(value);
 
                     OnWrite(ctx, (TEntity)e, (TReturnType)value);
                 };
@@ -74,9 +77,11 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
 
                 return (ctx, e, value) =>
                 {
-                    value = value is IDictionary<string, object> dict
+                    value = value is IDictionary<string, object?> dict
                         ? dict.ToObject(typeof(TReturnType))
                         : value?.GetPropertyValue(typeof(TReturnType));
+
+                    Guards.AssertIfNull(value);
 
                     return OnWriteAsync(ctx, (TEntity)e, (TReturnType)value);
                 };

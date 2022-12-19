@@ -5,8 +5,8 @@
 
 using System;
 using System.Globalization;
-using GraphQL.Language.AST;
 using GraphQL.Types;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.Types
 {
@@ -17,12 +17,12 @@ namespace Epam.GraphQL.Types
             Name = "DateTime";
         }
 
-        public override object? ParseLiteral(IValue value)
+        public override object? ParseLiteral(GraphQLValue value)
         {
             return value switch
             {
-                NullValue => null,
-                StringValue stringValue => DateTimeOffset.Parse(stringValue.Value, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal).UtcDateTime,
+                GraphQLNullValue => null,
+                GraphQLStringValue stringValue => DateTimeOffset.Parse(stringValue.Value, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal).UtcDateTime,
                 _ => ThrowLiteralConversionError(value),
             };
         }

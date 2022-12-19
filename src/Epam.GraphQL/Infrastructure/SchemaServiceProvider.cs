@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Extensions;
@@ -20,11 +21,16 @@ namespace Epam.GraphQL.Infrastructure
         private readonly ConcurrentDictionary<Type, object> _cache = new();
         private readonly Lazy<RelationRegistry<TExecutionContext>> _registry;
         private readonly Lazy<SubmitInputTypeRegistry<TExecutionContext>> _submitInputTypeRegistry;
+        private readonly Lazy<IEnumerable<IGraphTypeMappingProvider>> _graphTypeMappingProvider;
 
         public SchemaServiceProvider()
         {
             _registry = new Lazy<RelationRegistry<TExecutionContext>>(() => new RelationRegistry<TExecutionContext>(this));
             _submitInputTypeRegistry = new Lazy<SubmitInputTypeRegistry<TExecutionContext>>(() => new SubmitInputTypeRegistry<TExecutionContext>(_registry.Value));
+            _graphTypeMappingProvider = new Lazy<IEnumerable<IGraphTypeMappingProvider>>(() => new List<IGraphTypeMappingProvider>(new[]
+                {
+                    new AutoRegisteringGraphTypeMappingProvider(),
+                }));
         }
 
         public object GetService(Type type)
@@ -37,6 +43,11 @@ namespace Epam.GraphQL.Infrastructure
             if (type == typeof(SubmitInputTypeRegistry<TExecutionContext>))
             {
                 return _submitInputTypeRegistry.Value;
+            }
+
+            if (type == typeof(IEnumerable<IGraphTypeMappingProvider>))
+            {
+                return _graphTypeMappingProvider.Value;
             }
 
             Guards.ThrowInvalidOperationIf(!typeof(IGraphType).IsAssignableFrom(type), $"Cannot resolve type {type}");

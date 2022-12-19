@@ -10,7 +10,7 @@ using GraphQL.Resolvers;
 
 namespace Epam.GraphQL.Configuration.Implementations.Fields
 {
-    internal interface IFieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldResolver<TReturnType?>, ISorter<TExecutionContext>
+    internal interface IFieldExpression<TEntity, TReturnType, TExecutionContext> : IFieldResolver, ISorter<TExecutionContext>
     {
         bool IsReadOnly { get; }
 

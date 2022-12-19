@@ -204,7 +204,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Relations
                 var childFieldType = childGraphType.GetField(_childProperty.NameOf().ToCamelCase());
                 var fieldType = graphType.GetField(_property.NameOf().ToCamelCase());
 
-                if (fieldType == null)
+                if (fieldType == null || childFieldType == null)
                 {
                     return null;
                 }

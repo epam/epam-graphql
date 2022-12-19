@@ -16,7 +16,7 @@ namespace Epam.GraphQL.Types
             registry.ConfigureInputAutoObjectGraphType<TSourceType>(this);
         }
 
-        public override object ParseDictionary(IDictionary<string, object> value)
+        public override object ParseDictionary(IDictionary<string, object?> value)
         {
             return value;
         }

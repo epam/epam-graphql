@@ -144,7 +144,7 @@ namespace Epam.GraphQL.Tests
             });
 
             var actualResult = ExecuteHelpers.ExecuteQuery(queryType, GraphiqlRequest);
-            var actualQuery = actualResult.Query;
+            var actualQuery = actualResult.Query.ToString();
             var actualErrorsCount = actualResult.Errors?.Count ?? 0;
 
             const int expectedErrorsCount = 0;

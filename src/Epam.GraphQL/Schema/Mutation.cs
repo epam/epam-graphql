@@ -151,7 +151,7 @@ namespace Epam.GraphQL
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
             string argName,
             IInputObjectGraphType argGraphType,
-            Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
+            Func<IResolveFieldContext, Dictionary<string, object>, ValueTask<object?>> resolve,
             Type fieldType)
         {
             ThrowIfIsNotConfiguring();
@@ -164,7 +164,7 @@ namespace Epam.GraphQL
                 fieldType);
         }
 
-        private async Task<object> PerformResolve(IResolveFieldContext context, Dictionary<string, object> payload)
+        private async ValueTask<object?> PerformResolve(IResolveFieldContext context, Dictionary<string, object> payload)
         {
             var inputItems = new Dictionary<string, IEnumerable<IInputItem>>();
 

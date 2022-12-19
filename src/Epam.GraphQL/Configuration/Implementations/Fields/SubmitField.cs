@@ -22,12 +22,12 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
             string argName,
             IInputObjectGraphType argGraphType,
-            Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
+            Func<IResolveFieldContext, Dictionary<string, object>, ValueTask<object?>> resolve,
             Type fieldType)
             : base(configurationContextFactory, parent, name)
         {
             GraphType = returnGraphType;
-            Resolver = new AsyncFieldResolver<object>(ctx => resolve(ctx, (Dictionary<string, object>)ctx.Arguments["payload"].Value));
+            Resolver = new FuncFieldResolver<object>(ctx => resolve(ctx, (Dictionary<string, object>)ctx.Arguments!["payload"].Value!));
             FieldType = fieldType;
 
             Arguments = new()

@@ -6,13 +6,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.Extensions
 {
     internal static class FieldExtensions
     {
-        public static IEnumerable<string> GetSubFieldsNames(this Field? field, Fragments fragments, Func<Field, bool> predicate)
+        public static IEnumerable<string> GetSubFieldsNames(this GraphQLField? field, IEnumerable<GraphQLFragmentDefinition> fragments, Func<GraphQLField, bool> predicate)
         {
             if (field == null)
             {
@@ -20,24 +20,28 @@ namespace Epam.GraphQL.Extensions
             }
 
             var result = new List<string>();
-            result.AddRange(field.SelectionSet.Children.OfType<Field>().Where(f => predicate(f) && !f.IsMeta()).Select(field => field.Name));
 
-            var fragmentNames = field.SelectionSet.Children.OfType<FragmentSpread>().Select(fragment => fragment.Name);
+            if (field.SelectionSet != null)
+            {
+                result.AddRange(field.SelectionSet.Selections.OfType<GraphQLField>().Where(f => predicate(f) && !f.IsMeta()).Select(field => field.Name.StringValue));
+            }
+
+            var fragmentNames = field.SelectionSet?.Selections.OfType<GraphQLFragmentSpread>().Select(fragment => fragment.FragmentName.Name.StringValue);
             var fragmentFields = fragments
-                .Where(fragment => fragmentNames.Contains(fragment.Name))
+                .Where(fragment => fragmentNames.Contains(fragment.FragmentName.Name.StringValue))
                 .SelectMany(f => GetFragmentFields(fragments, f, predicate))
-                .Select(f => f.Name);
+                .Select(f => f.Name.StringValue);
             result.AddRange(fragmentFields);
 
             return result;
         }
 
-        public static bool IsMeta(this Field field) => field.Name.Equals("__typename", StringComparison.Ordinal);
+        public static bool IsMeta(this GraphQLField field) => field.Name.StringValue.Equals("__typename", StringComparison.Ordinal);
 
-        private static IEnumerable<Field> GetFragmentFields(Fragments fragments, FragmentDefinition fragment, Func<Field, bool> predicate)
+        private static IEnumerable<GraphQLField> GetFragmentFields(IEnumerable<GraphQLFragmentDefinition> fragments, GraphQLFragmentDefinition fragment, Func<GraphQLField, bool> predicate)
         {
-            var result = fragment.SelectionSet.Children.OfType<Field>().Where(f => predicate(f) && !f.IsMeta())
-                .Concat(fragment.SelectionSet.Children.OfType<FragmentSpread>().SelectMany(f => GetFragmentFields(fragments, fragments.Single(d => d.Name == f.Name), predicate)));
+            var result = fragment.SelectionSet.Selections.OfType<GraphQLField>().Where(f => predicate(f) && !f.IsMeta())
+                .Concat(fragment.SelectionSet.Selections.OfType<GraphQLFragmentSpread>().SelectMany(f => GetFragmentFields(fragments, fragments.Single(d => d.FragmentName.Name.StringValue == f.FragmentName.Name.StringValue), predicate)));
 
             return result;
         }

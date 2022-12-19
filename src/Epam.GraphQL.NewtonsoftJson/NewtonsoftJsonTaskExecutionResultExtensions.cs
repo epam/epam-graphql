@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using GraphQL;
 using GraphQL.Execution;
 using GraphQL.NewtonsoftJson;
-using Newtonsoft.Json;
 
 namespace Epam.GraphQL.SystemTextJson
 {
@@ -25,7 +24,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter()).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer()).ConfigureAwait(false);
             return result;
         }
 
@@ -37,7 +36,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(indent: indent)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(indent: indent)).ConfigureAwait(false);
             return result;
         }
 
@@ -49,7 +48,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
             return result;
         }
 
@@ -61,7 +60,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(serializerSettings: serializerSettings)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(serializerSettings: serializerSettings)).ConfigureAwait(false);
             return result;
         }
 
@@ -73,7 +72,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(configureSerializerSettings: configureSerializerSettings)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(configureSerializerSettings: configureSerializerSettings)).ConfigureAwait(false);
             return result;
         }
 
@@ -85,7 +84,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(indent: indent, errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(indent: indent, errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
             return result;
         }
 
@@ -97,7 +96,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(serializerSettings: serializerSettings, errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(serializerSettings: serializerSettings, errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
             return result;
         }
 
@@ -109,7 +108,7 @@ namespace Epam.GraphQL.SystemTextJson
             }
 
             var executionResult = await executionResultTask.ConfigureAwait(false);
-            var result = await executionResult.WriteToStringAsync(new DocumentWriter(configureSerializerSettings: configureSerializerSettings, errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
+            var result = await executionResult.WriteToStringAsync(new GraphQLSerializer(configureSerializerSettings: configureSerializerSettings, errorInfoProvider: errorInfoProvider)).ConfigureAwait(false);
             return result;
         }
     }
