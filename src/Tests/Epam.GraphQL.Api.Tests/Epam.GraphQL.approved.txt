@@ -541,7 +541,7 @@ namespace Epam.GraphQL
 {
     public static class ExecutionResultExtensions
     {
-        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.IGraphQLTextSerializer documentWriter) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.IGraphQLTextSerializer graphQlTextSerializer) { }
     }
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IDataContext : Epam.GraphQL.Adapters.IQueryableToAsNoTrackingQueryableConverter, Epam.GraphQL.Adapters.IQueryableToAsyncEnumerableConverter
@@ -711,7 +711,7 @@ namespace Epam.GraphQL
     }
     public static class TaskExecutionResultExtensions
     {
-        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, GraphQL.IGraphQLTextSerializer documentWriter) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, GraphQL.IGraphQLTextSerializer graphQlTextSerializer) { }
     }
 }
 namespace Epam.GraphQL.Filters
