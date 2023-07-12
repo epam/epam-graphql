@@ -12,7 +12,7 @@ using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Resolve.RootProjection
@@ -148,7 +148,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 expected: @"
                     {
                         test: {
-                            testField: 150 
+                            testField: 150
                         }
                     }");
 
@@ -217,7 +217,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<string, string, string, string, string>(mutation)
                     .Resolve(resolver),
                 query: $@"
-                    test({BuildArguments(arg1: "test", arg2: "test2", arg3: "test3", arg4: "test4", arg5: "test5")}) {{ 
+                    test({BuildArguments(arg1: "test", arg2: "test2", arg3: "test3", arg4: "test4", arg5: "test5")}) {{
                         testField
                     }}",
                 expected: @"
@@ -242,7 +242,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<int, int, int, int, int>(mutation)
                     .Resolve(resolver),
                 query: $@"
-                    test({BuildArguments(arg1: 20, arg2: 40, arg3: 60, arg4: 100, arg5: 50)}) {{ 
+                    test({BuildArguments(arg1: 20, arg2: 40, arg3: 60, arg4: 100, arg5: 50)}) {{
                         testField
                     }}",
                 expected: @"
@@ -267,7 +267,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<int, int, int, int, int>(mutation)
                     .Resolve(resolver),
                 query: $@"
-                    test({BuildArguments(arg1: 20, arg2: 40, arg3: 60, arg4: 100, arg5: 200)}) {{ 
+                    test({BuildArguments(arg1: 20, arg2: 40, arg3: 60, arg4: 100, arg5: 200)}) {{
                         testField
                     }}",
                 expected: @"
@@ -292,7 +292,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<int, int, int, int, int>(mutation)
                     .Resolve(resolver),
                 query: $@"
-                    test({BuildArguments(arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5)}) {{ 
+                    test({BuildArguments(arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5)}) {{
                         testField
                     }}",
                 expected: @"
@@ -326,7 +326,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<int, int, int, int, int>(mutation)
                     .Resolve(resolver),
                 query: $@"
-                    test({BuildArguments(arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5)}) {{ 
+                    test({BuildArguments(arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5)}) {{
                         testField
                     }}",
                 expected: @"
@@ -359,7 +359,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                 mutationBuilder: mutation => CreateArgumentBuilder<int, int, int, int, int>(mutation)
                     .Resolve(resolver),
                 query: $@"
-                    test({BuildArguments(arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5)}) {{ 
+                    test({BuildArguments(arg1: 1, arg2: 2, arg3: 3, arg4: 4, arg5: 5)}) {{
                         testField {{
                             testField
                         }}

@@ -19,42 +19,42 @@ namespace Epam.GraphQL.SystemTextJson
     {
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter());
+            return executionResult.WriteToStringAsync(new GraphQLSerializer());
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, bool indent)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(indent: indent));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(indent: indent));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(errorInfoProvider: errorInfoProvider));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(errorInfoProvider: errorInfoProvider));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, JsonSerializerOptions serializerOptions)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(serializerOptions: serializerOptions));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(serializerOptions: serializerOptions));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, Action<JsonSerializerOptions> configureSerializerOptions)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(configureSerializerOptions: configureSerializerOptions));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(configureSerializerOptions: configureSerializerOptions));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, bool indent, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(indent: indent, errorInfoProvider: errorInfoProvider));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(indent: indent, errorInfoProvider: errorInfoProvider));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, JsonSerializerOptions serializerOptions, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(serializerOptions: serializerOptions, errorInfoProvider: errorInfoProvider));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(serializerOptions: serializerOptions, errorInfoProvider: errorInfoProvider));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, Action<JsonSerializerOptions> configureSerializerOptions, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResult.WriteToStringAsync(new DocumentWriter(configureSerializerOptions: configureSerializerOptions, errorInfoProvider: errorInfoProvider));
+            return executionResult.WriteToStringAsync(new GraphQLSerializer(configureSerializerOptions: configureSerializerOptions, errorInfoProvider: errorInfoProvider));
         }
     }
 }

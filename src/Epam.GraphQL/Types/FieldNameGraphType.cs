@@ -5,8 +5,8 @@
 
 using System;
 using System.Linq;
-using GraphQL.Language.AST;
 using GraphQL.Types;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.Types
 {
@@ -22,17 +22,17 @@ namespace Epam.GraphQL.Types
             _fieldNames = fieldNames;
         }
 
-        public override object? ParseValue(object value)
+        public override object? ParseValue(object? value)
         {
             return ValidateResult(base.ParseValue(value));
         }
 
-        public override object? ParseLiteral(IValue value)
+        public override object? ParseLiteral(GraphQLValue value)
         {
             return ValidateResult(base.ParseLiteral(value));
         }
 
-        private string? ValidateResult(object value)
+        private string? ValidateResult(object? value)
         {
             var result = value as string;
             if (result != null && !_fieldNames.Contains(result))

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Epam.GraphQL.Tests.Helpers;
+using Epam.GraphQL.Tests.Mock;
 using Epam.GraphQL.Tests.TestData;
 using NUnit.Framework;
 
@@ -41,11 +42,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -89,11 +88,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test {
@@ -141,11 +138,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -186,11 +181,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test {
@@ -238,11 +231,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -286,11 +277,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -333,11 +322,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -382,11 +369,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         id
@@ -433,11 +418,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         id
@@ -492,6 +475,7 @@ namespace Epam.GraphQL.Tests.Diagnostics
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
             var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(MutationBuilder);
+            var dataContext = new DataContextMock();
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
@@ -507,7 +491,8 @@ namespace Epam.GraphQL.Tests.Diagnostics
                             id
                         }
                     }
-                }");
+                }",
+                dataContext);
 
             Assert.That(
                 result.Errors,

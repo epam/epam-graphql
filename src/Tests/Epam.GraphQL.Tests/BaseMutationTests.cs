@@ -150,6 +150,11 @@ namespace Epam.GraphQL.Tests
             TestHelpers.TestMutation(queryBuilder, mutationBuilder, DataContext, query, expected, checks, beforeExecute, afterSave);
         }
 
+        protected void TestQuery(Action<Query<TestUserContext>> queryBuilder, string query, string expected)
+        {
+            TestHelpers.TestQuery(queryBuilder, query, expected, DataContext);
+        }
+
         public static class CustomObject
         {
             public static CustomObject<T> Create<T>(T fieldValue) => new() { TestField = fieldValue };

@@ -14,13 +14,13 @@ namespace Epam.GraphQL
     /// </summary>
     public static class ExecutionResultExtensions
     {
-        public static async Task<string> WriteToStringAsync(this ExecutionResult executionResult, IDocumentWriter documentWriter)
+        public static Task<string> WriteToStringAsync(this ExecutionResult executionResult, IGraphQLTextSerializer graphQlTextSerializer)
         {
             Guards.ThrowIfNull(executionResult, nameof(executionResult));
-            Guards.ThrowIfNull(documentWriter, nameof(documentWriter));
+            Guards.ThrowIfNull(graphQlTextSerializer, nameof(graphQlTextSerializer));
 
-            var result = await documentWriter.WriteToStringAsync(executionResult).ConfigureAwait(false);
-            return result;
+            var result = graphQlTextSerializer.Serialize(executionResult);
+            return Task.FromResult(result);
         }
     }
 }

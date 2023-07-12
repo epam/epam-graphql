@@ -310,8 +310,8 @@ namespace Epam.GraphQL.EntityFrameworkCore.Tests
                         ctx => Queryable.Select(ctx.DbContext.People, p => p.UnitId),
                         builder =>
                         {
-                            builder.Field("id", x => x);
-                            builder.Field("twice", x => 2 * x);
+                            builder.Field("id", x => x).Groupable();
+                            builder.Field("twice", x => 2 * x).Groupable();
                         })
                         .AsGroupConnection();
             }

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Resolve.RootProjection
@@ -143,13 +143,13 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
                     {
                         test: {
-                            testField: 10 
+                            testField: 10
                         }
                     }");
 
@@ -169,7 +169,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
@@ -195,7 +195,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
@@ -221,7 +221,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
@@ -247,7 +247,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
@@ -274,7 +274,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
@@ -301,7 +301,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"
@@ -337,7 +337,7 @@ namespace Epam.GraphQL.Tests.Resolve.RootProjection
                     .Field("test")
                     .Resolve(resolver),
                 query: @"
-                    test { 
+                    test {
                         testField
                     }",
                 expected: @"

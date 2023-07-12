@@ -14,9 +14,12 @@ namespace Epam.GraphQL.Configuration.Implementations
 {
     internal class ObjectGraphTypeConfigurator<TEntity, TExecutionContext> : BaseObjectGraphTypeConfigurator<TEntity, TExecutionContext>
     {
+        private readonly bool _isAuto;
+
         public ObjectGraphTypeConfigurator(IField<TExecutionContext>? parent, IObjectConfigurationContext context, IRegistry<TExecutionContext> registry, bool isAuto)
             : base(context, parent, registry, isAuto)
         {
+            _isAuto = isAuto;
             Name = isAuto ? Registry.GetGraphQLAutoTypeName<TEntity>(false) : Registry.GetGraphQLTypeName<TEntity>(false, parent);
         }
 
@@ -49,6 +52,11 @@ namespace Epam.GraphQL.Configuration.Implementations
             {
                 graphType.AddField(field.AsFieldType());
             }
+        }
+
+        protected override bool IsFieldGroupable(IExpressionFieldConfiguration<TEntity, TExecutionContext> field)
+        {
+            return base.IsFieldGroupable(field) || (_isAuto && Registry.IsSimpleType(field.FieldType));
         }
     }
 

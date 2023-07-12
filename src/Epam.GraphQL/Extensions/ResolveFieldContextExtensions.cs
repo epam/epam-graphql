@@ -10,12 +10,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using Epam.GraphQL.Configuration;
 using Epam.GraphQL.Diagnostics;
+using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
 using GraphQL.DataLoader;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 using Microsoft.Extensions.Logging;
 
 namespace Epam.GraphQL.Extensions
@@ -32,44 +33,50 @@ namespace Epam.GraphQL.Extensions
             return context.Bind(ctx => ctx.GetQueryExecuter().Execute(context.GetFieldConfigurationContext(), () => ctx.GetPath(), queryFactory(ctx), transform, transformName));
         }
 
-        public static TExecutionContext GetUserContext<TExecutionContext>(this IResolveFieldContext context) => ((GraphQLContext<TExecutionContext>)context.UserContext["ctx"]).ExecutionContext;
+        public static TExecutionContext GetUserContext<TExecutionContext>(this IResolveFieldContext context) => GetGraphQLContext<TExecutionContext>(context).ExecutionContext;
 
-        public static ISchemaExecutionListener GetListener(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Listener;
+        public static ISchemaExecutionListener GetListener(this IResolveFieldContext context) => GetGraphQLContext(context).Listener;
 
-        public static IQueryExecuter GetQueryExecuter(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).QueryExecuter;
+        public static IQueryExecuter GetQueryExecuter(this IResolveFieldContext context) => GetGraphQLContext(context).QueryExecuter;
 
-        public static ILogger GetLogger(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Logger;
+        public static ILogger GetLogger(this IResolveFieldContext context) => GetGraphQLContext(context).Logger;
 
-        public static TResult Bind<TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, TResult> func) => ((GraphQLContext)context.UserContext["ctx"]).ResolveFieldContextBinder.Bind(context, func);
+        public static TResult Bind<TResult>(this IResolveFieldContext context, Func<IResolveFieldContext, TResult> func) => GetGraphQLContext(context).ResolveFieldContextBinder.Bind(context, func);
 
-        public static IBatcher GetBatcher(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Batcher;
+        public static IBatcher GetBatcher(this IResolveFieldContext context) => GetGraphQLContext(context).Batcher;
 
-        public static IProfiler GetProfiler(this IResolveFieldContext context) => ((GraphQLContext)context.UserContext["ctx"]).Profiler;
+        public static IProfiler GetProfiler(this IResolveFieldContext context) => GetGraphQLContext(context).Profiler;
 
         public static IDataContext GetDataContext(this IResolveFieldContext context)
         {
-            return ((GraphQLContext)context.UserContext["ctx"]).DataContext ?? throw new NotSupportedException();
+            return GetGraphQLContext(context).DataContext ?? throw new NotSupportedException();
         }
 
-        public static bool HasTotalCount(this IResolveFieldContext context) => context.SubFields.ContainsKey("totalCount");
+        public static bool HasTotalCount(this IResolveFieldContext context) => context.SubFields?.ContainsKey("totalCount") ?? false;
 
-        public static bool HasItems(this IResolveFieldContext context) => context.SubFields.ContainsKey("items");
+        public static bool HasItems(this IResolveFieldContext context) => context.SubFields?.ContainsKey("items") ?? false;
 
-        public static bool HasEdges(this IResolveFieldContext context) => context.SubFields.ContainsKey("edges");
+        public static bool HasEdges(this IResolveFieldContext context) => context.SubFields?.ContainsKey("edges") ?? false;
 
         public static bool HasEndCursor(this IResolveFieldContext context)
         {
-            if (!context.SubFields.TryGetValue("pageInfo", out var pageInfo))
+            if (context.SubFields != null && context.SubFields.TryGetValue("pageInfo", out var pageInfo))
             {
-                return false;
+                return pageInfo.Field?.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), c => !c.Name.StringValue.Equals("endCursor", StringComparison.OrdinalIgnoreCase)).Any() ?? false;
             }
 
-            return pageInfo.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("endCursor", StringComparison.OrdinalIgnoreCase)).Any();
+            return false;
         }
 
         public static string GetPath(this IResolveFieldContext context) => string.Join(".", context.Path.SafeNull());
 
-        public static IChainConfigurationContext GetFieldConfigurationContext(this IResolveFieldContext context) => (IChainConfigurationContext)context.FieldDefinition.Metadata["CONFIGURATION_CONTEXT"];
+        public static IChainConfigurationContext GetFieldConfigurationContext(this IResolveFieldContext context)
+        {
+            var result = context.FieldDefinition.Metadata["CONFIGURATION_CONTEXT"];
+            Guards.AssertIfNull(result);
+
+            return (IChainConfigurationContext)result;
+        }
 
         public static ExecutionError CreateFieldExecutionError(this IResolveFieldContext context, Exception innerException)
         {
@@ -122,70 +129,91 @@ namespace Epam.GraphQL.Extensions
 
         public static IEnumerable<string> GetQueriedFields(this IResolveFieldContext context)
         {
-            var result = context.FieldAst.GetSubFieldsNames(context.Fragments, _ => true);
+            var result = context.FieldAst.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), _ => true);
             return result;
         }
 
         public static IEnumerable<string> GetConnectionQueriedFields(this IResolveFieldContext context)
         {
-            context.SubFields.TryGetValue("items", out var items);
-            if (context.SubFields.TryGetValue("edges", out var edges))
+            GraphQLField? itemsField = null;
+            GraphQLField? edgesField = null;
+
+            if (context.SubFields != null && context.SubFields.TryGetValue("items", out var items))
             {
-                edges = GetSubField(context, edges, "node");
+                itemsField = items.Field;
             }
 
-            return items.GetSubFieldsNames(context.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Fragments, f => true)).Distinct();
+            if (context.SubFields != null && context.SubFields.TryGetValue("edges", out var edges))
+            {
+                edgesField = GetSubField(context, edges.Field, "node");
+            }
+
+            return itemsField.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), f => true)
+                .Concat(edgesField.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), f => true)).Distinct(StringComparer.Ordinal);
         }
 
         public static IEnumerable<string> GetGroupConnectionQueriedFields(this IResolveFieldContext context)
         {
-            if (context.SubFields.TryGetValue("items", out var items))
+            GraphQLField? itemsField = null;
+            GraphQLField? edgesField = null;
+
+            if (context.SubFields != null && context.SubFields.TryGetValue("items", out var items))
             {
-                items = GetSubField(context, items, "item");
+                itemsField = GetSubField(context, items.Field, "item");
             }
 
-            if (context.SubFields.TryGetValue("edges", out var edges))
+            if (context.SubFields != null && context.SubFields.TryGetValue("edges", out var edges))
             {
-                edges = GetSubField(context, edges, "node");
-                if (edges != null)
+                edgesField = GetSubField(context, edges.Field, "node");
+                if (edgesField != null)
                 {
-                    edges = GetSubField(context, edges, "item");
+                    edgesField = GetSubField(context, edgesField, "item");
                 }
             }
 
-            return items.GetSubFieldsNames(context.Fragments, f => true).Concat(edges.GetSubFieldsNames(context.Fragments, f => true)).Distinct();
+            return itemsField.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), f => true)
+                .Concat(edgesField.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), f => true)).Distinct(StringComparer.Ordinal);
         }
 
         public static bool HasGroupConnectionItemField(this IResolveFieldContext context)
         {
-            if (context.SubFields.TryGetValue("items", out var items))
+            GraphQLField? itemsField = null;
+            GraphQLField? edgesField = null;
+
+            if (context.SubFields != null && context.SubFields.TryGetValue("items", out var items))
             {
-                items = GetSubField(context, items, "item");
+                itemsField = GetSubField(context, items.Field, "item");
             }
 
-            if (context.SubFields.TryGetValue("edges", out var edges))
+            if (context.SubFields != null && context.SubFields.TryGetValue("edges", out var edges))
             {
-                edges = GetSubField(context, edges, "node");
-                if (edges != null)
+                edgesField = GetSubField(context, edges.Field, "node");
+                if (edgesField != null)
                 {
-                    edges = GetSubField(context, edges, "item");
+                    edgesField = GetSubField(context, edgesField, "item");
                 }
             }
 
-            return items != null || edges != null;
+            return itemsField != null || edgesField != null;
         }
 
         public static IEnumerable<string> GetGroupConnectionAggregateQueriedFields(this IResolveFieldContext context)
         {
-            context.SubFields.TryGetValue("items", out var items);
+            GraphQLField? itemsField = null;
+            GraphQLField? edgesField = null;
 
-            if (context.SubFields.TryGetValue("edges", out var edges))
+            if (context.SubFields != null && context.SubFields.TryGetValue("items", out var items))
             {
-                edges = GetSubField(context, edges, "node");
+                itemsField = items.Field;
             }
 
-            return items.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))
-                .Concat(edges.GetSubFieldsNames(context.Fragments, c => !c.Name.Equals("item", StringComparison.OrdinalIgnoreCase))).Distinct();
+            if (context.SubFields != null && context.SubFields.TryGetValue("edges", out var edges))
+            {
+                edgesField = GetSubField(context, edges.Field, "node");
+            }
+
+            return itemsField.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), c => !c.Name.StringValue.Equals("item", StringComparison.OrdinalIgnoreCase))
+                .Concat(edgesField.GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), c => !c.Name.StringValue.Equals("item", StringComparison.OrdinalIgnoreCase))).Distinct(StringComparer.Ordinal);
         }
 
         public static object GetFilterValue(this IResolveFieldContext context, Type filterType)
@@ -217,24 +245,25 @@ namespace Epam.GraphQL.Extensions
             return result;
         }
 
-        private static Field? GetSubField(IResolveFieldContext context, Field parent, string subFieldName)
+        private static GraphQLField? GetSubField(IResolveFieldContext context, GraphQLField? parent, string subFieldName)
         {
             if (parent == null)
             {
                 return null;
             }
 
-            var result = parent.SelectionSet.Children.OfType<Field>().FirstOrDefault(f => f.Name == subFieldName);
+            var result = parent.SelectionSet?.Selections.OfType<GraphQLField>().FirstOrDefault(f => f.Name.StringValue == subFieldName);
+
             if (result != null)
             {
                 return result;
             }
 
-            var fragmentNames = parent.SelectionSet.Children.OfType<FragmentSpread>().Select(fragment => fragment.Name);
+            var fragmentNames = parent.SelectionSet?.Selections.OfType<GraphQLFragmentSpread>().Select(fragment => fragment.FragmentName.Name.StringValue);
 
-            return context.Fragments
-                .Where(fragment => fragmentNames.Contains(fragment.Name))
-                .SelectMany(f => f.SelectionSet.Children.OfType<Field>())
+            return context.Document.Definitions.OfType<GraphQLFragmentDefinition>()
+                .Where(fragment => fragmentNames?.Contains(fragment.FragmentName.Name.StringValue) ?? false)
+                .SelectMany(f => f.SelectionSet.Selections.OfType<GraphQLField>())
                 .FirstOrDefault();
         }
 
@@ -247,9 +276,9 @@ namespace Epam.GraphQL.Extensions
         [return: NotNullIfNotNull("defaultValue")]
         private static object? GetArgument(IResolveFieldContext context, Type argumentType, string name, object? defaultValue)
         {
-            if (!HasArgument(context, name) || context.Arguments[name] == null)
+            if (!HasArgument(context, name) || context.Arguments![name].Value == null)
             {
-                if (defaultValue is IDictionary<string, object> dict)
+                if (defaultValue is IDictionary<string, object?> dict)
                 {
                     return dict.ToObject(argumentType);
                 }
@@ -258,9 +287,9 @@ namespace Epam.GraphQL.Extensions
             }
 
             var arg = context.Arguments[name];
-            if (arg is IDictionary<string, object> inputObject)
+            if (arg.Value is IDictionary<string, object?> inputObject)
             {
-                if (typeof(IDictionary<string, object>).IsAssignableFrom(argumentType))
+                if (typeof(IDictionary<string, object?>).IsAssignableFrom(argumentType))
                 {
                     return inputObject;
                 }
@@ -268,12 +297,30 @@ namespace Epam.GraphQL.Extensions
                 return inputObject.ToObject(argumentType);
             }
 
-            return arg.GetPropertyValue(argumentType);
+            return arg.Value.GetPropertyValue(argumentType);
         }
 
         private static bool HasArgument(IResolveFieldContext context, string argumentName)
         {
             return context.Arguments?.ContainsKey(argumentName) ?? false;
+        }
+
+        private static GraphQLContext GetGraphQLContext(this IResolveFieldContext context)
+        {
+            var result = (GraphQLContext?)context.UserContext["ctx"];
+
+            Guards.AssertIfNull(result);
+
+            return result;
+        }
+
+        private static GraphQLContext<TExecutionContext> GetGraphQLContext<TExecutionContext>(this IResolveFieldContext context)
+        {
+            var result = (GraphQLContext<TExecutionContext>?)context.UserContext["ctx"];
+
+            Guards.AssertIfNull(result);
+
+            return result;
         }
     }
 }

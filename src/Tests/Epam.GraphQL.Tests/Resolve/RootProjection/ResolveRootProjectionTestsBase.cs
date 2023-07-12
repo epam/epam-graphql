@@ -7,7 +7,7 @@ using System;
 using System.Collections;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.Tests.Resolve.RootProjection
 {

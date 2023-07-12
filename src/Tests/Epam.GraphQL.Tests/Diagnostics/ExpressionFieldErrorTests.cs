@@ -29,11 +29,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"
                 query {
                     people {
@@ -73,11 +71,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             var result = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"
                 query {
                     units {

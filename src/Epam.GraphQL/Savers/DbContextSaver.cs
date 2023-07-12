@@ -14,7 +14,7 @@ using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Types;
 using GraphQL;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Epam.GraphQL.Savers
@@ -23,14 +23,15 @@ namespace Epam.GraphQL.Savers
     {
         public static ResolveOptions DefaultOptions { get; } = new ResolveOptions();
 
-        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext>(
+        public static async ValueTask<object?> PerformManualMutationAndGetResult<TExecutionContext>(
             SubmitInputTypeRegistry<TExecutionContext> submitInputTypeRegistry,
             IEnumerable<object> entities,
             Mutation<TExecutionContext> mutation,
             IResolveFieldContext context,
             ResolveOptions options)
         {
-            var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
+            var executionContext = (GraphQLContext<TExecutionContext>?)context.UserContext["ctx"];
+            Guards.AssertIfNull(executionContext);
             var profiler = executionContext.Profiler;
 
             using (profiler.Step(nameof(PerformManualMutationAndGetResult)))
@@ -64,14 +65,15 @@ namespace Epam.GraphQL.Savers
             }
         }
 
-        public static async Task<object> PerformManualMutationAndGetResult<TExecutionContext, TData>(
+        public static async ValueTask<object?> PerformManualMutationAndGetResult<TExecutionContext, TData>(
             SubmitInputTypeRegistry<TExecutionContext> submitInputTypeRegistry,
             MutationResult<TData> mutationResult,
             Mutation<TExecutionContext> mutation,
             IResolveFieldContext context,
             ResolveOptions options)
         {
-            var executionContext = (GraphQLContext<TExecutionContext>)context.UserContext["ctx"];
+            var executionContext = (GraphQLContext<TExecutionContext>?)context.UserContext["ctx"];
+            Guards.AssertIfNull(executionContext);
             var profiler = executionContext.Profiler;
 
             using (profiler.Step(nameof(PerformManualMutationAndGetResult)))
@@ -194,16 +196,21 @@ namespace Epam.GraphQL.Savers
 
         public static IEnumerable<string> GetFieldsForReload<TExecutionContext>(ISaveResult<TExecutionContext> result, IResolveFieldContext context)
         {
-            var initialDictionary = context.SubFields;
+            var initialDictionary = context.SubFields?.ToDictionary(kv => kv.Key, kv => kv.Value.Field);
 
-            if (context.ReturnType.GetType().IsGenericType && (context.ReturnType.GetType().GetGenericTypeDefinition() == typeof(MutationResultGraphType<,>)))
+            Guards.AssertIfNull(initialDictionary);
+
+            if ((context.FieldDefinition.ResolvedType?.GetType().IsGenericType ?? false) && (context.FieldDefinition.ResolvedType?.GetType().GetGenericTypeDefinition() == typeof(MutationResultGraphType<,>)))
             {
                 if (!initialDictionary.ContainsKey("payload"))
                 {
                     return Enumerable.Empty<string>();
                 }
 
-                initialDictionary = initialDictionary["payload"].SelectionSet.Children.Cast<Field>().ToDictionary(f => f.Name);
+                initialDictionary = initialDictionary["payload"].SelectionSet?.Selections
+                    .Cast<GraphQLField>()
+                    .ToDictionary(f => f.Name.StringValue)
+                    ?? new Dictionary<string, GraphQLField>();
             }
 
             if (!initialDictionary.ContainsKey(result.FieldName))
@@ -211,14 +218,16 @@ namespace Epam.GraphQL.Savers
                 return Enumerable.Empty<string>();
             }
 
-            initialDictionary = initialDictionary[result.FieldName].SelectionSet.Children.Cast<Field>().ToDictionary(f => f.Name);
+            initialDictionary = initialDictionary[result.FieldName].SelectionSet?.Selections.Cast<GraphQLField>()
+                .ToDictionary(f => f.Name.StringValue)
+                ?? new Dictionary<string, GraphQLField>();
 
             if (!initialDictionary.ContainsKey("payload"))
             {
                 return Enumerable.Empty<string>();
             }
 
-            var fields = initialDictionary["payload"].GetSubFieldsNames(context.Fragments, _ => true);
+            var fields = initialDictionary["payload"].GetSubFieldsNames(context.Document.Definitions.OfType<GraphQLFragmentDefinition>(), _ => true);
 
             return fields;
         }

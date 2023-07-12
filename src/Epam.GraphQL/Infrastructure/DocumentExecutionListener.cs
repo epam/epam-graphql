@@ -5,8 +5,8 @@
 
 using System.Threading.Tasks;
 using GraphQL.Execution;
-using GraphQL.Language.AST;
 using GraphQL.Validation;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.Infrastructure
 {
@@ -21,7 +21,7 @@ namespace Epam.GraphQL.Infrastructure
 
         public Task AfterExecutionAsync(IExecutionContext context)
         {
-            if (context.Operation.OperationType == OperationType.Query)
+            if (context.Operation.Operation == OperationType.Query)
             {
                 _context.EnableTracking();
             }
@@ -33,16 +33,12 @@ namespace Epam.GraphQL.Infrastructure
 
         public Task BeforeExecutionAsync(IExecutionContext context)
         {
-            if (context.Operation.OperationType == OperationType.Query)
+            if (context.Operation.Operation == OperationType.Query)
             {
                 _context.DisableTracking();
             }
 
             return Task.CompletedTask;
         }
-
-        public Task BeforeExecutionAwaitedAsync(IExecutionContext context) => Task.CompletedTask;
-
-        public Task BeforeExecutionStepAwaitedAsync(IExecutionContext context) => Task.CompletedTask;
     }
 }

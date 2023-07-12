@@ -298,7 +298,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                         people {
                             items {
                                 id
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -347,7 +347,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                         people {
                             items {
                                 id
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -396,7 +396,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                         people {
                             items {
                                 id
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -445,7 +445,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                         people {
                             items {
                                 id
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -483,6 +483,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -492,7 +493,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                     query {
                         people {
                             items {
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -528,6 +529,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -537,7 +539,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                     query {
                         people {
                             items {
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -573,6 +575,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -582,7 +585,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                     query {
                         people {
                             items {
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -634,6 +637,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -643,7 +647,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                     query {
                         people {
                             items {
-                                test { 
+                                test {
                                     testField
                                 }
                             }
@@ -693,6 +697,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -702,7 +707,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                     query {
                         people {
                             items {
-                                test { 
+                                test {
                                     testField {
                                         testField
                                     }
@@ -768,6 +773,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -811,6 +817,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver);
                 },
@@ -854,6 +861,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .AsUnionOf<Line>()
                             .And<Circle>()
@@ -906,6 +914,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .AsUnionOf<CustomObject<string>>()
                             .And<CustomObject<string, int>>()
@@ -967,6 +976,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
 #pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<Line>, Line>()
@@ -1035,6 +1045,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
 #pragma warning disable CS0618 // Type or member is obsolete
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>()
@@ -1107,6 +1118,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
                 builder: builder =>
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .AsUnionOf<IEnumerable<CustomObject<string>>, CustomObject<string>>(b =>
                         {
@@ -1184,6 +1196,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
@@ -1233,6 +1246,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
@@ -1278,6 +1292,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },
@@ -1339,6 +1354,7 @@ namespace Epam.GraphQL.Tests.Resolve.MutableLoader
             TestHelpers.TestMutableLoader(
                 builder: builder =>
                 {
+                    builder.Field(p => p.FullName).Editable();
                     builder.Field("test")
                         .Resolve(resolver, b => b.Field("myField", o => o.TestField));
                 },

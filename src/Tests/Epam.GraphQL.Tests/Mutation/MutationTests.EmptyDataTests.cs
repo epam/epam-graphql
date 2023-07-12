@@ -27,13 +27,8 @@ namespace Epam.GraphQL.Tests.Mutation
                 query.Connection(personLoader, "people");
             }
 
-            void MutationBuilder(Mutation<TestUserContext> mutation)
-            {
-            }
-
-            TestMutation(
+            TestQuery(
                 QueryBuilder,
-                MutationBuilder,
                 @"query {
                     __type(name: ""SubmitInputType"") {
                         name
@@ -41,7 +36,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 }",
                 @"{
                     __type: null
-                }", null);
+                }");
         }
 
         [Test(Description = "Empty mutation/should not emit SubmitOutputType")]
@@ -60,13 +55,8 @@ namespace Epam.GraphQL.Tests.Mutation
                 query.Connection(personLoader, "people");
             }
 
-            void MutationBuilder(Mutation<TestUserContext> mutation)
-            {
-            }
-
-            TestMutation(
+            TestQuery(
                 QueryBuilder,
-                MutationBuilder,
                 @"query {
                     __type(name: ""SubmitOutputType"") {
                         name
@@ -74,7 +64,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 }",
                 @"{
                     __type: null
-                }", null);
+                }");
         }
 
         [Test(Description = "Empty mutation/should not emit input type for entity")]
@@ -93,13 +83,8 @@ namespace Epam.GraphQL.Tests.Mutation
                 query.Connection(personLoader, "people");
             }
 
-            void MutationBuilder(Mutation<TestUserContext> mutation)
-            {
-            }
-
-            TestMutation(
+            TestQuery(
                 QueryBuilder,
-                MutationBuilder,
                 @"query {
                     __type(name: ""InputPerson"") {
                         name
@@ -107,7 +92,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 }",
                 @"{
                     __type: null
-                }", null);
+                }");
         }
 
         [Test(Description = "Empty mutation/should not emit submit output type for entity")]
@@ -126,13 +111,8 @@ namespace Epam.GraphQL.Tests.Mutation
                 query.Connection(personLoader, "people");
             }
 
-            void MutationBuilder(Mutation<TestUserContext> mutation)
-            {
-            }
-
-            TestMutation(
+            TestQuery(
                 QueryBuilder,
-                MutationBuilder,
                 @"query {
                     __type(name: ""PersonSubmitOutput"") {
                         name
@@ -140,7 +120,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 }",
                 @"{
                     __type: null
-                }", null);
+                }");
         }
     }
 }

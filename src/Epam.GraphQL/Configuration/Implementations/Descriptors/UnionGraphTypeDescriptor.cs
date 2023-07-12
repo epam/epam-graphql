@@ -47,6 +47,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Descriptors
                     }
                     else
                     {
+                        Guards.AssertIfNull(type.Type);
                         unionType.Type(type.Type);
                     }
                 }

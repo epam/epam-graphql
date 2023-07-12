@@ -12,9 +12,9 @@ using Epam.GraphQL.Infrastructure;
 using Epam.GraphQL.Options;
 using Epam.GraphQL.TaskBatcher;
 using GraphQL;
-using GraphQL.Language.AST;
 using GraphQL.Validation;
 using GraphQL.Validation.Complexity;
+using GraphQLParser.AST;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Epam.GraphQL
@@ -37,10 +37,10 @@ namespace Epam.GraphQL
         public CancellationToken CancellationToken { get; set; }
 
 #pragma warning disable CA2227 // Collection properties should be read only
-        public Dictionary<string, object>? Variables { get; set; }
+        public Dictionary<string, object?>? Variables { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
 
-        public Document? Document { get; set; }
+        public GraphQLDocument? Document { get; set; }
 
         public string? OperationName { get; set; }
 
@@ -76,13 +76,13 @@ namespace Epam.GraphQL
                 ThrowOnUnhandledException = ThrowOnUnhandledException,
                 EnableMetrics = EnableMetrics,
                 ComplexityConfiguration = ComplexityConfiguration,
-                UserContext = new Dictionary<string, object>
+                UserContext = new Dictionary<string, object?>
                 {
                     ["ctx"] = graphQLContext,
                 },
                 ValidationRules = validationRules,
                 CancellationToken = CancellationToken,
-                Inputs = Variables.ToInputs(),
+                Variables = Variables?.ToInputs(),
                 Document = Document,
                 OperationName = OperationName,
                 Query = Query,

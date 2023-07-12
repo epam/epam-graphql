@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using Epam.GraphQL.Configuration.Implementations;
+using Epam.GraphQL.Helpers;
 using GraphQL.Types;
 
 namespace Epam.GraphQL.Types
@@ -18,6 +19,7 @@ namespace Epam.GraphQL.Types
 
             if (graphType.Configurator == null)
             {
+                Guards.AssertIfNull(graphType.Type);
                 Field(graphType.Type, "item");
             }
             else

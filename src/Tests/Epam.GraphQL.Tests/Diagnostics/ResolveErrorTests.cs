@@ -47,11 +47,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -93,11 +91,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -138,11 +134,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -190,11 +184,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     people {
                         test
@@ -234,11 +226,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -282,11 +272,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -326,11 +314,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -376,11 +362,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -422,11 +406,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -474,11 +456,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -522,11 +502,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -576,11 +554,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -626,11 +602,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",
@@ -682,11 +656,9 @@ namespace Epam.GraphQL.Tests.Diagnostics
             }
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(Builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             Assert.Throws<InvalidOperationException>(() => ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 @"query {
                     test
                 }",

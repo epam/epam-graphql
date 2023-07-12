@@ -60,7 +60,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
 
         public string Name { get => _objectGraphTypeConfigurator.Name; set => _objectGraphTypeConfigurator.Name = value; }
 
-        public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
+        public IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
                 owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
@@ -71,7 +71,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return field;
         }
 
-        public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
+        public IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
                 owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))
@@ -83,7 +83,7 @@ namespace Epam.GraphQL.Builders.Loader.Implementations
             return field;
         }
 
-        public IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason)
+        public IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, Expression<Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason)
         {
             var field = _objectGraphTypeConfigurator.AddField(
                 owner => _objectGraphTypeConfigurator.ConfigurationContext.Chain(owner, nameof(Field))

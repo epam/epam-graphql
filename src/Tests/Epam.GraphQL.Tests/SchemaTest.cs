@@ -9,6 +9,7 @@ using System.Linq;
 using Epam.GraphQL.Loaders;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL.Execution;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests
@@ -142,9 +143,8 @@ namespace Epam.GraphQL.Tests
                 query.Connection(securityPersonLoaderType, "securityPeople");
             });
 
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, GraphiqlRequest);
-            var actualQuery = actualResult.Query;
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, GraphiqlRequest);
+            var actualQuery = actualResult.Query.ToString();
             var actualErrorsCount = actualResult.Errors?.Count ?? 0;
 
             const int expectedErrorsCount = 0;
@@ -182,9 +182,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "name");
@@ -222,9 +220,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "name");
@@ -264,9 +260,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fields = GetFieldValue(actualResult.Data, "__type", "fields") as IEnumerable<object>;
@@ -311,9 +305,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "ofType", "name");
@@ -354,9 +346,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "ofType", "name");
@@ -394,9 +384,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "name");
@@ -435,9 +423,7 @@ namespace Epam.GraphQL.Tests
             ";
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "name");
@@ -476,8 +462,6 @@ namespace Epam.GraphQL.Tests
                 q.Connection(person2LoaderType, "users");
             });
 
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
             const string query1 = @"
                 query {
                     __type(name: ""Person"") {
@@ -492,7 +476,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("Person", loaderEntityTypeName);
@@ -511,7 +495,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("User", loaderEntityTypeName);
@@ -547,8 +531,6 @@ namespace Epam.GraphQL.Tests
                 q.Connection(person2LoaderType, "users");
             });
 
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
             const string query1 = @"
                 query {
                     __type(name: ""PersonConnection"") {
@@ -563,7 +545,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("PersonConnection", loaderEntityTypeName);
@@ -582,7 +564,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("UserConnection", loaderEntityTypeName);
@@ -601,7 +583,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query3);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query3);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("PersonEdge", loaderEntityTypeName);
@@ -620,7 +602,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query4);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query4);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("UserEdge", loaderEntityTypeName);
@@ -636,8 +618,6 @@ namespace Epam.GraphQL.Tests
                     .AsConnection(query => query.OrderBy(x => x));
             });
 
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
             const string query1 = @"
                 query {
                     __type(name: ""NullableOfIntConnection"") {
@@ -652,7 +632,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("NullableOfIntConnection", loaderEntityTypeName);
@@ -671,7 +651,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query3);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query3);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("NullableOfIntEdge", loaderEntityTypeName);
@@ -705,8 +685,6 @@ namespace Epam.GraphQL.Tests
                 q.Connection(person3LoaderType, "people3");
             });
 
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
             const string query1 = @"
                 query {
                     __type(name: ""Person"") {
@@ -721,7 +699,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("Person", loaderEntityTypeName);
@@ -740,7 +718,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.IsNull(loaderEntityTypeName);
@@ -759,7 +737,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query3);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query3);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.IsNull(loaderEntityTypeName);
@@ -870,7 +848,6 @@ namespace Epam.GraphQL.Tests
                 applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"), typeName: "MyQuery");
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -886,7 +863,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("MyQuery", loaderEntityTypeName);
@@ -906,7 +883,6 @@ namespace Epam.GraphQL.Tests
                 applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"), typeName: "MyMutation");
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -922,7 +898,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("MyMutation", loaderEntityTypeName);
@@ -942,7 +918,6 @@ namespace Epam.GraphQL.Tests
                 applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -961,7 +936,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.IsNull(filterTypeName);
@@ -981,7 +956,6 @@ namespace Epam.GraphQL.Tests
                 applySecurityFilter: (_, __) => Array.Empty<Person>().AsQueryable());
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people"));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -1000,7 +974,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("InputPersonFilter", filterTypeName);
@@ -1022,7 +996,6 @@ namespace Epam.GraphQL.Tests
             var filterType = GraphQLTypeBuilder.CreateLoaderFilterType<Person, PersonFilter, TestUserContext>((context, q, filter) => q);
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people").WithFilter(filterType));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -1038,7 +1011,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             Assert.AreEqual("InputPersonFilter", filterTypeName);
 
@@ -1056,7 +1029,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.IsNull(filterTypeName);
@@ -1078,7 +1051,6 @@ namespace Epam.GraphQL.Tests
             var filterType = GraphQLTypeBuilder.CreateLoaderFilterType<Person, PersonFilter, TestUserContext>((context, q, filter) => q);
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(personLoaderType, "people").WithFilter(filterType));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -1094,7 +1066,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             Assert.AreEqual("PersonFilter", filterTypeName);
             var fieldName = GetFieldValue(actualResult.Data, "__type", "fields", "name");
@@ -1114,7 +1086,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             Assert.AreEqual("InputPersonFilter", filterTypeName);
             fieldName = GetFieldValue(actualResult.Data, "__type", "inputFields", "name");
@@ -1137,7 +1109,6 @@ namespace Epam.GraphQL.Tests
             var filterType = GraphQLTypeBuilder.CreateLoaderFilterType<Person, PersonFilter, TestUserContext>((context, q, filter) => q);
 
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Field("myQuery").PayloadField<int>("arg").Resolve((_, arg) => arg));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query = @"
                 query {
@@ -1153,7 +1124,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
             var filterTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             Assert.AreEqual("InputMyQueryPayload", filterTypeName);
         }
@@ -1202,7 +1173,6 @@ namespace Epam.GraphQL.Tests
             {
                 q.Field("myQuery").Resolve(_ => FakeData.HannieEveritt, builder => builder.ConfigureFrom(personLoaderType));
             });
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query = @"
                 query {
@@ -1218,7 +1188,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "fields", "type", "name");
             Assert.AreEqual("Person", fieldTypeName);
         }
@@ -1241,7 +1211,6 @@ namespace Epam.GraphQL.Tests
                 q.Connection(loaderType, "people");
                 q.Field("people2").Resolve(ctx => TestData.Extra.Person.None);
             });
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -1251,7 +1220,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "kind");
             Assert.AreEqual("OBJECT", fieldTypeName);
 
@@ -1269,7 +1238,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             fieldTypeName = GetFieldValue(actualResult.Data, "__type", "kind");
             Assert.AreEqual("ENUM", fieldTypeName);
         }
@@ -1294,7 +1263,6 @@ namespace Epam.GraphQL.Tests
                 q.Connection(loaderType, "units");
                 q.Field("person").Resolve(ctx => TestData.Extra.Person.None);
             });
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query1 = @"
                 query {
@@ -1304,7 +1272,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "kind");
             Assert.AreEqual("ENUM", fieldTypeName);
 
@@ -1322,7 +1290,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             fieldTypeName = GetFieldValue(actualResult.Data, "__type", "kind");
             Assert.AreEqual("OBJECT", fieldTypeName);
         }
@@ -1344,7 +1312,6 @@ namespace Epam.GraphQL.Tests
             {
                 q.Connection(personLoaderType, "myQuery");
             });
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query = @"
                 query {
@@ -1354,7 +1321,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
             var fieldTypeName = GetFieldValue(actualResult.Data, "__type", "name");
             Assert.AreEqual("MyPerson", fieldTypeName);
         }
@@ -1408,7 +1375,6 @@ namespace Epam.GraphQL.Tests
             {
                 q.Connection(personLoaderType, "myQuery");
             });
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             const string query = @"
                 query {
@@ -1425,7 +1391,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query);
 
             var fieldTypeKind = GetFieldValue(actualResult.Data, "__type", "fields", "type", "kind");
 
@@ -1465,8 +1431,6 @@ namespace Epam.GraphQL.Tests
                 q.Connection(person3LoaderType, "people3");
             });
 
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
-
             const string query1 = @"
                 query {
                     __type(name: ""InputPersonFilter"") {
@@ -1481,7 +1445,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query1);
+            var actualResult = ExecuteHelpers.ExecuteQuery(queryType, query1);
             var loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.AreEqual("InputPersonFilter", loaderEntityTypeName);
@@ -1500,7 +1464,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query2);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query2);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.IsNull(loaderEntityTypeName);
@@ -1519,7 +1483,7 @@ namespace Epam.GraphQL.Tests
                 }
             ";
 
-            actualResult = ExecuteHelpers.ExecuteQuery(queryType, mutationType, query3);
+            actualResult = ExecuteHelpers.ExecuteQuery(queryType, query3);
             loaderEntityTypeName = GetFieldValue(actualResult.Data, "__type", "name");
 
             Assert.IsNull(loaderEntityTypeName);
@@ -1719,6 +1683,11 @@ namespace Epam.GraphQL.Tests
 
         private static object GetFieldValue(object data, params string[] fieldNames)
         {
+            if (data is ExecutionNode executionNode)
+            {
+                data = executionNode.ToValue();
+            }
+
             if (data is not IDictionary<string, object> asDictionary)
             {
                 if (data is not IEnumerable<object> asCollection || !asCollection.Any())

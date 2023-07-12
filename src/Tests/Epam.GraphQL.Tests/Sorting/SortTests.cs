@@ -7,6 +7,7 @@ using System;
 using Epam.GraphQL.Tests.Common;
 using Epam.GraphQL.Tests.Common.Configs;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL.Validation.Errors;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests.Sorting
@@ -650,8 +651,8 @@ namespace Epam.GraphQL.Tests.Sorting
         public void ShouldThrowIfSortByInvalidDirection()
         {
             TestQueryError(
-                typeof(FormatException),
-                "Failed to parse SortDirection from input 'invalid'. Input should be a string (\"asc\", \"desc\") or enum (ASC, DESC).",
+                typeof(ArgumentsOfCorrectTypeError),
+                "Argument 'sorting' has invalid value. In element #1: [In field 'direction': [Expected type 'SortDirection', found \"invalid\".]]",
                 @"
                 query {
                     people(sorting: [{
