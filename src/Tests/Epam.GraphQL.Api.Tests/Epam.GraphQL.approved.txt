@@ -543,6 +543,11 @@ namespace Epam.GraphQL
     {
         public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.IGraphQLTextSerializer graphQlTextSerializer) { }
     }
+    public interface IAfterSaveContext<TExecutionContext>
+    {
+        TExecutionContext ExecutionContext { get; }
+        System.Collections.Generic.IEnumerable<object> Path { get; }
+    }
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IDataContext : Epam.GraphQL.Adapters.IQueryableToAsNoTrackingQueryableConverter, Epam.GraphQL.Adapters.IQueryableToAsyncEnumerableConverter
     {
@@ -585,7 +590,7 @@ namespace Epam.GraphQL
     {
         protected Mutation() { }
         protected override void AfterConfigure() { }
-        protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(TExecutionContext context, System.Collections.Generic.IEnumerable<object> entities) { }
+        protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(Epam.GraphQL.IAfterSaveContext<TExecutionContext> context, System.Collections.Generic.IEnumerable<object> entities) { }
         protected Epam.GraphQL.Configuration.IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null) { }
         protected void SubmitField<TLoader>(string fieldName)
             where TLoader : Epam.GraphQL.Loaders.IMutableLoader<TExecutionContext> { }
