@@ -46,7 +46,7 @@ namespace Epam.GraphQL
 
             using (profiler.Step(nameof(DoAfterSave)))
             {
-                return await AfterSaveAsync(context.GetUserContext<TExecutionContext>(), entities).ConfigureAwait(false);
+                return await AfterSaveAsync(new AfterSaveContext<TExecutionContext>(context.GetUserContext<TExecutionContext>(), context.Path), entities).ConfigureAwait(false);
             }
         }
 
@@ -141,7 +141,7 @@ namespace Epam.GraphQL
                 _submitOutputType);
         }
 
-        protected virtual Task<IEnumerable<object>> AfterSaveAsync(TExecutionContext context, IEnumerable<object> entities)
+        protected virtual Task<IEnumerable<object>> AfterSaveAsync(IAfterSaveContext<TExecutionContext> context, IEnumerable<object> entities)
         {
             return Task.FromResult(Enumerable.Empty<object>());
         }

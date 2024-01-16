@@ -117,7 +117,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         }]
                     }) {
                         people {
-                            id 
+                            id
                             payload {
                                 hireDate
                             }
@@ -206,7 +206,7 @@ namespace Epam.GraphQL.Tests.Mutation
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
                 beforeCreate: beforeCreate,
-                beforeUpdate: (executionContext, person) => { person.Salary = 10; });
+                beforeUpdate: (_, person) => { person.Salary = 10; });
 
             void QueryBuilder(Query<TestUserContext> query)
             {
@@ -275,20 +275,21 @@ namespace Epam.GraphQL.Tests.Mutation
                 mutation.SubmitField(personLoader, "people");
             }
 
-            var afterSave = Substitute.For<Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>>>();
+            var afterSave = Substitute
+                .For<Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>>>();
 
             afterSave
-                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<object>>())
+                .Invoke(Arg.Any<IAfterSaveContext<TestUserContext>>(), Arg.Any<IEnumerable<object>>())
                 .Returns(Task.FromResult(Enumerable.Empty<object>()));
 
             void Checks(IDataContext dataContext)
             {
                 afterSave
                     .Received()
-                    .Invoke(Arg.Any<TestUserContext>(), Arg.Is<IEnumerable<object>>(entities =>
+                    .Invoke(Arg.Any<IAfterSaveContext<TestUserContext>>(), Arg.Is<IEnumerable<object>>(entities =>
                         entities.Count() == 1 && typeof(Person).IsAssignableFrom(entities.First().GetType())
-                        && ((Person)entities.First()).FullName == "Test"
-                        && ((Person)entities.First()).Id == 7));
+                                              && ((Person)entities.First()).FullName == "Test"
+                                              && ((Person)entities.First()).Id == 7));
             }
 
             TestMutation(
@@ -356,32 +357,34 @@ namespace Epam.GraphQL.Tests.Mutation
                 mutation.SubmitField(unitLoader, "units");
             }
 
-            var afterSave = Substitute.For<Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>>>();
+            var afterSave = Substitute
+                .For<Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>>>();
 
             afterSave
-                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<object>>())
+                .Invoke(Arg.Any<IAfterSaveContext<TestUserContext>>(), Arg.Any<IEnumerable<object>>())
                 .Returns(callInfo =>
                     Task.FromResult<IEnumerable<object>>(new Unit[]
                     {
-                            new Unit
-                            {
-                                Id = 0,
-                                Name = "New Unit",
-                            },
+                        new Unit
+                        {
+                            Id = 0,
+                            Name = "New Unit",
+                        },
                     }));
 
             void Checks(IDataContext dataContext)
             {
                 afterSave
                     .Received()
-                    .Invoke(Arg.Any<TestUserContext>(), Arg.Is<IEnumerable<object>>(entities =>
+                    .Invoke(Arg.Any<IAfterSaveContext<TestUserContext>>(), Arg.Is<IEnumerable<object>>(entities =>
                         entities.Count() == 1 && typeof(Person).IsAssignableFrom(entities.First().GetType())
-                        && ((Person)entities.First()).FullName == "Test"
-                        && ((Person)entities.First()).Id == 7));
+                                              && ((Person)entities.First()).FullName == "Test"
+                                              && ((Person)entities.First()).Id == 7));
 
                 dataContext
                     .Received()
-                    .AddRange(Arg.Is<IEnumerable<Unit>>(u => u.Count() == 1 && u.First().Id == 3 && u.First().Name == "New Unit"));
+                    .AddRange(Arg.Is<IEnumerable<Unit>>(u =>
+                        u.Count() == 1 && u.First().Id == 3 && u.First().Name == "New Unit"));
             }
 
             TestMutation(
@@ -463,17 +466,19 @@ namespace Epam.GraphQL.Tests.Mutation
                 mutation.SubmitField(unitLoader, "units");
             }
 
-            var afterSave = Substitute.For<Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>>>();
+            var afterSave = Substitute
+                .For<Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>>>();
 
             afterSave
-                .Invoke(Arg.Any<TestUserContext>(), Arg.Any<IEnumerable<object>>())
+                .Invoke(Arg.Any<IAfterSaveContext<TestUserContext>>(), Arg.Any<IEnumerable<object>>())
                 .Returns(callInfo =>
                 {
                     var person = callInfo.ArgAt<IEnumerable<object>>(1)
                         .Cast<Person>()
                         .First();
 
-                    var unit = callInfo.ArgAt<TestUserContext>(0).DataContext.GetQueryable<Unit>()
+                    var unit = callInfo.ArgAt<IAfterSaveContext<TestUserContext>>(0).ExecutionContext.DataContext
+                        .GetQueryable<Unit>()
                         .Where(u => u.Id == person.UnitId)
                         .First();
                     unit.Name = "New Unit";
@@ -484,10 +489,10 @@ namespace Epam.GraphQL.Tests.Mutation
             {
                 afterSave
                     .Received()
-                    .Invoke(Arg.Any<TestUserContext>(), Arg.Is<IEnumerable<object>>(entities =>
+                    .Invoke(Arg.Any<IAfterSaveContext<TestUserContext>>(), Arg.Is<IEnumerable<object>>(entities =>
                         entities.Count() == 1 && typeof(Person).IsAssignableFrom(entities.First().GetType())
-                        && ((Person)entities.First()).FullName == "Test"
-                        && ((Person)entities.First()).Id == 1));
+                                              && ((Person)entities.First()).FullName == "Test"
+                                              && ((Person)entities.First()).Id == 1));
             }
 
             TestMutation(

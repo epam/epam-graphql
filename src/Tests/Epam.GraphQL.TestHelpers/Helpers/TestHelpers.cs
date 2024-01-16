@@ -183,7 +183,7 @@ namespace Epam.GraphQL.Tests.Helpers
                 });
         }
 
-        public static void TestMutation(Action<Query<TestUserContext>> queryBuilder, Action<Mutation<TestUserContext>> mutationBuilder, IDataContext dataContext, string query, string expected, Action<IDataContext> checks = null, Action beforeExecute = null, Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null)
+        public static void TestMutation(Action<Query<TestUserContext>> queryBuilder, Action<Mutation<TestUserContext>> mutationBuilder, IDataContext dataContext, string query, string expected, Action<IDataContext> checks = null, Action beforeExecute = null, Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null)
         {
             beforeExecute?.Invoke();
             var expectedResult = ExecuteHelpers.Deserialize(expected);

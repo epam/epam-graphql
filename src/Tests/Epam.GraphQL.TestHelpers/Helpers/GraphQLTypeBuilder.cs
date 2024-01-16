@@ -118,7 +118,7 @@ namespace Epam.GraphQL.Tests.Helpers
             return CreateProjectionBaseType(typeName ?? "Query", typeof(Query<TExecutionContext>), (Action<ProjectionBase<object, TExecutionContext>>)OnConfigureWrapper);
         }
 
-        public static Type CreateMutationType<TExecutionContext>(Action<Mutation<TExecutionContext>> onConfigure, Func<TExecutionContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null, string typeName = null)
+        public static Type CreateMutationType<TExecutionContext>(Action<Mutation<TExecutionContext>> onConfigure, Func<IAfterSaveContext<TExecutionContext>, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null, string typeName = null)
         {
             void OnConfigureWrapper(ProjectionBase<object, TExecutionContext> query)
             {
@@ -151,7 +151,7 @@ namespace Epam.GraphQL.Tests.Helpers
 
             if (afterSave != null)
             {
-                _afterSaveFuncs[type] = (context, entities) => afterSave((TExecutionContext)context, entities);
+                _afterSaveFuncs[type] = (context, entities) => afterSave((IAfterSaveContext<TExecutionContext>)context, entities);
             }
 
             return type;

@@ -149,8 +149,8 @@ namespace Epam.GraphQL.Tests.Resolve.Mutation
 
             var personLoader = CreatePersonLoader();
 
-            var afterSave = FuncSubstitute.For<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>>((ctx, items) =>
-                Task.FromResult<IEnumerable<object>>(ctx.DataContext.GetQueryable<Person>().Skip(1).Take(1)));
+            var afterSave = FuncSubstitute.For<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>>((ctx, items) =>
+                Task.FromResult<IEnumerable<object>>(ctx.ExecutionContext.DataContext.GetQueryable<Person>().Skip(1).Take(1)));
 
             TestMutation(
                 queryBuilder: query => query
@@ -325,8 +325,8 @@ namespace Epam.GraphQL.Tests.Resolve.Mutation
 
             var personLoader = CreatePersonLoader();
 
-            var afterSave = FuncSubstitute.For<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>>((ctx, items) =>
-                Task.FromResult<IEnumerable<object>>(ctx.DataContext.GetQueryable<Person>().Skip(1).Take(1)));
+            var afterSave = FuncSubstitute.For<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>>((ctx, items) =>
+                Task.FromResult<IEnumerable<object>>(ctx.ExecutionContext.DataContext.GetQueryable<Person>().Skip(1).Take(1)));
 
             TestMutation(
                 queryBuilder: query => query
@@ -673,8 +673,8 @@ namespace Epam.GraphQL.Tests.Resolve.Mutation
 
             var personLoader = CreatePersonLoader();
 
-            var afterSave = FuncSubstitute.For<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>>((ctx, items) =>
-                Task.FromResult<IEnumerable<object>>(ctx.DataContext.GetQueryable<Person>().Skip(1).Take(1)));
+            var afterSave = FuncSubstitute.For<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>>((ctx, items) =>
+                Task.FromResult<IEnumerable<object>>(ctx.ExecutionContext.DataContext.GetQueryable<Person>().Skip(1).Take(1)));
 
             TestMutation(
                 queryBuilder: query => query.Connection(personLoader, "people"),
