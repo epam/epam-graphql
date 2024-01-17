@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Epam.Contracts.Models;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Tests.TestData;
 
@@ -33,6 +34,7 @@ namespace Epam.GraphQL.Tests.Helpers
         private static readonly Dictionary<Type, Action<object, object>> _beforeCreateFuncs = new();
         private static readonly Dictionary<Type, Action<object, object>> _beforeUpdateFuncs = new();
         private static readonly Dictionary<Type, Func<object, IEnumerable<object>, Task<IEnumerable<object>>>> _afterSaveFuncs = new();
+        private static readonly Dictionary<Type, Func<object, IEnumerable<object>, Task<IEnumerable<object>>>> _afterSaveNewFuncs = new();
         private static readonly Dictionary<Type, Func<object, bool>> _isFakeIdFuncs = new();
         private static readonly Dictionary<Type, Expression> _idExpressions = new();
         private static readonly AssemblyName _assemblyName = new("GraphQLAssembly");
@@ -104,6 +106,11 @@ namespace Epam.GraphQL.Tests.Helpers
             return _afterSaveFuncs[type](executionContext, entities);
         }
 
+        public static Task<IEnumerable<object>> CallAfterSaveNew(Type type, object executionContext, IEnumerable<object> entities)
+        {
+            return _afterSaveNewFuncs[type](executionContext, entities);
+        }
+
         public static Expression GetIdExpression(Type type) => GetValueByType(_idExpressions, type);
 
         public static bool GetIsFakeId(Type type, object id) => GetValueByType(_isFakeIdFuncs, type)(id);
@@ -118,7 +125,11 @@ namespace Epam.GraphQL.Tests.Helpers
             return CreateProjectionBaseType(typeName ?? "Query", typeof(Query<TExecutionContext>), (Action<ProjectionBase<object, TExecutionContext>>)OnConfigureWrapper);
         }
 
-        public static Type CreateMutationType<TExecutionContext>(Action<Mutation<TExecutionContext>> onConfigure, Func<TExecutionContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null, string typeName = null)
+        public static Type CreateMutationType<TExecutionContext>(
+            Action<Mutation<TExecutionContext>> onConfigure,
+            Func<TExecutionContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null,
+            string typeName = null,
+            Func<IAfterSaveContext<TExecutionContext>, IEnumerable<object>, Task<IEnumerable<object>>> afterSaveNew = null)
         {
             void OnConfigureWrapper(ProjectionBase<object, TExecutionContext> query)
             {
@@ -148,11 +159,38 @@ namespace Epam.GraphQL.Tests.Helpers
 
                     typeBuilder.DefineMethodOverride(afterSaveMethodBuilder, afterSaveMethodInfo);
                 }
+
+                if (afterSaveNew != null)
+                {
+                    var afterSaveMethodInfo = typeof(Mutation<TExecutionContext>).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                        .Single(m => m.Name == "AfterSaveAsync" && m.GetParameters().First().ParameterType == typeof(IAfterSaveContext<TExecutionContext>));
+                    var afterSaveMethodBuilder = typeBuilder.DefineMethod(
+                        "AfterSaveAsync",
+                        MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Virtual,
+                        CallingConventions.Standard,
+                        afterSaveMethodInfo.ReturnType,
+                        afterSaveMethodInfo.GetParameters().Select(p => p.ParameterType).ToArray());
+                    var afterSaveGenerator = afterSaveMethodBuilder.GetILGenerator();
+
+                    afterSaveGenerator.Emit(OpCodes.Ldarg_0); // this
+                    afterSaveGenerator.Emit(OpCodes.Call, typeof(object).GetMethod("GetType"));
+                    afterSaveGenerator.Emit(OpCodes.Ldarg_1); // context
+                    afterSaveGenerator.Emit(OpCodes.Ldarg_2); // entities
+                    afterSaveGenerator.Emit(OpCodes.Call, typeof(GraphQLTypeBuilder).GetMethod(nameof(GraphQLTypeBuilder.CallAfterSaveNew), BindingFlags.Static | BindingFlags.Public));
+                    afterSaveGenerator.Emit(OpCodes.Ret);
+
+                    typeBuilder.DefineMethodOverride(afterSaveMethodBuilder, afterSaveMethodInfo);
+                }
             });
 
             if (afterSave != null)
             {
                 _afterSaveFuncs[type] = (context, entities) => afterSave((TExecutionContext)context, entities);
+            }
+
+            if (afterSaveNew != null)
+            {
+                _afterSaveNewFuncs[type] = (context, entities) => afterSaveNew((IAfterSaveContext<TExecutionContext>)context, entities);
             }
 
             return type;

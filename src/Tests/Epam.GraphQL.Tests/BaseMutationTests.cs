@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
+using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
 using NSubstitute;
@@ -145,9 +146,17 @@ namespace Epam.GraphQL.Tests
                 });
         }
 
-        protected void TestMutation(Action<Query<TestUserContext>> queryBuilder, Action<Mutation<TestUserContext>> mutationBuilder, string query, string expected, Action<IDataContext> checks = null, Action beforeExecute = null, Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null)
+        protected void TestMutation(
+            Action<Query<TestUserContext>> queryBuilder,
+            Action<Mutation<TestUserContext>> mutationBuilder,
+            string query,
+            string expected,
+            Action<IDataContext> checks = null,
+            Action beforeExecute = null,
+            Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null,
+            Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>> afterSaveNew = null)
         {
-            TestHelpers.TestMutation(queryBuilder, mutationBuilder, DataContext, query, expected, checks, beforeExecute, afterSave);
+            TestHelpers.TestMutation(queryBuilder, mutationBuilder, DataContext, query, expected, checks, beforeExecute, afterSave, afterSaveNew);
         }
 
         protected void TestQuery(Action<Query<TestUserContext>> queryBuilder, string query, string expected)
