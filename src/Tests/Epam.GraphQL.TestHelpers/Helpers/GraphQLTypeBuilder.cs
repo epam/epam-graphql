@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Epam.Contracts.Models;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Tests.TestData;
 
@@ -129,7 +130,8 @@ namespace Epam.GraphQL.Tests.Helpers
             {
                 if (afterSave != null)
                 {
-                    var afterSaveMethodInfo = typeof(Mutation<TExecutionContext>).GetMethod("AfterSaveAsync", BindingFlags.Instance | BindingFlags.NonPublic);
+                    var afterSaveMethodInfo = typeof(Mutation<TExecutionContext>).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                        .Single(m => m.Name == "AfterSaveAsync" && m.GetParameters().First().ParameterType == typeof(TExecutionContext));
                     var afterSaveMethodBuilder = typeBuilder.DefineMethod(
                         "AfterSaveAsync",
                         MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Virtual,
