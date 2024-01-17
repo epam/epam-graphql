@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Epam.Contracts.Models;
 using Epam.GraphQL.Filters;
 using Epam.GraphQL.Loaders;
-using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Search;
 using Epam.GraphQL.Tests.TestData;
 
