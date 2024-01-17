@@ -12,6 +12,7 @@ using Epam.Contracts.Models;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Tests.TestData;
 using GraphQL.Execution;
 using Microsoft.Extensions.Logging;
@@ -183,12 +184,21 @@ namespace Epam.GraphQL.Tests.Helpers
                 });
         }
 
-        public static void TestMutation(Action<Query<TestUserContext>> queryBuilder, Action<Mutation<TestUserContext>> mutationBuilder, IDataContext dataContext, string query, string expected, Action<IDataContext> checks = null, Action beforeExecute = null, Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null)
+        public static void TestMutation(
+            Action<Query<TestUserContext>> queryBuilder,
+            Action<Mutation<TestUserContext>> mutationBuilder,
+            IDataContext dataContext,
+            string query,
+            string expected,
+            Action<IDataContext> checks = null,
+            Action beforeExecute = null,
+            Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null,
+            Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>> afterSaveNew = null)
         {
             beforeExecute?.Invoke();
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType(queryBuilder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType(mutationBuilder, afterSave);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType(mutationBuilder, afterSave, afterSaveNew: afterSaveNew);
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
