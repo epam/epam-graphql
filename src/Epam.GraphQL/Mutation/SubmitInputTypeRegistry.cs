@@ -40,7 +40,7 @@ namespace Epam.GraphQL.Mutation
             {
                 if (!record.Equals(newRecord))
                 {
-                    throw new ArgumentException("An item with the same key has been already added");
+                    throw new ArgumentException($"An item with the same key ('{fieldName}') has been already added", nameof(fieldName));
                 }
             }
             else
@@ -71,7 +71,7 @@ namespace Epam.GraphQL.Mutation
                 return record.EntityType;
             }
 
-            throw new ArgumentException("Cannot find item");
+            throw new ArgumentException($"Cannot find item '{fieldName}'", nameof(fieldName));
         }
 
         public Type GetLoaderTypeByFieldName(string fieldName)
@@ -81,7 +81,7 @@ namespace Epam.GraphQL.Mutation
                 return record.ConfiguratorType;
             }
 
-            throw new ArgumentException("Cannot find item");
+            throw new ArgumentException($"Cannot find item '{fieldName}'", nameof(fieldName));
         }
 
         public IMutableLoader<TExecutionContext> GetMutableLoaderByFieldName(string fieldName)
@@ -91,7 +91,7 @@ namespace Epam.GraphQL.Mutation
                 return record.MutableLoader;
             }
 
-            throw new ArgumentException("Cannot find item");
+            throw new ArgumentException($"Cannot find item '{fieldName}'", nameof(fieldName));
         }
 
         public IMutableLoader<TExecutionContext> GetMutableLoaderByEntityType(Type entityType)
@@ -104,7 +104,7 @@ namespace Epam.GraphQL.Mutation
                 }
             }
 
-            throw new ArgumentException("Cannot find item");
+            throw new ArgumentException($"Cannot find item '{entityType.HumanizedName()}'", nameof(entityType));
         }
 
         public bool IsRegistered<TEntity>()
@@ -130,7 +130,7 @@ namespace Epam.GraphQL.Mutation
                 }
             }
 
-            throw new ArgumentException("Cannot find item");
+            throw new ArgumentException($"Cannot find item '{entityType.HumanizedName()}'", nameof(entityType));
         }
     }
 }
