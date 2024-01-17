@@ -585,6 +585,9 @@ namespace Epam.GraphQL
     {
         protected Mutation() { }
         protected override void AfterConfigure() { }
+        protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(Epam.GraphQL.Mutation.IAfterSaveContext<TExecutionContext> context, System.Collections.Generic.IEnumerable<object> entities) { }
+        [System.Obsolete("Use AfterSaveAsync(IAfterSaveContext context, IEnumerable entities) method instea" +
+            "d")]
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(TExecutionContext context, System.Collections.Generic.IEnumerable<object> entities) { }
         protected Epam.GraphQL.Configuration.IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null) { }
         protected void SubmitField<TLoader>(string fieldName)
@@ -925,6 +928,11 @@ namespace Epam.GraphQL.Loaders
 }
 namespace Epam.GraphQL.Mutation
 {
+    public interface IAfterSaveContext<TExecutionContext>
+    {
+        TExecutionContext ExecutionContext { get; }
+        string MutationName { get; }
+    }
     public interface IMutationResult
     {
         System.Collections.Generic.IEnumerable<object>? Payload { get; set; }
