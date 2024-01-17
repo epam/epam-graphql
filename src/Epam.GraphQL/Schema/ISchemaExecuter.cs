@@ -24,7 +24,7 @@ namespace Epam.GraphQL
         /// <returns> A result of GraphQL query execution. </returns>
         Task<ExecutionResult> ExecuteAsync(SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions);
 
-        Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object> filterValue)
+        Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object?> filterValue)
             where TProjection : Projection<TEntity, TExecutionContext>, new();
     }
 

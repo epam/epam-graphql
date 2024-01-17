@@ -31,7 +31,7 @@ namespace Epam.GraphQL
         public SchemaExecutionOptionsBuilder<TExecutionContext> WithOperationName(string operationName) =>
             With(options => options.OperationName = operationName);
 
-        public SchemaExecutionOptionsBuilder<TExecutionContext> WithVariables(Dictionary<string, object> variables) =>
+        public SchemaExecutionOptionsBuilder<TExecutionContext> WithVariables(Dictionary<string, object?> variables) =>
             With(options => options.Variables = variables);
 
         public SchemaExecutionOptionsBuilder<TExecutionContext> Query(string query) =>

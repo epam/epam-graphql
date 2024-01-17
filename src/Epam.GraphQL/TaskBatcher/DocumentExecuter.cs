@@ -4,7 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using GraphQL.Execution;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 
 namespace Epam.GraphQL.TaskBatcher
 {
@@ -13,7 +13,7 @@ namespace Epam.GraphQL.TaskBatcher
         protected override IExecutionStrategy SelectExecutionStrategy(ExecutionContext context)
         {
 #pragma warning disable IDE0072 // Add missing cases
-            return context.Operation.OperationType switch
+            return context.Operation.Operation switch
 #pragma warning restore IDE0072 // Add missing cases
             {
                 OperationType.Query => new SerialExecutionStrategy(),

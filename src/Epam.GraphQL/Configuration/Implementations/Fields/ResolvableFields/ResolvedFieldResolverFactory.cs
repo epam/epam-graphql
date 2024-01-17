@@ -21,7 +21,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
         public static IFieldResolver Create<TReturnType>(
             Func<IResolveFieldContext, Task<TReturnType>> resolver)
         {
-            return new AsyncFieldResolver<object, TReturnType>(resolver);
+            return new FuncFieldResolver<object, TReturnType>(arg => new ValueTask<TReturnType?>(resolver(arg)));
         }
     }
 }

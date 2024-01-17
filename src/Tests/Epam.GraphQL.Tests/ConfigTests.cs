@@ -8,8 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Epam.GraphQL.Tests.Helpers;
 using Epam.GraphQL.Tests.TestData;
-using GraphQL.Language.AST;
 using GraphQL.Validation;
+using GraphQLParser.AST;
 using NUnit.Framework;
 
 namespace Epam.GraphQL.Tests
@@ -108,18 +108,16 @@ namespace Epam.GraphQL.Tests
 
         public class CustomValidationRule : IValidationRule
         {
-            public Task<INodeVisitor> ValidateAsync(ValidationContext context)
+            public async ValueTask<INodeVisitor> ValidateAsync(ValidationContext context)
             {
-                return Task.FromResult<INodeVisitor>(new EnterLeaveListener(x =>
+                return new MatchingNodeVisitor<GraphQLField>((field, context) =>
                 {
-                    x.Match<Field>(
-                        field => context.ReportError(new ValidationError(
-                            context.OriginalQuery,
-                            "403",
-                            "Permissions denied",
-                            new UnauthorizedAccessException(),
-                            field)));
-                }));
+                    context.ReportError(new ValidationError(
+                        context.Document.Source.ToString(),
+                        "403",
+                        "Permissions denied",
+                        new UnauthorizedAccessException()));
+                });
             }
         }
     }

@@ -463,7 +463,7 @@ namespace Epam.GraphQL.Tests.Filtration
         {
             TestQueryError(
                 typeof(ArgumentsOfCorrectTypeError),
-                "Argument \"filter\" has invalid value {managerId: {in: [null]}}.\nIn field \"managerId\": In field \"in\": In element #1: Expected \"Int!\", found null.",
+                "Argument 'filter' has invalid value. In field 'managerId': [In field 'in': [In element #1: [Expected 'Int!', found null.]]]",
                 @"
                 query {
                     people(filter: {

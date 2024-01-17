@@ -3,21 +3,12 @@
 // property law. Dissemination of this information or reproduction of this material is strictly forbidden,
 // unless prior written permission is obtained from EPAM Systems, Inc
 
-using Epam.GraphQL.Loaders;
-using GraphQL.Language.AST;
-
-namespace Epam.GraphQL.Types
+namespace Epam.GraphQL.Mutation
 {
-    internal class SortDirectionValue : ValueNode<SortDirection>
+    public interface IAfterSaveContext<TExecutionContext>
     {
-        public SortDirectionValue(SortDirection value)
-        {
-            Value = value;
-        }
+        TExecutionContext ExecutionContext { get; }
 
-        protected override bool Equals(ValueNode<SortDirection> node)
-        {
-            return Value.Equals(node.Value);
-        }
+        string MutationName { get; }
     }
 }

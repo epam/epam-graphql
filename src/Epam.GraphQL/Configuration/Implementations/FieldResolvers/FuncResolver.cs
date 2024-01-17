@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Threading.Tasks;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.Resolvers;
@@ -23,18 +24,18 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             _resolver = resolver;
         }
 
-        public object? Resolve(IResolveFieldContext context)
+        public ValueTask<object?> ResolveAsync(IResolveFieldContext context)
         {
             var executer = _proxyAccessor.CreateHooksExecuter(context);
 
             if (executer != null)
             {
-                return executer
+                return new ValueTask<object?>(executer
                     .Execute(FuncConstants<TTransformedReturnType>.Identity)
-                    .LoadAsync(_resolver(context));
+                    .LoadAsync(_resolver(context)));
             }
 
-            return _resolver(context);
+            return new ValueTask<object?>(_resolver(context));
         }
     }
 }

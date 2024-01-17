@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GraphQL.SystemTextJson" Version="3.3.2" />
+    <PackageReference Include="GraphQL.SystemTextJson" Version="5.4.0" />
   </ItemGroup>
 
   <ItemGroup>

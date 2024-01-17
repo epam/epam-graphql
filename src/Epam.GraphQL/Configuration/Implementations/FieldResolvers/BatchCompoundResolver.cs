@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.TaskBatcher;
@@ -45,16 +46,18 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                 context => GetProxiedBatchLoader<IEnumerable<object>>(context).Then(selector));
         }
 
-        public object Resolve(IResolveFieldContext context)
+        public ValueTask<object?> ResolveAsync(IResolveFieldContext context)
         {
+            Guards.AssertIfNull(context.Source);
+
             if (context.Source is Proxy<TEntity> proxy)
             {
                 var proxiedBatchLoader = context.Bind(GetProxiedBatchLoader);
-                return proxiedBatchLoader.LoadAsync(proxy);
+                return new ValueTask<object?>(proxiedBatchLoader.LoadAsync(proxy));
             }
 
             var batchLoader = context.Bind(GetBatchLoader);
-            return batchLoader.LoadAsync((TEntity)context.Source);
+            return new ValueTask<object?>(batchLoader.LoadAsync((TEntity)context.Source));
         }
 
         private IDataLoader<TEntity, TReturnType> GetBatchLoader<TReturnType>(IResolveFieldContext context)

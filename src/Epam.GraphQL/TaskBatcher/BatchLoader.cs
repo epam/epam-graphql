@@ -74,7 +74,7 @@ namespace Epam.GraphQL.TaskBatcher
                 return array;
             }
 
-            async Task<object> IDataLoaderResult.GetResultAsync(CancellationToken cancellationToken)
+            async Task<object?> IDataLoaderResult.GetResultAsync(CancellationToken cancellationToken)
             {
                 return await GetResultAsync(cancellationToken).ConfigureAwait(false);
             }

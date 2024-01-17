@@ -46,7 +46,7 @@ namespace Epam.GraphQL
 
             using (profiler.Step(nameof(DoAfterSave)))
             {
-                return await AfterSaveAsync(context.GetUserContext<TExecutionContext>(), entities).ConfigureAwait(false);
+                return await AfterSaveAsync(new AfterSaveContext<TExecutionContext>(context), entities).ConfigureAwait(false);
             }
         }
 
@@ -141,9 +141,15 @@ namespace Epam.GraphQL
                 _submitOutputType);
         }
 
+        [Obsolete("Use AfterSaveAsync(IAfterSaveContext context, IEnumerable entities) method instead")]
         protected virtual Task<IEnumerable<object>> AfterSaveAsync(TExecutionContext context, IEnumerable<object> entities)
         {
             return Task.FromResult(Enumerable.Empty<object>());
+        }
+
+        protected virtual Task<IEnumerable<object>> AfterSaveAsync(IAfterSaveContext<TExecutionContext> context, IEnumerable<object> entities)
+        {
+            return AfterSaveAsync(context.ExecutionContext, entities);
         }
 
         private void SubmitField(
@@ -151,7 +157,7 @@ namespace Epam.GraphQL
             IGraphTypeDescriptor<TExecutionContext> returnGraphType,
             string argName,
             IInputObjectGraphType argGraphType,
-            Func<IResolveFieldContext, Dictionary<string, object>, Task<object>> resolve,
+            Func<IResolveFieldContext, Dictionary<string, object>, ValueTask<object?>> resolve,
             Type fieldType)
         {
             ThrowIfIsNotConfiguring();
@@ -164,7 +170,7 @@ namespace Epam.GraphQL
                 fieldType);
         }
 
-        private async Task<object> PerformResolve(IResolveFieldContext context, Dictionary<string, object> payload)
+        private async ValueTask<object?> PerformResolve(IResolveFieldContext context, Dictionary<string, object> payload)
         {
             var inputItems = new Dictionary<string, IEnumerable<IInputItem>>();
 

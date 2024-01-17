@@ -35,7 +35,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             var options = builder.Options;
 
             var graphType = GraphTypeDescriptor.Create<TExecutionContext>(typeof(MutationResultGraphType<TExecutionContext, TReturnType>));
-            var fieldResolver = new AsyncFieldResolver<object>(context =>
+            var fieldResolver = new FuncFieldResolver<object>(context =>
             {
                 return DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, resolver(context), mutationField.Mutation, context, options);
             });
@@ -47,7 +47,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             IGraphTypeDescriptor<TExecutionContext> graphType,
             Func<IResolveFieldContext, Task<TReturnType>> resolver)
         {
-            return (new AsyncFieldResolver<object, TReturnType>(resolver), graphType);
+            return (new FuncFieldResolver<object, TReturnType>(arg => new ValueTask<TReturnType?>(resolver(arg))), graphType);
         }
 
         public static (IFieldResolver Resolver, IGraphTypeDescriptor<TExecutionContext> GraphType) Create<TReturnType, TExecutionContext>(
@@ -60,7 +60,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
             var options = builder.Options;
 
             var graphType = GraphTypeDescriptor.Create<MutationResultGraphType<TExecutionContext, TReturnType>, TExecutionContext>();
-            var fieldResolver = new AsyncFieldResolver<object>(async context =>
+            var fieldResolver = new FuncFieldResolver<object>(async context =>
             {
                 var mutationResult = await resolver(context).ConfigureAwait(false);
                 return await DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, mutationResult, mutationField.Mutation, context, options).ConfigureAwait(false);
@@ -82,7 +82,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 var options = builder.Options;
 
                 graphType = GraphTypeDescriptor.Create<SubmitOutputGraphType<TExecutionContext>, TExecutionContext>();
-                var fieldResolver = new AsyncFieldResolver<object>(context =>
+                var fieldResolver = new FuncFieldResolver<object>(context =>
                 {
                     var result = resolver(context).Cast<object>();
                     return DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, result, mutationField.Mutation, context, options);
@@ -107,7 +107,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ResolvableFields
                 var options = builder.Options;
 
                 graphType = GraphTypeDescriptor.Create<SubmitOutputGraphType<TExecutionContext>, TExecutionContext>();
-                var fieldResolver = new AsyncFieldResolver<object>(async context =>
+                var fieldResolver = new FuncFieldResolver<object>(async context =>
                 {
                     var result = (await resolver(context).ConfigureAwait(false)).Cast<object>();
                     return await DbContextSaver.PerformManualMutationAndGetResult(mutationField.Mutation.SubmitInputTypeRegistry, result, mutationField.Mutation, context, options)

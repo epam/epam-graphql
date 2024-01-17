@@ -69,11 +69,11 @@ namespace Epam.GraphQL.Builders.Loader
             where TProjection : Epam.GraphQL.Loaders.Projection<TSourceType, TExecutionContext>;
         Epam.GraphQL.Builders.Loader.IInlineObjectFieldBuilder<TSourceType, TExecutionContext> Field(string name, string? deprecationReason = null);
         Epam.GraphQL.Helpers.IVoid Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
-        Epam.GraphQL.Configuration.IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Configuration.IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
         Epam.GraphQL.Helpers.IVoid Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
-        Epam.GraphQL.Configuration.IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Configuration.IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TSourceType, TReturnType>> expression, string? deprecationReason = null);
         Epam.GraphQL.Helpers.IVoid Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, System.Collections.Generic.IEnumerable<TReturnType>>> expression, string? deprecationReason = null);
-        Epam.GraphQL.Configuration.IInlineExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null);
+        Epam.GraphQL.Configuration.IExpressionField<TSourceType, TReturnType, TExecutionContext> Field<TReturnType>(string name, System.Linq.Expressions.Expression<System.Func<TExecutionContext, TSourceType, TReturnType>> expression, string? deprecationReason = null);
         void OnEntityLoaded<T>(System.Linq.Expressions.Expression<System.Func<TSourceType, T>> expression, System.Action<TExecutionContext, T> action);
         void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Collections.Generic.IDictionary<TKey, T>> fetch, System.Action<TExecutionContext, T> action);
         void OnEntityLoaded<TKey, T>(System.Linq.Expressions.Expression<System.Func<TSourceType, TKey>> keyExpression, System.Func<TExecutionContext, System.Collections.Generic.IEnumerable<TKey>, System.Threading.Tasks.Task<System.Collections.Generic.IDictionary<TKey, T>>> fetch, System.Action<TExecutionContext, T> action);
@@ -276,7 +276,6 @@ namespace Epam.GraphQL.Configuration
     {
         void Groupable();
     }
-    public interface IInlineExpressionField<TEntity, TFilterValueType, TExecutionContext> : Epam.GraphQL.Configuration.IFilterableField<Epam.GraphQL.Configuration.ISortableField<Epam.GraphQL.Helpers.IVoid, TEntity, TExecutionContext>, TEntity, TFilterValueType>, Epam.GraphQL.Configuration.ISortableField<Epam.GraphQL.Helpers.IVoid, TEntity, TExecutionContext> { }
     public interface IInlineLoaderField<TParentEntity, TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IEnumerableField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IInlineLoaderField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<Epam.GraphQL.Configuration.IInlineLoaderField<TParentEntity, TEntity, TExecutionContext>, TEntity> { }
     public interface IInlineLoaderField<out TThis, TParentEntity, TEntity, TExecutionContext> : Epam.GraphQL.Configuration.IEnumerableField<TThis, TParentEntity, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.ISearchableField<TThis, TEntity, TExecutionContext>, Epam.GraphQL.Configuration.IWhereableField<TThis, TEntity> { }
     public interface ILegacyFilterableField<out TThis, TEntity, TExecutionContext>
@@ -542,7 +541,7 @@ namespace Epam.GraphQL
 {
     public static class ExecutionResultExtensions
     {
-        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.IDocumentWriter documentWriter) { }
+        public static System.Threading.Tasks.Task<string> WriteToStringAsync(this GraphQL.ExecutionResult executionResult, GraphQL.IGraphQLTextSerializer graphQlTextSerializer) { }
     }
     [Epam.GraphQL.Infrastructure.InternalApi]
     public interface IDataContext : Epam.GraphQL.Adapters.IQueryableToAsNoTrackingQueryableConverter, Epam.GraphQL.Adapters.IQueryableToAsyncEnumerableConverter
@@ -569,7 +568,7 @@ namespace Epam.GraphQL
     public interface ISchemaExecuter<TExecutionContext>
     {
         System.Threading.Tasks.Task<GraphQL.ExecutionResult> ExecuteAsync(Epam.GraphQL.SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions);
-        System.Linq.Expressions.Expression<System.Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, System.Collections.Generic.Dictionary<string, object> filterValue)
+        System.Linq.Expressions.Expression<System.Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, System.Collections.Generic.Dictionary<string, object?> filterValue)
             where TProjection : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, new ();
     }
     public interface ISchemaExecuter<TQuery, TExecutionContext> : Epam.GraphQL.ISchemaExecuter<TExecutionContext>
@@ -586,6 +585,9 @@ namespace Epam.GraphQL
     {
         protected Mutation() { }
         protected override void AfterConfigure() { }
+        protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(Epam.GraphQL.Mutation.IAfterSaveContext<TExecutionContext> context, System.Collections.Generic.IEnumerable<object> entities) { }
+        [System.Obsolete("Use AfterSaveAsync(IAfterSaveContext context, IEnumerable entities) method instea" +
+            "d")]
         protected virtual System.Threading.Tasks.Task<System.Collections.Generic.IEnumerable<object>> AfterSaveAsync(TExecutionContext context, System.Collections.Generic.IEnumerable<object> entities) { }
         protected Epam.GraphQL.Configuration.IMutationField<TExecutionContext> Field(string name, string? deprecationReason = null) { }
         protected void SubmitField<TLoader>(string fieldName)
@@ -633,7 +635,7 @@ namespace Epam.GraphQL
         protected SchemaExecuter(Epam.GraphQL.SchemaOptions options) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<GraphQL.ExecutionResult> ExecuteAsync(Epam.GraphQL.SchemaExecutionOptions<TExecutionContext> schemaExecutionOptions) { }
-        public System.Linq.Expressions.Expression<System.Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, System.Collections.Generic.Dictionary<string, object> filterValue)
+        public System.Linq.Expressions.Expression<System.Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, System.Collections.Generic.Dictionary<string, object?> filterValue)
             where TProjection : Epam.GraphQL.Loaders.Projection<TEntity, TExecutionContext>, new () { }
     }
     public class SchemaExecuter<TQuery, TExecutionContext> : Epam.GraphQL.SchemaExecuter<TExecutionContext>, Epam.GraphQL.ISchemaExecuter<TExecutionContext>, Epam.GraphQL.ISchemaExecuter<TQuery, TExecutionContext>
@@ -663,7 +665,7 @@ namespace Epam.GraphQL
         public Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> With(System.Action<Epam.GraphQL.SchemaExecutionOptions<TExecutionContext>> configure) { }
         public Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> WithExecutionContext(TExecutionContext executionContext) { }
         public Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> WithOperationName(string operationName) { }
-        public Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> WithVariables(System.Collections.Generic.Dictionary<string, object> variables) { }
+        public Epam.GraphQL.SchemaExecutionOptionsBuilder<TExecutionContext> WithVariables(System.Collections.Generic.Dictionary<string, object?> variables) { }
     }
     public class SchemaExecutionOptions<TExecutionContext>
     {
@@ -671,7 +673,7 @@ namespace Epam.GraphQL
         public System.Threading.CancellationToken CancellationToken { get; set; }
         public GraphQL.Validation.Complexity.ComplexityConfiguration? ComplexityConfiguration { get; set; }
         public Epam.GraphQL.IDataContext? DataContext { get; set; }
-        public GraphQL.Language.AST.Document? Document { get; set; }
+        public GraphQLParser.AST.GraphQLDocument? Document { get; set; }
         public bool EnableMetrics { get; set; }
         public TExecutionContext ExecutionContext { get; set; }
         public string? OperationName { get; set; }
@@ -680,7 +682,7 @@ namespace Epam.GraphQL
         [System.Obsolete("UserContext has been renamed to ExecutionContext. Use ExecutionContext instead")]
         public TExecutionContext UserContext { get; set; }
         public System.Collections.Generic.IEnumerable<GraphQL.Validation.IValidationRule>? ValidationRules { get; set; }
-        public System.Collections.Generic.Dictionary<string, object>? Variables { get; set; }
+        public System.Collections.Generic.Dictionary<string, object?>? Variables { get; set; }
     }
     public class SchemaOptions : Epam.GraphQL.Helpers.Options<Epam.GraphQL.SchemaOptions>
     {
@@ -712,7 +714,7 @@ namespace Epam.GraphQL
     }
     public static class TaskExecutionResultExtensions
     {
-        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, GraphQL.IDocumentWriter documentWriter) { }
+        public static System.Threading.Tasks.Task<string> ToStringAsync(this System.Threading.Tasks.Task<GraphQL.ExecutionResult> executionResultTask, GraphQL.IGraphQLTextSerializer graphQlTextSerializer) { }
     }
 }
 namespace Epam.GraphQL.Filters
@@ -926,6 +928,11 @@ namespace Epam.GraphQL.Loaders
 }
 namespace Epam.GraphQL.Mutation
 {
+    public interface IAfterSaveContext<TExecutionContext>
+    {
+        TExecutionContext ExecutionContext { get; }
+        string MutationName { get; }
+    }
     public interface IMutationResult
     {
         System.Collections.Generic.IEnumerable<object>? Payload { get; set; }

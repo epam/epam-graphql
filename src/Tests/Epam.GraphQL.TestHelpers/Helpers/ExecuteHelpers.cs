@@ -28,11 +28,29 @@ namespace Epam.GraphQL.Tests.Helpers
             return executeQueryMethodInfo.InvokeAndHoistBaseException<ExecutionResult>(null, request, dataContext, configure);
         }
 
+        public static ExecutionResult ExecuteQuery(Type queryType, string request, IDataContext dataContext = null, Action<SchemaOptionsBuilder<TestUserContext>> configure = null)
+        {
+            var executeQueryMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
+                nameof(ExecuteQuery),
+                new[] { queryType },
+                new[] { typeof(string), typeof(IDataContext), typeof(Action<SchemaOptionsBuilder<TestUserContext>>) });
+            return executeQueryMethodInfo.InvokeAndHoistBaseException<ExecutionResult>(null, request, dataContext, configure);
+        }
+
         public static ExecutionResult ExecuteQuery<TExecutionContext>(Type queryType, Type mutationType, Action<SchemaOptionsBuilder<TExecutionContext>> configure, Action<SchemaExecutionOptionsBuilder<TExecutionContext>> configureExecutionOptions)
         {
             var executeQueryMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
                 nameof(ExecuteQuery),
                 new[] { queryType, mutationType, typeof(TExecutionContext) },
+                new[] { typeof(Action<SchemaOptionsBuilder<TExecutionContext>>), typeof(Action<SchemaExecutionOptionsBuilder<TExecutionContext>>) });
+            return executeQueryMethodInfo.InvokeAndHoistBaseException<ExecutionResult>(null, configure, configureExecutionOptions);
+        }
+
+        public static ExecutionResult ExecuteQuery<TExecutionContext>(Type queryType, Action<SchemaOptionsBuilder<TExecutionContext>> configure, Action<SchemaExecutionOptionsBuilder<TExecutionContext>> configureExecutionOptions)
+        {
+            var executeQueryMethodInfo = typeof(ExecuteHelpers).GetNonPublicGenericMethod(
+                nameof(ExecuteQuery),
+                new[] { queryType, typeof(TExecutionContext) },
                 new[] { typeof(Action<SchemaOptionsBuilder<TExecutionContext>>), typeof(Action<SchemaExecutionOptionsBuilder<TExecutionContext>>) });
             return executeQueryMethodInfo.InvokeAndHoistBaseException<ExecutionResult>(null, configure, configureExecutionOptions);
         }
@@ -79,9 +97,50 @@ namespace Epam.GraphQL.Tests.Helpers
             return result;
         }
 
+        private static ExecutionResult ExecuteQuery<TQuery, TExecutionContext>(Action<SchemaOptionsBuilder<TExecutionContext>> configure, Action<SchemaExecutionOptionsBuilder<TExecutionContext>> configureExecutionOptions)
+            where TQuery : Query<TExecutionContext>, new()
+        {
+            var services = new ServiceCollection();
+            services.AddEpamGraphQLSchema<TQuery, TExecutionContext>(configure);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var schemaExecuter = serviceProvider.GetRequiredService<ISchemaExecuter<TQuery, TExecutionContext>>();
+            var result = schemaExecuter.ExecuteAsync(configureExecutionOptions).Result;
+            return result;
+        }
+
         private static ExecutionResult ExecuteQuery<TQuery, TMutation>(string request, IDataContext dataContext, Action<SchemaOptionsBuilder<TestUserContext>> configure)
             where TQuery : Query<TestUserContext>, new()
             where TMutation : Mutation<TestUserContext>, new()
+        {
+            SetUpMocks(dataContext);
+
+            return ExecuteQuery<TQuery, TMutation, TestUserContext>(configure, executionBuilder =>
+            {
+                executionBuilder.Options.DataContext = dataContext;
+                executionBuilder
+                    .ThrowOnUnhandledException()
+                    .WithExecutionContext(new TestUserContext(dataContext))
+                    .Query(request);
+            });
+        }
+
+        private static ExecutionResult ExecuteQuery<TQuery>(string request, IDataContext dataContext, Action<SchemaOptionsBuilder<TestUserContext>> configure)
+            where TQuery : Query<TestUserContext>, new()
+        {
+            SetUpMocks(dataContext);
+
+            return ExecuteQuery<TQuery, TestUserContext>(configure, executionBuilder =>
+            {
+                executionBuilder.Options.DataContext = dataContext;
+                executionBuilder
+                    .ThrowOnUnhandledException()
+                    .WithExecutionContext(new TestUserContext(dataContext))
+                    .Query(request);
+            });
+        }
+
+        private static void SetUpMocks(IDataContext dataContext)
         {
             if (dataContext == null)
             {
@@ -151,15 +210,6 @@ namespace Epam.GraphQL.Tests.Helpers
                 dataContext.ExecuteInTransactionAsync(Arg.Any<Func<Task>>())
                     .Returns(callInfo => callInfo.ArgAt<Func<Task>>(0)());
             }
-
-            return ExecuteQuery<TQuery, TMutation, TestUserContext>(configure, executionBuilder =>
-            {
-                executionBuilder.Options.DataContext = dataContext;
-                executionBuilder
-                    .ThrowOnUnhandledException()
-                    .WithExecutionContext(new TestUserContext(dataContext))
-                    .Query(request);
-            });
         }
 
         private static object ToObject(JToken token)

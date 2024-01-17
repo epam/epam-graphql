@@ -4,6 +4,7 @@
 // unless prior written permission is obtained from EPAM Systems, Inc
 
 using System;
+using System.Threading.Tasks;
 using Epam.GraphQL.Helpers;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -25,11 +26,13 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
 
         protected Func<IResolveFieldContext, IDataLoader<Proxy<TEntity>, TReturnType>> ProxiedResolver { get; }
 
-        public object Resolve(IResolveFieldContext context)
+        public ValueTask<object?> ResolveAsync(IResolveFieldContext context)
         {
+            Guards.AssertIfNull(context.Source);
+
             return context.Source is Proxy<TEntity> proxy
-                ? ProxiedResolver(context).LoadAsync(proxy)
-                : Resolver(context).LoadAsync((TEntity)context.Source);
+                ? new ValueTask<object?>(ProxiedResolver(context).LoadAsync(proxy))
+                : new ValueTask<object?>(Resolver(context).LoadAsync((TEntity)context.Source));
         }
     }
 }

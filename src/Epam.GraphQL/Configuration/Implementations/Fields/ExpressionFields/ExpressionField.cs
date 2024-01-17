@@ -23,11 +23,9 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         TypedField<TEntity, TReturnType, TExecutionContext>,
         IExpressionFieldConfiguration<TEntity, TExecutionContext>,
         IExpressionField<TEntity, TReturnType, TExecutionContext>,
-        IInlineExpressionField<TEntity, TReturnType, TExecutionContext>,
         IVoid
     {
         private readonly IFieldExpression<TEntity, TReturnType, TExecutionContext> _expression;
-        private bool _isGroupable;
 
         public ExpressionField(
             Func<IChainConfigurationContextOwner, IChainConfigurationContext> configurationContextFactory,
@@ -74,7 +72,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
 
         public bool IsFilterable { get; set; }
 
-        public bool IsGroupable => _isGroupable || Registry.IsSimpleType(typeof(TEntity));
+        public bool IsGroupable { get; private set; }
 
         public PropertyInfo? PropertyInfo => _expression.PropertyInfo;
 
@@ -153,7 +151,7 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
         public void Groupable()
         {
             ConfigurationContext.Chain(nameof(Groupable));
-            _isGroupable = true;
+            IsGroupable = true;
         }
 
         public override FieldType AsFieldType()
@@ -191,42 +189,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields.ExpressionFields
             }
 
             return base.Equals(other);
-        }
-
-        ISortableField<IVoid, TEntity, TExecutionContext> IFilterableField<ISortableField<IVoid, TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable()
-        {
-            Filterable();
-            return this;
-        }
-
-        ISortableField<IVoid, TEntity, TExecutionContext> IFilterableField<ISortableField<IVoid, TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable(params TReturnType[] defaultValues)
-        {
-            Filterable(defaultValues);
-            return this;
-        }
-
-        ISortableField<IVoid, TEntity, TExecutionContext> IFilterableField<ISortableField<IVoid, TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable(NullOption nullValue)
-        {
-            Filterable(nullValue);
-            return this;
-        }
-
-        IVoid ISortableField<IVoid, TEntity, TExecutionContext>.Sortable()
-        {
-            Sortable();
-            return this;
-        }
-
-        IVoid ISortableField<IVoid, TEntity, TExecutionContext>.Sortable<TValue>(Expression<Func<TEntity, TValue>> sorter)
-        {
-            Sortable(sorter);
-            return this;
-        }
-
-        IVoid ISortableField<IVoid, TEntity, TExecutionContext>.Sortable<TValue>(Func<TExecutionContext, Expression<Func<TEntity, TValue>>> sorterFactory)
-        {
-            Sortable(sorterFactory);
-            return this;
         }
 
         ISortableGroupableField<TEntity, TExecutionContext> IFilterableField<ISortableGroupableField<TEntity, TExecutionContext>, TEntity, TReturnType>.Filterable()

@@ -12,7 +12,9 @@ using Epam.Contracts.Models;
 using Epam.GraphQL.Builders.Loader;
 using Epam.GraphQL.Helpers;
 using Epam.GraphQL.Loaders;
+using Epam.GraphQL.Mutation;
 using Epam.GraphQL.Tests.TestData;
+using GraphQL.Execution;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -34,12 +36,10 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 query,
                 dataContext,
                 configure: schemaOptionsBuilder =>
@@ -51,7 +51,7 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke();
@@ -65,12 +65,10 @@ namespace Epam.GraphQL.Tests.Helpers
         {
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery<TestUserContext>(
                 queryType,
-                mutationType,
                 configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory),
                 configureExecutionOptions: schemaExecutionOptionsBuilder =>
                 {
@@ -81,7 +79,7 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -96,19 +94,17 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 query,
                 configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
 
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -126,7 +122,7 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Connection(loaderType, connectionName));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
+            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(m => m.SubmitField(loaderType, "test"));
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
@@ -138,7 +134,7 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -152,19 +148,17 @@ namespace Epam.GraphQL.Tests.Helpers
         {
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType<TestUserContext>(q => q.Field(fieldName).Resolve(ctx => getBaseQuery(ctx), builder));
-            var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
                 queryType,
-                mutationType,
                 query,
                 configure: schemaOptionsBuilder => schemaOptionsBuilder.UseLoggerFactory(loggerFactory));
 
             Assert.IsNull(actualResult.Errors, actualResult.Errors != null ? string.Join(",", actualResult.Errors.Select(e => e.Message)) : null);
 
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue());
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -173,12 +167,10 @@ namespace Epam.GraphQL.Tests.Helpers
             Assert.Throws(Is.TypeOf(exceptionType).And.Message.EqualTo(message), () =>
                 {
                     var queryType = GraphQLTypeBuilder.CreateQueryType(builder);
-                    var mutationType = GraphQLTypeBuilder.CreateMutationType<TestUserContext>(_ => { });
 
                     using var loggerFactory = CreateLoggerFactory();
                     var result = ExecuteHelpers.ExecuteQuery(
                         queryType,
-                        mutationType,
                         query,
                         configure: schemaOptionsBuilder =>
                         {
@@ -192,12 +184,21 @@ namespace Epam.GraphQL.Tests.Helpers
                 });
         }
 
-        public static void TestMutation(Action<Query<TestUserContext>> queryBuilder, Action<Mutation<TestUserContext>> mutationBuilder, IDataContext dataContext, string query, string expected, Action<IDataContext> checks = null, Action beforeExecute = null, Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null)
+        public static void TestMutation(
+            Action<Query<TestUserContext>> queryBuilder,
+            Action<Mutation<TestUserContext>> mutationBuilder,
+            IDataContext dataContext,
+            string query,
+            string expected,
+            Action<IDataContext> checks = null,
+            Action beforeExecute = null,
+            Func<TestUserContext, IEnumerable<object>, Task<IEnumerable<object>>> afterSave = null,
+            Func<IAfterSaveContext<TestUserContext>, IEnumerable<object>, Task<IEnumerable<object>>> afterSaveNew = null)
         {
             beforeExecute?.Invoke();
             var expectedResult = ExecuteHelpers.Deserialize(expected);
             var queryType = GraphQLTypeBuilder.CreateQueryType(queryBuilder);
-            var mutationType = GraphQLTypeBuilder.CreateMutationType(mutationBuilder, afterSave);
+            var mutationType = GraphQLTypeBuilder.CreateMutationType(mutationBuilder, afterSave, afterSaveNew: afterSaveNew);
 
             using var loggerFactory = CreateLoggerFactory();
             var actualResult = ExecuteHelpers.ExecuteQuery(
@@ -211,7 +212,7 @@ namespace Epam.GraphQL.Tests.Helpers
 
             var converter = new DecimalFormatConverter();
             var expectedJson = JsonConvert.SerializeObject(expectedResult, converter);
-            var actualJson = JsonConvert.SerializeObject(actualResult.Data, converter);
+            var actualJson = JsonConvert.SerializeObject(((ExecutionNode)actualResult.Data).ToValue(), converter);
             Assert.AreEqual(expectedJson, actualJson);
 
             checks?.Invoke(dataContext);

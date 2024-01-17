@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Epam.GraphQL.Configuration.Implementations.Fields.Helpers;
 using Epam.GraphQL.Extensions;
 using Epam.GraphQL.Helpers;
@@ -69,17 +70,17 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
             return result;
         };
 
-        public object Resolve(IResolveFieldContext context)
+        public ValueTask<object?> ResolveAsync(IResolveFieldContext context)
         {
             if (_proxyAccessor.HasHooks)
             {
                 var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
-                return hooksExecuter!
+                return new ValueTask<object?>(hooksExecuter!
                     .Execute(FuncConstants<TTransformedReturnType>.Identity)
-                    .LoadAsync(context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx))));
+                    .LoadAsync(context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)))));
             }
 
-            return context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx)));
+            return new ValueTask<object?>(context.ExecuteQuery(ctx => Resolver(ctx).Select(Transform(ctx))));
         }
 
         public IRootQueryableResolver<TReturnType, TExecutionContext> Select(Func<IResolveFieldContext, IQueryable<TReturnType>, IQueryable<TReturnType>> selector)
@@ -188,12 +189,12 @@ namespace Epam.GraphQL.Configuration.Implementations.FieldResolvers
                         {
                             var hooksExecuter = _proxyAccessor.CreateHooksExecuter(context);
                             connection.Edges = hooksExecuter!
-                                .Execute<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>>(edge => edge.Node)
+                                .Execute<global::GraphQL.Types.Relay.DataObjects.Edge<TTransformedReturnType>>(edge => edge.Node!)
                                 .LoadAsync(selected.Edges);
 
                             if (selected.Items != null)
                             {
-                                connection.Items = connection.Edges.Then(edges => edges.Select(edge => edge.Node));
+                                connection.Items = connection.Edges.Then(edges => edges.Select(edge => edge.Node!));
                             }
 
                             return connection;

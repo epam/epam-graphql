@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using GraphQL;
 using GraphQL.Execution;
 using GraphQL.NewtonsoftJson;
-using Newtonsoft.Json;
 
 namespace Epam.GraphQL.SystemTextJson
 {
@@ -19,42 +18,42 @@ namespace Epam.GraphQL.SystemTextJson
     {
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter());
+            return executionResul.WriteToStringAsync(new GraphQLSerializer());
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, bool indent)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(indent: indent));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(indent: indent));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(errorInfoProvider: errorInfoProvider));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(errorInfoProvider: errorInfoProvider));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, JsonSerializerSettings serializerSettings)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(serializerSettings: serializerSettings));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(serializerSettings: serializerSettings));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, Action<JsonSerializerSettings> configureSerializerSettings)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(configureSerializerSettings: configureSerializerSettings));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(configureSerializerSettings: configureSerializerSettings));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, bool indent, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(indent: indent, errorInfoProvider: errorInfoProvider));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(indent: indent, errorInfoProvider: errorInfoProvider));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, JsonSerializerSettings serializerSettings, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(serializerSettings: serializerSettings, errorInfoProvider: errorInfoProvider));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(serializerSettings: serializerSettings, errorInfoProvider: errorInfoProvider));
         }
 
         public static Task<string> WriteToStringAsync(this ExecutionResult executionResul, Action<JsonSerializerSettings> configureSerializerSettings, IErrorInfoProvider errorInfoProvider)
         {
-            return executionResul.WriteToStringAsync(new DocumentWriter(configureSerializerSettings: configureSerializerSettings, errorInfoProvider: errorInfoProvider));
+            return executionResul.WriteToStringAsync(new GraphQLSerializer(configureSerializerSettings: configureSerializerSettings, errorInfoProvider: errorInfoProvider));
         }
     }
 }

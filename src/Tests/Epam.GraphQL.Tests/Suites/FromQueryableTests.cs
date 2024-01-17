@@ -122,7 +122,7 @@ namespace Epam.GraphQL.Tests.Suites
                 queryFragment,
                 resultFragment,
                 person => person.Id,
-                builder => builder.Field("id", id => id));
+                builder => builder.Field("id", id => id).Groupable());
         }
 
         [TestCaseSource(typeof(FromQueryableTests), nameof(RootNullableIntTestData))]

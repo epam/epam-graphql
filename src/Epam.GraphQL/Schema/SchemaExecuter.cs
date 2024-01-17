@@ -39,11 +39,12 @@ namespace Epam.GraphQL
 
             var coreOptionsExtension = Options.FindExtension<CoreSchemaOptionsExtension<TExecutionContext>>();
             var schemaServiceProvider = new SchemaServiceProvider<TExecutionContext>();
-            GraphQLSchema = new Schema(schemaServiceProvider);
+            GraphQLSchema = new Schema(schemaServiceProvider, runConfigurations: false);
             Registry = schemaServiceProvider.GetRequiredService<RelationRegistry<TExecutionContext>>();
 
             ValueConverter.Register(typeof(string), typeof(SortDirection), StringToSortDirection);
-            GraphQLSchema.RegisterValueConverter(new SortDirectionAstValueConverter());
+            GraphQLSchema.RegisterTypeMapping<SortDirection, SortDirectionGraphType>();
+            GraphQLSchema.RegisterType<LegacyDateTimeGraphType>();
         }
 
         internal RelationRegistry<TExecutionContext> Registry { get; }
@@ -63,16 +64,19 @@ namespace Epam.GraphQL
             Guards.ThrowIfNull(schemaExecutionOptions, nameof(schemaExecutionOptions));
 
             var executionOptions = schemaExecutionOptions.ToExecutionOptions(this);
-            var profiler = ((GraphQLContext)executionOptions.UserContext["ctx"]).Profiler;
+            Guards.AssertIfNull(executionOptions);
+            var userContext = (GraphQLContext?)executionOptions.UserContext["ctx"];
+            Guards.AssertIfNull(userContext);
+            var profiler = userContext.Profiler;
 
-            using (profiler.CustomTiming($"GQL: {executionOptions.OperationName}", $"{executionOptions.Query}\r\n\r\nVARIABLES:\r\n{executionOptions.Inputs.ToFriendlyString()}"))
+            using (profiler.CustomTiming($"GQL: {executionOptions.OperationName}", $"{executionOptions.Query}\r\n\r\nVARIABLES:\r\n{executionOptions.Variables.ToFriendlyString()}"))
             {
                 var documentExecuter = new DocumentExecuter();
                 return await documentExecuter.ExecuteAsync(executionOptions).ConfigureAwait(false);
             }
         }
 
-        public Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object> filterValue)
+        public Expression<Func<TEntity, bool>> GetExpressionByFilterValue<TProjection, TEntity>(TExecutionContext executionContext, Dictionary<string, object?> filterValue)
             where TProjection : Projection<TEntity, TExecutionContext>, new()
         {
             Guards.ThrowIfNull(filterValue, nameof(filterValue));
@@ -89,12 +93,10 @@ namespace Epam.GraphQL
             var filterGraphType = Registry.GenerateInputGraphType(filters.FilterType);
             var resolvedFilterGraphType = (IGraphType)Registry.GetService(filterGraphType);
 
-#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
             return (Expression<Func<TEntity, bool>>)filters.BuildExpression(executionContext, CoerceValue(resolvedFilterGraphType, filterValue).ToObject(filters.FilterType, resolvedFilterGraphType));
-#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
         }
 
-        private static object? CoerceValue(IGraphType type, object? input)
+        private static object? CoerceValue(IGraphType? type, object? input)
         {
             if (type is NonNullGraphType nonNull)
             {
@@ -215,12 +217,17 @@ namespace Epam.GraphQL
 
             GraphQLSchema.Initialize();
 
-            var typeGraphType = (__Type)GraphQLSchema.FindType(nameof(__Type));
+            var typeGraphType = (__Type?)GraphQLSchema.TypeMetaFieldType.ResolvedType;
+            var fieldGraphType = (__Field?)GraphQLSchema.AllTypes[nameof(__Field)];
+
+            Guards.AssertIfNull(typeGraphType);
+            Guards.AssertIfNull(fieldGraphType);
+
             var field = new FieldType()
             {
                 Name = "metadata",
                 Type = typeof(TypeMetadataGraphType),
-                ResolvedType = new TypeMetadataGraphType((__Field)GraphQLSchema.FindType(nameof(__Field)), typeGraphType),
+                ResolvedType = new TypeMetadataGraphType(fieldGraphType, typeGraphType),
                 Resolver = new FuncFieldResolver<IGraphType, TypeMetadata?>(ResolveTypeMetadata),
             };
 
