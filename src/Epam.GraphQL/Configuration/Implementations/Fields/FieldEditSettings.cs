@@ -59,8 +59,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                         ? dict.ToObject(typeof(TReturnType))
                         : value?.GetPropertyValue(typeof(TReturnType));
 
-                    Guards.AssertIfNull(value);
-
                     OnWrite(ctx, (TEntity)e, (TReturnType)value);
                 };
             }
@@ -80,8 +78,6 @@ namespace Epam.GraphQL.Configuration.Implementations.Fields
                     value = value is IDictionary<string, object?> dict
                         ? dict.ToObject(typeof(TReturnType))
                         : value?.GetPropertyValue(typeof(TReturnType));
-
-                    Guards.AssertIfNull(value);
 
                     return OnWriteAsync(ctx, (TEntity)e, (TReturnType)value);
                 };
