@@ -99,12 +99,38 @@ namespace Epam.GraphQL.Loaders
             return await ((GraphQLContext<TExecutionContext>)context).Registry.CanViewParentAsync(GetType(), (GraphQLContext<TExecutionContext>)context, entity).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Lifetime hook, allows to perform extra operations before inserting a new <paramref name="entity"/> in a db.
+        /// </summary>
         protected virtual void BeforeCreate(TExecutionContext context, TEntity entity)
         {
         }
 
+        /// <summary>
+        /// Asynchronous lifetime hook, allows to perform extra operations before inserting a new <paramref name="entity"/> in a db.
+        /// <br/><b>Note:</b> Default implementation performs call of the <see cref="BeforeCreate(TExecutionContext, TEntity)"/>.
+        /// </summary>
+        protected virtual Task BeforeCreateAsync(TExecutionContext context, TEntity entity)
+        {
+            BeforeCreate(context, entity);
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Lifetime hook, allows to perform extra operations before updating a <paramref name="entity"/> in a db.
+        /// </summary>
         protected virtual void BeforeUpdate(TExecutionContext context, TEntity entity)
         {
+        }
+
+        /// <summary>
+        /// Asynchronous lifetime hook, allows to perform extra operations before updating a <paramref name="entity"/> in a db.
+        /// <br/><b>Note:</b> Default implementation performs call of the <see cref="BeforeUpdate(TExecutionContext, TEntity)"/>.
+        /// </summary>
+        protected virtual Task BeforeUpdateAsync(TExecutionContext context, TEntity entity)
+        {
+            BeforeUpdate(context, entity);
+            return Task.CompletedTask;
         }
 
         private SaveResult<TEntity, TId, TExecutionContext> CreateSaveResultFromValues(string fieldName, IEnumerable<InputItem<TEntity>> entities) => new(
@@ -395,7 +421,7 @@ namespace Epam.GraphQL.Loaders
 
                             try
                             {
-                                BeforeUpdate(context.GetUserContext<TExecutionContext>(), itemToUpdate);
+                                await BeforeUpdateAsync(context.GetUserContext<TExecutionContext>(), itemToUpdate).ConfigureAwait(false);
                             }
                             catch (Exception e)
                             {
@@ -458,7 +484,7 @@ namespace Epam.GraphQL.Loaders
                     {
                         foreach (var item in payloadOnly)
                         {
-                            BeforeCreate(context.GetUserContext<TExecutionContext>(), item);
+                            await BeforeCreateAsync(context.GetUserContext<TExecutionContext>(), item).ConfigureAwait(false);
                         }
                     }
 

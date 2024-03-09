@@ -20,8 +20,8 @@ namespace Epam.GraphQL.Tests.Mutation
         [Test(Description = "Insert (should call BeforeCreate and should not call BeforeUpdate)")]
         public void TestMutationHookInsertShouldCallBeforeCreateAndShouldNotCallBeforeUpdate()
         {
-            var beforeCreate = Substitute.For<Action<TestUserContext, Person>>();
-            var beforeUpdate = Substitute.For<Action<TestUserContext, Person>>();
+            var beforeCreateAsync = Substitute.For<Func<TestUserContext, Person, Task>>();
+            var beforeUpdateAsync = Substitute.For<Func<TestUserContext, Person, Task>>();
 
             var personLoader = GraphQLTypeBuilder.CreateMutableLoaderType(
                 onConfigure: builder =>
@@ -31,8 +31,8 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
-                beforeCreate: beforeCreate,
-                beforeUpdate: beforeUpdate);
+                beforeCreateAsync: beforeCreateAsync,
+                beforeUpdateAsync: beforeUpdateAsync);
 
             void QueryBuilder(Query<TestUserContext> query)
             {
@@ -46,8 +46,8 @@ namespace Epam.GraphQL.Tests.Mutation
 
             void Checks(IDataContext dataContext)
             {
-                beforeUpdate.DidNotReceive().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
-                beforeCreate.Received().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+                beforeUpdateAsync.DidNotReceive().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+                beforeCreateAsync.Received().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
             }
 
             TestMutation(
@@ -79,8 +79,8 @@ namespace Epam.GraphQL.Tests.Mutation
         [Ignore("TBD: https://git.epam.com/epm-ppa/epam-graphql/-/issues/28")]
         public void TestMutationHookBeforeCreateChangeNonNullableField()
         {
-            var beforeCreate = Substitute.For<Action<TestUserContext, Person>>();
-            beforeCreate.When(a => a(Arg.Any<TestUserContext>(), Arg.Any<Person>()))
+            var beforeCreateAsync = Substitute.For<Func<TestUserContext, Person, Task>>();
+            beforeCreateAsync.When(a => a(Arg.Any<TestUserContext>(), Arg.Any<Person>()))
                 .Do(x => x.ArgAt<Person>(1).HireDate = DateTime.Now);
 
             var personLoader = GraphQLTypeBuilder.CreateMutableLoaderType(
@@ -91,7 +91,7 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
-                beforeCreate: beforeCreate);
+                beforeCreateAsync: beforeCreateAsync);
 
             void QueryBuilder(Query<TestUserContext> query)
             {
@@ -105,7 +105,7 @@ namespace Epam.GraphQL.Tests.Mutation
 
             void Checks(IDataContext dataContext)
             {
-                beforeCreate.Received().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+                beforeCreateAsync.Received().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
             }
 
             TestMutation(
@@ -138,8 +138,8 @@ namespace Epam.GraphQL.Tests.Mutation
         [Test(Description = "Update (should not call BeforeCreate and should call BeforeUpdate)")]
         public void TestMutationHookUpdateShouldNotCallBeforeCreateAndShouldCallBeforeUpdate()
         {
-            var beforeCreate = Substitute.For<Action<TestUserContext, Person>>();
-            var beforeUpdate = Substitute.For<Action<TestUserContext, Person>>();
+            var beforeCreateAsync = Substitute.For<Func<TestUserContext, Person, Task>>();
+            var beforeUpdateAsync = Substitute.For<Func<TestUserContext, Person, Task>>();
 
             var personLoader = GraphQLTypeBuilder.CreateMutableLoaderType(
                 onConfigure: builder =>
@@ -149,8 +149,8 @@ namespace Epam.GraphQL.Tests.Mutation
                         .Editable();
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
-                beforeCreate: beforeCreate,
-                beforeUpdate: beforeUpdate);
+                beforeCreateAsync: beforeCreateAsync,
+                beforeUpdateAsync: beforeUpdateAsync);
 
             void QueryBuilder(Query<TestUserContext> query)
             {
@@ -164,8 +164,8 @@ namespace Epam.GraphQL.Tests.Mutation
 
             void Checks(IDataContext dataContext)
             {
-                beforeUpdate.Received().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
-                beforeCreate.DidNotReceive().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+                beforeUpdateAsync.Received().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+                beforeCreateAsync.DidNotReceive().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
             }
 
             TestMutation(
@@ -196,7 +196,7 @@ namespace Epam.GraphQL.Tests.Mutation
         [Test(Description = "Update (should not call BeforeCreate and should call BeforeUpdate and update salary)")]
         public void TestMutationHookUpdateShouldNotCallBeforeCreateAndShouldCallBeforeUpdateAndUpdateField()
         {
-            var beforeCreate = Substitute.For<Action<TestUserContext, Person>>();
+            var beforeCreateAsync = Substitute.For<Func<TestUserContext, Person, Task>>();
 
             var personLoader = GraphQLTypeBuilder.CreateMutableLoaderType(
                 builder =>
@@ -206,7 +206,7 @@ namespace Epam.GraphQL.Tests.Mutation
                     builder.Field(p => p.Salary).Default(x => x.Salary);
                 },
                 getBaseQuery: context => context.DataContext.GetQueryable<Person>(),
-                beforeCreate: beforeCreate,
+                beforeCreateAsync: beforeCreateAsync,
                 beforeUpdate: (executionContext, person) => { person.Salary = 10; });
 
             void QueryBuilder(Query<TestUserContext> query)
@@ -221,7 +221,7 @@ namespace Epam.GraphQL.Tests.Mutation
 
             void Checks(IDataContext dataContext)
             {
-                beforeCreate.DidNotReceive().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
+                beforeCreateAsync.DidNotReceive().Invoke(Arg.Any<TestUserContext>(), Arg.Any<Person>());
             }
 
             TestMutation(
