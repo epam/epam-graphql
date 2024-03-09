@@ -872,7 +872,9 @@ namespace Epam.GraphQL.Loaders
     {
         protected MutableLoader() { }
         protected virtual void BeforeCreate(TExecutionContext context, TEntity entity) { }
+        protected virtual System.Threading.Tasks.Task BeforeCreateAsync(TExecutionContext context, TEntity entity) { }
         protected virtual void BeforeUpdate(TExecutionContext context, TEntity entity) { }
+        protected virtual System.Threading.Tasks.Task BeforeUpdateAsync(TExecutionContext context, TEntity entity) { }
         protected virtual System.Threading.Tasks.Task<bool> CanSaveAsync(Epam.GraphQL.IExecutionContextAccessor<TExecutionContext> context, TEntity entity, bool isNew) { }
         [System.Obsolete("Consider using CanSaveAsync with the first argument of type IExecutionContextAcce" +
             "ssor<TExecutionContext>).")]
