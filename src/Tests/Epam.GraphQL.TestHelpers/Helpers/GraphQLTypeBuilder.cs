@@ -32,7 +32,9 @@ namespace Epam.GraphQL.Tests.Helpers
         private static readonly Dictionary<Type, Func<object, string, object>> _applySearchThenByFuncs = new();
         private static readonly Dictionary<Type, Func<object, object, bool, Task<bool>>> _canSaveAsyncFuncs = new();
         private static readonly Dictionary<Type, Action<object, object>> _beforeCreateFuncs = new();
+        private static readonly Dictionary<Type, Func<object, object, Task>> _beforeCreateFuncsAsync = new();
         private static readonly Dictionary<Type, Action<object, object>> _beforeUpdateFuncs = new();
+        private static readonly Dictionary<Type, Func<object, object, Task>> _beforeUpdateFuncsAsync = new();
         private static readonly Dictionary<Type, Func<object, IEnumerable<object>, Task<IEnumerable<object>>>> _afterSaveFuncs = new();
         private static readonly Dictionary<Type, Func<object, IEnumerable<object>, Task<IEnumerable<object>>>> _afterSaveNewFuncs = new();
         private static readonly Dictionary<Type, Func<object, bool>> _isFakeIdFuncs = new();
@@ -96,9 +98,19 @@ namespace Epam.GraphQL.Tests.Helpers
             _beforeCreateFuncs[type](executionContext, entity);
         }
 
+        public static void CallBeforeCreateAsync(Type type, object executionContext, object entity)
+        {
+            _beforeCreateFuncsAsync[type](executionContext, entity);
+        }
+
         public static void CallBeforeUpdate(Type type, object executionContext, object entity)
         {
             _beforeUpdateFuncs[type](executionContext, entity);
+        }
+
+        public static void CallBeforeUpdateAsync(Type type, object executionContext, object entity)
+        {
+            _beforeUpdateFuncsAsync[type](executionContext, entity);
         }
 
         public static Task<IEnumerable<object>> CallAfterSave(Type type, object executionContext, IEnumerable<object> entities)
@@ -276,7 +288,9 @@ namespace Epam.GraphQL.Tests.Helpers
             Func<TExecutionContext, IQueryable<TEntity>, IQueryable<TEntity>> applySecurityFilter = null,
             Func<IExecutionContextAccessor<TExecutionContext>, TEntity, bool, Task<bool>> canSaveAsync = null,
             Action<TExecutionContext, TEntity> beforeCreate = null,
+            Func<TExecutionContext, TEntity, Task> beforeCreateAsync = null,
             Action<TExecutionContext, TEntity> beforeUpdate = null,
+            Func<TExecutionContext, TEntity, Task> beforeUpdateAsync = null,
             string typeName = null)
             where TEntity : class, IHasId<int>
         {
@@ -287,7 +301,9 @@ namespace Epam.GraphQL.Tests.Helpers
                 applySecurityFilter,
                 canSaveAsync,
                 beforeCreate,
+                beforeCreateAsync,
                 beforeUpdate,
+                beforeUpdateAsync,
                 typeName);
 
             return type;
@@ -300,7 +316,9 @@ namespace Epam.GraphQL.Tests.Helpers
             Func<TExecutionContext, IQueryable<TEntity>, IQueryable<TEntity>> applySecurityFilter = null,
             Func<IExecutionContextAccessor<TExecutionContext>, TEntity, bool, Task<bool>> canSaveAsync = null,
             Action<TExecutionContext, TEntity> beforeCreate = null,
+            Func<TExecutionContext, TEntity, Task> beforeCreateAsync = null,
             Action<TExecutionContext, TEntity> beforeUpdate = null,
+            Func<TExecutionContext, TEntity, Task> beforeUpdateAsync = null,
             string typeName = null)
             where TEntity : class, IHasId<TId>
         {
@@ -311,7 +329,9 @@ namespace Epam.GraphQL.Tests.Helpers
                 applySecurityFilter,
                 canSaveAsync,
                 beforeCreate,
+                beforeCreateAsync,
                 beforeUpdate,
+                beforeUpdateAsync,
                 typeName,
                 typeBuilder =>
                 {
@@ -456,7 +476,9 @@ namespace Epam.GraphQL.Tests.Helpers
             Func<TExecutionContext, IQueryable<TEntity>, IQueryable<TEntity>> applySecurityFilter = null,
             Func<IExecutionContextAccessor<TExecutionContext>, TEntity, bool, Task<bool>> canSaveAsync = null,
             Action<TExecutionContext, TEntity> beforeCreate = null,
+            Func<TExecutionContext, TEntity, Task> beforeCreateAsync = null,
             Action<TExecutionContext, TEntity> beforeUpdate = null,
+            Func<TExecutionContext, TEntity, Task> beforeUpdateAsync = null,
             string typeName = null,
             Action<TypeBuilder> afterBuild = null)
             where TEntity : class, IHasId<TId>
@@ -513,6 +535,28 @@ namespace Epam.GraphQL.Tests.Helpers
                     typeBuilder.DefineMethodOverride(beforeCreateMethodBuilder, beforeCreateMethodInfo);
                 }
 
+                if (beforeCreateAsync != null)
+                {
+                    var beforeCreateMethodInfo = loaderType.GetMethod("BeforeCreateAsync", BindingFlags.Instance | BindingFlags.NonPublic);
+                    var beforeCreateMethodBuilder = typeBuilder.DefineMethod(
+                        "BeforeCreateAsync",
+                        MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Virtual,
+                        CallingConventions.Standard,
+                        beforeCreateMethodInfo.ReturnType,
+                        beforeCreateMethodInfo.GetParameters().Select(p => p.ParameterType).ToArray());
+                    var beforeCreateGenerator = beforeCreateMethodBuilder.GetILGenerator();
+
+                    beforeCreateGenerator.Emit(OpCodes.Ldarg_0); // this
+                    beforeCreateGenerator.Emit(OpCodes.Call, typeof(object).GetMethod("GetType"));
+                    beforeCreateGenerator.Emit(OpCodes.Ldarg_1); // context
+                    beforeCreateGenerator.Emit(OpCodes.Ldarg_2); // entity
+                    beforeCreateGenerator.Emit(OpCodes.Call, typeof(GraphQLTypeBuilder).GetMethod(nameof(GraphQLTypeBuilder.CallBeforeCreateAsync), BindingFlags.Static | BindingFlags.Public));
+                    beforeCreateGenerator.Emit(OpCodes.Call, typeof(Task).GetProperty("CompletedTask").GetGetMethod());
+                    beforeCreateGenerator.Emit(OpCodes.Ret);
+
+                    typeBuilder.DefineMethodOverride(beforeCreateMethodBuilder, beforeCreateMethodInfo);
+                }
+
                 if (beforeUpdate != null)
                 {
                     var beforeUpdateMethodInfo = loaderType.GetMethod("BeforeUpdate", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -534,6 +578,28 @@ namespace Epam.GraphQL.Tests.Helpers
                     typeBuilder.DefineMethodOverride(beforeUpdateMethodBuilder, beforeUpdateMethodInfo);
                 }
 
+                if (beforeUpdateAsync != null)
+                {
+                    var beforeCreateMethodInfo = loaderType.GetMethod("BeforeUpdateAsync", BindingFlags.Instance | BindingFlags.NonPublic);
+                    var beforeCreateMethodBuilder = typeBuilder.DefineMethod(
+                        "BeforeUpdateAsync",
+                        MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Virtual,
+                        CallingConventions.Standard,
+                        beforeCreateMethodInfo.ReturnType,
+                        beforeCreateMethodInfo.GetParameters().Select(p => p.ParameterType).ToArray());
+                    var beforeCreateGenerator = beforeCreateMethodBuilder.GetILGenerator();
+
+                    beforeCreateGenerator.Emit(OpCodes.Ldarg_0); // this
+                    beforeCreateGenerator.Emit(OpCodes.Call, typeof(object).GetMethod("GetType"));
+                    beforeCreateGenerator.Emit(OpCodes.Ldarg_1); // context
+                    beforeCreateGenerator.Emit(OpCodes.Ldarg_2); // entity
+                    beforeCreateGenerator.Emit(OpCodes.Call, typeof(GraphQLTypeBuilder).GetMethod(nameof(GraphQLTypeBuilder.CallBeforeUpdateAsync), BindingFlags.Static | BindingFlags.Public));
+                    beforeCreateGenerator.Emit(OpCodes.Call, typeof(Task).GetProperty("CompletedTask").GetGetMethod());
+                    beforeCreateGenerator.Emit(OpCodes.Ret);
+
+                    typeBuilder.DefineMethodOverride(beforeCreateMethodBuilder, beforeCreateMethodInfo);
+                }
+
                 OverrideIdExpression<TEntity, TId, TExecutionContext>(typeBuilder);
 
                 afterBuild?.Invoke(typeBuilder);
@@ -552,9 +618,19 @@ namespace Epam.GraphQL.Tests.Helpers
                 _beforeCreateFuncs[type] = (context, entity) => beforeCreate((TExecutionContext)context, (TEntity)entity);
             }
 
+            if (beforeCreateAsync != null)
+            {
+                _beforeCreateFuncsAsync[type] = (context, entity) => beforeCreateAsync((TExecutionContext)context, (TEntity)entity);
+            }
+
             if (beforeUpdate != null)
             {
                 _beforeUpdateFuncs[type] = (context, entity) => beforeUpdate((TExecutionContext)context, (TEntity)entity);
+            }
+
+            if (beforeUpdateAsync != null)
+            {
+                _beforeUpdateFuncsAsync[type] = (context, entity) => beforeUpdateAsync((TExecutionContext)context, (TEntity)entity);
             }
 
             return type;
